@@ -1,10 +1,7 @@
-"use client"
 import Link from 'next/link';
-import { useModal } from './ModalProvider';
 import { sitioConfig } from '../../../config/sitio.config';
 
 export default function Hero() {
-    const { openModal } = useModal();
 
     return (
         <section className="relative pt-32 pb-16 md:pt-48 md:pb-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col md:grid md:grid-cols-2 gap-12 items-center">
@@ -30,12 +27,12 @@ export default function Hero() {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
-                    <button
-                        onClick={() => openModal("Nivel 1 - Start ⭐", "$7.000", "primer mes · luego $15.000/mes")}
+                    <Link
+                        href="#planes"
                         className="w-full sm:w-auto bg-naranja text-marino font-bold px-8 py-4 rounded focus:outline-none hover:bg-naranja-h transition-colors text-center shadow-lg shadow-naranja/20"
                     >
                         Ver planes →
-                    </button>
+                    </Link>
                     <Link
                         href="#bio"
                         className="text-blanco font-medium border-b border-naranja/30 hover:border-naranja transition-colors pb-1 text-sm uppercase tracking-wide"

@@ -33,15 +33,15 @@ export default function Nav() {
                         <Link href="#planes" className="text-sm font-medium text-blanco hover:text-naranja transition-colors">Planes</Link>
                         <Link href="#testimonios" className="text-sm font-medium text-blanco hover:text-naranja transition-colors">Resultados</Link>
                         <Link href="#faq" className="text-sm font-medium text-blanco hover:text-naranja transition-colors">FAQ</Link>
-                        <Link href="#planes" className="bg-naranja text-marino font-bold px-5 py-2 rounded text-sm hover:bg-naranja-h transition-colors">
-                            Empezar
+                        <Link href="/ingresar" className="bg-naranja text-marino font-bold px-5 py-2 rounded text-sm hover:bg-naranja-h transition-colors shadow-lg shadow-naranja/20">
+                            Campus
                         </Link>
                     </div>
 
                     {/* CTA Mobile */}
                     <div className="md:hidden flex items-center">
-                        <Link href="#planes" className="bg-naranja text-marino font-bold px-4 py-2 rounded text-sm hover:bg-naranja-h transition-colors">
-                            Empezar
+                        <Link href="/ingresar" className="bg-naranja text-marino font-bold px-4 py-2 rounded text-sm hover:bg-naranja-h transition-colors">
+                            Campus
                         </Link>
                     </div>
                 </div>
