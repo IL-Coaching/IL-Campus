@@ -1,6 +1,7 @@
 "use client"
 import Link from 'next/link';
 import { useModal } from './ModalProvider';
+import { sitioConfig } from '../../../config/sitio.config';
 
 export default function Hero() {
     const { openModal } = useModal();
@@ -14,7 +15,7 @@ export default function Hero() {
             <div className="z-10 fade-up order-2 md:order-1">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-naranja/10 border border-naranja/30 mb-8">
                     <div className="w-2 h-2 rounded-full bg-naranja animate-pulse"></div>
-                    <span className="text-blanco text-[0.7rem] font-bold uppercase tracking-widest leading-none mt-0.5">Asesorías online · Santa Fe, Argentina</span>
+                    <span className="text-blanco text-[0.7rem] font-bold uppercase tracking-widest leading-none mt-0.5">Asesorías online · {sitioConfig.ubicacion}</span>
                 </div>
 
                 <h1 className="text-5xl sm:text-[clamp(2.8rem,5vw,4.5rem)] font-barlow-condensed font-black uppercase text-blanco leading-[0.95] mb-6 tracking-tight">

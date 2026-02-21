@@ -5,4 +5,5 @@ export const sitioConfig = {
     descripcion: "Más que entrenar: entender, adaptar, progresar.",
     url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
     whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMERO || "",
+    ubicacion: "Santa Fe, Argentina",
 };

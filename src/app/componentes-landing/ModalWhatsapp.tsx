@@ -1,6 +1,8 @@
 "use client"
-import { useModal } from "./ModalProvider";
 import { useEffect } from "react";
+import { useModal } from "./ModalProvider";
+import { sitioConfig } from "../../../config/sitio.config";
+
 export default function ModalWhatsapp() {
     const { isOpen, planData, closeModal } = useModal();
 
@@ -18,8 +20,9 @@ export default function ModalWhatsapp() {
     const msg = encodeURIComponent(
         `¡Hola Iñaki! Me interesa el ${planData.name} (${planData.price} · ${planData.duration}). ¿Podemos coordinar?`
     );
-    // Reemplazamos config + por formato requerido internacional por wa.me
-    const url = `https://wa.me/5493425555607?text=${msg}`;
+    // Usamos el número de la configuración
+    const numero = sitioConfig.whatsapp || "5493425555607";
+    const url = `https://wa.me/${numero}?text=${msg}`;
 
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">

@@ -1,5 +1,6 @@
 "use client"
 import { useModal } from './ModalProvider';
+import { sitioConfig } from "../../../config/sitio.config";
 
 export default function CtaFinal() {
     const { openModal } = useModal();
@@ -32,8 +33,8 @@ export default function CtaFinal() {
 
                     <div className="flex items-center gap-3">
                         <span className="text-xl">💬</span>
-                        <a href="https://wa.me/5493425555607" target="_blank" rel="noopener noreferrer" className="text-blanco font-bold font-barlow-condensed tracking-widest uppercase hover:text-naranja transition-colors">
-                            342-5555607
+                        <a href={`https://wa.me/${sitioConfig.whatsapp || "5493425555607"}`} target="_blank" rel="noopener noreferrer" className="text-blanco font-bold font-barlow-condensed tracking-widest uppercase hover:text-naranja transition-colors">
+                            {sitioConfig.whatsapp ? sitioConfig.whatsapp.replace(/^549/, "") : "342-5555607"}
                         </a>
                     </div>
                 </div>

@@ -1,5 +1,6 @@
 "use client"
 import Link from 'next/link';
+import { sitioConfig } from '../../../config/sitio.config';
 
 export default function Nav() {
     return (
@@ -22,7 +23,7 @@ export default function Nav() {
                         {/* Textos */}
                         <div className="hidden sm:flex flex-col">
                             <span className="text-[0.65rem] font-bold tracking-widest text-gris uppercase">Fitness Coach</span>
-                            <span className="text-sm font-barlow-condensed font-bold tracking-wide text-naranja uppercase leading-none">Iñaki Legarreta</span>
+                            <span className="text-sm font-barlow-condensed font-bold tracking-wide text-naranja uppercase leading-none">{sitioConfig.entrenador}</span>
                         </div>
                     </div>
 

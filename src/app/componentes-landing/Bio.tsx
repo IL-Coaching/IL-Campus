@@ -1,3 +1,5 @@
+import { sitioConfig } from '../../../config/sitio.config';
+
 export default function Bio() {
     return (
         <section id="bio" className="bg-marino-2 border-y border-marino-4 py-24">
@@ -17,10 +19,10 @@ export default function Bio() {
                         Sobre el entrenador
                     </span>
                     <h2 className="text-[2.5rem] font-barlow-condensed font-black uppercase text-blanco mb-1 leading-none tracking-tight">
-                        Iñaki Legarreta
+                        {sitioConfig.entrenador}
                     </h2>
                     <p className="text-naranja text-xs tracking-widest uppercase font-bold mb-8">
-                        Fitness Coach · IL-Coaching
+                        Fitness Coach · {sitioConfig.nombre}
                     </p>
 
                     <p className="text-gris-claro font-light leading-relaxed mb-8 text-lg">
