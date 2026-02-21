@@ -28,13 +28,13 @@ export default function Hero() {
 
                 <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
                     <Link
-                        href="#planes"
+                        href="/#planes"
                         className="w-full sm:w-auto bg-naranja text-marino font-bold px-8 py-4 rounded focus:outline-none hover:bg-naranja-h transition-colors text-center shadow-lg shadow-naranja/20"
                     >
                         Ver planes →
                     </Link>
                     <Link
-                        href="#bio"
+                        href="/#bio"
                         className="text-blanco font-medium border-b border-naranja/30 hover:border-naranja transition-colors pb-1 text-sm uppercase tracking-wide"
                     >
                         Conocé al entrenador
