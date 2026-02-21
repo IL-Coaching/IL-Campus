@@ -30,6 +30,25 @@ export type ClientePlanificacion = Cliente & {
     formularioInscripcion?: {
         objetivos?: {
             principal?: string;
+            secundarios?: string[];
+            motivacionReal?: string;
+            plazo?: string;
+        };
+        disponibilidad?: {
+            diasSemana?: number;
+            minutosSesion?: number;
+            preferenciaHoraria?: string;
+            equipamiento?: string[];
+        };
+        saludMedica?: {
+            lesiones?: string;
+            patologias?: string;
+            medicacion?: string;
+        };
+        estiloDeVida?: {
+            ocupacion?: string;
+            estres?: number;
+            horasSueno?: number;
         };
     } | null;
 };

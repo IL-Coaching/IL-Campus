@@ -1,34 +1,55 @@
 "use client"
+import { SemanaConDias, DiaConEjercicios } from "@/nucleo/tipos/planificacion.tipos";
 
 interface VistaMicrocicloProps {
-    semana: number;
+    semana: SemanaConDias;
     onSelectSesion: (dia: string) => void;
 }
 
 export default function VistaMicrociclo({ semana, onSelectSesion }: VistaMicrocicloProps) {
-    const dias = [
-        { dia: "Lunes", foco: "Push (Pecho/Hombro)", color: "text-naranja", dot: "bg-naranja", active: true, info: "8 ej · 24 sets" },
-        { dia: "Martes", foco: "Pull (Espalda/Bíceps)", color: "text-[#10B981]", dot: "bg-[#10B981]", active: true, info: "7 ej · 21 sets" },
-        { dia: "Miércoles", foco: "Descanso", color: "text-gris", dot: "", active: false, info: "" },
-        { dia: "Jueves", foco: "Piernas (Empuje/Tracción)", color: "text-[#3B82F6]", dot: "bg-[#3B82F6]", active: true, info: "6 ej · 22 sets" },
-        { dia: "Viernes", foco: "FB (Funcional / HIIT)", color: "text-[#8B5CF6]", dot: "bg-[#8B5CF6]", active: true, info: "10 ej · 15 sets" },
-        { dia: "Sábado", foco: "Descanso", color: "text-gris", dot: "", active: false, info: "" },
-        { dia: "Domingo", foco: "Descanso", color: "text-gris", dot: "", active: false, info: "" },
-    ];
+    const dias = semana.diasSesion.map((d: DiaConEjercicios) => ({
+        id: d.id,
+        dia: d.diaSemana,
+        foco: d.focoMuscular,
+        active: true,
+        info: `${d.ejercicios.length} ej · ${d.ejercicios.reduce((acc, curr) => acc + curr.series, 0)} sets`,
+        color: d.diaSemana === 'Lunes' ? "text-naranja" :
+            d.diaSemana === 'Miércoles' ? "text-[#10B981]" :
+                d.diaSemana === 'Viernes' ? "text-[#3B82F6]" : "text-[#8B5CF6]",
+        dot: d.diaSemana === 'Lunes' ? "bg-naranja" :
+            d.diaSemana === 'Miércoles' ? "bg-[#10B981]" :
+                d.diaSemana === 'Viernes' ? "bg-[#3B82F6]" : "bg-[#8B5CF6]"
+    }));
+
+    // Rellenamos los días que faltan (Descanso)
+    const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+    const layout = diasSemana.map(nombre => {
+        const existente = dias.find(d => d.dia === nombre);
+        if (existente) return existente;
+        return {
+            id: nombre,
+            dia: nombre,
+            foco: "Descanso",
+            active: false,
+            info: "",
+            color: "text-gris",
+            dot: ""
+        };
+    });
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             <div className="border-b border-marino-4 pb-6">
                 <h2 className="text-3xl font-barlow-condensed font-black uppercase text-blanco leading-none tracking-tight">
-                    Semana {semana} — Objetivo: Acumulación Metabólica
+                    Semana {semana.numeroSemana} — {semana.objetivoSemana}
                 </h2>
                 <p className="text-gris font-medium text-sm mt-2 uppercase tracking-widest">
-                    RIR 3 · 4 Sesiones Activas · Volumen Estimado: 85 sets
+                    RIR {semana.RIRobjetivo} · {dias.length} Sesiones Activas · Volumen Estimado: {semana.volumenEstimado}
                 </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
-                {dias.map((d, i) => (
+                {layout.map((d, i) => (
                     <div
                         key={i}
                         onClick={() => d.active && onSelectSesion(d.dia)}

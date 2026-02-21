@@ -1,41 +1,44 @@
 "use client"
+import { BloqueConSemanas, SemanaConDias, DiaConEjercicios } from "@/nucleo/tipos/planificacion.tipos";
 
 interface VistaMesocicloProps {
+    bloque: BloqueConSemanas;
     mes: number;
     onSelectSemana: (semana: number) => void;
 }
 
-export default function VistaMesociclo({ mes, onSelectSemana }: VistaMesocicloProps) {
-    const semanas = [
-        { n: 1, tipo: "Trabajo", rir: "3-4", vol: "8 sets", dias: ["Push", "Pull", "Piernas", "FB"] },
-        { n: 2, tipo: "Trabajo", rir: "2-3", vol: "9 sets", dias: ["Push", "Pull", "Piernas", "FB"] },
-        { n: 3, tipo: "Trabajo", rir: "1-2", vol: "10 sets", dias: ["Push", "Pull", "Piernas", "FB"] },
-        { n: 4, tipo: "Deload", rir: "4-5", vol: "4 sets", dias: ["Push", "Pull", "Piernas", "FB"] },
-        { n: 5, tipo: "Testeo", rir: "0-1", vol: "2 sets", dias: ["Push", "Pull", "Piernas", "FB"] },
-    ];
+export default function VistaMesociclo({ bloque, mes, onSelectSemana }: VistaMesocicloProps) {
+    const semanas = bloque.semanas.map((s: SemanaConDias) => ({
+        id: s.id,
+        n: s.numeroSemana,
+        tipo: s.esFaseDeload ? "Deload" : (s.esSemanaTesteo ? "Testeo" : "Trabajo"),
+        rir: s.RIRobjetivo || "3-4",
+        vol: s.volumenEstimado || "8 sets",
+        dias: s.diasSesion.map((d: DiaConEjercicios) => d.focoMuscular)
+    }));
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             <div className="border-b border-marino-4 pb-6">
                 <h2 className="text-3xl font-barlow-condensed font-black uppercase text-blanco leading-none tracking-tight">
-                    Mes {mes} — Acumulación
+                    Mes {mes} — {bloque.objetivo}
                 </h2>
                 <p className="text-gris font-medium text-sm mt-2 uppercase tracking-widest">
-                    5 Semanas · RIR 3-4 General · Volumen Medio
+                    {semanas.length} Semanas · RIR {bloque.semanas[0]?.RIRobjetivo || '3-4'} General · Volumen {bloque.semanas[0]?.volumenEstimado || 'Medio'}
                 </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 {semanas.map((s) => (
                     <div
-                        key={s.n}
+                        key={s.id}
                         onClick={() => onSelectSemana(s.n)}
                         className="bg-marino-2 border border-marino-4 rounded-xl p-5 cursor-pointer hover:border-naranja/50 transition-all duration-300 group"
                     >
                         <div className="flex justify-between items-start mb-4">
                             <span className={`px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase tracking-[0.15em] border ${s.tipo === 'Trabajo' ? 'text-[#22C55E] border-[#22C55E]/30 bg-[#22C55E]/5' :
-                                    s.tipo === 'Deload' ? 'text-[#EAB308] border-[#EAB308]/30 bg-[#EAB308]/5' :
-                                        'text-[#A78BFA] border-[#A78BFA]/30 bg-[#A78BFA]/5'
+                                s.tipo === 'Deload' ? 'text-[#EAB308] border-[#EAB308]/30 bg-[#EAB308]/5' :
+                                    'text-[#A78BFA] border-[#A78BFA]/30 bg-[#A78BFA]/5'
                                 }`}>
                                 {s.tipo}
                             </span>
@@ -56,10 +59,10 @@ export default function VistaMesociclo({ mes, onSelectSemana }: VistaMesocicloPr
                         </div>
 
                         <div className="flex flex-wrap gap-1.5 pt-4 border-t border-marino-4">
-                            {s.dias.map((d, i) => (
-                                <span key={i} className={`w-1.5 h-1.5 rounded-full ${d === 'Push' ? 'bg-naranja' :
-                                        d === 'Pull' ? 'bg-[#22C55E]' :
-                                            d === 'Piernas' ? 'bg-[#60A5FA]' : 'bg-[#A78BFA]'
+                            {s.dias.map((d: string, i: number) => (
+                                <span key={i} className={`w-1.5 h-1.5 rounded-full ${d.toLowerCase().includes('push') ? 'bg-naranja' :
+                                    d.toLowerCase().includes('pull') ? 'bg-[#22C55E]' :
+                                        d.toLowerCase().includes('piern') ? 'bg-[#60A5FA]' : 'bg-[#A78BFA]'
                                     }`} title={d}></span>
                             ))}
                         </div>

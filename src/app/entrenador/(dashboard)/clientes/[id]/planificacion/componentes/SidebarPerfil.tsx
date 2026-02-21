@@ -70,18 +70,20 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                     <div className="space-y-5 animate-in fade-in slide-in-from-left-2">
                         <div>
                             <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Objetivo Principal</span>
-                            <p className="text-[0.82rem] text-gris-claro font-medium">{cliente?.formularioInscripcion?.objetivos?.principal || 'Pérdida de grasa'}</p>
+                            <p className="text-[0.82rem] text-blanco font-bold">{cliente?.formularioInscripcion?.objetivos?.principal || 'No definido'}</p>
                         </div>
                         <div>
                             <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Plazo Deseado</span>
-                            <p className="text-[0.82rem] text-gris-claro font-medium">12 semanas</p>
+                            <p className="text-[0.82rem] text-gris-claro font-medium">{cliente?.formularioInscripcion?.objetivos?.plazo || 'Sin especificar'}</p>
                         </div>
-                        <div>
-                            <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Motivación Real</span>
-                            <p className="text-[0.82rem] text-gris-claro font-light leading-relaxed italic">
-                                &quot;Sentirme fuerte de nuevo y recuperar mi energía para jugar con mis hijos.&quot;
-                            </p>
-                        </div>
+                        {cliente?.formularioInscripcion?.objetivos?.motivacionReal && (
+                            <div>
+                                <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Motivación Real</span>
+                                <p className="text-[0.82rem] text-gris-claro font-light leading-relaxed italic">
+                                    &quot;{cliente.formularioInscripcion.objetivos.motivacionReal}&quot;
+                                </p>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -89,29 +91,69 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                     <div className="space-y-5 animate-in fade-in slide-in-from-left-2">
                         <div>
                             <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Sesiones por Semana</span>
-                            <p className="text-[0.82rem] text-gris-claro font-medium">4 días</p>
+                            <p className="text-[0.82rem] text-blanco font-bold">{cliente?.formularioInscripcion?.disponibilidad?.diasSemana || '--'} días</p>
                         </div>
                         <div>
                             <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Duración Sesión</span>
-                            <p className="text-[0.82rem] text-gris-claro font-medium">60 - 75 min</p>
+                            <p className="text-[0.82rem] text-gris-claro font-medium">{cliente?.formularioInscripcion?.disponibilidad?.minutosSesion || '--'} min</p>
                         </div>
                         <div>
                             <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Equipamiento</span>
                             <div className="flex flex-wrap gap-2 mt-2">
-                                {['Mancuernas', 'Barra', 'Poleas', 'Rack'].map(tag => (
-                                    <span key={tag} className="px-2 py-1 bg-marino-3 border border-marino-4 rounded text-[0.7rem] text-verde-ok border-verde-ok/30">
-                                        {tag}
-                                    </span>
-                                ))}
+                                {cliente?.formularioInscripcion?.disponibilidad?.equipamiento?.length ? (
+                                    cliente.formularioInscripcion.disponibilidad.equipamiento.map((tag: string) => (
+                                        <span key={tag} className="px-2 py-1 bg-marino-3 border border-marino-4 rounded text-[0.7rem] text-naranja border-naranja/30">
+                                            {tag}
+                                        </span>
+                                    ))
+                                ) : (
+                                    <p className="text-xs text-gris italic">No especificado</p>
+                                )}
                             </div>
                         </div>
                     </div>
                 )}
 
                 {/* Placeholders para el resto de tabs */}
-                {tabActiva >= 2 && (
-                    <div className="py-10 text-center text-gris italic text-xs">
-                        Cargando datos del formulario...
+                {tabActiva === 2 && (
+                    <div className="space-y-5 animate-in fade-in slide-in-from-left-2">
+                        <div>
+                            <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Lesiones / Patologías</span>
+                            <p className="text-[0.82rem] text-gris-claro leading-relaxed">
+                                {cliente?.formularioInscripcion?.saludMedica?.lesiones || 'Ninguna reportada'}
+                            </p>
+                        </div>
+                        <div>
+                            <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Medicación</span>
+                            <p className="text-[0.82rem] text-gris-claro leading-relaxed">
+                                {cliente?.formularioInscripcion?.saludMedica?.medicacion || 'Ninguna'}
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {tabActiva === 3 && (
+                    <div className="space-y-5 animate-in fade-in slide-in-from-left-2">
+                        <div>
+                            <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Ocupación</span>
+                            <p className="text-[0.82rem] text-blanco font-bold">
+                                {cliente?.formularioInscripcion?.estiloDeVida?.ocupacion || 'No especificada'}
+                            </p>
+                        </div>
+                        <div>
+                            <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Estrés (1-10)</span>
+                            <p className="text-[0.82rem] text-gris-claro">
+                                {cliente?.formularioInscripcion?.estiloDeVida?.estres || '--'} / 10
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {tabActiva === 4 && (
+                    <div className="space-y-5 animate-in fade-in slide-in-from-left-2">
+                        <div className="p-4 bg-naranja/5 border border-naranja/10 rounded-xl text-center">
+                            <p className="text-xs text-gris italic">Gráfica de métricas corporales llegará pronto.</p>
+                        </div>
                     </div>
                 )}
             </div>

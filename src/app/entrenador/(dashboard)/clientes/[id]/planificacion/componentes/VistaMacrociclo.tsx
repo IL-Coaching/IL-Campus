@@ -1,35 +1,64 @@
 "use client"
 import { TrendingUp, Settings, Plus, ChevronRight } from "lucide-react";
+import { MacrocicloCompleto, BloqueConSemanas } from "@/nucleo/tipos/planificacion.tipos";
 
 interface VistaMacrocicloProps {
+    macrociclo: MacrocicloCompleto;
     onSelectMeso: (mes: number) => void;
+    onConfigurar: () => void;
+    onNuevoMesociclo: () => void;
 }
 
-export default function VistaMacrociclo({ onSelectMeso }: VistaMacrocicloProps) {
-    const bloques = [
-        { n: 1, s: "1-4", nombre: "Acumulación", tipo: "v" /* volumen */, color: "border-[#22C55E]", rir: "3-4", vol: "8-12 sets", prog: 100 },
-        { n: 2, s: "5-8", nombre: "Intensificación", tipo: "i" /* intensidad */, color: "border-[#FF6B00]", rir: "1-2", vol: "6-10 sets", prog: 45 },
-        { n: 3, s: "9-12", nombre: "Realización", tipo: "r" /* realization */, color: "border-[#EF4444]", rir: "0-1", vol: "4-6 sets", prog: 0 },
-    ];
+interface BloqueMapped {
+    id: string;
+    n: number;
+    nombre: string;
+    s: string;
+    rir: string | number;
+    vol: string;
+    prog: number;
+    color: string;
+}
+
+export default function VistaMacrociclo({ macrociclo, onSelectMeso, onConfigurar, onNuevoMesociclo }: VistaMacrocicloProps) {
+    // Calculamos los bloques a partir del macrociclo real
+    const bloques: BloqueMapped[] = macrociclo.bloquesMensuales.map((b: BloqueConSemanas, idx: number) => ({
+        id: b.id,
+        n: idx + 1,
+        nombre: b.objetivo,
+        s: `${(idx * 4) + 1}-${(idx + 1) * 4}`,
+        rir: b.semanas[0]?.RIRobjetivo || "3-4",
+        vol: b.semanas[0]?.volumenEstimado || "8-12 sets",
+        prog: idx === 0 ? 100 : (idx === 1 ? 45 : 0), // Mock de progreso por ahora
+        color: idx === 0 ? "border-[#22C55E]" : (idx === 1 ? "border-[#FF6B00]" : "border-[#EF4444]")
+    }));
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* Header Info */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-naranja/10 border border-naranja/20 p-4 rounded-lg">
-                <div className="flex items-center gap-3">
-                    <TrendingUp size={20} className="text-naranja" />
-                    <span className="text-sm font-bold text-blanco uppercase tracking-widest font-barlow-condensed">
-                        Plan activo · GymRat 🧠 · 3 meses · 90 días
-                    </span>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-marino-2 border border-marino-4 p-5 rounded-xl shadow-lg">
+                <div className="flex items-center gap-4">
+                    <div className="p-2.5 bg-naranja/10 rounded-lg">
+                        <TrendingUp size={22} className="text-naranja" />
+                    </div>
+                    <div>
+                        <span className="text-[0.6rem] font-black text-naranja uppercase tracking-[0.2em] block mb-0.5">Planificación Activa</span>
+                        <h3 className="text-lg font-barlow-condensed font-bold text-blanco uppercase tracking-wide">
+                            Macrociclo · {macrociclo.duracionSemanas} Semanas · Inicio {new Date(macrociclo.fechaInicio).toLocaleDateString()}
+                        </h3>
+                    </div>
                 </div>
                 <div className="flex gap-3">
                     <button
-                        onClick={() => alert("Configuración del Macrociclo próximamente...")}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-marino-3 border border-marino-4 rounded text-xs font-bold uppercase tracking-wider text-gris hover:text-blanco transition-colors"
+                        onClick={onConfigurar}
+                        className="flex items-center gap-2 px-4 py-2 bg-marino-3 border border-marino-4 rounded-xl text-xs font-bold uppercase tracking-widest text-gris hover:text-blanco hover:border-gris/30 transition-all"
                     >
                         <Settings size={14} /> Configurar
                     </button>
-                    <button className="flex items-center gap-2 px-3 py-1.5 bg-naranja/20 border border-naranja/40 rounded text-xs font-bold uppercase tracking-wider text-naranja hover:bg-naranja/30 transition-colors">
+                    <button
+                        onClick={onNuevoMesociclo}
+                        className="flex items-center gap-2 px-4 py-2 bg-naranja hover:bg-naranja-h rounded-xl text-xs font-black uppercase tracking-widest text-marino transition-all shadow-lg shadow-naranja/20"
+                    >
                         <Plus size={14} /> Nuevo Mesociclo
                     </button>
                 </div>
@@ -37,9 +66,9 @@ export default function VistaMacrociclo({ onSelectMeso }: VistaMacrocicloProps) 
 
             {/* Grid Mesociclos */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {bloques.map((b) => (
+                {bloques.map((b: BloqueMapped) => (
                     <div
-                        key={b.n}
+                        key={b.id}
                         onClick={() => onSelectMeso(b.n)}
                         className={`group bg-marino-2 border-l-4 ${b.color} border border-y-marino-4 border-r-marino-4 p-6 rounded-r-lg cursor-pointer hover:bg-marino-3 transition-all duration-300 relative overflow-hidden`}
                     >

@@ -8,15 +8,14 @@ import VistaMesociclo from './componentes/VistaMesociclo';
 import VistaMicrociclo from './componentes/VistaMicrociclo';
 import VistaSesion from './componentes/VistaSesion';
 import BuscadorEjercicios from './componentes/BuscadorEjercicios';
-import type { Cliente } from '@prisma/client';
-import { MacrocicloCompleto } from '@/nucleo/tipos/planificacion.tipos';
+import { MacrocicloCompleto, ClientePlanificacion, BloqueConSemanas, SemanaConDias } from '@/nucleo/tipos/planificacion.tipos';
 import { crearNuevoMacrociclo } from '@/nucleo/acciones/planificacion.accion';
 import { Loader2, Settings } from 'lucide-react';
 
 type NivelVista = 'macro' | 'meso' | 'micro' | 'sesion';
 
 interface ConstructorClienteProps {
-    cliente: Cliente;
+    cliente: ClientePlanificacion;
     macrocicloInicial: MacrocicloCompleto | null;
 }
 
@@ -34,7 +33,7 @@ export default function ConstructorCliente({ cliente, macrocicloInicial }: Const
     const handleCrearPlan = async () => {
         setCreandoPlan(true);
         const formData = new FormData();
-        formData.append("duracion", "12"); // 12 semanas por defecto
+        formData.append("duracion", "12");
         formData.append("fechaInicio", new Date().toISOString());
 
         const res = await crearNuevoMacrociclo(cliente.id, formData);
@@ -69,6 +68,11 @@ export default function ConstructorCliente({ cliente, macrocicloInicial }: Const
     if (vistaActual === 'meso' || historial.includes('meso')) breadcrumbItems.push({ label: `Mes ${mesActivo}`, nivel: 'meso' });
     if (vistaActual === 'micro' || historial.includes('micro')) breadcrumbItems.push({ label: `Semana ${semanaActiva}`, nivel: 'micro' });
     if (vistaActual === 'sesion') breadcrumbItems.push({ label: `${diaActivo}`, nivel: 'sesion' });
+
+    // Encontrar objetos actuales en la jerarquía
+    const bloqueActual = macrocicloInicial?.bloquesMensuales.find((_: BloqueConSemanas, idx: number) => idx + 1 === mesActivo);
+    const semanaActual = bloqueActual?.semanas.find((s: SemanaConDias) => s.numeroSemana === semanaActiva);
+    const diaObjetoActual = semanaActual?.diasSesion.find(d => d.diaSemana === diaActivo);
 
     return (
         <div className="flex flex-col min-h-full bg-marino selection:bg-naranja/30 pb-20">
@@ -109,27 +113,32 @@ export default function ConstructorCliente({ cliente, macrocicloInicial }: Const
                         <>
                             {vistaActual === 'macro' && (
                                 <VistaMacrociclo
+                                    macrociclo={macrocicloInicial}
                                     onSelectMeso={(n) => { setMesActivo(n); irA('meso'); }}
+                                    onConfigurar={() => alert("Módulo de configuración de Macrociclo (nombre, duración, fechas) estará disponible en la próxima versión.")}
+                                    onNuevoMesociclo={() => alert("Función para agregar un nuevo mesociclo a la planificación actual próximamente.")}
                                 />
                             )}
 
-                            {vistaActual === 'meso' && (
+                            {vistaActual === 'meso' && bloqueActual && (
                                 <VistaMesociclo
+                                    bloque={bloqueActual}
                                     mes={mesActivo}
                                     onSelectSemana={(n) => { setSemanaActiva(n); irA('micro'); }}
                                 />
                             )}
 
-                            {vistaActual === 'micro' && (
+                            {vistaActual === 'micro' && semanaActual && (
                                 <VistaMicrociclo
-                                    semana={semanaActiva}
+                                    semana={semanaActual}
                                     onSelectSesion={(dia) => { setDiaActivo(dia); irA('sesion'); }}
                                 />
                             )}
 
-                            {vistaActual === 'sesion' && (
+                            {vistaActual === 'sesion' && diaObjetoActual && (
                                 <VistaSesion
-                                    dia={diaActivo}
+                                    diaObjeto={diaObjetoActual}
+                                    semanaNombre={`Semana ${semanaActiva}`}
                                     onOpenBuscador={() => setBuscadorOpen(true)}
                                 />
                             )}
