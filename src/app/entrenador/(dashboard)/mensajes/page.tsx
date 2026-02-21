@@ -1,4 +1,4 @@
-import { MessageCircle, Send } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 
 export default function MensajesPage() {
     return (

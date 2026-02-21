@@ -10,8 +10,10 @@ import {
     ChevronRight
 } from 'lucide-react';
 
+import type { Cliente } from '@prisma/client';
+
 interface SidebarPerfilProps {
-    cliente: any; // Tipar mejor luego
+    cliente: Cliente;
 }
 
 export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {

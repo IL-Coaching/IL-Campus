@@ -23,7 +23,10 @@ export default function VistaMacrociclo({ onSelectMeso }: VistaMacrocicloProps) 
                     </span>
                 </div>
                 <div className="flex gap-3">
-                    <button className="flex items-center gap-2 px-3 py-1.5 bg-marino-3 border border-marino-4 rounded text-xs font-bold uppercase tracking-wider text-gris hover:text-blanco transition-colors">
+                    <button
+                        onClick={() => alert("Configuración del Macrociclo próximamente...")}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-marino-3 border border-marino-4 rounded text-xs font-bold uppercase tracking-wider text-gris hover:text-blanco transition-colors"
+                    >
                         <Settings size={14} /> Configurar
                     </button>
                     <button className="flex items-center gap-2 px-3 py-1.5 bg-naranja/20 border border-naranja/40 rounded text-xs font-bold uppercase tracking-wider text-naranja hover:bg-naranja/30 transition-colors">

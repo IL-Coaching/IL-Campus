@@ -13,8 +13,9 @@ export async function buscarEjerciciosCatalogo(query: string) {
         const resultados = await EjercicioServicio.buscar(entrenador.id, query);
 
         return { exito: true, resultados };
-    } catch (error: any) {
-        return { error: error.message };
+    } catch (error) {
+        const message = error instanceof Error ? error.message : "Error desconocido";
+        return { error: message };
     }
 }
 
@@ -34,7 +35,8 @@ export async function crearEjercicioCatalogo(formData: FormData) {
         });
 
         return { exito: true, ejercicio: nuevo };
-    } catch (error: any) {
-        return { error: error.message };
+    } catch (error) {
+        const message = error instanceof Error ? error.message : "Error desconocido";
+        return { error: message };
     }
 }

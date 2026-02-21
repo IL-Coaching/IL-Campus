@@ -11,7 +11,7 @@ import BuscadorEjercicios from './componentes/BuscadorEjercicios';
 import type { Cliente } from '@prisma/client';
 import { MacrocicloCompleto } from '@/nucleo/tipos/planificacion.tipos';
 import { crearNuevoMacrociclo } from '@/nucleo/acciones/planificacion.accion';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Settings } from 'lucide-react';
 
 type NivelVista = 'macro' | 'meso' | 'micro' | 'sesion';
 
@@ -71,7 +71,7 @@ export default function ConstructorCliente({ cliente, macrocicloInicial }: Const
     if (vistaActual === 'sesion') breadcrumbItems.push({ label: `${diaActivo}`, nivel: 'sesion' });
 
     return (
-        <div className="flex flex-col h-screen max-h-screen overflow-hidden bg-marino selection:bg-naranja/30">
+        <div className="flex flex-col min-h-full bg-marino selection:bg-naranja/30 pb-20">
 
             <TopbarPlanificacion
                 items={breadcrumbItems}
@@ -81,10 +81,12 @@ export default function ConstructorCliente({ cliente, macrocicloInicial }: Const
                 canVolver={historial.length > 0}
             />
 
-            <div className="flex flex-1 overflow-hidden">
-                <SidebarPerfil cliente={cliente} />
+            <div className="flex flex-1 mt-6 gap-6">
+                <div className="hidden xl:block">
+                    <SidebarPerfil cliente={cliente} />
+                </div>
 
-                <main className="flex-1 overflow-y-auto bg-marino p-6 md:p-10">
+                <main className="flex-1 min-w-0">
 
                     {!macrocicloInicial ? (
                         <div className="flex flex-col items-center justify-center h-full text-center space-y-6 fade-up visible">
@@ -134,6 +136,15 @@ export default function ConstructorCliente({ cliente, macrocicloInicial }: Const
                         </>
                     )}
                 </main>
+
+                <div className="xl:hidden fixed bottom-6 right-6">
+                    <button
+                        onClick={() => setBuscadorOpen(true)}
+                        className="w-14 h-14 bg-naranja text-marino rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform"
+                    >
+                        <Settings size={24} />
+                    </button>
+                </div>
             </div>
 
             {buscadorOpen && (

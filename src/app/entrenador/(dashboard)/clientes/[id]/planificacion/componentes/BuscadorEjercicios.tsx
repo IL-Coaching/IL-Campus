@@ -2,16 +2,17 @@
 import { useState, useEffect } from 'react';
 import { Search, X, Dumbbell, Loader2 } from 'lucide-react';
 import { buscarEjerciciosCatalogo } from '@/nucleo/acciones/ejercicio.accion';
+import type { Ejercicio } from '@prisma/client';
 
 interface BuscadorEjerciciosProps {
     onClose: () => void;
-    onSelect?: (ejercicio: any) => void;
+    onSelect?: (ejercicio: Ejercicio) => void;
 }
 
 export default function BuscadorEjercicios({ onClose, onSelect }: BuscadorEjerciciosProps) {
     const [musculoFiltro, setMusculoFiltro] = useState('Todos');
     const [query, setQuery] = useState('');
-    const [resultados, setResultados] = useState<any[]>([]);
+    const [resultados, setResultados] = useState<Ejercicio[]>([]);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {

@@ -2,7 +2,6 @@ import { ClienteServicio } from "@/nucleo/servicios/cliente.servicio";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
-    User,
     Calendar,
     Dumbbell,
     MessageCircle,

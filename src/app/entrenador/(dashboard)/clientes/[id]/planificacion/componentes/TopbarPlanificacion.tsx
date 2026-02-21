@@ -1,6 +1,6 @@
 "use client"
-import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
+import type { Cliente } from '@prisma/client';
 
 interface BreadcrumbItem {
     label: string;
@@ -9,7 +9,7 @@ interface BreadcrumbItem {
 
 interface TopbarPlanificacionProps {
     items: BreadcrumbItem[];
-    cliente: any;
+    cliente: Cliente;
     onNavigate: (nivel: 'macro' | 'meso' | 'micro' | 'sesion') => void;
     onVolver: () => void;
     canVolver: boolean;
@@ -17,13 +17,8 @@ interface TopbarPlanificacionProps {
 
 export default function TopbarPlanificacion({ items, cliente, onNavigate, onVolver, canVolver }: TopbarPlanificacionProps) {
     return (
-        <header className="h-[56px] border-b border-marino-4 bg-marino-2 flex items-center justify-between px-6 shrink-0 z-50">
-            <div className="flex items-center gap-6">
-                {/* Logo */}
-                <span className="text-2xl font-barlow-condensed font-black italic text-naranja leading-none tracking-tighter">IL</span>
-
-                <div className="h-4 w-[1px] bg-marino-4"></div>
-
+        <header className="h-[56px] border-b border-marino-4 bg-marino-2 flex items-center justify-between px-0 shrink-0 z-50">
+            <div className="flex items-center gap-6 pl-2">
                 {/* Breadcrumb */}
                 <nav className="flex items-center text-sm font-medium">
                     {items.map((item, idx) => (

@@ -1,4 +1,4 @@
-import { Settings, Shield, Bell, User, Camera } from "lucide-react";
+import { Shield, User, Camera } from "lucide-react";
 
 export default function ConfiguracionPage() {
     return (

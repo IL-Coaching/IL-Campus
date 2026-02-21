@@ -7,11 +7,11 @@ interface VistaMicrocicloProps {
 
 export default function VistaMicrociclo({ semana, onSelectSesion }: VistaMicrocicloProps) {
     const dias = [
-        { dia: "Lunes", foco: "Push (Pecho/Hombro)", color: "text-naranja", dot: "bg-[#22C55E]", active: true, info: "8 ej · 24 sets" },
-        { dia: "Martes", foco: "Pull (Espalda/Bíceps)", color: "text-[#22C55E]", dot: "bg-[#22C55E]", active: true, info: "7 ej · 21 sets" },
+        { dia: "Lunes", foco: "Push (Pecho/Hombro)", color: "text-naranja", dot: "bg-naranja", active: true, info: "8 ej · 24 sets" },
+        { dia: "Martes", foco: "Pull (Espalda/Bíceps)", color: "text-[#10B981]", dot: "bg-[#10B981]", active: true, info: "7 ej · 21 sets" },
         { dia: "Miércoles", foco: "Descanso", color: "text-gris", dot: "", active: false, info: "" },
-        { dia: "Jueves", foco: "Piernas (Empuje/Tracción)", color: "text-[#60A5FA]", dot: "bg-[#22C55E]", active: true, info: "6 ej · 22 sets" },
-        { dia: "Viernes", foco: "FB (Funcional / HIIT)", color: "text-[#A78BFA]", dot: "bg-[#EAB308]", active: true, info: "10 ej · 15 sets" },
+        { dia: "Jueves", foco: "Piernas (Empuje/Tracción)", color: "text-[#3B82F6]", dot: "bg-[#3B82F6]", active: true, info: "6 ej · 22 sets" },
+        { dia: "Viernes", foco: "FB (Funcional / HIIT)", color: "text-[#8B5CF6]", dot: "bg-[#8B5CF6]", active: true, info: "10 ej · 15 sets" },
         { dia: "Sábado", foco: "Descanso", color: "text-gris", dot: "", active: false, info: "" },
         { dia: "Domingo", foco: "Descanso", color: "text-gris", dot: "", active: false, info: "" },
     ];
