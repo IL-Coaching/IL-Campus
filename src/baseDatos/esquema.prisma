@@ -1,0 +1,241 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Entrenador {
+  id         String      @id @default(uuid())
+  nombre     String
+  email      String      @unique
+  telefono   String?
+  activo     Boolean     @default(true)
+  creadoEn   DateTime    @default(now())
+  clientes   Cliente[]
+  ejercicios Ejercicio[]
+  planes     Plan[]
+}
+
+model Plan {
+  id           String         @id @default(uuid())
+  entrenadorId String
+  nombre       String
+  precio       Float
+  duracionDias Int
+  descripcion  String?
+  beneficios   String[]
+  visible      Boolean        @default(true)
+  creadoEn     DateTime       @default(now())
+  entrenador   Entrenador     @relation(fields: [entrenadorId], references: [id])
+  asignaciones PlanAsignado[]
+}
+
+model Ejercicio {
+  id              String                 @id @default(uuid())
+  entrenadorId    String
+  nombre          String
+  grupoMuscular   String
+  equipoNecesario String?
+  descripcion     String?
+  videoUrl        String?
+  creadoEn        DateTime               @default(now())
+  entrenador      Entrenador             @relation(fields: [entrenadorId], references: [id])
+  planificaciones EjercicioPlanificado[]
+}
+
+model Cliente {
+  id                    String                 @id @default(uuid())
+  entrenadorId          String
+  nombre                String
+  email                 String                 @unique
+  telefono              String?
+  genero                String?
+  fechaAlta             DateTime               @default(now())
+  activo                Boolean                @default(true)
+  notas                 String?
+  checkins              Checkin[]
+  cicloMenstrual        CicloMenstrual?
+  entrenador            Entrenador             @relation(fields: [entrenadorId], references: [id])
+  cobros                Cobro[]
+  formularioInscripcion FormularioInscripcion?
+  macrociclos           Macrociclo[]
+  mensajes              Mensaje[]
+  planesAsignados       PlanAsignado[]
+  sesiones              SesionRegistrada[]
+}
+
+model PlanAsignado {
+  id               String   @id @default(uuid())
+  clienteId        String
+  planId           String
+  fechaInicio      DateTime
+  fechaVencimiento DateTime
+  estado           String
+  creadoEn         DateTime @default(now())
+  cliente          Cliente  @relation(fields: [clienteId], references: [id])
+  plan             Plan     @relation(fields: [planId], references: [id])
+}
+
+model FormularioInscripcion {
+  id              String   @id @default(uuid())
+  clienteId       String   @unique
+  datosPersonales Json?
+  contacto        Json?
+  consentimiento  Json?
+  saludMedica     Json?
+  estiloDeVida    Json?
+  experiencia     Json?
+  objetivos       Json?
+  disponibilidad  Json?
+  personalizacion Json?
+  creadoEn        DateTime @default(now())
+  cliente         Cliente  @relation(fields: [clienteId], references: [id])
+}
+
+model CicloMenstrual {
+  id                     String   @id @default(uuid())
+  clienteId              String   @unique
+  activo                 Boolean  @default(true)
+  duracionCiclo          Int
+  fechaInicioUltimoCiclo DateTime
+  creadoEn               DateTime @default(now())
+  cliente                Cliente  @relation(fields: [clienteId], references: [id])
+}
+
+model Macrociclo {
+  id               String          @id @default(uuid())
+  clienteId        String
+  duracionSemanas  Int
+  fechaInicio      DateTime
+  notas            String?
+  creadoEn         DateTime        @default(now())
+  bloquesMensuales BloqueMensual[]
+  cliente          Cliente         @relation(fields: [clienteId], references: [id])
+}
+
+model BloqueMensual {
+  id           String     @id @default(uuid())
+  macrocicloId String
+  objetivo     String
+  duracion     Int
+  macrociclo   Macrociclo @relation(fields: [macrocicloId], references: [id])
+  semanas      Semana[]
+}
+
+model Semana {
+  id              String        @id @default(uuid())
+  bloqueMensualId String
+  numeroSemana    Int
+  objetivoSemana  String
+  RIRobjetivo     Int
+  volumenEstimado String
+  esFaseDeload    Boolean       @default(false)
+  esSemanaTesteo  Boolean       @default(false)
+  fasesCiclo      String?
+  diasSesion      DiaSesion[]
+  bloqueMensual   BloqueMensual @relation(fields: [bloqueMensualId], references: [id])
+}
+
+model DiaSesion {
+  id             String                 @id @default(uuid())
+  semanaId       String
+  diaSemana      String
+  focoMuscular   String
+  semana         Semana                 @relation(fields: [semanaId], references: [id])
+  ejercicios     EjercicioPlanificado[]
+  sesionesReales SesionRegistrada[]
+}
+
+model EjercicioPlanificado {
+  id                String            @id @default(uuid())
+  diaId             String
+  ejercicioId       String
+  series            Int
+  repsMin           Int
+  repsMax           Int
+  RIR               Int
+  tempo             String?
+  descansoSegundos  Int
+  pesoSugerido      Float?
+  notasTecnicas     String?
+  orden             Int
+  diaSesion         DiaSesion         @relation(fields: [diaId], references: [id])
+  ejercicio         Ejercicio         @relation(fields: [ejercicioId], references: [id])
+  seriesRegistradas SerieRegistrada[]
+}
+
+model SesionRegistrada {
+  id              String            @id @default(uuid())
+  clienteId       String
+  diaId           String
+  fecha           DateTime          @default(now())
+  completada      Boolean           @default(false)
+  duracionMinutos Int?
+  metricas        MetricasSesion?
+  series          SerieRegistrada[]
+  cliente         Cliente           @relation(fields: [clienteId], references: [id])
+  diaSesion       DiaSesion         @relation(fields: [diaId], references: [id])
+}
+
+model SerieRegistrada {
+  id                     String               @id @default(uuid())
+  sesionId               String
+  ejercicioPlanificadoId String
+  pesoKg                 Float?
+  repsReales             Int?
+  completada             Boolean              @default(false)
+  ejercicioPlanificado   EjercicioPlanificado @relation(fields: [ejercicioPlanificadoId], references: [id])
+  sesionRegistrada       SesionRegistrada     @relation(fields: [sesionId], references: [id])
+}
+
+model MetricasSesion {
+  id                    String           @id @default(uuid())
+  sesionId              String           @unique
+  duracion              Int?
+  DOMS                  String?
+  grupoMuscularFatigado String?
+  pesajeDia             Float?
+  esfuerzoGral          Int?
+  sesionRegistrada      SesionRegistrada @relation(fields: [sesionId], references: [id])
+}
+
+model Checkin {
+  id         String   @id @default(uuid())
+  clienteId  String
+  fecha      DateTime @default(now())
+  fotosUrls  String[]
+  pesoKg     Float?
+  nota       String?
+  energia    Int?
+  sueno      Int?
+  adherencia Int?
+  faseCiclo  String?
+  cliente    Cliente  @relation(fields: [clienteId], references: [id])
+}
+
+model Cobro {
+  id           String   @id @default(uuid())
+  clienteId    String
+  fecha        DateTime @default(now())
+  montoArs     Float
+  metodo       String
+  periodoDesde DateTime
+  periodoHasta DateTime
+  notas        String?
+  cliente      Cliente  @relation(fields: [clienteId], references: [id])
+}
+
+model Mensaje {
+  id        String   @id @default(uuid())
+  clienteId String
+  emisor    String
+  contenido String
+  tipo      String
+  creadoEn  DateTime @default(now())
+  leido     Boolean  @default(false)
+  cliente   Cliente  @relation(fields: [clienteId], references: [id])
+}
