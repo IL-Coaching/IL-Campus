@@ -45,6 +45,7 @@ export async function guardarCambiosEjercicio(ejercicioPlanificadoId: string, da
     repsMax?: number;
     RIR?: number;
     descanso?: number;
+    tempo?: string;
     notas?: string;
 }) {
     try {
@@ -56,9 +57,46 @@ export async function guardarCambiosEjercicio(ejercicioPlanificadoId: string, da
             repsMax: data.repsMax,
             RIR: data.RIR,
             descansoSegundos: data.descanso,
+            tempo: data.tempo,
             notasTecnicas: data.notas
         });
 
+        return { exito: true };
+    } catch (error) {
+        const mensaje = error instanceof Error ? error.message : "Error desconocido";
+        return { error: mensaje };
+    }
+}
+
+export async function agregarEjercicio(diaId: string, ejercicioId: string, orden: number) {
+    try {
+        await getEntrenadorSesion();
+        await PlanificacionServicio.agregarEjercicioASesion(diaId, ejercicioId, orden);
+        revalidatePath(`/entrenador/clientes`); // Revalidamos la ruta dinámica
+        return { exito: true };
+    } catch (error) {
+        const mensaje = error instanceof Error ? error.message : "Error desconocido";
+        return { error: mensaje };
+    }
+}
+
+export async function eliminarEjercicio(id: string) {
+    try {
+        await getEntrenadorSesion();
+        await PlanificacionServicio.eliminarEjercicioPlanificado(id);
+        revalidatePath(`/entrenador/clientes`);
+        return { exito: true };
+    } catch (error) {
+        const mensaje = error instanceof Error ? error.message : "Error desconocido";
+        return { error: mensaje };
+    }
+}
+
+export async function actualizarSemana(id: string, data: any) {
+    try {
+        await getEntrenadorSesion();
+        await PlanificacionServicio.actualizarSemana(id, data);
+        revalidatePath(`/entrenador/clientes`);
         return { exito: true };
     } catch (error) {
         const mensaje = error instanceof Error ? error.message : "Error desconocido";

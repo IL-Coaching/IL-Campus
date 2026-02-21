@@ -70,6 +70,51 @@ export const ClienteServicio = {
     },
 
     /**
+     * Crea un cliente en estado prospecto (sin password) junto con su formulario de inscripción.
+     */
+    async crearProspectoConFormulario(data: {
+        nombre: string;
+        email: string;
+        telefono: string;
+        entrenadorId: string;
+        formulario: Record<string, unknown>;
+    }) {
+        const existente = await prisma.cliente.findUnique({
+            where: { email: data.email }
+        });
+
+        if (existente) {
+            // Si ya existe, actualizamos su formulario en lugar de crear uno nuevo error
+            return await prisma.cliente.update({
+                where: { email: data.email },
+                data: {
+                    nombre: data.nombre,
+                    telefono: data.telefono,
+                    formularioInscripcion: {
+                        upsert: {
+                            create: data.formulario,
+                            update: data.formulario
+                        }
+                    }
+                }
+            });
+        }
+
+        return await prisma.cliente.create({
+            data: {
+                nombre: data.nombre,
+                email: data.email,
+                telefono: data.telefono,
+                entrenadorId: data.entrenadorId,
+                activo: false, // Es un prospecto hasta que el coach lo active
+                formularioInscripcion: {
+                    create: data.formulario
+                }
+            }
+        });
+    },
+
+    /**
      * Cuenta el total de clientes activos.
      */
     async contarTotalActivos() {

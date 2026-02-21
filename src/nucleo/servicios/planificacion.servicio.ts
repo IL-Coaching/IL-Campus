@@ -55,19 +55,70 @@ export const PlanificacionServicio = {
     },
 
     /**
-     * Agrega un bloque mensual (Mesociclo) a un macrociclo.
+     * Actualiza un bloque mensual.
      */
-    async agregarBloqueMensual(data: {
-        macrocicloId: string;
-        objetivo: string;
-        duracionSemanas: number;
+    async actualizarBloqueMensual(id: string, data: {
+        objetivo?: string;
+        duracion?: number;
     }) {
-        return await prisma.bloqueMensual.create({
+        return await prisma.bloqueMensual.update({
+            where: { id },
+            data
+        });
+    },
+
+    /**
+     * Actualiza una semana (Microciclo).
+     */
+    async actualizarSemana(id: string, data: {
+        objetivoSemana?: string;
+        RIRobjetivo?: number;
+        volumenEstimado?: string;
+        esFaseDeload?: boolean;
+        esSemanaTesteo?: boolean;
+    }) {
+        return await prisma.semana.update({
+            where: { id },
+            data
+        });
+    },
+
+    /**
+     * Actualiza un día de sesión.
+     */
+    async actualizarDiaSesion(id: string, data: {
+        focoMuscular?: string;
+    }) {
+        return await prisma.diaSesion.update({
+            where: { id },
+            data
+        });
+    },
+
+    /**
+     * Agrega un ejercicio a una sesión.
+     */
+    async agregarEjercicioASesion(diaId: string, ejercicioId: string, orden: number) {
+        return await prisma.ejercicioPlanificado.create({
             data: {
-                macrocicloId: data.macrocicloId,
-                objetivo: data.objetivo,
-                duracion: data.duracionSemanas
+                diaId,
+                ejercicioId,
+                series: 3, // Defaults
+                repsMin: 8,
+                repsMax: 12,
+                RIR: 3,
+                descansoSegundos: 90,
+                orden
             }
+        });
+    },
+
+    /**
+     * Elimina un ejercicio de la planificación.
+     */
+    async eliminarEjercicioPlanificado(id: string) {
+        return await prisma.ejercicioPlanificado.delete({
+            where: { id }
         });
     },
 
@@ -79,6 +130,7 @@ export const PlanificacionServicio = {
         repsMin?: number;
         repsMax?: number;
         RIR?: number;
+        tempo?: string;
         descansoSegundos?: number;
         notasTecnicas?: string;
     }) {

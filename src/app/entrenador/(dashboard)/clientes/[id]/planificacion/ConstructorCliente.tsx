@@ -9,7 +9,7 @@ import VistaMicrociclo from './componentes/VistaMicrociclo';
 import VistaSesion from './componentes/VistaSesion';
 import BuscadorEjercicios from './componentes/BuscadorEjercicios';
 import { MacrocicloCompleto, ClientePlanificacion, BloqueConSemanas, SemanaConDias } from '@/nucleo/tipos/planificacion.tipos';
-import { crearNuevoMacrociclo } from '@/nucleo/acciones/planificacion.accion';
+import { crearNuevoMacrociclo, agregarEjercicio } from '@/nucleo/acciones/planificacion.accion';
 import { Loader2, Settings } from 'lucide-react';
 
 type NivelVista = 'macro' | 'meso' | 'micro' | 'sesion';
@@ -157,7 +157,20 @@ export default function ConstructorCliente({ cliente, macrocicloInicial }: Const
             </div>
 
             {buscadorOpen && (
-                <BuscadorEjercicios onClose={() => setBuscadorOpen(false)} />
+                <BuscadorEjercicios
+                    onClose={() => setBuscadorOpen(false)}
+                    onSelect={async (ej) => {
+                        if (diaObjetoActual) {
+                            const res = await agregarEjercicio(diaObjetoActual.id, ej.id, diaObjetoActual.ejercicios.length + 1);
+                            if (res.exito) {
+                                router.refresh();
+                                setBuscadorOpen(false);
+                            } else {
+                                alert("Error al agregar ejercicio: " + res.error);
+                            }
+                        }
+                    }}
+                />
             )}
         </div>
     );

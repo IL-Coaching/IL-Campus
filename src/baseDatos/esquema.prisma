@@ -53,7 +53,7 @@ model Cliente {
   entrenadorId          String
   nombre                String
   email                 String                 @unique
-  password              String
+  password              String?
   telefono              String?
   genero                String?
   fechaAlta             DateTime               @default(now())
