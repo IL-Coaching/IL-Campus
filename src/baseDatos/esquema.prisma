@@ -12,6 +12,7 @@ model Entrenador {
   id         String      @id @default(uuid())
   nombre     String
   email      String      @unique
+  password   String
   telefono   String?
   activo     Boolean     @default(true)
   creadoEn   DateTime    @default(now())
@@ -52,6 +53,7 @@ model Cliente {
   entrenadorId          String
   nombre                String
   email                 String                 @unique
+  password              String
   telefono              String?
   genero                String?
   fechaAlta             DateTime               @default(now())

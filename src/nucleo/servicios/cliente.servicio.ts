@@ -60,6 +60,7 @@ export const ClienteServicio = {
             data: {
                 nombre: data.nombre,
                 email: data.email,
+                password: "temporal-change-me", // Password inicial por defecto
                 telefono: data.telefono,
                 entrenadorId: data.entrenadorId,
                 notas: data.notas,

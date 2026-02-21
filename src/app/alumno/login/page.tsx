@@ -1,22 +1,29 @@
 "use client"
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, ArrowRight } from 'lucide-react';
+import { Loader2, ArrowRight, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import { loginAlumno } from '@/nucleo/acciones/auth.accion';
 
 export default function AlumnoLoginPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [email, setEmail] = useState('');
-    const [pass, setPass] = useState('');
+    const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
-        // Simulamos validación y redirección
-        setTimeout(() => {
+        setError(null);
+
+        const formData = new FormData(e.currentTarget);
+        const result = await loginAlumno(formData);
+
+        if (result.success) {
             router.push('/alumno/dashboard');
-        }, 1200);
+        } else {
+            setError(result.error || "Ocurrió un error inesperado.");
+            setLoading(false);
+        }
     };
 
     return (
@@ -46,13 +53,18 @@ export default function AlumnoLoginPage() {
                     {/* Glow efecto sutil en el borde superior */}
                     <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-naranja/40 to-transparent"></div>
 
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-xl text-xs font-bold flex items-center gap-3 animate-shake">
+                            <AlertCircle size={16} /> {error}
+                        </div>
+                    )}
+
                     <div className="space-y-2">
                         <label className="text-[0.65rem] text-naranja font-black uppercase tracking-[0.25em] ml-1">Email Registrado</label>
                         <input
+                            name="email"
                             type="email"
                             required
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
                             placeholder="tu@email.com"
                             className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:outline-none focus:border-naranja transition-all font-medium placeholder:text-gris/20"
                         />
@@ -64,10 +76,9 @@ export default function AlumnoLoginPage() {
                             <button type="button" className="text-[0.6rem] text-gris hover:text-naranja uppercase font-bold tracking-tighter">¿Problemas?</button>
                         </div>
                         <input
+                            name="password"
                             type="password"
                             required
-                            value={pass}
-                            onChange={(e) => setPass(e.target.value)}
                             placeholder="••••••••"
                             className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:outline-none focus:border-naranja transition-all font-medium placeholder:text-gris/20"
                         />
