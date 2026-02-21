@@ -74,12 +74,18 @@ export default async function PerfilClientePage({ params }: { params: { id: stri
                         </div>
 
                         <div className="mt-8 space-y-3">
-                            <button className="w-full bg-naranja hover:bg-naranja-h text-marino font-black py-3 rounded-xl uppercase tracking-widest font-barlow-condensed text-sm transition-all shadow-lg shadow-naranja/10">
+                            <Link
+                                href={`/entrenador/clientes/${cliente.id}/planificacion`}
+                                className="w-full bg-naranja hover:bg-naranja-h text-marino font-black py-3 rounded-xl uppercase tracking-widest font-barlow-condensed text-sm transition-all shadow-lg shadow-naranja/10 text-center block"
+                            >
                                 Asignar Nueva Rutina
-                            </button>
-                            <button className="w-full bg-marino-3 border border-marino-4 text-blanco font-bold py-3 rounded-xl uppercase tracking-widest font-barlow-condensed text-xs hover:bg-marino-4 transition-all flex items-center justify-center gap-2">
+                            </Link>
+                            <Link
+                                href="/entrenador/mensajes"
+                                className="w-full bg-marino-3 border border-marino-4 text-blanco font-bold py-3 rounded-xl uppercase tracking-widest font-barlow-condensed text-xs hover:bg-marino-4 transition-all flex items-center justify-center gap-2 text-center"
+                            >
                                 <MessageCircle size={14} /> Enviar Mensaje
-                            </button>
+                            </Link>
                         </div>
                     </div>
 
@@ -124,14 +130,17 @@ export default async function PerfilClientePage({ params }: { params: { id: stri
                                 <Dumbbell size={16} className="text-naranja" />
                                 Planificación Actual
                             </h3>
-                            <Link href={`/entrenador/clientes/${cliente.id}/planificacion`} className="text-[0.6rem] font-black text-naranja uppercase tracking-widest hover:underline">Gestionar Plan</Link>
+                            <Link href={`/entrenador/clientes/${cliente.id}/planificacion`} className="text-[0.6rem] font-black text-naranja uppercase tracking-widest hover:underline">Gestionar Entrenamiento</Link>
                         </div>
                         <div className="p-12 text-center flex flex-col items-center justify-center">
                             <Dumbbell size={48} className="text-marino-4 mb-4" />
                             <p className="text-gris italic text-sm">Este atleta aún no tiene rutinas asignadas para el ciclo actual.</p>
-                            <button className="mt-6 text-xs text-naranja border border-naranja/30 px-4 py-2 rounded-lg font-bold uppercase tracking-widest hover:bg-naranja/5 transition-all">
+                            <Link
+                                href={`/entrenador/clientes/${cliente.id}/planificacion`}
+                                className="mt-6 text-xs text-naranja border border-naranja/30 px-4 py-2 rounded-lg font-bold uppercase tracking-widest hover:bg-naranja/5 transition-all text-center"
+                            >
                                 Crear primer Microciclo
-                            </button>
+                            </Link>
                         </div>
                     </div>
 
