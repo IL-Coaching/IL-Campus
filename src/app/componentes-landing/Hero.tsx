@@ -46,14 +46,23 @@ export default function Hero() {
             </div>
 
             {/* Columna Derecha */}
-            <div className="relative fade-up order-1 md:order-2 w-full max-w-sm mx-auto md:max-w-none">
-                {/* SVG/Placeholder de 380x480 */}
-                <div className="w-full aspect-[380/480] bg-marino-2 border border-marino-4 flex flex-col items-center justify-center text-gris-claro relative overflow-hidden shadow-2xl shadow-naranja/5">
-                    {/* En producción sera un <Image src={...}> */}
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mb-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <div className="relative fade-up order-1 md:order-2 w-full max-w-sm mx-auto md:max-w-none group">
+                {/* Glow decorativo detrás de la foto */}
+                <div className="absolute inset-0 bg-naranja/10 blur-[80px] rounded-full scale-75 group-hover:scale-100 transition-transform duration-700"></div>
+
+                {/* Contenedor de la foto */}
+                <div className="relative w-full aspect-[380/480] bg-marino-2 border border-marino-4 rounded-2xl flex flex-col items-center justify-center text-gris-claro overflow-hidden shadow-2xl transition-all duration-500 group-hover:border-naranja/30 group-hover:shadow-naranja/5">
+
+                    {/* Patrón de puntos decorativos */}
+                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20 mb-6 opacity-20 group-hover:opacity-40 transition-opacity duration-500 text-naranja" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    <span className="font-barlow-condensed font-bold tracking-[0.2em] uppercase opacity-50 text-xs">Foto del entrenador</span>
+                    <span className="font-barlow-condensed font-black tracking-[0.3em] uppercase opacity-40 text-[0.6rem] group-hover:opacity-60 transition-opacity">Espacio para fotografía</span>
+
+                    {/* Overlay gradiente inferior */}
+                    <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-marino-2 to-transparent group-hover:from-naranja/10 transition-colors duration-700"></div>
                 </div>
 
                 {/* Stats flotantes */}

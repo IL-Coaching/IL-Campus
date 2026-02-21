@@ -4,7 +4,7 @@ import { sitioConfig } from '../../../config/sitio.config';
 
 export default function Nav() {
     return (
-        <nav className="fixed top-0 w-full z-101 border-b border-naranja/15 bg-marino/85 backdrop-blur-md">
+        <nav className="fixed top-0 w-full z-101 border-b border-white/5 bg-marino-2/60 backdrop-blur-xl shadow-2xl shadow-black/20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-20">
 

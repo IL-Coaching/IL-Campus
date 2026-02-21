@@ -1,6 +1,6 @@
 "use client"
 import { ChevronLeft } from 'lucide-react';
-import type { Cliente } from '@prisma/client';
+
 
 interface BreadcrumbItem {
     label: string;
@@ -9,7 +9,7 @@ interface BreadcrumbItem {
 
 interface TopbarPlanificacionProps {
     items: BreadcrumbItem[];
-    cliente: Cliente;
+    cliente: any;
     onNavigate: (nivel: 'macro' | 'meso' | 'micro' | 'sesion') => void;
     onVolver: () => void;
     canVolver: boolean;
