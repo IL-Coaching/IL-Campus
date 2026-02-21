@@ -7,9 +7,11 @@ interface BreadcrumbItem {
     nivel: 'macro' | 'meso' | 'micro' | 'sesion';
 }
 
+import { ClientePlanificacion } from '@/nucleo/tipos/planificacion.tipos';
+
 interface TopbarPlanificacionProps {
     items: BreadcrumbItem[];
-    cliente: any;
+    cliente: ClientePlanificacion;
     onNavigate: (nivel: 'macro' | 'meso' | 'micro' | 'sesion') => void;
     onVolver: () => void;
     canVolver: boolean;

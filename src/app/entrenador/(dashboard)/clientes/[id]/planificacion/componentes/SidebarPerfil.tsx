@@ -12,8 +12,10 @@ import {
 
 
 
+import { ClientePlanificacion } from '@/nucleo/tipos/planificacion.tipos';
+
 interface SidebarPerfilProps {
-    cliente: any;
+    cliente: ClientePlanificacion;
 }
 
 export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {

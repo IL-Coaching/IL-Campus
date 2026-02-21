@@ -25,7 +25,16 @@ export type MacrocicloCompleto = Macrociclo & {
     bloquesMensuales: BloqueConSemanas[];
 };
 
+export type ClientePlanificacion = Cliente & {
+    plan?: string;
+    formularioInscripcion?: {
+        objetivos?: {
+            principal?: string;
+        };
+    } | null;
+};
+
 export interface PlanificacionEstado {
-    cliente: Cliente;
+    cliente: ClientePlanificacion;
     macrociclo: MacrocicloCompleto | null;
 }

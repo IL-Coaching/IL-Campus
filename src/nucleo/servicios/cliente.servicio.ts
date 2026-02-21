@@ -1,4 +1,5 @@
 import { prisma } from "@/baseDatos/conexion";
+import { ClientePlanificacion } from "../tipos/planificacion.tipos";
 
 export const ClienteServicio = {
     /**
@@ -12,12 +13,29 @@ export const ClienteServicio = {
     },
 
     /**
-     * Obtiene un cliente específico por su ID.
+     * Obtiene un cliente específico por su ID con sus relaciones necesarias para planificación.
      */
-    async obtenerPorId(id: string) {
-        return await prisma.cliente.findUnique({
-            where: { id }
+    async obtenerPorId(id: string): Promise<ClientePlanificacion | null> {
+        const cliente = await prisma.cliente.findUnique({
+            where: { id },
+            include: {
+                planesAsignados: {
+                    include: { plan: true },
+                    orderBy: { fechaInicio: 'desc' },
+                    take: 1
+                },
+                formularioInscripcion: true
+            }
         });
+
+        if (!cliente) return null;
+
+        // Mapeamos para que coincida con el tipo ClientePlanificacion
+        return {
+            ...cliente,
+            plan: cliente.planesAsignados[0]?.plan?.nombre || 'Sin Plan',
+            formularioInscripcion: cliente.formularioInscripcion as ClientePlanificacion['formularioInscripcion']
+        };
     },
 
     /**

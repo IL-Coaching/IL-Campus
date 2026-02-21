@@ -1,0 +1,27 @@
+
+> il-campus@0.1.0 lint
+> next lint
+
+node.exe : 
+En l?nea: 1 Car?cter: 1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) 
+    [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+./src/app/entrenador/(dashboard)/clientes/[id]/planifi
+cacion/componentes/SidebarPerfil.tsx
+16:14  Error: Unexpected any. Specify a different 
+type.  @typescript-eslint/no-explicit-any
+
+./src/app/entrenador/(dashboard)/clientes/[id]/planifi
+cacion/componentes/TopbarPlanificacion.tsx
+12:14  Error: Unexpected any. Specify a different 
+type.  @typescript-eslint/no-explicit-any
+
+info  - Need to disable some ESLint rules? Learn more 
+here: https://nextjs.org/docs/basic-features/eslint#di
+sabling-rules

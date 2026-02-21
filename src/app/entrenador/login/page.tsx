@@ -97,8 +97,8 @@ export default function EntrenadorLoginPage() {
                 </form>
 
                 <div className="flex justify-center flex-col items-center gap-4 pt-4">
-                    <Link href="/alumno/login" className="text-xs text-gris hover:text-naranja transition-colors font-bold uppercase tracking-widest border-b border-transparent hover:border-naranja pb-1">
-                        Ir al acceso de alumnos
+                    <Link href="/ingresar" className="text-xs text-gris hover:text-naranja transition-colors font-bold uppercase tracking-widest border-b border-transparent hover:border-naranja pb-1">
+                        ← Volver a opciones de acceso
                     </Link>
                     <p className="text-[0.6rem] text-gris/40 font-bold uppercase tracking-[0.4em]">IL-COACHING • ADMIN CORE</p>
                 </div>
