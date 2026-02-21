@@ -25,10 +25,10 @@ interface BloqueMapped {
 export default function VistaMacrociclo({ macrociclo, onSelectMeso, onConfigurar, onNuevoMesociclo }: VistaMacrocicloProps) {
 
     // Mapeo dinámico con lógica de "Gualda Style" para los campos extras
-    const bloques: BloqueMapped[] = macrociclo.bloquesMensuales.map((b: any, idx: number) => {
+    const bloques: BloqueMapped[] = macrociclo.bloquesMensuales.map((b: BloqueConSemanas, idx: number) => {
         // Lógica de placeholders basada en el objetivo si no hay datos específicos
-        let metodo = b.metodo || "Leg, Push, Pull, Adicional";
-        let rango = b.rangoReferencia || (b.objetivo.toLowerCase().includes('fuerza') ? "6-8 reps" : "8-12 reps");
+        const metodo = b.metodo || "Leg, Push, Pull, Adicional";
+        const rango = b.rangoReferencia || (b.objetivo.toLowerCase().includes('fuerza') ? "6-8 reps" : "8-12 reps");
 
         // Colores según fase
         let color = "border-naranja";

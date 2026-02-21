@@ -24,7 +24,8 @@ export const ClienteServicio = {
                     orderBy: { fechaInicio: 'desc' },
                     take: 1
                 },
-                formularioInscripcion: true
+                formularioInscripcion: true,
+                cicloMenstrual: true
             }
         });
 

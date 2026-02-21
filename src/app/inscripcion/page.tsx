@@ -111,10 +111,11 @@ export default function InscripcionPage() {
     const prevStep = () => setStep(prev => Math.max(prev - 1, 0));
 
     // Helpers para actualizar el estado anidado
-    const updateNested = (path: string, value: any) => {
+    const updateNested = (path: string, value: string | number | boolean | string[]) => {
         const keys = path.split('.');
         setFormData(prev => {
             const newState = { ...prev };
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             let current: any = newState;
             for (let i = 0; i < keys.length - 1; i++) {
                 current = current[keys[i]];
@@ -128,6 +129,7 @@ export default function InscripcionPage() {
         const keys = path.split('.');
         setFormData(prev => {
             const newState = { ...prev };
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             let current: any = newState;
             for (let i = 0; i < keys.length - 1; i++) {
                 current = current[keys[i]];

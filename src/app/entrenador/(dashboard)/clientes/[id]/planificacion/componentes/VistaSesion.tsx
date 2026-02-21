@@ -31,7 +31,7 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
         }
     };
 
-    const handleUpdateChange = (id: string, field: string, value: any) => {
+    const handleUpdateChange = (id: string, field: string, value: string | number) => {
         setEjercicios(prev => prev.map(ej => {
             if (ej.id === id) {
                 return { ...ej, [field]: value };
@@ -51,14 +51,17 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                     RIR: ej.RIR,
                     descanso: ej.descansoSegundos,
                     tempo: ej.tempo || undefined,
+                    pesoSugerido: ej.pesoSugerido || undefined,
                     notas: ej.notasTecnicas || undefined
                 });
             }
             router.refresh();
             alert("Sesión guardada correctamente.");
-        } catch (e) {
+        } catch (error) {
+            console.error(error);
             alert("Error al guardar algunos cambios.");
         } finally {
+
             setSaving(false);
         }
     };
@@ -139,7 +142,7 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                                 <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-20 text-center">Sets</th>
                                 <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-24 text-center">RIR/RPE</th>
                                 <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-24 text-center">Descanso</th>
-                                <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-28 text-center">Serie 1-5 (Reps/Kg)</th>
+                                <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-24 text-center">Peso (Kg)</th>
                                 <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-24 text-center">Tonelaje</th>
                                 <th className="p-5 text-right w-12"></th>
                             </tr>
@@ -207,16 +210,21 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                                         </div>
                                     </td>
                                     <td className="p-5">
-                                        <div className="flex gap-1 justify-center">
-                                            {[1, 2, 3, 4, 5].map(s => (
-                                                <div key={s} className={`w-8 h-10 rounded border text-[0.6rem] flex items-center justify-center font-black ${s <= ej.series ? 'bg-marino-3 border-naranja/20 text-naranja' : 'bg-marino-4/20 border-transparent text-gris/20'}`}>
-                                                    {s <= ej.series ? '--' : ''}
-                                                </div>
-                                            ))}
+                                        <div className="flex items-center gap-1 bg-marino-3 px-2 rounded-lg border border-marino-4/30">
+                                            <input
+                                                type="number"
+                                                step="0.5"
+                                                value={ej.pesoSugerido || ''}
+                                                onChange={(e) => handleUpdateChange(ej.id, 'pesoSugerido', parseFloat(e.target.value))}
+                                                placeholder="0.0"
+                                                className="w-full bg-transparent py-2.5 text-center text-naranja focus:outline-none text-[0.85rem] font-black"
+                                            />
                                         </div>
                                     </td>
                                     <td className="p-5 text-center">
-                                        <span className="text-xs font-black text-blanco/80 uppercase tracking-tighter">0.0 KG</span>
+                                        <span className="text-xs font-black text-blanco/80 uppercase tracking-tighter">
+                                            {(ej.series * (ej.repsMax || 0) * (ej.pesoSugerido || 0)).toFixed(1)} KG
+                                        </span>
                                     </td>
                                     <td className="p-5 text-right">
                                         <button
@@ -267,11 +275,13 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                                 <input placeholder="--.- kg" className="bg-transparent border-none p-0 text-blanco font-bold text-xs focus:ring-0 placeholder:text-gris/30" />
                             </div>
                         </div>
-                        <div className="flex items-center gap-4 p-4 bg-marino-3 border border-marino-4 rounded-2xl border-naranja/20">
+                        <div className="flex items-center gap-4 p-4 bg-marino-3 border border-naranja/20 rounded-2xl">
                             <div className="p-3 bg-naranja/10 rounded-xl"><Dumbbell className="text-naranja" size={20} /></div>
                             <div>
                                 <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest block mb-0.5">Tonelaje SESIÓN</label>
-                                <span className="text-blanco font-black text-xs uppercase tracking-tighter">--.--- KG</span>
+                                <span className="text-blanco font-black text-xs uppercase tracking-tighter">
+                                    {ejercicios.reduce((acc, ej) => acc + (ej.series * (ej.repsMax || 0) * (ej.pesoSugerido || 0)), 0).toLocaleString()} KG
+                                </span>
                             </div>
                         </div>
                     </div>

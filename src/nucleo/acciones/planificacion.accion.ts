@@ -46,6 +46,7 @@ export async function guardarCambiosEjercicio(ejercicioPlanificadoId: string, da
     RIR?: number;
     descanso?: number;
     tempo?: string;
+    pesoSugerido?: number;
     notas?: string;
 }) {
     try {
@@ -58,6 +59,7 @@ export async function guardarCambiosEjercicio(ejercicioPlanificadoId: string, da
             RIR: data.RIR,
             descansoSegundos: data.descanso,
             tempo: data.tempo,
+            pesoSugerido: data.pesoSugerido,
             notasTecnicas: data.notas
         });
 
@@ -92,10 +94,27 @@ export async function eliminarEjercicio(id: string) {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function actualizarSemana(id: string, data: any) {
     try {
         await getEntrenadorSesion();
         await PlanificacionServicio.actualizarSemana(id, data);
+        revalidatePath(`/entrenador/clientes`);
+        return { exito: true };
+    } catch (error) {
+        const mensaje = error instanceof Error ? error.message : "Error desconocido";
+        return { error: mensaje };
+    }
+}
+
+export async function actualizarMesociclo(id: string, data: {
+    objetivo?: string;
+    metodo?: string;
+    rangoReferencia?: string;
+}) {
+    try {
+        await getEntrenadorSesion();
+        await PlanificacionServicio.actualizarBloqueMensual(id, data);
         revalidatePath(`/entrenador/clientes`);
         return { exito: true };
     } catch (error) {

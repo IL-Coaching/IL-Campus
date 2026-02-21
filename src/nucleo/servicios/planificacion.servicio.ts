@@ -60,6 +60,8 @@ export const PlanificacionServicio = {
     async actualizarBloqueMensual(id: string, data: {
         objetivo?: string;
         duracion?: number;
+        metodo?: string;
+        rangoReferencia?: string;
     }) {
         return await prisma.bloqueMensual.update({
             where: { id },
@@ -132,6 +134,7 @@ export const PlanificacionServicio = {
         RIR?: number;
         tempo?: string;
         descansoSegundos?: number;
+        pesoSugerido?: number;
         notasTecnicas?: string;
     }) {
         return await prisma.ejercicioPlanificado.update({

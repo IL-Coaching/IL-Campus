@@ -120,12 +120,14 @@ model Macrociclo {
 }
 
 model BloqueMensual {
-  id           String     @id @default(uuid())
-  macrocicloId String
-  objetivo     String
-  duracion     Int
-  macrociclo   Macrociclo @relation(fields: [macrocicloId], references: [id])
-  semanas      Semana[]
+  id               String     @id @default(uuid())
+  macrocicloId     String
+  objetivo         String
+  duracion         Int
+  metodo           String?
+  rangoReferencia  String?
+  macrociclo       Macrociclo @relation(fields: [macrocicloId], references: [id])
+  semanas          Semana[]
 }
 
 model Semana {

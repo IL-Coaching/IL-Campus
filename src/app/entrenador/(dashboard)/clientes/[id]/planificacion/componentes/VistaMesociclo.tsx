@@ -1,6 +1,8 @@
-"use client"
+import { Layers, ChevronRight, Activity, Flame, MoveUp, Save, Loader2, FlaskConical, Target } from "lucide-react";
+import { useState } from 'react';
 import { BloqueConSemanas, SemanaConDias, DiaConEjercicios } from "@/nucleo/tipos/planificacion.tipos";
-import { Layers, ChevronRight, Activity, Zap, Flame, MoveUp } from "lucide-react";
+import { actualizarMesociclo } from '@/nucleo/acciones/planificacion.accion';
+import { useRouter } from 'next/navigation';
 
 interface VistaMesocicloProps {
     bloque: BloqueConSemanas;
@@ -9,6 +11,28 @@ interface VistaMesocicloProps {
 }
 
 export default function VistaMesociclo({ bloque, mes, onSelectSemana }: VistaMesocicloProps) {
+    const [objetivo, setObjetivo] = useState(bloque.objetivo);
+    const [metodo, setMetodo] = useState(bloque.metodo || '');
+    const [rango, setRango] = useState(bloque.rangoReferencia || '');
+    const [saving, setSaving] = useState(false);
+    const router = useRouter();
+
+    const handleGuardar = async () => {
+        setSaving(true);
+        const res = await actualizarMesociclo(bloque.id, {
+            objetivo,
+            metodo,
+            rangoReferencia: rango
+        });
+        if (res.exito) {
+            router.refresh();
+            alert("Mesociclo actualizado.");
+        } else {
+            alert("Error: " + res.error);
+        }
+        setSaving(false);
+    };
+
     const semanas = bloque.semanas.map((s: SemanaConDias) => ({
         id: s.id,
         n: s.numeroSemana,
@@ -19,41 +43,81 @@ export default function VistaMesociclo({ bloque, mes, onSelectSemana }: VistaMes
     }));
 
     return (
-        <div className="space-y-10 animate-in fade-in duration-700">
+        <div className="space-y-10 animate-in fade-in duration-700 pb-10">
             {/* Header Mesociclo Professional */}
             <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6 border-b border-marino-4 pb-8">
-                <div className="flex items-start gap-4">
-                    <div className="p-3 bg-naranja/10 border border-naranja/20 rounded-2xl">
+                <div className="flex items-start gap-4 flex-1">
+                    <div className="p-3 bg-naranja/10 border border-naranja/20 rounded-2xl shrink-0">
                         <Layers size={28} className="text-naranja" />
                     </div>
-                    <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <span className="text-[0.65rem] font-black text-naranja uppercase tracking-[0.3em] block">Desglose de Microciclos</span>
+                    <div className="flex-1 space-y-4">
+                        <div className="flex items-center gap-3">
+                            <span className="text-[0.65rem] font-black text-naranja uppercase tracking-[0.3em] block">Configuración de Mesociclo</span>
                             <span className="px-2 py-0.5 bg-marino-3 border border-marino-4 rounded text-[0.55rem] font-bold text-gris uppercase tracking-widest">Mes {mes}</span>
                         </div>
-                        <h2 className="text-5xl font-barlow-condensed font-black uppercase text-blanco leading-none tracking-tight">
-                            Mesociclo: {bloque.objetivo}
-                        </h2>
+                        <input
+                            value={objetivo}
+                            onChange={(e) => setObjetivo(e.target.value)}
+                            className="text-4xl md:text-5xl font-barlow-condensed font-black uppercase text-blanco leading-none tracking-tight bg-transparent border-none focus:ring-0 w-full p-0 placeholder:text-gris/20"
+                            placeholder="Objetivo del Mesociclo"
+                        />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
+                            <div className="bg-marino-3/30 p-3 rounded-xl border border-marino-4">
+                                <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest mb-1.5 block flex items-center gap-2">
+                                    <FlaskConical size={10} /> Método de Carga
+                                </label>
+                                <input
+                                    value={metodo}
+                                    onChange={(e) => setMetodo(e.target.value)}
+                                    className="bg-transparent border-none p-0 text-sm font-bold text-blanco focus:ring-0 w-full placeholder:text-gris/20"
+                                    placeholder="Ej: Leg/Push/Pull, Fullbody..."
+                                />
+                            </div>
+                            <div className="bg-marino-3/30 p-3 rounded-xl border border-marino-4">
+                                <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest mb-1.5 block flex items-center gap-2">
+                                    <Target size={10} /> Rango Referencia
+                                </label>
+                                <input
+                                    value={rango}
+                                    onChange={(e) => setRango(e.target.value)}
+                                    className="bg-transparent border-none p-0 text-sm font-bold text-blanco focus:ring-0 w-full placeholder:text-gris/20"
+                                    placeholder="Ej: 8-12 reps, 5-8 reps..."
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div className="flex gap-4 w-full xl:w-auto">
-                    <div className="flex-1 xl:flex-none flex flex-col bg-marino-2 p-4 rounded-xl border border-marino-4 min-w-[140px]">
-                        <span className="text-[0.55rem] font-black text-gris uppercase tracking-widest mb-1.5 opacity-60">Volumen Global</span>
-                        <div className="flex items-center gap-2">
-                            <Activity className="text-naranja" size={16} />
-                            <span className="text-lg font-black text-blanco uppercase tracking-tight">{bloque.semanas[0]?.volumenEstimado || 'ESTÁNDAR'}</span>
+                <div className="flex flex-col gap-4 w-full xl:w-auto">
+                    <div className="flex gap-4">
+                        <div className="flex-1 xl:flex-none flex flex-col bg-marino-2 p-4 rounded-xl border border-marino-4 min-w-[140px]">
+                            <span className="text-[0.55rem] font-black text-gris uppercase tracking-widest mb-1.5 opacity-60">Volumen Global</span>
+                            <div className="flex items-center gap-2">
+                                <Activity className="text-naranja" size={16} />
+                                <span className="text-lg font-black text-blanco uppercase tracking-tight">{bloque.semanas[0]?.volumenEstimado || 'ESTÁNDAR'}</span>
+                            </div>
+                        </div>
+                        <div className="flex-1 xl:flex-none flex flex-col bg-marino-2 p-4 rounded-xl border border-marino-4 min-w-[140px]">
+                            <span className="text-[0.55rem] font-black text-gris uppercase tracking-widest mb-1.5 opacity-60">Intensidad Media</span>
+                            <div className="flex items-center gap-2">
+                                <Flame className="text-naranja" size={16} />
+                                <span className="text-lg font-black text-blanco uppercase tracking-tight">RIR {bloque.semanas[0]?.RIRobjetivo || '3'}</span>
+                            </div>
                         </div>
                     </div>
-                    <div className="flex-1 xl:flex-none flex flex-col bg-marino-2 p-4 rounded-xl border border-marino-4 min-w-[140px]">
-                        <span className="text-[0.55rem] font-black text-gris uppercase tracking-widest mb-1.5 opacity-60">Intensidad Media</span>
-                        <div className="flex items-center gap-2">
-                            <Flame className="text-naranja" size={16} />
-                            <span className="text-lg font-black text-blanco uppercase tracking-tight">RIR {bloque.semanas[0]?.RIRobjetivo || '3'}</span>
-                        </div>
-                    </div>
+
+                    <button
+                        onClick={handleGuardar}
+                        disabled={saving}
+                        className="w-full bg-naranja hover:bg-naranja-h transition-all text-marino font-black py-3 rounded-xl uppercase tracking-widest text-xs flex items-center justify-center gap-2 shadow-lg shadow-naranja/10"
+                    >
+                        {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                        {saving ? "Guardando..." : "Guardar Cambios"}
+                    </button>
                 </div>
             </div>
+
 
             {/* Grid de Semanas */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
@@ -69,8 +133,8 @@ export default function VistaMesociclo({ bloque, mes, onSelectSemana }: VistaMes
 
                         <div className="flex justify-between items-start mb-6">
                             <span className={`px-2.5 py-1 rounded-lg text-[0.6rem] font-black uppercase tracking-[0.15em] border ${s.tipo === 'Trabajo' ? 'text-[#22C55E] border-[#22C55E]/30 bg-[#22C55E]/10' :
-                                    s.tipo === 'Deload' ? 'text-[#EAB308] border-[#EAB308]/30 bg-[#EAB308]/10' :
-                                        'text-[#A78BFA] border-[#A78BFA]/30 bg-[#A78BFA]/10'
+                                s.tipo === 'Deload' ? 'text-[#EAB308] border-[#EAB308]/30 bg-[#EAB308]/10' :
+                                    'text-[#A78BFA] border-[#A78BFA]/30 bg-[#A78BFA]/10'
                                 }`}>
                                 {s.tipo}
                             </span>
@@ -104,8 +168,8 @@ export default function VistaMesociclo({ bloque, mes, onSelectSemana }: VistaMes
                                     <div
                                         key={i}
                                         className={`w-4 h-4 rounded-full border border-marino-2 ${d.toLowerCase().includes('push') ? 'bg-naranja' :
-                                                d.toLowerCase().includes('pull') ? 'bg-[#22C55E]' :
-                                                    d.toLowerCase().includes('piern') ? 'bg-[#60A5FA]' : 'bg-[#A78BFA]'
+                                            d.toLowerCase().includes('pull') ? 'bg-[#22C55E]' :
+                                                d.toLowerCase().includes('piern') ? 'bg-[#60A5FA]' : 'bg-[#A78BFA]'
                                             }`}
                                         title={d}
                                     ></div>

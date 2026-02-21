@@ -1,5 +1,5 @@
 "use client"
-import { SemanaConDias, DiaConEjercicios } from "@/nucleo/tipos/planificacion.tipos";
+import { SemanaConDias, DiaConEjercicios, EjercicioConDetalle } from "@/nucleo/tipos/planificacion.tipos";
 import { Calendar, ChevronRight, Moon, Zap, Activity, Info } from "lucide-react";
 
 interface VistaMicrocicloProps {
@@ -13,13 +13,13 @@ export default function VistaMicrociclo({ semana, onSelectSesion }: VistaMicroci
         dia: d.diaSemana,
         foco: d.focoMuscular,
         active: true,
-        info: `${d.ejercicios.length} ejercicios · ${d.ejercicios.reduce((acc: number, curr: any) => acc + curr.series, 0)} series`,
+        info: `${d.ejercicios.length} ejercicios · ${d.ejercicios.reduce((acc: number, curr: EjercicioConDetalle) => acc + curr.series, 0)} series`,
         color: "text-blanco",
         accent: "bg-naranja"
     }));
 
     const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
-    const layout = diasSemana.map(nombre => {
+    const layout = diasSemana.map((nombre: string) => {
         const existente = dias.find(d => d.dia === nombre);
         if (existente) return existente;
         return {
@@ -67,13 +67,13 @@ export default function VistaMicrociclo({ semana, onSelectSesion }: VistaMicroci
 
             {/* Grid de Días con diseño de Cards Profesionales */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
-                {layout.map((d, i) => (
+                {layout.map((d, i: number) => (
                     <div
                         key={i}
                         onClick={() => d.active && onSelectSesion(d.dia)}
                         className={`group relative bg-marino-2 border border-marino-4 rounded-2xl p-6 min-h-[220px] flex flex-col transition-all duration-300 ${d.active
-                                ? 'cursor-pointer hover:border-naranja/50 hover:bg-marino-3 hover:-translate-y-1 shadow-lg hover:shadow-naranja/5'
-                                : 'opacity-40 grayscale-[0.5] cursor-default'
+                            ? 'cursor-pointer hover:border-naranja/50 hover:bg-marino-3 hover:-translate-y-1 shadow-lg hover:shadow-naranja/5'
+                            : 'opacity-40 grayscale-[0.5] cursor-default'
                             }`}
                     >
                         {/* Indicador de Tipo de Día */}

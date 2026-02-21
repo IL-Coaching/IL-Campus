@@ -3,11 +3,50 @@
 import { prisma } from "@/baseDatos/conexion";
 import { ClienteServicio } from "../servicios/cliente.servicio";
 
+interface RespuestasInscripcion {
+    datosPersonales?: {
+        nacimiento?: string;
+        edad?: string;
+        genero?: string;
+        peso?: string;
+        altura?: string;
+        ubicacion?: string;
+    };
+    salud?: {
+        condiciones?: string[];
+        consentimiento?: boolean;
+        aptoMedico?: string | boolean;
+    };
+    estiloVida?: {
+        actividad?: string;
+        sueno?: string;
+    };
+    experiencia?: {
+        entrenaActualmente?: string;
+        tiempoEntrenando?: string;
+    };
+    objetivos?: {
+        principal?: string[];
+        motivacion?: string;
+    };
+    logistica?: {
+        sesionesSemana?: string;
+        tiempoSesion?: string;
+        dondeEntrena?: string;
+        equipamiento?: string[];
+    };
+    personalizacion?: {
+        noGusta?: string;
+        notasImportantes?: string;
+        declaracionFinal?: boolean;
+    };
+}
+
 export async function enviarFormularioInscripcion(datos: {
     nombre: string;
     email: string;
     telefono: string;
-    respuestas: any;
+    respuestas: RespuestasInscripcion;
 }) {
     try {
         // 1. Buscamos al entrenador principal (Iñaki)
@@ -72,13 +111,14 @@ export async function enviarFormularioInscripcion(datos: {
             email: datos.email,
             telefono: datos.telefono,
             entrenadorId: entrenador.id,
-            formulario: formularioData as any
+            formulario: formularioData
         });
 
         return { exito: true, clienteId: result.id };
 
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error al procesar inscripción:", error);
-        return { error: "Ocurrió un error al enviar tu formulario. Por favor, intenta de nuevo." };
+        const mensaje = error instanceof Error ? error.message : "Ocurrió un error al enviar tu formulario. Por favor, intenta de nuevo.";
+        return { error: mensaje };
     }
 }

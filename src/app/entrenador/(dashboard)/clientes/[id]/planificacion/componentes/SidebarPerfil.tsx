@@ -6,11 +6,11 @@ import {
     Calendar,
     Stethoscope,
     Heart,
+    Zap, // Added Zap for Ciclo
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Info // Added Info for notes
 } from 'lucide-react';
-
-
 
 import { ClientePlanificacion } from '@/nucleo/tipos/planificacion.tipos';
 
@@ -27,6 +27,7 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
         { id: 1, icon: Calendar, label: 'Disponibilidad' },
         { id: 2, icon: Stethoscope, label: 'Salud' },
         { id: 3, icon: Heart, label: 'Preferencias' },
+        { id: 5, icon: Zap, label: 'Ciclo' }, // New tab
         { id: 4, icon: User, label: 'Métricas' },
     ];
 
@@ -144,6 +145,49 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                             <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Estrés (1-10)</span>
                             <p className="text-[0.82rem] text-gris-claro">
                                 {cliente?.formularioInscripcion?.estiloDeVida?.estres || '--'} / 10
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {tabActiva === 5 && (
+                    <div className="space-y-5 animate-in fade-in slide-in-from-left-2">
+                        <div className="flex items-center justify-between">
+                            <span className="text-[0.65rem] text-naranja font-black uppercase tracking-widest block">Ciclo Menstrual</span>
+                            <span className={`px-2 py-0.5 rounded text-[0.55rem] font-bold uppercase tracking-widest ${cliente?.cicloMenstrual?.activo ? 'bg-naranja/10 text-naranja border border-naranja/20' : 'bg-marino-3 text-gris border border-marino-4'}`}>
+                                {cliente?.cicloMenstrual?.activo ? 'Activo' : 'Inactivo'}
+                            </span>
+                        </div>
+
+                        <div className="bg-marino-3/50 border border-marino-4 rounded-xl p-4 space-y-4">
+                            <div>
+                                <label className="text-[0.55rem] text-gris font-bold uppercase tracking-widest block mb-2">Último Inicio</label>
+                                <input
+                                    type="date"
+                                    defaultValue={cliente?.cicloMenstrual?.fechaInicioUltimoCiclo ? new Date(cliente.cicloMenstrual.fechaInicioUltimoCiclo).toISOString().split('T')[0] : ''}
+                                    className="w-full bg-marino-3 border border-marino-4 rounded-lg px-3 py-2 text-xs text-blanco focus:outline-none focus:border-naranja/50 transition-colors"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[0.55rem] text-gris font-bold uppercase tracking-widest block mb-2">Duración Promedio (Días)</label>
+                                <input
+                                    type="number"
+                                    defaultValue={cliente?.cicloMenstrual?.duracionCiclo || 28}
+                                    className="w-full bg-marino-3 border border-marino-4 rounded-lg px-3 py-2 text-xs text-blanco focus:outline-none focus:border-naranja/50 transition-colors"
+                                />
+                            </div>
+                            <button className="w-full py-2 bg-naranja/10 border border-naranja/30 rounded-lg text-[0.65rem] font-black text-naranja uppercase tracking-widest hover:bg-naranja hover:text-marino transition-all">
+                                Guardar Configuración
+                            </button>
+                        </div>
+
+                        <div className="p-4 bg-marino-3/30 border border-marino-4 border-dashed rounded-xl">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Info size={14} className="text-naranja" />
+                                <span className="text-[0.6rem] font-black text-blanco uppercase tracking-widest">Nota Técnica</span>
+                            </div>
+                            <p className="text-[0.7rem] text-gris leading-relaxed font-medium">
+                                El sistema ajusta automáticamente las recomendaciones de intensidad RIR en la planificación basándose en la fase proyectada del ciclo.
                             </p>
                         </div>
                     </div>
