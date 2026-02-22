@@ -6,7 +6,7 @@ import { AlertCircle, CheckCircle2, DollarSign, ExternalLink } from "lucide-reac
 import Link from "next/link";
 import ModalRegistrarPago from "./ModalRegistrarPago";
 
-interface Vencimiento {
+export interface Vencimiento {
     id: string;
     fechaVencimiento: Date;
     cliente: { id: string, nombre: string, email: string };
