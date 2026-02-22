@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { BloqueConSemanas, SemanaConDias, DiaConEjercicios } from "@/nucleo/tipos/planificacion.tipos";
 import { actualizarMesociclo, actualizarSemana } from '@/nucleo/acciones/planificacion.accion';
 import { TIPOS_CARGA_MESOCICLO } from '@/nucleo/planificacion/zonas.constantes';
-import { TipoCarga } from '@prisma/client';
 import { useRouter } from 'next/navigation';
 
 interface VistaMesocicloProps {
@@ -39,13 +38,13 @@ export default function VistaMesociclo({ bloque, mes, onSelectSemana }: VistaMes
         id: s.id,
         n: s.numeroSemana,
         tipo: s.esFaseDeload ? "Deload" : (s.esSemanaTesteo ? "Testeo" : "Trabajo"),
-        tipoCarga: s.tipoCarga as TipoCarga | null,
+        tipoCarga: s.tipoCarga || '',
         rir: s.RIRobjetivo || "3-4",
         vol: s.volumenEstimado || "8 sets",
         dias: s.diasSesion.map((d: DiaConEjercicios) => d.focoMuscular)
     }));
 
-    const handleCambiarTipoCarga = async (semanaId: string, tipo: TipoCarga) => {
+    const handleCambiarTipoCarga = async (semanaId: string, tipo: string) => {
         let rir = 3;
         let vol = "100% Base";
 
@@ -58,7 +57,7 @@ export default function VistaMesociclo({ bloque, mes, onSelectSemana }: VistaMes
             tipoCarga: tipo,
             RIRobjetivo: rir,
             volumenEstimado: vol,
-            esFaseDeload: tipo === 'DESCARGA_TEST', // Marca como descarga
+            esFaseDeload: tipo === 'DESCARGA_TEST',
             esSemanaTesteo: tipo === 'DESCARGA_TEST'
         });
 
@@ -160,13 +159,13 @@ export default function VistaMesociclo({ bloque, mes, onSelectSemana }: VistaMes
                             <div className="relative group/tipo">
                                 <select
                                     className={`px-2.5 py-1 rounded-lg text-[0.65rem] font-black uppercase tracking-[0.15em] border bg-marino-3 outline-none cursor-pointer ${s.tipoCarga === 'BASE' ? 'text-[#22C55E] border-[#22C55E]/30' :
-                                            s.tipoCarga === 'CHOQUE' ? 'text-[#FF6B00] border-[#FF6B00]/30' :
-                                                s.tipoCarga === 'DESCARGA_TEST' ? 'text-[#A78BFA] border-[#A78BFA]/30' :
-                                                    'text-gris border-marino-4'
+                                        s.tipoCarga === 'CHOQUE' ? 'text-[#FF6B00] border-[#FF6B00]/30' :
+                                            s.tipoCarga === 'DESCARGA_TEST' ? 'text-[#A78BFA] border-[#A78BFA]/30' :
+                                                'text-gris border-marino-4'
                                         }`}
                                     value={s.tipoCarga || ''}
                                     onClick={(e) => e.stopPropagation()}
-                                    onChange={(e) => handleCambiarTipoCarga(s.id, e.target.value as TipoCarga)}
+                                    onChange={(e) => handleCambiarTipoCarga(s.id, e.target.value)}
                                 >
                                     <option value="" disabled>TIPO CARGA</option>
                                     {Object.entries(TIPOS_CARGA_MESOCICLO).map(([key, value]) => (

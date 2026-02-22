@@ -15,6 +15,7 @@ export type DiaConEjercicios = DiaSesion & {
 
 export type SemanaConDias = Semana & {
     diasSesion: DiaConEjercicios[];
+    tipoCarga?: string;
 };
 
 // Bloque Mensual (Mesociclo) con sus semanas
@@ -35,7 +36,7 @@ export type ClientePlanificacion = Cliente & {
         datosPersonales?: {
             nombre?: string;
             nacimiento?: string;
-            edad?: string;
+            edad?: string | number;
             genero?: string;
             peso?: string;
             altura?: string;
@@ -81,6 +82,9 @@ export type ClientePlanificacion = Cliente & {
         activo: boolean;
         duracionCiclo: number;
         fechaInicioUltimoCiclo: Date;
+    } | null;
+    perfilRespuesta?: {
+        nivelRespuesta: string;
     } | null;
 };
 

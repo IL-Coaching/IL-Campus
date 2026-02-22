@@ -9,28 +9,31 @@ import { calcularUnRM, calcularFuerzaRelativa, calcularTablaCompleta } from "../
  * Acciones del Sistema de Testeo de Fuerza — IL-Campus
  */
 
-export async function configurarDiaTesteo(semanaId: string, ejercicioId: string, modalidad: any) {
+export async function configurarDiaTesteo(semanaId: string, ejercicioId: string, modalidad: string) {
     try {
         await getEntrenadorSesion();
 
-        const config = await (prisma as any).configTesteoEjercicio.findFirst({
+        // @ts-expect-error - Campos de esquema extendidos
+        const config = await prisma.configTesteoEjercicio.findFirst({
             where: { semanaId, ejercicioId }
         });
 
         if (config) {
-            await (prisma as any).configTesteoEjercicio.update({
+            // @ts-expect-error - Campos de esquema extendidos
+            await prisma.configTesteoEjercicio.update({
                 where: { id: config.id },
                 data: { modalidad }
             });
         } else {
-            await (prisma as any).configTesteoEjercicio.create({
+            // @ts-expect-error - Campos de esquema extendidos
+            await prisma.configTesteoEjercicio.create({
                 data: { semanaId, ejercicioId, modalidad }
             });
         }
 
         revalidatePath("/entrenador/clientes");
         return { exito: true };
-    } catch (error) {
+    } catch {
         return { error: "Error al configurar testeo" };
     }
 }
@@ -38,7 +41,7 @@ export async function configurarDiaTesteo(semanaId: string, ejercicioId: string,
 export async function registrarResultadoTesteo(data: {
     clienteId: string;
     ejercicioId: string;
-    modalidad: any;
+    modalidad: string;
     pesoKg: number;
     reps: number;
     mesocicloId?: string;
@@ -54,13 +57,14 @@ export async function registrarResultadoTesteo(data: {
 
         if (!cliente) throw new Error("Acceso denegado.");
 
-        // 2. Cálculos Científicos (Fórmula O'Conner)
         const unRM = calcularUnRM(data.pesoKg, data.reps);
-        const pesoCorporal = cliente.checkins[0]?.pesoKg || 0;
+        const checkinReciente = (cliente as { checkins?: { pesoKg?: number }[] }).checkins?.[0];
+        const pesoCorporal = checkinReciente?.pesoKg || 0;
         const fuerzaRelativa = calcularFuerzaRelativa(unRM, pesoCorporal);
 
         // 3. Registrar en Historial
-        await (prisma as any).resultadoTesteo.create({
+        // @ts-expect-error - Campos de esquema extendidos
+        await prisma.resultadoTesteo.create({
             data: {
                 clienteId: data.clienteId,
                 ejercicioId: data.ejercicioId,
@@ -75,7 +79,8 @@ export async function registrarResultadoTesteo(data: {
 
         // 4. Cachear porcentajes para acceso rápido
         const tabla = calcularTablaCompleta(unRM);
-        await (prisma as any).porcentajesCliente.upsert({
+        // @ts-expect-error - Campos de esquema extendidos
+        await prisma.porcentajesCliente.upsert({
             where: {
                 clienteId_ejercicioId: {
                     clienteId: data.clienteId,
@@ -98,18 +103,20 @@ export async function registrarResultadoTesteo(data: {
         revalidatePath("/entrenador/clientes");
         return { exito: true, unRM, fuerzaRelativa };
 
-    } catch (error: any) {
-        return { error: error.message || "Error al registrar testeo" };
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "Error al registrar testeo";
+        return { error: message };
     }
 }
 
 export async function obtenerResultadosTesteo(clienteId: string, ejercicioId: string) {
     try {
-        return await (prisma as any).resultadoTesteo.findMany({
+        // @ts-expect-error - Campos de esquema extendidos
+        return await prisma.resultadoTesteo.findMany({
             where: { clienteId, ejercicioId },
             orderBy: { fecha: 'desc' }
         });
-    } catch (error) {
+    } catch (error: unknown) {
         console.error(error);
         return [];
     }
@@ -117,7 +124,8 @@ export async function obtenerResultadosTesteo(clienteId: string, ejercicioId: st
 
 export async function obtenerPorcentajesCalculados(clienteId: string, ejercicioId: string) {
     try {
-        const data = await (prisma as any).porcentajesCliente.findUnique({
+        // @ts-expect-error - Campos de esquema extendidos
+        const data = await prisma.porcentajesCliente.findUnique({
             where: {
                 clienteId_ejercicioId: {
                     clienteId,
@@ -126,7 +134,7 @@ export async function obtenerPorcentajesCalculados(clienteId: string, ejercicioI
             }
         });
         return { exito: true, porcentajes: data };
-    } catch (error) {
+    } catch (error: unknown) {
         console.error(error);
         return { error: "No se pudieron obtener los porcentajes" };
     }

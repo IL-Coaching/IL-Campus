@@ -127,11 +127,12 @@ export async function obtenerCondicionesClinicas(clienteId: string) {
         const formulario = await prisma.formularioInscripcion.findUnique({
             where: { clienteId },
             select: {
-                // @ts-expect-error - Campo agregado en esquema real
+                // @ts-expect-error - Campo agregado recientemente
                 condicionesClinicas: true
-            } as any
+            }
         });
-        return { exito: true, condiciones: (formulario as any)?.condicionesClinicas || [] };
+        // @ts-expect-error - Campo agregado recientemente
+        return { exito: true, condiciones: formulario?.condicionesClinicas || [] };
     } catch {
         return { error: "Error al obtener condiciones" };
     }

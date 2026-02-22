@@ -92,7 +92,7 @@ export const PlanificacionServicio = {
         volumenEstimado?: string;
         esFaseDeload?: boolean;
         esSemanaTesteo?: boolean;
-        tipoCarga?: any;
+        tipoCarga?: string;
     }) {
         const semanaActualizada = await prisma.semana.update({
             where: { id },

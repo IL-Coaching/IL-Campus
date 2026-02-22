@@ -11,8 +11,6 @@ import {
     ChevronRight,
     Info,
     ShieldAlert,
-    Copy,
-    CheckCircle2,
     Loader2,
     Microscope
 } from 'lucide-react';
@@ -20,7 +18,6 @@ import {
 import { ClientePlanificacion } from '@/nucleo/tipos/planificacion.tipos';
 import { generarLinkRecuperacionManual } from '@/nucleo/acciones/password.accion';
 import { obtenerPorcentajesCalculados } from '@/nucleo/acciones/testeo.accion';
-import { ZONAS_INTENSIDAD } from '@/nucleo/planificacion/zonas.constantes';
 
 interface SidebarPerfilProps {
     cliente: ClientePlanificacion;
@@ -41,10 +38,19 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
         { id: 6, icon: ShieldAlert, label: 'Cuenta' },
     ];
 
+    interface PorcentajesData {
+        unRM: number;
+        fechaTesteo: string | Date;
+        p100: number;
+        p90_6: number;
+        p85_6: number;
+        p78_6: number;
+        p74_4: number;
+        p70_3: number;
+    }
+
     const [generandoLink, setGenerandoLink] = useState(false);
-    const [linkRecuperacion, setLinkRecuperacion] = useState<string | null>(null);
-    const [copiado, setCopiado] = useState(false);
-    const [porcentajes, setPorcentajes] = useState<any>(null);
+    const [porcentajes, setPorcentajes] = useState<PorcentajesData | null>(null);
     const [loadingPct, setLoadingPct] = useState(false);
 
     const handleGenerarLink = async () => {
@@ -53,24 +59,18 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
         setGenerandoLink(false);
 
         if (result.success && result.link) {
-            setLinkRecuperacion(result.link);
+            navigator.clipboard.writeText(result.link);
+            alert("¡Link copiado al portapapeles!");
         } else {
             alert(result.error || "Ocurrió un error al generar el link.");
         }
-    };
-
-    const copiarLink = () => {
-        if (!linkRecuperacion) return;
-        navigator.clipboard.writeText(linkRecuperacion);
-        setCopiado(true);
-        setTimeout(() => setCopiado(false), 3000);
     };
 
     const fetchPorcentajes = async (ejercicioId: string) => {
         setLoadingPct(true);
         const res = await obtenerPorcentajesCalculados(cliente.id, ejercicioId);
         if (res.exito && res.porcentajes) {
-            setPorcentajes(res.porcentajes);
+            setPorcentajes(res.porcentajes as PorcentajesData);
         }
         setLoadingPct(false);
     };
@@ -183,7 +183,6 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
 
                 {tabActiva === 4 && (
                     <div className="space-y-6 animate-in fade-in slide-in-from-left-2 pb-10">
-                        {/* Selector de ejercicio para métricas (Hardcoded de ejemplo o dinámico si hubiera lista) */}
                         <div className="space-y-2">
                             <span className="text-[0.65rem] text-naranja font-black uppercase tracking-widest block mb-1">Tabla de Porcentajes</span>
                             <select
@@ -191,7 +190,6 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                                 className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-xs font-bold text-blanco outline-none appearance-none cursor-pointer"
                             >
                                 <option value="">Seleccionar ejercicio testeado...</option>
-                                {/* Aquí deberían ir los ejercicios que tienen testeos. Por ahora mockeamos uno */}
                                 <option value="sentadilla">Sentadilla Libre</option>
                             </select>
                         </div>
@@ -256,7 +254,7 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                                 {['BAJA', 'NORMAL', 'ALTA'].map(nivel => (
                                     <button
                                         key={nivel}
-                                        className={`py-2.5 rounded-lg text-[0.6rem] font-black tracking-widest transition-all border ${(cliente as any).perfilRespuesta?.nivelRespuesta === nivel
+                                        className={`py-2.5 rounded-lg text-[0.6rem] font-black tracking-widest transition-all border ${cliente.perfilRespuesta?.nivelRespuesta === nivel
                                             ? 'bg-naranja border-naranja text-marino shadow-lg shadow-naranja/20'
                                             : 'bg-marino-3 border-marino-4 text-gris hover:border-gris'
                                             }`}
@@ -277,7 +275,7 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                             </p>
                         </div>
 
-                        {(cliente as any).formularioInscripcion?.datosPersonales?.edad >= 60 && (
+                        {Number(cliente.formularioInscripcion?.datosPersonales?.edad) >= 60 && (
                             <div className="p-4 bg-rojo/5 border border-rojo/20 rounded-xl">
                                 <h5 className="text-[0.65rem] font-bold text-rojo uppercase flex items-center gap-2 mb-2">
                                     <Zap size={14} /> Adulto Mayor
