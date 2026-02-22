@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
@@ -14,10 +15,10 @@ model Entrenador {
   email      String      @unique
   password   String
   telefono   String?
-  mfaSecret  String?     // Para Google Authenticator
-  mfaEnabled Boolean     @default(false)
   activo     Boolean     @default(true)
   creadoEn   DateTime    @default(now())
+  mfaEnabled Boolean     @default(false)
+  mfaSecret  String?
   clientes   Cliente[]
   ejercicios Ejercicio[]
   planes     Plan[]
@@ -41,16 +42,16 @@ model Ejercicio {
   id                  String                 @id @default(uuid())
   entrenadorId        String
   nombre              String
-  patronMovimiento    String?
   grupoMuscular       String
-  musculosPrincipales String?
-  musculosAccesorios  String?
-  analisisBiomecanico String?
   equipoNecesario     String?
   descripcion         String?
   videoUrl            String?
-  fotoUrl             String?
   creadoEn            DateTime               @default(now())
+  analisisBiomecanico String?
+  fotoUrl             String?
+  musculosAccesorios  String?
+  musculosPrincipales String?
+  patronMovimiento    String?
   entrenador          Entrenador             @relation(fields: [entrenadorId], references: [id])
   planificaciones     EjercicioPlanificado[]
 }
@@ -66,15 +67,12 @@ model Cliente {
   fechaAlta             DateTime               @default(now())
   activo                Boolean                @default(true)
   notas                 String?
-
-  // Seguridad y Alta
-  invitationToken       String?    @unique // Para completar registro
+  forcePasswordChange   Boolean                @default(false)
   invitationExpires     DateTime?
-  passwordResetToken    String?    @unique
-  passwordResetExpires  DateTime?
-  forcePasswordChange   Boolean    @default(false)
+  invitationToken       String?                @unique
   lastLogin             DateTime?
-
+  passwordResetExpires  DateTime?
+  passwordResetToken    String?                @unique
   checkins              Checkin[]
   cicloMenstrual        CicloMenstrual?
   entrenador            Entrenador             @relation(fields: [entrenadorId], references: [id])
@@ -94,9 +92,9 @@ model PlanAsignado {
   fechaVencimiento DateTime
   estado           String
   creadoEn         DateTime @default(now())
+  cobros           Cobro[]
   cliente          Cliente  @relation(fields: [clienteId], references: [id])
   plan             Plan     @relation(fields: [planId], references: [id])
-  cobros           Cobro[]
 }
 
 model FormularioInscripcion {
@@ -137,14 +135,14 @@ model Macrociclo {
 }
 
 model BloqueMensual {
-  id               String     @id @default(uuid())
-  macrocicloId     String
-  objetivo         String
-  duracion         Int
-  metodo           String?
-  rangoReferencia  String?
-  macrociclo       Macrociclo @relation(fields: [macrocicloId], references: [id])
-  semanas          Semana[]
+  id              String     @id @default(uuid())
+  macrocicloId    String
+  objetivo        String
+  duracion        Int
+  metodo          String?
+  rangoReferencia String?
+  macrociclo      Macrociclo @relation(fields: [macrocicloId], references: [id])
+  semanas         Semana[]
 }
 
 model Semana {
@@ -241,13 +239,13 @@ model Checkin {
 model Cobro {
   id             String        @id @default(uuid())
   clienteId      String
-  planAsignadoId String?
   fecha          DateTime      @default(now())
   montoArs       Float
   metodo         String
   periodoDesde   DateTime
   periodoHasta   DateTime
   notas          String?
+  planAsignadoId String?
   comprobanteUrl String?
   cliente        Cliente       @relation(fields: [clienteId], references: [id])
   planAsignado   PlanAsignado? @relation(fields: [planAsignadoId], references: [id])

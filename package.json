@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate --no-engine --schema=src/baseDatos/esquema.prisma && next build",
+    "build": "prisma generate --schema=src/baseDatos/esquema.prisma && next build",
     "start": "next start",
     "lint": "next lint"
   },
