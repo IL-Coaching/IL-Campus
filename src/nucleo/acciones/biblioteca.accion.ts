@@ -119,6 +119,35 @@ const BIBLIOTECA_OFICIAL = [
     }
 ];
 
+const PLANES_OFICIALES = [
+    { nombre: "Sesión Suelta", precio: 2500, duracionDias: 1, visible: true },
+    { nombre: "Plan Mensual / 4 Semanas", precio: 15000, duracionDias: 30, visible: true },
+    { nombre: "Plan Trimestral / 12 Semanas", precio: 40000, duracionDias: 90, visible: true },
+    { nombre: "Plan Semestral / 24 Semanas", precio: 75000, duracionDias: 180, visible: true },
+];
+
+export async function cargarPlanesOficiales() {
+    try {
+        const entrenador = await getEntrenadorSesion();
+        let creados = 0;
+        for (const plan of PLANES_OFICIALES) {
+            const existe = await prisma.plan.findFirst({
+                where: { nombre: plan.nombre, entrenadorId: entrenador.id }
+            });
+            if (!existe) {
+                await prisma.plan.create({
+                    data: { ...plan, entrenadorId: entrenador.id }
+                });
+                creados++;
+            }
+        }
+        return { exito: true, creados };
+    } catch (error) {
+        console.error("Error al cargar planes:", error);
+        return { error: "No se pudieron cargar los planes oficiales." };
+    }
+}
+
 export async function cargarBibliotecaOficial() {
     try {
         const entrenador = await getEntrenadorSesion();
@@ -140,6 +169,9 @@ export async function cargarBibliotecaOficial() {
                 creados++;
             }
         }
+
+        // También cargar planes si no existen
+        await cargarPlanesOficiales();
 
         return { exito: true, creados };
     } catch (error) {

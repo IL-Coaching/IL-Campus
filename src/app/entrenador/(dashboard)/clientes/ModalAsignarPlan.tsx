@@ -88,32 +88,50 @@ export default function ModalAsignarPlan({ clienteId, clienteNombre, planes, onC
                             Elegir Plan
                         </label>
                         <div className="grid grid-cols-1 gap-2">
-                            {planes.map((plan) => (
-                                <button
-                                    key={plan.id}
-                                    type="button"
-                                    onClick={() => setPlanId(plan.id)}
-                                    className={`flex items-center justify-between p-4 rounded-xl border transition-all text-left group ${planId === plan.id
-                                        ? 'bg-naranja border-naranja text-marino shadow-lg shadow-naranja/20'
-                                        : 'bg-marino border-marino-4 text-gris-claro hover:border-marino-3 hover:bg-marino-3'
-                                        }`}
-                                >
-                                    <div>
-                                        <p className="font-barlow-condensed font-black uppercase tracking-tight">
-                                            {plan.nombre}
-                                        </p>
-                                        <p className="text-[10px] uppercase font-bold opacity-70">
-                                            {plan.duracionDias} días de asesoría
-                                        </p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="font-bold text-sm">
-                                            ${plan.precio.toLocaleString()}
-                                        </p>
-                                        {planId === plan.id && <CheckCircle2 size={16} />}
-                                    </div>
-                                </button>
-                            ))}
+                            {planes.length === 0 ? (
+                                <div className="p-8 border border-dashed border-marino-4 rounded-xl text-center space-y-4">
+                                    <p className="text-xs text-gris italic">No has creado planes de asesoría todavía.</p>
+                                    <button
+                                        type="button"
+                                        onClick={async () => {
+                                            setIsSubmitting(true);
+                                            const { cargarPlanesOficiales } = await import("@/nucleo/acciones/biblioteca.accion");
+                                            await cargarPlanesOficiales();
+                                            window.location.reload();
+                                        }}
+                                        className="text-[0.6rem] font-black text-naranja uppercase tracking-widest border border-naranja/30 px-4 py-2 rounded-lg hover:bg-naranja/10 transition-all"
+                                    >
+                                        Provisionar Planes Maestros
+                                    </button>
+                                </div>
+                            ) : (
+                                planes.map((plan) => (
+                                    <button
+                                        key={plan.id}
+                                        type="button"
+                                        onClick={() => setPlanId(plan.id)}
+                                        className={`flex items-center justify-between p-4 rounded-xl border transition-all text-left group ${planId === plan.id
+                                            ? 'bg-naranja border-naranja text-marino shadow-lg shadow-naranja/20'
+                                            : 'bg-marino border-marino-4 text-gris-claro hover:border-marino-3 hover:bg-marino-3'
+                                            }`}
+                                    >
+                                        <div>
+                                            <p className="font-barlow-condensed font-black uppercase tracking-tight">
+                                                {plan.nombre}
+                                            </p>
+                                            <p className="text-[10px] uppercase font-bold opacity-70">
+                                                {plan.duracionDias} días de asesoría
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="font-bold text-sm">
+                                                ${plan.precio.toLocaleString()}
+                                            </p>
+                                            {planId === plan.id && <CheckCircle2 size={16} />}
+                                        </div>
+                                    </button>
+                                ))
+                            )}
                         </div>
                     </div>
 
