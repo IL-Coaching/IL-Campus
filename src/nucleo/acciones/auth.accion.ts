@@ -3,11 +3,21 @@
 import { redirect } from "next/navigation";
 import * as otplib from 'otplib';
 
-// Tipado estricto para otplib sin usar 'any'
+// Tipado estricto para otplib
 interface AuthenticatorMod {
     check: (token: string, secret: string) => boolean;
 }
-const authenticator = (otplib as unknown as { authenticator: AuthenticatorMod }).authenticator;
+
+/**
+ * Acceso resiliente al authenticator para el login
+ */
+const getAuthLogin = (): AuthenticatorMod => {
+    const otp = otplib as unknown as { authenticator?: AuthenticatorMod, default?: { authenticator?: AuthenticatorMod }, check?: unknown };
+    const instance = otp.authenticator || otp.default?.authenticator || (typeof otp.check === 'function' ? otp : null);
+    return instance as AuthenticatorMod;
+};
+
+const authenticator = getAuthLogin();
 
 import { prisma } from "@/baseDatos/conexion";
 import { CriptoServicio } from "@/nucleo/seguridad/cripto";

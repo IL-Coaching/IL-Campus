@@ -1,14 +1,28 @@
 import * as otplib from 'otplib';
 import QRCode from 'qrcode';
 
-// Interface para tipado estricto del módulo otplib y evitar 'any'
+// Interface para tipado estricto
 interface AuthenticatorModule {
     generateSecret: () => string;
     keyuri: (user: string, service: string, secret: string) => string;
     verify: (opts: { token: string, secret: string }) => boolean;
 }
 
-const auth = (otplib as unknown as { authenticator: AuthenticatorModule }).authenticator;
+/**
+ * Obtiene la instancia de authenticator de forma resiliente para producción (Vercel/ESM).
+ */
+const getAuthInstance = (): AuthenticatorModule => {
+    const otp = otplib as unknown as { authenticator?: AuthenticatorModule, default?: { authenticator?: AuthenticatorModule }, generateSecret?: unknown };
+    const instance = otp.authenticator || otp.default?.authenticator || (typeof otp.generateSecret === 'function' ? (otp as unknown as AuthenticatorModule) : null);
+
+    if (!instance) {
+        console.error("MFA Error: No se pudo encontrar la instancia de authenticator en otplib", Object.keys(otp));
+        throw new Error("Sistema de seguridad no inicializado correctamente.");
+    }
+    return instance;
+};
+
+const auth = getAuthInstance();
 
 /**
  * Servicio de Autenticación de Doble Factor (MFA) para IL-Campus.
