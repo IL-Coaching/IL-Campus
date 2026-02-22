@@ -22,7 +22,7 @@ const MENU_ITEMS = [
     { name: 'Rutinas', icon: Dumbbell, href: '/entrenador/rutinas' },
     { name: 'Check-ins', icon: CheckSquare, href: '/entrenador/checkins' },
     { name: 'Mensajes', icon: MessageCircle, href: '/entrenador/mensajes' },
-    { name: 'Cobros', icon: CreditCard, href: '/entrenador/cobros' },
+    { name: 'Finanzas', icon: CreditCard, href: '/entrenador/finanzas' },
     { name: 'Configuración', icon: Settings, href: '/entrenador/configuracion' },
 ];
 

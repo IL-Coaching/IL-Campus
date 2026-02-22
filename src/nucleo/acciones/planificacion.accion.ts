@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getEntrenadorSesion } from "../seguridad/sesion";
 import { PlanificacionServicio } from "../servicios/planificacion.servicio";
 import { prisma } from "@/baseDatos/conexion";
+import { EsquemaNuevoMacrociclo, EsquemaActualizarEjercicio } from "../validadores/planificacion.validador";
 
 /**
  * Acciones de Planificación — ArchSecure AI
@@ -22,8 +23,17 @@ export async function crearNuevoMacrociclo(clienteId: string, formData: FormData
             throw new Error("No tienes permisos para planificar a este cliente.");
         }
 
-        const duracion = parseInt(formData.get("duracion") as string);
-        const fechaInicio = new Date(formData.get("fechaInicio") as string);
+        const rawData = {
+            duracion: formData.get("duracion"),
+            fechaInicio: formData.get("fechaInicio"),
+        };
+
+        const validacion = EsquemaNuevoMacrociclo.safeParse(rawData);
+        if (!validacion.success) {
+            return { error: validacion.error.issues[0].message };
+        }
+
+        const { duracion, fechaInicio } = validacion.data;
 
         const macro = await PlanificacionServicio.inicializarPlanificacion(clienteId, {
             duracionSemanas: duracion,
@@ -50,17 +60,45 @@ export async function guardarCambiosEjercicio(ejercicioPlanificadoId: string, da
     notas?: string;
 }) {
     try {
-        await getEntrenadorSesion();
+        const entrenador = await getEntrenadorSesion();
+
+        // 1. Validar inputs
+        const validacion = EsquemaActualizarEjercicio.safeParse(data);
+        if (!validacion.success) {
+            return { error: validacion.error.issues[0].message };
+        }
+
+        // 2. Mitigación BOLA: Verificar propiedad del ejercicio
+        const ejercicioPropio = await prisma.ejercicioPlanificado.findFirst({
+            where: {
+                id: ejercicioPlanificadoId,
+                diaSesion: {
+                    semana: {
+                        bloqueMensual: {
+                            macrociclo: {
+                                cliente: {
+                                    entrenadorId: entrenador.id
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!ejercicioPropio) {
+            return { error: "No tienes permiso para modificar este ejercicio." };
+        }
 
         await PlanificacionServicio.actualizarEjercicioPlanificado(ejercicioPlanificadoId, {
-            series: data.series,
-            repsMin: data.repsMin,
-            repsMax: data.repsMax,
-            RIR: data.RIR,
-            descansoSegundos: data.descanso,
-            tempo: data.tempo,
-            pesoSugerido: data.pesoSugerido,
-            notasTecnicas: data.notas
+            series: validacion.data.series,
+            repsMin: validacion.data.repsMin,
+            repsMax: validacion.data.repsMax,
+            RIR: validacion.data.RIR,
+            descansoSegundos: validacion.data.descanso,
+            tempo: validacion.data.tempo,
+            pesoSugerido: validacion.data.pesoSugerido,
+            notasTecnicas: validacion.data.notas
         });
 
         return { exito: true };
@@ -72,9 +110,28 @@ export async function guardarCambiosEjercicio(ejercicioPlanificadoId: string, da
 
 export async function agregarEjercicio(diaId: string, ejercicioId: string, orden: number) {
     try {
-        await getEntrenadorSesion();
+        const entrenador = await getEntrenadorSesion();
+
+        // 1. Mitigación BOLA: Verificar que el día pertenece a un cliente del entrenador
+        const diaPropio = await prisma.diaSesion.findFirst({
+            where: {
+                id: diaId,
+                semana: {
+                    bloqueMensual: {
+                        macrociclo: {
+                            cliente: {
+                                entrenadorId: entrenador.id
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!diaPropio) throw new Error("Acceso denegado al recurso.");
+
         await PlanificacionServicio.agregarEjercicioASesion(diaId, ejercicioId, orden);
-        revalidatePath(`/entrenador/clientes`); // Revalidamos la ruta dinámica
+        revalidatePath(`/entrenador/clientes`);
         return { exito: true };
     } catch (error) {
         const mensaje = error instanceof Error ? error.message : "Error desconocido";
@@ -84,7 +141,28 @@ export async function agregarEjercicio(diaId: string, ejercicioId: string, orden
 
 export async function eliminarEjercicio(id: string) {
     try {
-        await getEntrenadorSesion();
+        const entrenador = await getEntrenadorSesion();
+
+        // 1. Mitigación BOLA
+        const ejercicioPropio = await prisma.ejercicioPlanificado.findFirst({
+            where: {
+                id,
+                diaSesion: {
+                    semana: {
+                        bloqueMensual: {
+                            macrociclo: {
+                                cliente: {
+                                    entrenadorId: entrenador.id
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!ejercicioPropio) throw new Error("No tienes permiso para eliminar este ejercicio.");
+
         await PlanificacionServicio.eliminarEjercicioPlanificado(id);
         revalidatePath(`/entrenador/clientes`);
         return { exito: true };

@@ -3,40 +3,30 @@
 import { getEntrenadorSesion } from "../seguridad/sesion";
 import { EjercicioServicio } from "../servicios/ejercicio.servicio";
 
-/**
- * Acciones de Ejercicios — ArchSecure AI
- */
-
-export async function buscarEjerciciosCatalogo(query: string) {
+export async function buscarEjercicios(query: string = "") {
     try {
         const entrenador = await getEntrenadorSesion();
-        const resultados = await EjercicioServicio.buscar(entrenador.id, query);
-
-        return { exito: true, resultados };
+        return await EjercicioServicio.buscar(entrenador.id, query);
     } catch (error) {
-        const message = error instanceof Error ? error.message : "Error desconocido";
-        return { error: message };
+        console.error("Error al buscar ejercicios:", error);
+        return [];
     }
 }
 
-export async function crearEjercicioCatalogo(formData: FormData) {
+export async function crearEjercicio(formData: any) {
     try {
         const entrenador = await getEntrenadorSesion();
 
-        const nombre = formData.get("nombre") as string;
-        const grupoMuscular = formData.get("grupoMuscular") as string;
-        const videoUrl = formData.get("videoUrl") as string;
+        // Aquí iría la validación Zod (pendiente crear validador)
 
-        const nuevo = await EjercicioServicio.crear({
-            entrenadorId: entrenador.id,
-            nombre,
-            grupoMuscular,
-            videoUrl
+        await EjercicioServicio.crear({
+            ...formData,
+            entrenadorId: entrenador.id
         });
 
-        return { exito: true, ejercicio: nuevo };
+        return { exito: true };
     } catch (error) {
-        const message = error instanceof Error ? error.message : "Error desconocido";
-        return { error: message };
+        console.error("Error al crear ejercicio:", error);
+        return { error: "No se pudo crear el ejercicio." };
     }
 }

@@ -13,7 +13,8 @@ export const EjercicioServicio = {
                 entrenadorId,
                 OR: [
                     { nombre: { contains: query, mode: 'insensitive' } },
-                    { grupoMuscular: { contains: query, mode: 'insensitive' } }
+                    { grupoMuscular: { contains: query, mode: 'insensitive' } },
+                    { patronMovimiento: { contains: query, mode: 'insensitive' } }
                 ]
             },
             orderBy: { nombre: 'asc' },
@@ -22,13 +23,19 @@ export const EjercicioServicio = {
     },
 
     /**
-     * Crea un nuevo ejercicio en el catálogo.
+     * Crea un nuevo ejercicio con detalle técnico completo.
      */
     async crear(data: {
         entrenadorId: string;
         nombre: string;
         grupoMuscular: string;
+        patronMovimiento?: string;
+        musculosPrincipales?: string;
+        musculosAccesorios?: string;
+        analisisBiomecanico?: string;
+        equipoNecesario?: string;
         videoUrl?: string;
+        fotoUrl?: string;
         descripcion?: string;
     }) {
         return await prisma.ejercicio.create({

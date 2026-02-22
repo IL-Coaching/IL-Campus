@@ -36,16 +36,21 @@ model Plan {
 }
 
 model Ejercicio {
-  id              String                 @id @default(uuid())
-  entrenadorId    String
-  nombre          String
-  grupoMuscular   String
-  equipoNecesario String?
-  descripcion     String?
-  videoUrl        String?
-  creadoEn        DateTime               @default(now())
-  entrenador      Entrenador             @relation(fields: [entrenadorId], references: [id])
-  planificaciones EjercicioPlanificado[]
+  id                  String                 @id @default(uuid())
+  entrenadorId        String
+  nombre              String
+  patronMovimiento    String?
+  grupoMuscular       String
+  musculosPrincipales String?
+  musculosAccesorios  String?
+  analisisBiomecanico String?
+  equipoNecesario     String?
+  descripcion         String?
+  videoUrl            String?
+  fotoUrl             String?
+  creadoEn            DateTime               @default(now())
+  entrenador          Entrenador             @relation(fields: [entrenadorId], references: [id])
+  planificaciones     EjercicioPlanificado[]
 }
 
 model Cliente {
@@ -80,6 +85,7 @@ model PlanAsignado {
   creadoEn         DateTime @default(now())
   cliente          Cliente  @relation(fields: [clienteId], references: [id])
   plan             Plan     @relation(fields: [planId], references: [id])
+  cobros           Cobro[]
 }
 
 model FormularioInscripcion {
@@ -222,15 +228,17 @@ model Checkin {
 }
 
 model Cobro {
-  id           String   @id @default(uuid())
-  clienteId    String
-  fecha        DateTime @default(now())
-  montoArs     Float
-  metodo       String
-  periodoDesde DateTime
-  periodoHasta DateTime
-  notas        String?
-  cliente      Cliente  @relation(fields: [clienteId], references: [id])
+  id             String        @id @default(uuid())
+  clienteId      String
+  planAsignadoId String?
+  fecha          DateTime      @default(now())
+  montoArs       Float
+  metodo         String
+  periodoDesde   DateTime
+  periodoHasta   DateTime
+  notas          String?
+  cliente        Cliente       @relation(fields: [clienteId], references: [id])
+  planAsignado   PlanAsignado? @relation(fields: [planAsignadoId], references: [id])
 }
 
 model Mensaje {

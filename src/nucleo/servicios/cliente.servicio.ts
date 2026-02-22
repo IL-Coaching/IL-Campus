@@ -8,6 +8,16 @@ export const ClienteServicio = {
     async obtenerPorEntrenador(entrenadorId: string) {
         return await prisma.cliente.findMany({
             where: { entrenadorId },
+            include: {
+                planesAsignados: {
+                    include: { plan: true },
+                    orderBy: { fechaInicio: 'desc' },
+                    take: 1
+                },
+                formularioInscripcion: {
+                    select: { id: true }
+                }
+            },
             orderBy: { fechaAlta: "desc" }
         });
     },
@@ -139,5 +149,37 @@ export const ClienteServicio = {
                 }
             }
         });
+    },
+
+    /**
+     * Asigna un plan a un cliente, calculando el vencimiento y activando su cuenta.
+     */
+    async asignarPlan(data: { clienteId: string; planId: string; fechaInicio: Date }) {
+        const plan = await prisma.plan.findUnique({
+            where: { id: data.planId }
+        });
+
+        if (!plan) throw new Error("El plan seleccionado no existe.");
+
+        const fechaVencimiento = new Date(data.fechaInicio);
+        fechaVencimiento.setDate(fechaVencimiento.getDate() + plan.duracionDias);
+
+        return await prisma.$transaction([
+            // 1. Crear la asignación del plan
+            prisma.planAsignado.create({
+                data: {
+                    clienteId: data.clienteId,
+                    planId: data.planId,
+                    fechaInicio: data.fechaInicio,
+                    fechaVencimiento: fechaVencimiento,
+                    estado: "ACTIVO"
+                }
+            }),
+            // 2. Asegurar que el cliente esté activo
+            prisma.cliente.update({
+                where: { id: data.clienteId },
+                data: { activo: true }
+            })
+        ]);
     }
 };

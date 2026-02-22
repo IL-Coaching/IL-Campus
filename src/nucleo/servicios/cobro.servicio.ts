@@ -6,72 +6,73 @@ import { prisma } from "@/baseDatos/conexion";
  */
 export const CobroServicio = {
     /**
-     * Obtiene estadísticas financieras del mes actual.
+     * Obtiene estadísticas financieras del mes actual para un entrenador específico.
      */
-    async obtenerEstadisticasMensuales() {
+    async obtenerEstadisticasMensuales(entrenadorId: string) {
         const inicioMes = new Date();
         inicioMes.setDate(1);
         inicioMes.setHours(0, 0, 0, 0);
 
         const cobros = await prisma.cobro.findMany({
             where: {
-                fecha: {
-                    gte: inicioMes
-                }
+                cliente: { entrenadorId },
+                fecha: { gte: inicioMes }
             }
         });
 
         const totalMes = cobros.reduce((acc, c) => acc + c.montoArs, 0);
-        const ticketPromedio = cobros.length > 0 ? totalMes / cobros.length : 0;
-
         return {
             totalMes,
-            ticketPromedio,
             cantidadCobros: cobros.length
         };
     },
 
     /**
-     * Identifica clientes con planes próximos a vencer o vencidos sin cobro registrado.
-     * Para este MVP, simplificamos: clientes activos cuyo PlanAsignado vence en los próximos 7 días o ya venció.
+     * Identifica clientes con planes próximos a vencer o vencidos.
      */
-    async obtenerPendientes() {
+    async obtenerVencimientos(entrenadorId: string) {
         const hoy = new Date();
-        const proximaSemana = new Date();
-        proximaSemana.setDate(hoy.getDate() + 7);
+        const limiteVencimiento = new Date();
+        limiteVencimiento.setDate(hoy.getDate() + 10); // Miramos 10 días al futuro
 
-        const pendientes = await prisma.planAsignado.findMany({
+        return await prisma.planAsignado.findMany({
             where: {
-                fechaVencimiento: {
-                    lte: proximaSemana
-                },
-                estado: 'activo'
+                cliente: { entrenadorId },
+                fechaVencimiento: { lte: limiteVencimiento },
+                estado: 'ACTIVO'
             },
             include: {
-                cliente: true
+                cliente: true,
+                plan: true,
+                cobros: {
+                    orderBy: { fecha: 'desc' },
+                    take: 1
+                }
             },
-            take: 5
+            orderBy: { fechaVencimiento: 'asc' }
         });
-
-        return pendientes.map(p => ({
-            id: p.id,
-            clienteNombre: p.cliente.nombre,
-            fechaVencimiento: p.fechaVencimiento
-        }));
     },
 
     /**
-     * Obtiene los últimos cobros registrados.
+     * Registra un nuevo cobro vinculado a un plan y cliente.
      */
-    async obtenerUltimosCobros(limit = 10) {
-        return await prisma.cobro.findMany({
-            include: {
-                cliente: true
-            },
-            orderBy: {
-                fecha: 'desc'
-            },
-            take: limit
+    async registrarCobro(data: {
+        clienteId: string;
+        planAsignadoId: string;
+        monto: number;
+        metodo: string;
+        periodoDesde: Date;
+        periodoHasta: Date;
+    }) {
+        return await prisma.cobro.create({
+            data: {
+                clienteId: data.clienteId,
+                planAsignadoId: data.planAsignadoId,
+                montoArs: data.monto,
+                metodo: data.metodo,
+                periodoDesde: data.periodoDesde,
+                periodoHasta: data.periodoHasta
+            }
         });
     }
 };

@@ -3,22 +3,30 @@
 import { revalidatePath } from "next/cache";
 import { getEntrenadorSesion } from "../seguridad/sesion";
 import { ClienteServicio } from "../servicios/cliente.servicio";
+import { EsquemaAltaCliente, EsquemaAsignarPlan } from "../validadores/cliente.validador";
+import { prisma } from "@/baseDatos/conexion";
 
 export async function altaManualCliente(formData: FormData) {
     try {
-        const nombre = formData.get("nombre") as string;
-        const email = formData.get("email") as string;
-        const telefono = formData.get("telefono") as string;
-        const plan = formData.get("plan") as string; // 'Start', 'GymRat', 'Elite'
+        const rawData = {
+            nombre: formData.get("nombre") as string,
+            email: formData.get("email") as string,
+            telefono: formData.get("telefono") as string,
+            plan: formData.get("plan") as string,
+        };
 
-        if (!nombre || !email || !plan) {
-            return { error: "Faltan campos obligatorios" };
+        // 1. Validar datos (Sanitización)
+        const validacion = EsquemaAltaCliente.safeParse(rawData);
+        if (!validacion.success) {
+            return { error: validacion.error.issues[0].message };
         }
 
-        // 1. Obtener el Entrenador desde la sesión (Capa de Seguridad)
+        const { nombre, email, telefono, plan } = validacion.data;
+
+        // 2. Obtener el Entrenador desde la sesión (Capa de Seguridad)
         const entrenador = await getEntrenadorSesion();
 
-        // 2. Crear el Cliente usando el Servicio
+        // 3. Crear el Cliente usando el Servicio
         const nuevoCliente = await ClienteServicio.crear({
             nombre,
             email,
@@ -27,7 +35,7 @@ export async function altaManualCliente(formData: FormData) {
             notas: `Alta inicial con plan: ${plan}`
         });
 
-        // Revalidar la vista de clientes para que se actualice la tabla
+        // Revalidar la vista de clientes
         revalidatePath("/entrenador/clientes");
 
         return { exito: true, cliente: nuevoCliente };
@@ -35,5 +43,36 @@ export async function altaManualCliente(formData: FormData) {
     } catch (error: unknown) {
         console.error("Error al dar de alta al cliente:", error);
         return { error: "Ocurrió un error al guardar el cliente en la base de datos." };
+    }
+}
+
+export async function asignarMembresia(data: { clienteId: string; planId: string; fechaInicio: string }) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        // 1. Validar datos
+        const validacion = EsquemaAsignarPlan.safeParse(data);
+        if (!validacion.success) {
+            return { error: validacion.error.issues[0].message };
+        }
+
+        // 2. BOLA: Verificar que el cliente pertenece al entrenador
+        const clientePropio = await prisma.cliente.findFirst({
+            where: { id: data.clienteId, entrenadorId: entrenador.id }
+        });
+
+        if (!clientePropio) {
+            return { error: "No tienes permiso para gestionar este cliente." };
+        }
+
+        // 3. Ejecutar servicio
+        await ClienteServicio.asignarPlan(validacion.data);
+
+        revalidatePath("/entrenador/clientes");
+        return { exito: true };
+
+    } catch (error) {
+        console.error("Error al asignar membresía:", error);
+        return { error: "No se pudo asignar la membresía." };
     }
 }
