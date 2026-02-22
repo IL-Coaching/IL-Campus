@@ -1,3 +1,4 @@
+/** Biblioteca Maestra de Ejercicios — IL-Campus */
 import { Plus } from "lucide-react";
 import { buscarEjercicios } from "@/nucleo/acciones/ejercicio.accion";
 import BibliotecaEjercicios from "./BibliotecaEjercicios";

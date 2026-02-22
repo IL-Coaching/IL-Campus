@@ -1,3 +1,4 @@
+/** Módulo de Finanzas — IL-Campus */
 import { CreditCard } from "lucide-react";
 import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";
 import { CobroServicio } from "@/nucleo/servicios/cobro.servicio";

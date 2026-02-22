@@ -1,3 +1,4 @@
+/** Listado de vencimientos y renovaciones */
 "use client"
 import { useState } from "react";
 import { format } from "date-fns";
