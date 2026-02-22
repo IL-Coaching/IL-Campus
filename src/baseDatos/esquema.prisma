@@ -424,4 +424,6 @@ model PorcentajesCliente {
   actualizadoEn    DateTime @updatedAt
   cliente          Cliente  @relation(fields: [clienteId], references: [id])
   ejercicio        Ejercicio @relation(fields: [ejercicioId], references: [id])
+
+  @@unique([clienteId, ejercicioId])
 }

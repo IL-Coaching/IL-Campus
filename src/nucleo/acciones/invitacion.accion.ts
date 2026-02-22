@@ -4,12 +4,6 @@ import { prisma } from "@/baseDatos/conexion";
 import { CriptoServicio } from "@/nucleo/seguridad/cripto";
 import { getEntrenadorSesion, establecerSesion } from "@/nucleo/seguridad/sesion";
 
-// Tipos auxiliares para el acceso dinámico y evitar 'any' en el linter
-type PrismaClienteAccessor = {
-    update: (args: { where: { id: string }, data: Record<string, unknown> }) => Promise<unknown>;
-    findFirst: (args: { where: Record<string, unknown> }) => Promise<Record<string, unknown> | null>;
-};
-
 /**
  * Genera un token de invitación profesional para un nuevo cliente.
  */
@@ -21,8 +15,7 @@ export async function generarInvitacion(clienteId: string) {
         const expiracion = new Date();
         expiracion.setHours(expiracion.getHours() + 48); // Expira en 48 horas
 
-        const accessor = (prisma.cliente as unknown) as PrismaClienteAccessor;
-        await accessor.update({
+        await prisma.cliente.update({
             where: { id: clienteId },
             data: {
                 invitationToken: token,
@@ -35,7 +28,8 @@ export async function generarInvitacion(clienteId: string) {
             success: true,
             link: `${baseUrl}/registro?token=${token}`
         };
-    } catch {
+    } catch (error) {
+        console.error(error);
         return { error: "No se pudo generar la invitación." };
     }
 }
@@ -44,8 +38,7 @@ export async function generarInvitacion(clienteId: string) {
  * Valida si un token de invitación es legítimo y vigente.
  */
 export async function validarInvitacion(token: string) {
-    const accessor = (prisma.cliente as unknown) as PrismaClienteAccessor;
-    const cliente = await accessor.findFirst({
+    const cliente = await prisma.cliente.findFirst({
         where: {
             invitationToken: token,
             invitationExpires: { gt: new Date() }
@@ -56,8 +49,8 @@ export async function validarInvitacion(token: string) {
 
     return {
         success: true,
-        email: cliente.email as string,
-        nombre: cliente.nombre as string
+        email: cliente.email,
+        nombre: cliente.nombre
     };
 }
 
@@ -66,8 +59,7 @@ export async function validarInvitacion(token: string) {
  */
 export async function completarAlta(token: string, passwordPlana: string) {
     try {
-        const accessor = (prisma.cliente as unknown) as PrismaClienteAccessor;
-        const cliente = await accessor.findFirst({
+        const cliente = await prisma.cliente.findFirst({
             where: {
                 invitationToken: token,
                 invitationExpires: { gt: new Date() }
@@ -78,8 +70,8 @@ export async function completarAlta(token: string, passwordPlana: string) {
 
         const passwordHash = await CriptoServicio.hashPassword(passwordPlana);
 
-        await accessor.update({
-            where: { id: cliente.id as string },
+        await prisma.cliente.update({
+            where: { id: cliente.id },
             data: {
                 password: passwordHash,
                 invitationToken: null,
@@ -89,10 +81,11 @@ export async function completarAlta(token: string, passwordPlana: string) {
             }
         });
 
-        await establecerSesion(cliente.id as string, "alumno");
+        await establecerSesion(cliente.id, "alumno");
 
         return { success: true };
-    } catch {
+    } catch (error) {
+        console.error(error);
         return { error: "Error al completar el alta." };
     }
 }

@@ -166,7 +166,7 @@ export default function VistaMesociclo({ bloque, mes, onSelectSemana }: VistaMes
                                         }`}
                                     value={s.tipoCarga || ''}
                                     onClick={(e) => e.stopPropagation()}
-                                    onChange={(e) => handleCambiarTipoCarga(s.id, e.target.value)}
+                                    onChange={(e) => handleCambiarTipoCarga(s.id, e.target.value as TipoCarga)}
                                 >
                                     <option value="" disabled>TIPO CARGA</option>
                                     {Object.entries(TIPOS_CARGA_MESOCICLO).map(([key, value]) => (
