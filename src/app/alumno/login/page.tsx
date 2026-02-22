@@ -3,12 +3,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, ArrowRight, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
-import { loginAlumno } from '@/nucleo/acciones/auth.accion';
+import { loginAlumno, completarForzarPassword } from '@/nucleo/acciones/auth.accion';
 
 export default function AlumnoLoginPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [faseActivacion, setFaseActivacion] = useState(false);
+    const [tempToken, setTempToken] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -16,9 +18,41 @@ export default function AlumnoLoginPage() {
         setError(null);
 
         const formData = new FormData(e.currentTarget);
+
+        if (faseActivacion && tempToken) {
+            const password = formData.get("password") as string;
+            const confirmacion = formData.get("password_confirm") as string;
+
+            if (password !== confirmacion) {
+                setError("Las contraseñas no coinciden.");
+                setLoading(false);
+                return;
+            }
+
+            if (password.length < 6) {
+                setError("La contraseña debe tener al menos 6 caracteres.");
+                setLoading(false);
+                return;
+            }
+
+            const result = await completarForzarPassword(tempToken, password);
+
+            if (result.success) {
+                router.push('/alumno/dashboard');
+            } else {
+                setError(result.error || "Ocurrió un error inesperado al activar la cuenta.");
+                setLoading(false);
+            }
+            return;
+        }
+
         const result = await loginAlumno(formData);
 
-        if (result.success) {
+        if (result.success && result.requiereCambioPassword && result.tempToken) {
+            setFaseActivacion(true);
+            setTempToken(result.tempToken);
+            setLoading(false);
+        } else if (result.success) {
             router.push('/alumno/dashboard');
         } else {
             setError(result.error || "Ocurrió un error inesperado.");
@@ -59,30 +93,63 @@ export default function AlumnoLoginPage() {
                         </div>
                     )}
 
-                    <div className="space-y-2">
-                        <label className="text-[0.65rem] text-naranja font-black uppercase tracking-[0.25em] ml-1">Email Registrado</label>
-                        <input
-                            name="email"
-                            type="email"
-                            required
-                            placeholder="tu@email.com"
-                            className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:outline-none focus:border-naranja transition-all font-medium placeholder:text-gris/20"
-                        />
-                    </div>
+                    {!faseActivacion ? (
+                        <>
+                            <div className="space-y-2">
+                                <label className="text-[0.65rem] text-naranja font-black uppercase tracking-[0.25em] ml-1">Email / Usuario</label>
+                                <input
+                                    name="email"
+                                    type="email"
+                                    required
+                                    placeholder="tu@email.com"
+                                    className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:outline-none focus:border-naranja transition-all font-medium placeholder:text-gris/20"
+                                />
+                            </div>
 
-                    <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                            <label className="text-[0.65rem] text-naranja font-black uppercase tracking-[0.25em] ml-1">Contraseña</label>
-                            <button type="button" className="text-[0.6rem] text-gris hover:text-naranja uppercase font-bold tracking-tighter">¿Problemas?</button>
-                        </div>
-                        <input
-                            name="password"
-                            type="password"
-                            required
-                            placeholder="••••••••"
-                            className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:outline-none focus:border-naranja transition-all font-medium placeholder:text-gris/20"
-                        />
-                    </div>
+                            <div className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                    <label className="text-[0.65rem] text-naranja font-black uppercase tracking-[0.25em] ml-1">Código de Activación / Contraseña</label>
+                                    <Link href="/recuperar" className="text-[0.6rem] text-gris hover:text-naranja uppercase font-bold tracking-tighter transition-colors">¿Problemas?</Link>
+                                </div>
+                                <input
+                                    name="password"
+                                    type="password"
+                                    required
+                                    placeholder="••••••••"
+                                    className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:outline-none focus:border-naranja transition-all font-medium placeholder:text-gris/20"
+                                />
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="bg-naranja/10 border border-naranja/30 p-4 rounded-xl mb-4">
+                                <h3 className="text-naranja font-black uppercase tracking-widest text-xs mb-1">¡Cuenta Encontrada!</h3>
+                                <p className="text-gris text-sm">Por seguridad, debés crear tu contraseña definitiva para continuar a tu panel.</p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[0.65rem] text-naranja font-black uppercase tracking-[0.25em] ml-1">Nueva Contraseña</label>
+                                <input
+                                    name="password"
+                                    type="password"
+                                    required
+                                    placeholder="••••••••"
+                                    className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:outline-none focus:border-naranja transition-all font-medium placeholder:text-gris/20"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[0.65rem] text-naranja font-black uppercase tracking-[0.25em] ml-1">Repetí la Contraseña</label>
+                                <input
+                                    name="password_confirm"
+                                    type="password"
+                                    required
+                                    placeholder="••••••••"
+                                    className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:outline-none focus:border-naranja transition-all font-medium placeholder:text-gris/20"
+                                />
+                            </div>
+                        </>
+                    )}
 
                     <div className="pt-4">
                         <button
@@ -90,7 +157,7 @@ export default function AlumnoLoginPage() {
                             className="w-full bg-naranja hover:bg-naranja-h disabled:opacity-50 transition-all text-marino font-black py-4.5 rounded-xl uppercase tracking-widest font-barlow-condensed text-xl shadow-xl shadow-naranja/10 active:scale-[0.98] flex items-center justify-center gap-3"
                         >
                             {loading ? <Loader2 className="animate-spin" size={24} /> : (
-                                <>Entrar al Campus <ArrowRight size={20} /></>
+                                faseActivacion ? "Guardar y Entrar" : <><ArrowRight size={20} /> Entrar al Campus</>
                             )}
                         </button>
                     </div>

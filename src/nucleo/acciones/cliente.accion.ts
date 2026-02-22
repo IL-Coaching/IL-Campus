@@ -38,7 +38,7 @@ export async function altaManualCliente(formData: FormData) {
         // Revalidar la vista de clientes
         revalidatePath("/entrenador/clientes");
 
-        return { exito: true, cliente: nuevoCliente };
+        return { exito: true, cliente: nuevoCliente, codigoActivacion: nuevoCliente.codigoActivacion };
 
     } catch (error: unknown) {
         console.error("Error al dar de alta al cliente:", error);

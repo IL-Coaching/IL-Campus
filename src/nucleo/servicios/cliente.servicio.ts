@@ -49,9 +49,6 @@ export const ClienteServicio = {
         };
     },
 
-    /**
-     * Crea un nuevo cliente después de validar que el email no esté en uso.
-     */
     async crear(data: {
         nombre: string;
         email: string;
@@ -67,17 +64,30 @@ export const ClienteServicio = {
             throw new Error("Ya existe un cliente registrado con este correo electrónico.");
         }
 
-        return await prisma.cliente.create({
+        // 1. Generar Código Único de Activación Seguro
+        const randomStr1 = Math.random().toString(36).substring(2, 6).toUpperCase();
+        const randomStr2 = Math.random().toString(36).substring(2, 5).toUpperCase();
+        const codigoActivacion = `IL-${randomStr1}-${randomStr2}`;
+
+        // 2. Importar el CriptoServicio para hashearlo
+        const { CriptoServicio } = await import('@/nucleo/seguridad/cripto');
+        const hash = await CriptoServicio.hashPassword(codigoActivacion);
+
+        const cliente = await prisma.cliente.create({
             data: {
                 nombre: data.nombre,
                 email: data.email,
-                password: "temporal-change-me", // Password inicial por defecto
+                password: hash, // Guardamos SÓLO el hash, nunca en claro
                 telefono: data.telefono,
                 entrenadorId: data.entrenadorId,
                 notas: data.notas,
-                activo: true
+                activo: true,
+                forcePasswordChange: true // Obligamos a elegir una clave definitiva al entrar
             }
         });
+
+        // 3. Devolvemos el código en claro SÓLO esta vez para la UI del creador
+        return { ...cliente, codigoActivacion };
     },
 
     /**
