@@ -10,11 +10,11 @@ export default async function EntrenadorLayout({
     await getEntrenadorSesion();
 
     return (
-        <div className="flex min-h-screen bg-marino text-blanco relative overflow-hidden">
+        <div className="flex min-h-screen bg-[#0F1629] text-blanco relative overflow-hidden" style={{ background: 'radial-gradient(circle at 50% 50%, #1A2540 0%, #0F1629 100%)' }}>
             {/* Decoración de fondo Premium (Blobs dinámicos) — Best Practice: Wow Aesthetics */}
-            <div className="absolute top-[-10%] left-[-5%] w-[50%] h-[50%] bg-naranja/10 blur-[120px] rounded-full pointer-events-none animate-pulse" />
-            <div className="absolute bottom-[-5%] right-[-5%] w-[40%] h-[40%] bg-naranja/5 blur-[100px] rounded-full pointer-events-none" />
-            <div className="absolute top-[20%] right-[10%] w-[20%] h-[20%] bg-marino-3/50 blur-[80px] rounded-full pointer-events-none" />
+            <div className="absolute top-[-15%] left-[-10%] w-[60%] h-[60%] bg-naranja/10 blur-[130px] rounded-full pointer-events-none animate-pulse duration-[10s]" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-naranja/5 blur-[120px] rounded-full pointer-events-none animate-pulse duration-[15s]" />
+            <div className="absolute top-[30%] right-[20%] w-[15%] h-[15%] bg-marino-3/30 blur-[70px] rounded-full pointer-events-none" />
 
             {/* Sidebar fijo a la izquierda */}
             <SidebarEntrenador />
