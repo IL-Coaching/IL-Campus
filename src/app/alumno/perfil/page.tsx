@@ -16,7 +16,7 @@ export default async function PerfilPage() {
             <header className="p-8 pt-12 text-center bg-gradient-to-b from-marino-2 to-marino border-b border-marino-4">
                 <div className="w-20 h-20 bg-naranja/10 text-naranja border-2 border-naranja/30 rounded-3xl mx-auto flex items-center justify-center mb-6 shadow-2xl shadow-naranja/10">
                     <span className="text-3xl font-black font-barlow-condensed">
-                        {alumno.nombre.split(' ').map((n: any) => n[0]).join('').toUpperCase().slice(0, 2)}
+                        {alumno.nombre.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)}
                     </span>
                 </div>
                 <h1 className="text-4xl font-barlow-condensed font-black uppercase text-blanco tracking-tight italic">Panel de Usuario</h1>

@@ -6,8 +6,7 @@ import {
     ChevronRight,
     Flame,
     Weight,
-    Zap,
-    Info
+    Zap
 } from 'lucide-react';
 import AlumnoNav from '@/compartido/componentes/AlumnoNav';
 import { getAlumnoSesion } from '@/nucleo/seguridad/sesion';

@@ -11,9 +11,10 @@ import {
     AlertCircle,
     Loader2
 } from 'lucide-react';
+import { Cliente, CicloMenstrual } from '@prisma/client';
 import { actualizarPerfilAlumno, cambiarPasswordAlumno, guardarConfiguracionCiclo } from '@/nucleo/acciones/alumno.accion';
 
-export default function PerfilContent({ alumno, ciclo }: { alumno: any, ciclo?: any }) {
+export default function PerfilContent({ alumno, ciclo }: { alumno: Cliente, ciclo?: CicloMenstrual | null }) {
     const [tab, setTab] = useState<'datos' | 'seguridad' | 'ciclo'>('datos');
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<{ type: 'exito' | 'error', msg: string } | null>(null);
