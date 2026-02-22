@@ -23,7 +23,7 @@ export const EmailServicio = {
 
         try {
             const data = await resend.emails.send({
-                from: 'IL-Campus <campus@il-coaching.com>', // Deberás verificar este dominio en Resend
+                from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev', // Fallback al dominio de prueba de Resend
                 to: para,
                 subject: asunto,
                 html: html,
