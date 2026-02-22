@@ -23,11 +23,17 @@ export default function EntrenadorLoginPage() {
         setError(null);
 
         const formData = new FormData(e.currentTarget);
-        const result = await loginEntrenador(formData) as any;
+        interface LoginRes {
+            success?: boolean;
+            error?: string;
+            mfaRequired?: boolean;
+            adminId?: string;
+        }
+        const result = await loginEntrenador(formData) as LoginRes;
 
         if (result.success) {
             if (result.mfaRequired) {
-                setMfaState({ required: true, adminId: result.adminId });
+                setMfaState({ required: true, adminId: result.adminId || null });
                 setLoading(false);
             } else {
                 router.push('/entrenador/dashboard');

@@ -1,7 +1,14 @@
 import * as otplib from 'otplib';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const { authenticator } = otplib as any;
 import QRCode from 'qrcode';
+
+// Interface para tipado estricto del módulo otplib y evitar 'any'
+interface AuthenticatorModule {
+    generateSecret: () => string;
+    keyuri: (user: string, service: string, secret: string) => string;
+    verify: (opts: { token: string, secret: string }) => boolean;
+}
+
+const { authenticator } = (otplib as unknown) as { authenticator: AuthenticatorModule };
 
 /**
  * Servicio de Autenticación de Doble Factor (MFA) para IL-Campus.

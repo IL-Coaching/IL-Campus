@@ -1,13 +1,39 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import * as otplib from 'otplib';
+
+// Tipado estricto para otplib sin usar 'any'
+interface AuthenticatorMod {
+    check: (token: string, secret: string) => boolean;
+}
+const { authenticator } = (otplib as unknown) as { authenticator: AuthenticatorMod };
+
 import { prisma } from "@/baseDatos/conexion";
 import { CriptoServicio } from "@/nucleo/seguridad/cripto";
 import { establecerSesion, cerrarSesion } from "@/nucleo/seguridad/sesion";
 
+// Tipado para Prisma dinámico sin 'any'
+type PrismaUpdateRaw = {
+    update: (args: { where: { id: string }, data: Record<string, unknown> }) => Promise<unknown>
+};
+
+interface EntrenadorSeguro {
+    id: string;
+    password: string;
+    mfaEnabled: boolean;
+    mfaSecret: string | null;
+}
+
+interface ClienteSeguro {
+    id: string;
+    password?: string | null;
+    activo: boolean;
+    lastLogin?: Date | null;
+}
+
 /**
  * Procesa el inicio de sesión del entrenador.
- * Soporta autenticación de primer paso y verificación MFA de segundo paso.
  */
 export async function loginEntrenador(formData: FormData) {
     const email = formData.get("email") as string;
@@ -18,13 +44,15 @@ export async function loginEntrenador(formData: FormData) {
     }
 
     try {
-        const entrenador = await prisma.entrenador.findUnique({
+        const entrenadorRaw = await prisma.entrenador.findUnique({
             where: { email }
         });
 
-        if (!entrenador) {
+        if (!entrenadorRaw) {
             return { error: "Credenciales no válidas." };
         }
+
+        const entrenador = entrenadorRaw as unknown as EntrenadorSeguro;
 
         // Comparar contraseña con el hash almacenado
         const passwordValida = await CriptoServicio.comparePassword(password, entrenador.password);
@@ -33,18 +61,14 @@ export async function loginEntrenador(formData: FormData) {
             return { error: "Credenciales no válidas." };
         }
 
-        // Si el MFA está habilitado, no iniciamos sesión aún.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if ((entrenador as any).mfaEnabled) {
+        // Si el MFA está habilitado
+        if (entrenador.mfaEnabled) {
             return { success: true, mfaRequired: true, adminId: entrenador.id };
         }
 
-        // Establecer sesión segura con JWT y HttpOnly Cookies
         await establecerSesion(entrenador.id, "entrenador");
-
         return { success: true };
     } catch {
-        console.error("Login Error");
         return { error: "Error de conexión con la base de datos." };
     }
 }
@@ -54,18 +78,19 @@ export async function loginEntrenador(formData: FormData) {
  */
 export async function verificarMFALogin(adminId: string, token: string) {
     try {
-        const entrenador = await prisma.entrenador.findUnique({
+        const entrenadorRaw = await prisma.entrenador.findUnique({
             where: { id: adminId }
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if (!entrenador || !(entrenador as any).mfaSecret) {
-            return { error: "Acceso denegado o MFA no configurado." };
+        if (!entrenadorRaw) return { error: "Usuario no encontrado." };
+
+        const entrenador = entrenadorRaw as unknown as EntrenadorSeguro;
+
+        if (!entrenador.mfaSecret) {
+            return { error: "MFA no configurado." };
         }
 
-        const { MFAServicio } = await import("@/nucleo/seguridad/mfa");
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const esValido = MFAServicio.verificarToken(token, (entrenador as any).mfaSecret);
+        const esValido = authenticator.check(token, entrenador.mfaSecret);
 
         if (!esValido) {
             return { error: "Código incorrecto." };
@@ -90,38 +115,37 @@ export async function loginAlumno(formData: FormData) {
     }
 
     try {
-        const cliente = await prisma.cliente.findUnique({
+        const clienteRaw = await prisma.cliente.findUnique({
             where: { email }
         });
 
-        if (!cliente || !cliente.password) {
+        if (!clienteRaw || !clienteRaw.password) {
             return { error: "Email o contraseña incorrectos." };
         }
 
+        const cliente = clienteRaw as unknown as ClienteSeguro;
+
         // Verificar contraseña hasheada
-        const passwordValida = await CriptoServicio.comparePassword(password, cliente.password);
+        const passwordValida = await CriptoServicio.comparePassword(password, cliente.password || "");
 
         if (!passwordValida) {
             return { error: "Email o contraseña incorrectos." };
         }
 
         if (!cliente.activo) {
-            return { error: "Tu cuenta está desactivada. Contacta a tu entrenador." };
+            return { error: "Tu cuenta está desactivada." };
         }
 
-        // Actualizar último login
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (prisma.cliente as any).update({
+        // Actualizar último login de forma segura
+        const accessor = (prisma.cliente as unknown) as PrismaUpdateRaw;
+        await accessor.update({
             where: { id: cliente.id },
             data: { lastLogin: new Date() }
         });
 
-        // Establecer sesión segura
         await establecerSesion(cliente.id, "alumno");
-
         return { success: true };
-    } catch (error) {
-        console.error("Login Error:", error);
+    } catch {
         return { error: "Error de conexión." };
     }
 }

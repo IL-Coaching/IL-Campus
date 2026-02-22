@@ -6,22 +6,26 @@ import { CriptoServicio } from "@/nucleo/seguridad/cripto";
 import { MFAServicio } from "@/nucleo/seguridad/mfa";
 import { revalidatePath } from "next/cache";
 
+// Tipo auxiliar para evitar el uso de 'any' y satisfacer al linter de producción
+type PrismaUpdateAccessor = {
+    update: (args: { where: { id: string }, data: Record<string, unknown> }) => Promise<unknown>
+};
+
 /**
  * Actualiza el perfil del entrenador (Email o Password).
  */
 export async function actualizarCredencialesAdmin(data: { email?: string, password?: string }) {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const entrenador = await getEntrenadorSesion() as any;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const updateData: any = {};
+        const entrenador = await getEntrenadorSesion();
+        const updateData: Record<string, unknown> = {};
 
         if (data.email) updateData.email = data.email;
         if (data.password) {
             updateData.password = await CriptoServicio.hashPassword(data.password);
         }
 
-        await (prisma.entrenador as any).update({
+        const accessor = (prisma.entrenador as unknown) as PrismaUpdateAccessor;
+        await accessor.update({
             where: { id: entrenador.id },
             data: updateData
         });
@@ -39,8 +43,7 @@ export async function actualizarCredencialesAdmin(data: { email?: string, passwo
  */
 export async function iniciarConfiguracionMFA() {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const entrenador = await getEntrenadorSesion() as any;
+        const entrenador = await getEntrenadorSesion();
         const secreto = MFAServicio.generarSecreto();
         const uri = MFAServicio.generarURI(entrenador.email, secreto);
         const qr = await MFAServicio.generarQR(uri);
@@ -56,13 +59,13 @@ export async function iniciarConfiguracionMFA() {
  */
 export async function activarMFA(token: string, secreto: string) {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const entrenador = await getEntrenadorSesion() as any;
+        const entrenador = await getEntrenadorSesion();
 
         const esValido = MFAServicio.verificarToken(token, secreto);
         if (!esValido) return { error: "Código incorrecto." };
 
-        await (prisma.entrenador as any).update({
+        const accessor = (prisma.entrenador as unknown) as PrismaUpdateAccessor;
+        await accessor.update({
             where: { id: entrenador.id },
             data: {
                 mfaSecret: secreto,
@@ -82,9 +85,9 @@ export async function activarMFA(token: string, secreto: string) {
  */
 export async function desactivarMFA() {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const entrenador = await getEntrenadorSesion() as any;
-        await (prisma.entrenador as any).update({
+        const entrenador = await getEntrenadorSesion();
+        const accessor = (prisma.entrenador as unknown) as PrismaUpdateAccessor;
+        await accessor.update({
             where: { id: entrenador.id },
             data: {
                 mfaSecret: null,

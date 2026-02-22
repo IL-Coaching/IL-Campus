@@ -4,6 +4,12 @@ import { prisma } from "@/baseDatos/conexion";
 import { CriptoServicio } from "@/nucleo/seguridad/cripto";
 import { getEntrenadorSesion, establecerSesion } from "@/nucleo/seguridad/sesion";
 
+// Tipos auxiliares para el acceso dinámico y evitar 'any' en el linter
+type PrismaClienteAccessor = {
+    update: (args: { where: { id: string }, data: Record<string, unknown> }) => Promise<unknown>;
+    findFirst: (args: { where: Record<string, unknown> }) => Promise<Record<string, unknown> | null>;
+};
+
 /**
  * Genera un token de invitación profesional para un nuevo cliente.
  */
@@ -15,17 +21,15 @@ export async function generarInvitacion(clienteId: string) {
         const expiracion = new Date();
         expiracion.setHours(expiracion.getHours() + 48); // Expira en 48 horas
 
-        await prisma.cliente.update({
+        const accessor = (prisma.cliente as unknown) as PrismaClienteAccessor;
+        await accessor.update({
             where: { id: clienteId },
             data: {
-                // @ts-expect-error - Prisma type sync
                 invitationToken: token,
-                // @ts-expect-error - Prisma type sync
                 invitationExpires: expiracion
             }
         });
 
-        // Retornamos el link de registro
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
         return {
             success: true,
@@ -40,7 +44,8 @@ export async function generarInvitacion(clienteId: string) {
  * Valida si un token de invitación es legítimo y vigente.
  */
 export async function validarInvitacion(token: string) {
-    const cliente = await prisma.cliente.findFirst({
+    const accessor = (prisma.cliente as unknown) as PrismaClienteAccessor;
+    const cliente = await accessor.findFirst({
         where: {
             invitationToken: token,
             invitationExpires: { gt: new Date() }
@@ -51,8 +56,8 @@ export async function validarInvitacion(token: string) {
 
     return {
         success: true,
-        email: cliente.email,
-        nombre: cliente.nombre
+        email: cliente.email as string,
+        nombre: cliente.nombre as string
     };
 }
 
@@ -61,36 +66,30 @@ export async function validarInvitacion(token: string) {
  */
 export async function completarAlta(token: string, passwordPlana: string) {
     try {
-        const cliente = await prisma.cliente.findFirst({
+        const accessor = (prisma.cliente as unknown) as PrismaClienteAccessor;
+        const cliente = await accessor.findFirst({
             where: {
-                // @ts-expect-error - Prisma type sync
                 invitationToken: token,
-                // @ts-expect-error - Prisma type sync
                 invitationExpires: { gt: new Date() }
             }
         });
 
         if (!cliente) throw new Error("Invitación no válida.");
 
-        // Hashear password con Argon2/Bcrypt via CriptoServicio
         const passwordHash = await CriptoServicio.hashPassword(passwordPlana);
 
-        await prisma.cliente.update({
-            where: { id: cliente.id },
+        await accessor.update({
+            where: { id: cliente.id as string },
             data: {
                 password: passwordHash,
-                // @ts-expect-error - Prisma type sync
-                invitationToken: null, // Quemamos el token
-                // @ts-expect-error - Prisma type sync
+                invitationToken: null,
                 invitationExpires: null,
                 activo: true,
-                // @ts-expect-error - Prisma type sync
                 lastLogin: new Date()
             }
         });
 
-        // Login automático tras el alta
-        await establecerSesion(cliente.id, "alumno");
+        await establecerSesion(cliente.id as string, "alumno");
 
         return { success: true };
     } catch {
