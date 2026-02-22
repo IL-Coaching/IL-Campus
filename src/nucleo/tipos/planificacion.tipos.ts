@@ -35,10 +35,10 @@ export type ClientePlanificacion = Cliente & {
         datosPersonales?: {
             nombre?: string;
             nacimiento?: string;
-            edad?: string | number;
+            edad?: string;
             genero?: string;
-            peso?: string | number;
-            altura?: string | number;
+            peso?: string;
+            altura?: string;
             ubicacion?: string;
         };
         contacto?: {
@@ -47,17 +47,12 @@ export type ClientePlanificacion = Cliente & {
         };
         saludMedica?: {
             condiciones?: string[];
-            aptoMedico?: string | boolean;
-            lesiones?: string;
-            patologias?: string;
-            medicacion?: string;
+            otrasCondiciones?: string;
+            aptoMedico?: string;
         };
         estiloDeVida?: {
             actividad?: string;
             sueno?: string;
-            ocupacion?: string;
-            estres?: number;
-            horasSueno?: number;
         };
         experiencia?: {
             entrenaActualmente?: string;
@@ -66,19 +61,12 @@ export type ClientePlanificacion = Cliente & {
         objetivos?: {
             principales?: string[];
             motivacion?: string;
-            principal?: string;
-            secundarios?: string[];
-            motivacionReal?: string;
-            plazo?: string;
         };
         disponibilidad?: {
-            sesionesSemana?: string | number;
+            sesionesSemanales?: string;
             tiempoSesion?: string;
             lugar?: string;
             equipamiento?: string[];
-            diasSemana?: number;
-            minutosSesion?: number;
-            preferenciaHoraria?: string;
         };
         personalizacion?: {
             noGusta?: string;

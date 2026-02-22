@@ -16,3 +16,5 @@ Para más detalles, consultar `/docs/onboarding.md`
 
 Ver `/docs/arquitectura.md` para las justificaciones de la arquitectura del proyecto.
 El proyecto está completamente en idioma ESPAÑOL.
+
+Ya hosteada en vercel app conectada al repositorio git

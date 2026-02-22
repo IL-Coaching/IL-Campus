@@ -3,14 +3,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
     Calendar,
-    Dumbbell,
     MessageCircle,
-    CreditCard,
-    ChevronLeft,
-    TrendingUp,
-    Clock,
-    Activity
+    ChevronLeft
 } from "lucide-react";
+import DetallesFormulario from "./DetallesFormulario";
 
 export default async function PerfilClientePage({ params }: { params: { id: string } }) {
     const cliente = await ClienteServicio.obtenerPorId(params.id);
@@ -49,11 +45,13 @@ export default async function PerfilClientePage({ params }: { params: { id: stri
                             <h3 className="text-xl font-bold text-blanco leading-none">{cliente.nombre}</h3>
                             <p className="text-gris text-sm mt-1">{cliente.email}</p>
                             <div className="mt-4 flex gap-2">
-                                <span className="px-3 py-1 bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/20 rounded text-[0.6rem] font-bold uppercase tracking-widest">
-                                    Activo
-                                </span>
+                                {cliente.activo && (
+                                    <span className="px-3 py-1 bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/20 rounded text-[0.6rem] font-bold uppercase tracking-widest">
+                                        Activo
+                                    </span>
+                                )}
                                 <span className="px-3 py-1 bg-marino-3 text-gris border border-marino-4 rounded text-[0.6rem] font-bold uppercase tracking-widest">
-                                    Plan Elite
+                                    {cliente.plan || "Sin Plan"}
                                 </span>
                             </div>
                         </div>
@@ -61,15 +59,7 @@ export default async function PerfilClientePage({ params }: { params: { id: stri
                         <div className="space-y-4">
                             <div className="flex items-center justify-between text-sm">
                                 <span className="text-gris flex items-center gap-2"><Calendar size={14} /> Fecha Alta</span>
-                                <span className="text-blanco font-medium">{new Date(cliente.fechaAlta).toLocaleDateString()}</span>
-                            </div>
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-gris flex items-center gap-2"><CreditCard size={14} /> Último Pago</span>
-                                <span className="text-[#22C55E] font-bold">Al día</span>
-                            </div>
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-gris flex items-center gap-2"><Clock size={14} /> Próximo Venc.</span>
-                                <span className="text-blanco font-medium">15 de Marzo</span>
+                                <span className="text-blanco font-medium">{new Date(cliente.fechaAlta).toLocaleDateString('es-AR')}</span>
                             </div>
                         </div>
 
@@ -98,65 +88,9 @@ export default async function PerfilClientePage({ params }: { params: { id: stri
                     </div>
                 </div>
 
-                {/* Columna Derecha: Progresos y Planificación */}
+                {/* Columna Derecha: Detalles del Formulario */}
                 <div className="lg:col-span-2 space-y-6">
-
-                    {/* Stats de Rendimiento */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="bg-marino-2 border border-marino-4 p-5 rounded-xl flex items-center gap-4">
-                            <div className="p-3 bg-naranja/10 rounded-lg text-naranja">
-                                <TrendingUp size={24} />
-                            </div>
-                            <div>
-                                <p className="text-[0.6rem] font-bold text-gris uppercase tracking-widest">Peso Actual</p>
-                                <p className="text-2xl font-black text-blanco">-- <span className="text-xs font-normal">kg</span></p>
-                            </div>
-                        </div>
-                        <div className="bg-marino-2 border border-marino-4 p-5 rounded-xl flex items-center gap-4">
-                            <div className="p-3 bg-[#EAB308]/10 rounded-lg text-[#EAB308]">
-                                <Activity size={24} />
-                            </div>
-                            <div>
-                                <p className="text-[0.6rem] font-bold text-gris uppercase tracking-widest">Cumplimiento</p>
-                                <p className="text-2xl font-black text-blanco">0%</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Rutina Actual */}
-                    <div className="bg-marino-2 border border-marino-4 rounded-2xl overflow-hidden shadow-xl">
-                        <div className="p-4 border-b border-marino-4 bg-marino-3/50 flex items-center justify-between">
-                            <h3 className="font-barlow-condensed font-bold tracking-widest uppercase text-sm text-blanco flex items-center gap-2">
-                                <Dumbbell size={16} className="text-naranja" />
-                                Planificación Actual
-                            </h3>
-                            <Link href={`/entrenador/clientes/${cliente.id}/planificacion`} className="text-[0.6rem] font-black text-naranja uppercase tracking-widest hover:underline">Gestionar Entrenamiento</Link>
-                        </div>
-                        <div className="p-12 text-center flex flex-col items-center justify-center">
-                            <Dumbbell size={48} className="text-marino-4 mb-4" />
-                            <p className="text-gris italic text-sm">Este atleta aún no tiene rutinas asignadas para el ciclo actual.</p>
-                            <Link
-                                href={`/entrenador/clientes/${cliente.id}/planificacion`}
-                                className="mt-6 text-xs text-naranja border border-naranja/30 px-4 py-2 rounded-lg font-bold uppercase tracking-widest hover:bg-naranja/5 transition-all text-center"
-                            >
-                                Crear primer Microciclo
-                            </Link>
-                        </div>
-                    </div>
-
-                    {/* Historial de Check-ins */}
-                    <div className="bg-marino-2 border border-marino-4 rounded-2xl overflow-hidden shadow-xl">
-                        <div className="p-4 border-b border-marino-4 bg-marino-3/50 flex items-center justify-between">
-                            <h3 className="font-barlow-condensed font-bold tracking-widest uppercase text-sm text-blanco flex items-center gap-2">
-                                <Activity size={16} className="text-[#22C55E]" />
-                                Historial de Reportes
-                            </h3>
-                        </div>
-                        <div className="p-8 text-center text-gris italic text-sm">
-                            No hay check-ins registrados todavía.
-                        </div>
-                    </div>
-
+                    <DetallesFormulario cliente={cliente} />
                 </div>
             </div>
         </div>
