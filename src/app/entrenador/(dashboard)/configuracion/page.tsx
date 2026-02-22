@@ -1,6 +1,7 @@
-import { Shield, User, Camera, Mail, Phone } from "lucide-react";
+import { Shield, User, Mail, Phone } from "lucide-react";
 import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";
 import GestionSeguridadAdmin from "./componentes/GestionSeguridadAdmin";
+import GestionAvatarAdmin from "./componentes/GestionAvatarAdmin";
 
 export default async function ConfiguracionPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -33,15 +34,10 @@ export default async function ConfiguracionPage() {
                             </div>
                         </div>
                         <div className="p-8 flex flex-col md:flex-row gap-10 items-start md:items-center">
-                            <div className="relative group mx-auto md:mx-0">
-                                <div className="w-32 h-32 rounded-3xl bg-marino-3 border-2 border-dashed border-marino-4 flex flex-col items-center justify-center gap-2 overflow-hidden shadow-inner group-hover:border-naranja/50 transition-all duration-500 cursor-pointer">
-                                    <Camera size={32} className="text-gris/40 group-hover:text-naranja group-hover:scale-110 transition-all" />
-                                    <span className="text-[0.55rem] font-black text-gris/40 uppercase tracking-[0.2em] group-hover:text-naranja">Avatar</span>
-                                </div>
-                                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-naranja rounded-xl flex items-center justify-center shadow-lg border-2 border-marino-2">
-                                    <Camera size={14} className="text-marino" />
-                                </div>
-                            </div>
+                            <GestionAvatarAdmin
+                                avatarUrl={entrenador.avatarUrl}
+                                nombre={entrenador.nombre}
+                            />
                             <div className="space-y-6 flex-1 w-full">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">

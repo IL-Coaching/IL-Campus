@@ -117,3 +117,50 @@ export async function desactivarMFA(passwordConfirmacion: string) {
         return { error: "No se pudo desactivar." };
     }
 }
+
+/**
+ * Actualiza el Avatar del entrenador.
+ */
+export async function actualizarAvatarAdmin(base64: string) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        // 1. Limpieza y preparación de la imagen
+        const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
+        const buffer = Buffer.from(base64Data, 'base64');
+        const fileName = `avatares/${entrenador.id}-${Date.now()}.png`;
+
+        // 2. Subida a Supabase Storage (Public)
+        // Nota: El cliente de Supabase se importa por demanda para evitar fugas de memoria en build
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+
+        const { error: uploadError } = await supabase.storage
+            .from('archivos')
+            .upload(fileName, buffer, {
+                contentType: 'image/png',
+                upsert: true
+            });
+
+        if (uploadError) throw uploadError;
+
+        const { data: publicUrlData } = supabase.storage.from('archivos').getPublicUrl(fileName);
+        const avatarUrl = publicUrlData.publicUrl;
+
+        // 3. Persistencia en DB
+        const accessor = (prisma.entrenador as unknown) as PrismaUpdateAccessor;
+        await accessor.update({
+            where: { id: entrenador.id },
+            data: { avatarUrl }
+        });
+
+        revalidatePath('/entrenador/configuracion');
+        return { success: true, avatarUrl };
+    } catch (error) {
+        console.error("Error avatar:", error);
+        return { error: "No se pudo procesar la imagen." };
+    }
+}
