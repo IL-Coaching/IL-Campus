@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Key, Smartphone, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { actualizarCredencialesAdmin, iniciarConfiguracionMFA, activarMFA, desactivarMFA } from "@/nucleo/acciones/admin.accion";
+import ModalConfirmarAccion from "./ModalConfirmarAccion";
 
 interface Props {
     entrenador: {
@@ -16,21 +17,60 @@ export default function GestionSeguridadAdmin({ entrenador }: Props) {
     const [loading, setLoading] = useState(false);
     const [mfaConfig, setMfaConfig] = useState<{ qr: string, secreto: string } | null>(null);
     const [mfaToken, setMfaToken] = useState("");
+    const [showConfirmPassword, setShowConfirmPassword] = useState<{ type: 'password' | 'mfa_enable' | 'mfa_disable' } | null>(null);
 
-    // Manejo de cambio de Password
-    const handleCambiarPassword = async () => {
+    // --- HANDLERS CONFIRMADOS (Después de validar password) ---
+
+    const onConfirmCambioPassword = async (passConfirmacion: string) => {
         const nueva = prompt("Ingresa la nueva contraseña maestra:");
-        if (!nueva || nueva.length < 8) return alert("Mínimo 8 caracteres.");
+        if (!nueva || nueva.length < 8) {
+            alert("Mínimo 8 caracteres.");
+            return;
+        }
 
-        setLoading(true);
-        const res = await actualizarCredencialesAdmin({ password: nueva });
-        setLoading(false);
+        const res = await actualizarCredencialesAdmin({
+            password: nueva,
+            passwordConfirmacion: passConfirmacion
+        });
 
-        if (res.success) alert("Contraseña actualizada correctamente.");
-        else alert("Error: " + res.error);
+        if (res.success) {
+            alert("Contraseña actualizada correctamente.");
+            setShowConfirmPassword(null);
+        } else {
+            throw new Error(res.error);
+        }
     };
 
-    // Iniciar Configuración MFA
+    const onConfirmActivarMFA = async (passConfirmacion: string) => {
+        if (!mfaConfig || !mfaToken) return;
+
+        const res = await activarMFA(mfaToken, mfaConfig.secreto, passConfirmacion);
+        if (res.success) {
+            setMfaConfig(null);
+            setMfaToken("");
+            setShowConfirmPassword(null);
+            alert("MFA Activado con éxito.");
+        } else {
+            throw new Error(res.error);
+        }
+    };
+
+    const onConfirmDesactivarMFA = async (passConfirmacion: string) => {
+        const res = await desactivarMFA(passConfirmacion);
+        if (res.success) {
+            setShowConfirmPassword(null);
+            alert("Capa MFA eliminada.");
+        } else {
+            throw new Error(res.error);
+        }
+    };
+
+    // --- DISPARADORES DE UI ---
+
+    const handleCambiarPassword = () => setShowConfirmPassword({ type: 'password' });
+    const handleConfirmarMFA = () => setShowConfirmPassword({ type: 'mfa_enable' });
+    const handleDesactivarMFA = () => setShowConfirmPassword({ type: 'mfa_disable' });
+
     const handleIniciarMFA = async () => {
         setLoading(true);
         const res = await iniciarConfiguracionMFA();
@@ -38,30 +78,8 @@ export default function GestionSeguridadAdmin({ entrenador }: Props) {
         if (res.success && res.qr && res.secreto) {
             setMfaConfig({ qr: res.qr, secreto: res.secreto });
         } else {
-            console.error(res.error || "No se pudo iniciar MFA.");
+            alert(res.error || "No se pudo iniciar MFA.");
         }
-    };
-
-    // Confirmar Activación MFA
-    const handleConfirmarMFA = async () => {
-        if (!mfaConfig || !mfaToken) return;
-        setLoading(true);
-        const res = await activarMFA(mfaToken, mfaConfig.secreto);
-        setLoading(false);
-        if (res.success) {
-            setMfaConfig(null);
-            setMfaToken("");
-            alert("MFA Activado con éxito.");
-        } else {
-            alert(res.error);
-        }
-    };
-
-    const handleDesactivarMFA = async () => {
-        if (!confirm("¿Seguro que quieres eliminar la capa extra de seguridad?")) return;
-        setLoading(true);
-        await desactivarMFA();
-        setLoading(false);
     };
 
     return (
@@ -161,7 +179,7 @@ export default function GestionSeguridadAdmin({ entrenador }: Props) {
                                         disabled={loading || mfaToken.length < 6}
                                         className="bg-naranja text-marino font-black px-6 rounded-xl uppercase text-[0.7rem] tracking-widest hover:scale-105 transition-all disabled:opacity-50"
                                     >
-                                        Validar y Activar
+                                        Activar
                                     </button>
                                     <button
                                         onClick={() => setMfaConfig(null)}
@@ -175,6 +193,34 @@ export default function GestionSeguridadAdmin({ entrenador }: Props) {
                     </div>
                 )}
             </div>
+
+            {/* Modales de Confirmación */}
+            {showConfirmPassword?.type === 'password' && (
+                <ModalConfirmarAccion
+                    titulo="Cambiar Contraseña Maestra"
+                    descripcion="Para actualizar tu clave de acceso, primero debemos validar tu identidad actual."
+                    onConfirm={onConfirmCambioPassword}
+                    onClose={() => setShowConfirmPassword(null)}
+                />
+            )}
+
+            {showConfirmPassword?.type === 'mfa_enable' && (
+                <ModalConfirmarAccion
+                    titulo="Activar Protección MFA"
+                    descripcion="Estás por vincular tu cuenta con un dispositivo físico. Esta acción requiere tu contraseña."
+                    onConfirm={onConfirmActivarMFA}
+                    onClose={() => setShowConfirmPassword(null)}
+                />
+            )}
+
+            {showConfirmPassword?.type === 'mfa_disable' && (
+                <ModalConfirmarAccion
+                    titulo="Desactivar Protección MFA"
+                    descripcion="ADVERTENCIA: Vas a reducir la seguridad de tu cuenta. Por favor, confirma tu identidad."
+                    onConfirm={onConfirmDesactivarMFA}
+                    onClose={() => setShowConfirmPassword(null)}
+                />
+            )}
         </div>
     );
 }

@@ -14,9 +14,15 @@ type PrismaUpdateAccessor = {
 /**
  * Actualiza el perfil del entrenador (Email o Password).
  */
-export async function actualizarCredencialesAdmin(data: { email?: string, password?: string }) {
+export async function actualizarCredencialesAdmin(data: { email?: string, password?: string, passwordConfirmacion: string }) {
     try {
-        const entrenador = await getEntrenadorSesion();
+        const entrenadorFull = await prisma.entrenador.findUnique({ where: { id: (await getEntrenadorSesion()).id } });
+        if (!entrenadorFull) return { error: "Sesión inválida." };
+
+        // 1. Validar identidad
+        const passValida = await CriptoServicio.comparePassword(data.passwordConfirmacion, entrenadorFull.password);
+        if (!passValida) return { error: "Contraseña de confirmación incorrecta." };
+
         const updateData: Record<string, unknown> = {};
 
         if (data.email) updateData.email = data.email;
@@ -26,7 +32,7 @@ export async function actualizarCredencialesAdmin(data: { email?: string, passwo
 
         const accessor = (prisma.entrenador as unknown) as PrismaUpdateAccessor;
         await accessor.update({
-            where: { id: entrenador.id },
+            where: { id: entrenadorFull.id },
             data: updateData
         });
 
@@ -57,16 +63,21 @@ export async function iniciarConfiguracionMFA() {
 /**
  * Confirma y activa definitivamente el MFA si el código es correcto.
  */
-export async function activarMFA(token: string, secreto: string) {
+export async function activarMFA(token: string, secreto: string, passwordConfirmacion: string) {
     try {
-        const entrenador = await getEntrenadorSesion();
+        const entrenadorFull = await prisma.entrenador.findUnique({ where: { id: (await getEntrenadorSesion()).id } });
+        if (!entrenadorFull) return { error: "Sesión inválida." };
+
+        // 1. Validar identidad
+        const passValida = await CriptoServicio.comparePassword(passwordConfirmacion, entrenadorFull.password);
+        if (!passValida) return { error: "Contraseña incorrecta." };
 
         const esValido = MFAServicio.verificarToken(token, secreto);
-        if (!esValido) return { error: "Código incorrecto." };
+        if (!esValido) return { error: "Código MFA incorrecto." };
 
         const accessor = (prisma.entrenador as unknown) as PrismaUpdateAccessor;
         await accessor.update({
-            where: { id: entrenador.id },
+            where: { id: entrenadorFull.id },
             data: {
                 mfaSecret: secreto,
                 mfaEnabled: true
@@ -83,12 +94,18 @@ export async function activarMFA(token: string, secreto: string) {
 /**
  * Desactiva el MFA.
  */
-export async function desactivarMFA() {
+export async function desactivarMFA(passwordConfirmacion: string) {
     try {
-        const entrenador = await getEntrenadorSesion();
+        const entrenadorFull = await prisma.entrenador.findUnique({ where: { id: (await getEntrenadorSesion()).id } });
+        if (!entrenadorFull) return { error: "Sesión inválida." };
+
+        // 1. Validar identidad
+        const passValida = await CriptoServicio.comparePassword(passwordConfirmacion, entrenadorFull.password);
+        if (!passValida) return { error: "Contraseña incorrecta." };
+
         const accessor = (prisma.entrenador as unknown) as PrismaUpdateAccessor;
         await accessor.update({
-            where: { id: entrenador.id },
+            where: { id: entrenadorFull.id },
             data: {
                 mfaSecret: null,
                 mfaEnabled: false
