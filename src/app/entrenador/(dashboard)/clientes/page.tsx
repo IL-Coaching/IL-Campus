@@ -14,14 +14,14 @@ export default async function ClientesPage({
     const entrenador = await getEntrenadorSesion();
 
     // 2. Usar capa de servicio
-    const todosLosClientes = await ClienteServicio.obtenerPorEntrenador(entrenador.id);
-    const planes = await PlanServicio.obtenerPorEntrenador(entrenador.id);
+    const todosLosClientes = await ClienteServicio.obtenerPorEntrenador(entrenador.id) || [];
+    const planes = await PlanServicio.obtenerPorEntrenador(entrenador.id) || [];
 
     // 3. Segmentación lógica
-    const activos = todosLosClientes.filter(c => c.planesAsignados.length > 0);
-    const inscripciones = todosLosClientes.filter(c => c.planesAsignados.length === 0);
+    const activos = todosLosClientes.filter(c => (c.planesAsignados?.length || 0) > 0);
+    const inscripciones = todosLosClientes.filter(c => (c.planesAsignados?.length || 0) === 0);
 
-    const tabActual = searchParams.tab === "inscripciones" ? "inscripciones" : "activos";
+    const tabActual = searchParams?.tab === "inscripciones" ? "inscripciones" : "activos";
     const clientesAMostrar = tabActual === "activos" ? activos : inscripciones;
 
     return (
@@ -63,7 +63,7 @@ export default async function ClientesPage({
 
             {/* Listado dinámico (Componente de Cliente) */}
             <ListadoClientes
-                clientes={clientesAMostrar as unknown as { id: string, nombre: string, email: string, activo: boolean, planesAsignados: { plan: { nombre: string } }[] }[]}
+                clientes={clientesAMostrar as Parameters<typeof ListadoClientes>[0]['clientes']}
                 planes={planes}
                 tabActual={tabActual as "activos" | "inscripciones"}
             />

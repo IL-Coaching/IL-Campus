@@ -17,7 +17,6 @@ export const EmailServicio = {
     }) {
         if (!process.env.RESEND_API_KEY) {
             console.warn("⚠️ RESEND_API_KEY no encontrada. Simulando envío de email a:", para);
-            console.log("Contenido HTML:", html);
             return { success: true, dummy: true };
         }
 

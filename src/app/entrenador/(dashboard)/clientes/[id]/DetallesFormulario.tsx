@@ -42,32 +42,36 @@ export default function DetallesFormulario({ cliente }: { cliente: ClientePlanif
     }
 
     // Renderizador de secciones con formato limpio
-    const seccion = (titulo: string, data: Record<string, string | number | boolean | string[] | undefined>) => (
-        <div className="mb-8 break-inside-avoid">
-            <h4 className="text-naranja font-barlow-condensed font-black uppercase text-xl mb-4 border-b border-marino-4 pb-2">{titulo}</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-5 gap-x-8">
-                {Object.entries(data).map(([key, value]) => {
-                    // Dar formato legible a las claves camelCase
-                    const formattedKey = key
-                        .replace(/([A-Z])/g, ' $1')
-                        .replace(/^./, str => str.toUpperCase());
+    const seccion = (titulo: string, data: Record<string, unknown> | undefined | null) => {
+        if (!data || typeof data !== 'object' || Object.keys(data).length === 0) return null;
 
-                    let displayValue = value;
-                    if (Array.isArray(value)) displayValue = value.length > 0 ? value.join(' • ') : 'Ninguno';
-                    else if (value === true) displayValue = 'Sí';
-                    else if (value === false) displayValue = 'No';
-                    else if (value === '' || value === null || value === undefined) displayValue = '- Sin responder -';
+        return (
+            <div className="mb-8 break-inside-avoid">
+                <h4 className="text-naranja font-barlow-condensed font-black uppercase text-xl mb-4 border-b border-marino-4 pb-2">{titulo}</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-5 gap-x-8">
+                    {Object.entries(data).map(([key, value]) => {
+                        // Dar formato legible a las claves camelCase
+                        const formattedKey = key
+                            .replace(/([A-Z])/g, ' $1')
+                            .replace(/^./, str => str.toUpperCase());
 
-                    return (
-                        <div key={key}>
-                            <p className="text-[0.65rem] font-black text-gris uppercase tracking-widest">{formattedKey}</p>
-                            <p className="text-sm text-blanco mt-1.5 font-medium whitespace-pre-wrap">{displayValue}</p>
-                        </div>
-                    );
-                })}
+                        let displayValue: string | number | boolean | React.ReactNode = '- Sin responder -';
+                        if (Array.isArray(value)) displayValue = value.length > 0 ? value.join(' • ') : 'Ninguno';
+                        else if (value === true) displayValue = 'Sí';
+                        else if (value === false) displayValue = 'No';
+                        else if (value !== null && value !== undefined && value !== '') displayValue = String(value);
+
+                        return (
+                            <div key={key}>
+                                <p className="text-[0.65rem] font-black text-gris uppercase tracking-widest">{formattedKey}</p>
+                                <p className="text-sm text-blanco mt-1.5 font-medium whitespace-pre-wrap">{displayValue}</p>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     return (
         <div className="bg-marino-2 border border-marino-4 rounded-2xl overflow-hidden shadow-xl">
@@ -95,15 +99,15 @@ export default function DetallesFormulario({ cliente }: { cliente: ClientePlanif
                     </div>
 
                     <div className="space-y-6">
-                        {form.datosPersonales && Object.keys(form.datosPersonales).length > 0 && seccion('1. Datos Personales', form.datosPersonales)}
-                        {form.contacto && Object.keys(form.contacto).length > 0 && seccion('2. Contacto', form.contacto)}
-                        {form.saludMedica && Object.keys(form.saludMedica).length > 0 && seccion('3. Salud Médica', form.saludMedica)}
-                        {form.estiloDeVida && Object.keys(form.estiloDeVida).length > 0 && seccion('4. Estilo de Vida', form.estiloDeVida)}
-                        {form.experiencia && Object.keys(form.experiencia).length > 0 && seccion('5. Experiencia', form.experiencia)}
-                        {form.objetivos && Object.keys(form.objetivos).length > 0 && seccion('6. Objetivos', form.objetivos)}
-                        {form.disponibilidad && Object.keys(form.disponibilidad).length > 0 && seccion('7. Disponibilidad', form.disponibilidad)}
-                        {form.personalizacion && Object.keys(form.personalizacion).length > 0 && seccion('8. Personalización', form.personalizacion)}
-                        {form.consentimiento && Object.keys(form.consentimiento).length > 0 && seccion('9. Consentimiento', form.consentimiento)}
+                        {seccion('1. Datos Personales', form?.datosPersonales)}
+                        {seccion('2. Contacto', form?.contacto)}
+                        {seccion('3. Salud Médica', form?.saludMedica)}
+                        {seccion('4. Estilo de Vida', form?.estiloDeVida)}
+                        {seccion('5. Experience', form?.experiencia)}
+                        {seccion('6. Objetivos', form?.objetivos)}
+                        {seccion('7. Disponibilidad', form?.disponibilidad)}
+                        {seccion('8. Personalización', form?.personalizacion)}
+                        {seccion('9. Consentimiento', form?.consentimiento)}
                     </div>
                 </div>
             </div>

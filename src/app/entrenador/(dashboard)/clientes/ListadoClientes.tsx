@@ -116,7 +116,13 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                                                     Ver Perfil
                                                 </Link>
                                             ) : (
-                                                <div className="flex justify-end gap-2">
+                                                <div className="flex justify-end gap-2 text-right">
+                                                    <Link
+                                                        href={`/entrenador/clientes/${cliente.id}`}
+                                                        className="bg-marino-4 hover:bg-marino-3 text-gris hover:text-blanco px-4 py-2 rounded font-barlow-condensed font-bold text-xs uppercase tracking-widest transition-all inline-block"
+                                                    >
+                                                        Ver Perfil
+                                                    </Link>
                                                     <button
                                                         onClick={() => setClienteSeleccionado({ id: cliente.id, nombre: cliente.nombre })}
                                                         className="bg-naranja hover:bg-naranja-h text-marino px-4 py-2 rounded font-barlow-condensed font-bold text-xs uppercase tracking-widest transition-all"
