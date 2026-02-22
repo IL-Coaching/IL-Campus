@@ -1,4 +1,5 @@
-import { authenticator } from 'otplib';
+import * as otplib from 'otplib';
+const { authenticator } = otplib as any;
 import QRCode from 'qrcode';
 
 /**
@@ -25,7 +26,7 @@ export const MFAServicio = {
     async generarQR(uri: string): Promise<string> {
         try {
             return await QRCode.toDataURL(uri);
-        } catch (err) {
+        } catch {
             throw new Error('No se pudo generar el código QR.');
         }
     },

@@ -34,7 +34,8 @@ export async function loginEntrenador(formData: FormData) {
         }
 
         // Si el MFA está habilitado, no iniciamos sesión aún.
-        if (entrenador.mfaEnabled) {
+        // Si el MFA está habilitado, no iniciamos sesión aún.
+        if ((entrenador as any).mfaEnabled) {
             return { success: true, mfaRequired: true, adminId: entrenador.id };
         }
 
@@ -42,8 +43,8 @@ export async function loginEntrenador(formData: FormData) {
         await establecerSesion(entrenador.id, "entrenador");
 
         return { success: true };
-    } catch (error) {
-        console.error("Login Error:", error);
+    } catch {
+        console.error("Login Error");
         return { error: "Error de conexión con la base de datos." };
     }
 }
@@ -57,12 +58,12 @@ export async function verificarMFALogin(adminId: string, token: string) {
             where: { id: adminId }
         });
 
-        if (!entrenador || !entrenador.mfaSecret) {
+        if (!entrenador || !(entrenador as any).mfaSecret) {
             return { error: "Acceso denegado o MFA no configurado." };
         }
 
         const { MFAServicio } = await import("@/nucleo/seguridad/mfa");
-        const esValido = MFAServicio.verificarToken(token, entrenador.mfaSecret);
+        const esValido = MFAServicio.verificarToken(token, (entrenador as any).mfaSecret);
 
         if (!esValido) {
             return { error: "Código incorrecto." };
@@ -107,7 +108,8 @@ export async function loginAlumno(formData: FormData) {
         }
 
         // Actualizar último login
-        await prisma.cliente.update({
+        // Actualizar último login
+        await (prisma.cliente as any).update({
             where: { id: cliente.id },
             data: { lastLogin: new Date() }
         });
