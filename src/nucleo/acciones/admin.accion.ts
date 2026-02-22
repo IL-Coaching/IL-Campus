@@ -55,8 +55,9 @@ export async function iniciarConfiguracionMFA() {
         const qr = await MFAServicio.generarQR(uri);
 
         return { success: true, qr, secreto };
-    } catch {
-        return { error: "Error al iniciar configuración MFA." };
+    } catch (error) {
+        console.error("MFA Start Error:", error);
+        return { error: "Error al iniciar configuración MFA. Verifica la conexión." };
     }
 }
 

@@ -7,7 +7,7 @@ import * as otplib from 'otplib';
 interface AuthenticatorMod {
     check: (token: string, secret: string) => boolean;
 }
-const { authenticator } = (otplib as unknown) as { authenticator: AuthenticatorMod };
+const authenticator = (otplib as unknown as { authenticator: AuthenticatorMod }).authenticator;
 
 import { prisma } from "@/baseDatos/conexion";
 import { CriptoServicio } from "@/nucleo/seguridad/cripto";

@@ -8,7 +8,7 @@ interface AuthenticatorModule {
     verify: (opts: { token: string, secret: string }) => boolean;
 }
 
-const { authenticator } = (otplib as unknown) as { authenticator: AuthenticatorModule };
+const auth = (otplib as unknown as { authenticator: AuthenticatorModule }).authenticator;
 
 /**
  * Servicio de Autenticación de Doble Factor (MFA) para IL-Campus.
@@ -18,14 +18,14 @@ export const MFAServicio = {
      * Genera un nuevo secreto único para el usuario.
      */
     generarSecreto(): string {
-        return authenticator.generateSecret();
+        return auth.generateSecret();
     },
 
     /**
      * Genera un URI de autenticación para ser escaneado por una App (Google Auth, Authy, etc).
      */
     generarURI(email: string, secreto: string): string {
-        return authenticator.keyuri(email, 'IL-Campus Core', secreto);
+        return auth.keyuri(email, 'IL-Campus Core', secreto);
     },
 
     /**
@@ -43,6 +43,6 @@ export const MFAServicio = {
      * Verifica si un token de 6 dígitos es válido para un secreto dado.
      */
     verificarToken(token: string, secreto: string): boolean {
-        return authenticator.verify({ token, secret: secreto });
+        return auth.verify({ token, secret: secreto });
     }
 };
