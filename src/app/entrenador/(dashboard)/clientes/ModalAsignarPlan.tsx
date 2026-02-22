@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-import { X, CheckCircle2, Calendar, CreditCard, Shield } from "lucide-react";
+import { X, Calendar, CreditCard, Shield } from "lucide-react";
 import { asignarMembresia } from "@/nucleo/acciones/cliente.accion";
 
 interface Plan {
@@ -87,50 +87,62 @@ export default function ModalAsignarPlan({ clienteId, clienteNombre, planes, onC
                             <CreditCard size={14} className="text-naranja" />
                             Elegir Plan
                         </label>
-                        <div className="grid grid-cols-1 gap-2">
+                        <div className="grid grid-cols-1 gap-3">
                             {planes.length === 0 ? (
-                                <div className="p-8 border border-dashed border-marino-4 rounded-xl text-center space-y-4">
-                                    <p className="text-xs text-gris italic">No se encontraron los planes del flyer en tu cuenta.</p>
-                                    <button
-                                        type="button"
-                                        onClick={async () => {
-                                            setIsSubmitting(true);
-                                            const { sincronizarPlanesMaestros } = await import("@/nucleo/acciones/biblioteca.accion");
-                                            await sincronizarPlanesMaestros();
-                                            window.location.reload();
-                                        }}
-                                        className="text-[0.6rem] font-black text-naranja uppercase tracking-widest border border-naranja/30 px-4 py-2 rounded-lg hover:bg-naranja/10 transition-all flex items-center justify-center gap-2 mx-auto"
-                                    >
-                                        <Shield size={12} /> Sincronizar con Flyer Oficial
-                                    </button>
+                                <div className="p-10 border border-dashed border-marino-4 rounded-2xl text-center space-y-4 bg-marino-3/20">
+                                    <Shield size={32} className="mx-auto text-gris/50" />
+                                    <p className="text-xs text-gris italic">Configurando planes maestros...</p>
                                 </div>
                             ) : (
-                                planes.map((plan) => (
-                                    <button
-                                        key={plan.id}
-                                        type="button"
-                                        onClick={() => setPlanId(plan.id)}
-                                        className={`flex items-center justify-between p-4 rounded-xl border transition-all text-left group ${planId === plan.id
-                                            ? 'bg-naranja border-naranja text-marino shadow-lg shadow-naranja/20'
-                                            : 'bg-marino border-marino-4 text-gris-claro hover:border-marino-3 hover:bg-marino-3'
-                                            }`}
-                                    >
-                                        <div>
-                                            <p className="font-barlow-condensed font-black uppercase tracking-tight">
-                                                {plan.nombre}
-                                            </p>
-                                            <p className="text-[10px] uppercase font-bold opacity-70">
-                                                {plan.duracionDias} días de asesoría
-                                            </p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="font-bold text-sm">
-                                                ${plan.precio.toLocaleString()}
-                                            </p>
-                                            {planId === plan.id && <CheckCircle2 size={16} />}
-                                        </div>
-                                    </button>
-                                ))
+                                planes.map((plan) => {
+                                    const isElite = plan.nombre.includes("Elite");
+                                    const isGymRat = plan.nombre.includes("GymRat");
+                                    const isStart = plan.nombre.includes("Start");
+
+                                    return (
+                                        <button
+                                            key={plan.id}
+                                            type="button"
+                                            onClick={() => setPlanId(plan.id)}
+                                            className={`flex items-center justify-between p-5 rounded-2xl border transition-all duration-300 relative group overflow-hidden ${planId === plan.id
+                                                ? 'bg-naranja border-naranja text-marino shadow-2xl shadow-naranja/20'
+                                                : 'bg-marino-3/30 border-marino-4 text-blanco hover:border-naranja/50 hover:bg-marino-3'
+                                                }`}
+                                        >
+                                            {/* Indicador de Nivel */}
+                                            <div className="flex flex-col gap-1 items-start relative z-10">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`text-[10px] font-black uppercase tracking-[0.15em] px-2 py-0.5 rounded ${planId === plan.id ? 'bg-marino text-naranja' : 'bg-naranja/10 text-naranja'}`}>
+                                                        {isStart ? "Nivel 1" : isGymRat ? "Nivel 2" : isElite ? "Nivel 3" : "Oficial"}
+                                                    </span>
+                                                    <p className="font-barlow-condensed font-black uppercase tracking-tight text-base italic">
+                                                        {plan.nombre.split('-')[1]?.trim() || plan.nombre}
+                                                    </p>
+                                                </div>
+                                                <p className={`text-[10px] uppercase font-bold tracking-widest ${planId === plan.id ? 'text-marino/80' : 'text-gris'}`}>
+                                                    {plan.duracionDias} DÍAS DE SEGUIMIENTO EVOLUTIVO
+                                                </p>
+                                            </div>
+
+                                            {/* Precio */}
+                                            <div className="text-right relative z-10">
+                                                <p className="font-barlow-condensed font-black text-xl italic leading-none">
+                                                    ${plan.precio.toLocaleString()}
+                                                </p>
+                                                <p className={`text-[9px] font-black uppercase tracking-tighter ${planId === plan.id ? 'text-marino/70' : 'text-naranja/70'}`}>
+                                                    INVERSIÓN FINAL
+                                                </p>
+                                            </div>
+
+                                            {/* Decoración sutil al seleccionar */}
+                                            {planId === plan.id && (
+                                                <div className="absolute right-[-10px] top-[-10px] opacity-10">
+                                                    <Shield size={100} />
+                                                </div>
+                                            )}
+                                        </button>
+                                    );
+                                })
                             )}
                         </div>
                     </div>
