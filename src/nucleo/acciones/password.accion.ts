@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { prisma } from "@/baseDatos/conexion";
 import { CriptoServicio } from "../seguridad/cripto";
 import { EmailServicio } from "../servicios/email.servicio";
@@ -38,7 +39,18 @@ export async function solicitarReseteoPassword(formData: FormData) {
         });
 
         // 2. Construir link y Enviar Email
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const headersList = headers();
+        const origin = headersList.get('origin');
+        const host = headersList.get('host');
+        const protocol = host?.includes('localhost') ? 'http' : 'https';
+
+        const baseUrl = origin ||
+            (host ? `${protocol}://${host}` : null) ||
+            process.env.NEXT_PUBLIC_APP_URL ||
+            (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null) ||
+            (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+            'http://localhost:3000';
+
         const urlReseteo = `${baseUrl}/recuperar?token=${token}`;
 
         const plantillaEmail = `
@@ -99,7 +111,18 @@ export async function generarLinkRecuperacionManual(clienteId: string) {
         });
 
         // 2. Construir link
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const headersList = headers();
+        const origin = headersList.get('origin');
+        const host = headersList.get('host');
+        const protocol = host?.includes('localhost') ? 'http' : 'https';
+
+        const baseUrl = origin ||
+            (host ? `${protocol}://${host}` : null) ||
+            process.env.NEXT_PUBLIC_APP_URL ||
+            (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null) ||
+            (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+            'http://localhost:3000';
+
         const urlReseteo = `${baseUrl}/recuperar?token=${token}`;
 
         return { success: true, link: urlReseteo };
