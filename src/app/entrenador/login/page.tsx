@@ -1,3 +1,4 @@
+"use client"
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Lock, Mail, ArrowRight, Loader2, AlertCircle, Smartphone } from 'lucide-react';
