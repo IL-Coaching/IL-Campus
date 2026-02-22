@@ -32,27 +32,61 @@ export type MacrocicloCompleto = Macrociclo & {
 export type ClientePlanificacion = Cliente & {
     plan?: string;
     formularioInscripcion?: {
+        datosPersonales?: {
+            nombre?: string;
+            nacimiento?: string;
+            edad?: string | number;
+            genero?: string;
+            peso?: string | number;
+            altura?: string | number;
+            ubicacion?: string;
+        };
+        contacto?: {
+            whatsapp?: string;
+            email?: string;
+        };
+        saludMedica?: {
+            condiciones?: string[];
+            aptoMedico?: string | boolean;
+            lesiones?: string;
+            patologias?: string;
+            medicacion?: string;
+        };
+        estiloDeVida?: {
+            actividad?: string;
+            sueno?: string;
+            ocupacion?: string;
+            estres?: number;
+            horasSueno?: number;
+        };
+        experiencia?: {
+            entrenaActualmente?: string;
+            tiempo?: string;
+        };
         objetivos?: {
+            principales?: string[];
+            motivacion?: string;
             principal?: string;
             secundarios?: string[];
             motivacionReal?: string;
             plazo?: string;
         };
         disponibilidad?: {
+            sesionesSemana?: string | number;
+            tiempoSesion?: string;
+            lugar?: string;
+            equipamiento?: string[];
             diasSemana?: number;
             minutosSesion?: number;
             preferenciaHoraria?: string;
-            equipamiento?: string[];
         };
-        saludMedica?: {
-            lesiones?: string;
-            patologias?: string;
-            medicacion?: string;
+        personalizacion?: {
+            noGusta?: string;
+            notas?: string;
         };
-        estiloDeVida?: {
-            ocupacion?: string;
-            estres?: number;
-            horasSueno?: number;
+        consentimiento?: {
+            aceptado?: boolean;
+            declaracionFinal?: boolean;
         };
     } | null;
     cicloMenstrual?: {

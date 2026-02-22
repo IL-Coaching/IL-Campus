@@ -55,6 +55,20 @@ export const PlanificacionServicio = {
     },
 
     /**
+     * Actualiza un macrociclo.
+     */
+    async actualizarMacrociclo(id: string, data: {
+        duracionSemanas?: number;
+        fechaInicio?: Date;
+        notas?: string;
+    }) {
+        return await prisma.macrociclo.update({
+            where: { id },
+            data
+        });
+    },
+
+    /**
      * Actualiza un bloque mensual.
      */
     async actualizarBloqueMensual(id: string, data: {
@@ -150,11 +164,8 @@ export const PlanificacionServicio = {
         duracionSemanas: number;
         fechaInicio: Date;
     }) {
-        // Estructura de días base
         const diasBase = ['Lunes', 'Miércoles', 'Viernes'];
 
-        // Creamos todo en UNA sola operación anidada. 
-        // Esto reduce drásticamente la latencia en bases de datos cloud (Supabase).
         return await prisma.macrociclo.create({
             data: {
                 clienteId,
@@ -179,6 +190,43 @@ export const PlanificacionServicio = {
                             }))
                         }
                     }
+                }
+            }
+        });
+    },
+
+    /**
+     * Agrega un nuevo mesociclo a un macrociclo existente.
+     */
+    async agregarMesociclo(macrocicloId: string, data: {
+        objetivo: string;
+        metodo?: string;
+        rangoReferencia?: string;
+        numeroMes: number;
+    }) {
+        const diasBase = ['Lunes', 'Miércoles', 'Viernes'];
+        const startWeek = ((data.numeroMes - 1) * 4) + 1;
+
+        return await prisma.bloqueMensual.create({
+            data: {
+                macrocicloId,
+                objetivo: data.objetivo,
+                metodo: data.metodo,
+                rangoReferencia: data.rangoReferencia,
+                duracion: 4,
+                semanas: {
+                    create: [0, 1, 2, 3].map(offset => ({
+                        numeroSemana: startWeek + offset,
+                        objetivoSemana: "Fase de carga / Acumulación",
+                        RIRobjetivo: 3,
+                        volumenEstimado: "Medio",
+                        diasSesion: {
+                            create: diasBase.map(dia => ({
+                                diaSemana: dia,
+                                focoMuscular: "General"
+                            }))
+                        }
+                    }))
                 }
             }
         });

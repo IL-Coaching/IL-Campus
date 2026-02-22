@@ -200,3 +200,36 @@ export async function actualizarMesociclo(id: string, data: {
         return { error: mensaje };
     }
 }
+
+export async function actualizarMacrociclo(id: string, data: {
+    duracionSemanas?: number;
+    fechaInicio?: Date;
+    notas?: string;
+}) {
+    try {
+        await getEntrenadorSesion();
+        await PlanificacionServicio.actualizarMacrociclo(id, data);
+        revalidatePath(`/entrenador/clientes`);
+        return { exito: true };
+    } catch (error) {
+        const mensaje = error instanceof Error ? error.message : "Error desconocido";
+        return { error: mensaje };
+    }
+}
+
+export async function agregarMesociclo(macrocicloId: string, data: {
+    objetivo: string;
+    metodo?: string;
+    rangoReferencia?: string;
+    numeroMes: number;
+}) {
+    try {
+        await getEntrenadorSesion();
+        await PlanificacionServicio.agregarMesociclo(macrocicloId, data);
+        revalidatePath(`/entrenador/clientes`);
+        return { exito: true };
+    } catch (error) {
+        const mensaje = error instanceof Error ? error.message : "Error desconocido";
+        return { error: mensaje };
+    }
+}

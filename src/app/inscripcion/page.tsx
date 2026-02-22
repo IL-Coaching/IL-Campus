@@ -9,7 +9,7 @@ import {
     ChevronRight,
     ChevronLeft,
     CheckCircle2,
-    Clock,
+    ShieldCheck,
     Zap,
     AlertTriangle,
     MapPin,
@@ -38,12 +38,12 @@ export default function InscripcionPage() {
                 altura: '',
                 ubicacion: ''
             },
-            salud: {
-                consentimiento: false,
+            saludMedica: {
                 condiciones: [] as string[],
+                otrasCondiciones: '',
                 aptoMedico: '',
             },
-            estiloVida: {
+            estiloDeVida: {
                 ocupacion: '',
                 actividad: '',
                 sueno: '',
@@ -51,21 +51,24 @@ export default function InscripcionPage() {
             },
             experiencia: {
                 entrenaActualmente: '',
-                tiempoEntrenando: '',
+                tiempo: '',
             },
             objetivos: {
-                principal: [] as string[],
+                principales: [] as string[],
                 motivacion: ''
             },
-            logistica: {
-                sesionesSemana: '',
+            disponibilidad: {
+                sesionesSemanales: '',
                 tiempoSesion: '',
-                dondeEntrena: '',
+                lugar: '',
                 equipamiento: [] as string[]
             },
             personalizacion: {
                 noGusta: '',
-                notasImportantes: '',
+                notas: ''
+            },
+            consentimiento: {
+                aceptado: false,
                 declaracionFinal: false
             }
         }
@@ -110,39 +113,276 @@ export default function InscripcionPage() {
 
     const prevStep = () => setStep(prev => Math.max(prev - 1, 0));
 
-    // Helpers para actualizar el estado anidado
-    const updateNested = (path: string, value: string | number | boolean | string[]) => {
-        const keys = path.split('.');
+    // Helpers para actualizar el estado de forma inmutable y segura
+    type ValorFormulario = string | number | boolean | string[];
+
+    const updateNested = (path: string, value: ValorFormulario) => {
         setFormData(prev => {
-            const newState = { ...prev };
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            let current: any = newState;
+            // Clonado profundo para asegurar inmutabilidad en estructuras complejas
+            const next = JSON.parse(JSON.stringify(prev));
+            const keys = path.split('.');
+            let currentLine = next as Record<string, unknown>; // Travesía dinámica segura de objeto anidado
+
             for (let i = 0; i < keys.length - 1; i++) {
-                current = current[keys[i]];
+                if (!currentLine[keys[i]]) currentLine[keys[i]] = {};
+                currentLine = currentLine[keys[i]] as Record<string, unknown>;
             }
-            current[keys[keys.length - 1]] = value;
-            return newState;
+
+            currentLine[keys[keys.length - 1]] = value;
+            return next;
         });
     };
 
     const toggleArray = (path: string, value: string) => {
-        const keys = path.split('.');
         setFormData(prev => {
-            const newState = { ...prev };
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            let current: any = newState;
+            const next = JSON.parse(JSON.stringify(prev));
+            const keys = path.split('.');
+            let currentLine = next as Record<string, unknown>;
+
             for (let i = 0; i < keys.length - 1; i++) {
-                current = current[keys[i]];
+                if (!currentLine[keys[i]]) currentLine[keys[i]] = {};
+                currentLine = currentLine[keys[i]] as Record<string, unknown>;
             }
-            const arr = current[keys[keys.length - 1]] as string[];
+
+            const lastKey = keys[keys.length - 1];
+            const arr = (currentLine[lastKey] || []) as string[];
+
             if (arr.includes(value)) {
-                current[keys[keys.length - 1]] = arr.filter(v => v !== value);
+                currentLine[lastKey] = arr.filter(v => v !== value);
             } else {
-                current[keys[keys.length - 1]] = [...arr, value];
+                currentLine[lastKey] = [...arr, value];
             }
-            return newState;
+
+            return next;
         });
     };
+
+    // Renderizadores de pasos individuales para limpieza de código (Principio ArchSecure AI)
+    const renderStep2 = () => (
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-4">
+                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block tracking-[0.2em]">Nivel de Actividad Diaria</label>
+                <div className="grid grid-cols-1 gap-3">
+                    {[
+                        { val: 'Sedentario', desc: 'Sentado gran parte del día (Ej: Oficina)' },
+                        { val: 'Ligeramente Activo', desc: 'De pie o camina parte del día (Ej: Ventas)' },
+                        { val: 'Activo', desc: 'Constante movimiento (Ej: Mozo, Repositor)' },
+                        { val: 'Muy Activo', desc: 'Trabajo físico pesado (Ej: Construcción)' }
+                    ].map((opt) => (
+                        <button
+                            key={opt.val}
+                            onClick={() => updateNested('respuestas.estiloDeVida.actividad', opt.val)}
+                            className={`p-4 rounded-xl border text-left transition-all ${formData.respuestas.estiloDeVida.actividad === opt.val
+                                ? 'bg-naranja/10 border-naranja shadow-[0_0_20px_rgba(255,107,0,0.1)]'
+                                : 'bg-marino-3 border-marino-4 hover:border-naranja/30'
+                                }`}
+                        >
+                            <p className={`text-xs font-black uppercase tracking-widest ${formData.respuestas.estiloDeVida.actividad === opt.val ? 'text-naranja' : 'text-blanco'}`}>{opt.val}</p>
+                            <p className="text-[0.65rem] text-gris font-medium mt-1">{opt.desc}</p>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="space-y-4">
+                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block tracking-[0.2em]">Horas de Sueño Promedio</label>
+                <div className="flex flex-wrap gap-2">
+                    {['Menos de 6hs', '6 a 7 hs', '7 a 8 hs', 'Más de 8 hs'].map((opt) => (
+                        <button
+                            key={opt}
+                            onClick={() => updateNested('respuestas.estiloDeVida.sueno', opt)}
+                            className={`px-4 py-3 rounded-xl border text-[0.65rem] font-black uppercase tracking-widest transition-all ${formData.respuestas.estiloDeVida.sueno === opt
+                                ? 'bg-naranja border-naranja text-marino'
+                                : 'bg-marino-3 border-marino-4 text-gris'
+                                }`}
+                        >
+                            {opt}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderStep3 = () => (
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-4">
+                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block">¿Tomas algún medicamento o tienes alguna condición?</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {['Asma', 'Diabetes', 'Hipertensión', 'Lesiones previas', 'Cirugías recientes', 'Ninguna'].map((opt) => (
+                        <button
+                            key={opt}
+                            onClick={() => toggleArray('respuestas.saludMedica.condiciones', opt)}
+                            className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${formData.respuestas.saludMedica.condiciones.includes(opt)
+                                ? 'bg-naranja/20 border-naranja text-blanco'
+                                : 'bg-marino-3 border-marino-4 text-gris hover:border-naranja/50'
+                                }`}
+                        >
+                            <div className={`w-4 h-4 rounded border flex items-center justify-center ${formData.respuestas.saludMedica.condiciones.includes(opt) ? 'bg-naranja border-naranja' : 'border-marino-4'}`}>
+                                {formData.respuestas.saludMedica.condiciones.includes(opt) && <CheckCircle2 size={12} className="text-marino" />}
+                            </div>
+                            <span className="text-xs font-bold uppercase tracking-tight">{opt}</span>
+                        </button>
+                    ))}
+                </div>
+                <div className="space-y-2 mt-4">
+                    <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest ml-1">Otra condición o medicación</label>
+                    <input
+                        type="text"
+                        value={formData.respuestas.saludMedica.otrasCondiciones}
+                        onChange={(e) => updateNested('respuestas.saludMedica.otrasCondiciones', e.target.value)}
+                        className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco text-sm focus:border-naranja/50 outline-none transition-all"
+                        placeholder="Especificar aquí..."
+                    />
+                </div>
+            </div>
+
+            <div className="space-y-4">
+                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block">¿Tienes apto médico vigente?</label>
+                <div className="flex gap-4">
+                    {['Sí', 'No', 'En trámite'].map((opt) => (
+                        <button
+                            key={opt}
+                            onClick={() => updateNested('respuestas.saludMedica.aptoMedico', opt)}
+                            className={`flex-1 py-3 rounded-xl border font-black uppercase tracking-widest text-[0.65rem] transition-all ${formData.respuestas.saludMedica.aptoMedico === opt
+                                ? 'bg-naranja border-naranja text-marino'
+                                : 'bg-marino-3 border-marino-4 text-gris hover:border-naranja/50'
+                                }`}
+                        >
+                            {opt}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderStep4 = () => (
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <h2 className="text-2xl font-barlow-condensed font-black uppercase text-naranja mb-6 flex items-center gap-3">
+                <Dumbbell className="text-blanco" /> Experiencia y Objetivos
+            </h2>
+
+            <div className="space-y-4">
+                <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">¿Entrenás actualmente? *</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {["Sí, frecuentemente", "Sí, a veces", "No, hace tiempo", "Nunca"].map((opc) => (
+                        <button
+                            key={opc}
+                            onClick={() => updateNested('respuestas.experiencia.entrenaActualmente', opc)}
+                            className={`p-4 rounded-xl border text-left transition-all ${formData.respuestas.experiencia.entrenaActualmente === opc ? 'bg-naranja/10 border-naranja' : 'bg-marino-3 border-marino-4 hover:border-naranja/30'}`}
+                        >
+                            <span className={`text-xs font-black uppercase tracking-widest ${formData.respuestas.experiencia.entrenaActualmente === opc ? 'text-naranja' : 'text-blanco'}`}>{opc}</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="space-y-4">
+                <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Objetivos Principales *</label>
+                <div className="grid grid-cols-2 gap-3">
+                    {['Hipertrofia', 'Fuerza', 'Pérdida de Grasa', 'Salud/Bienestar', 'Rendimiento'].map((opt) => (
+                        <button
+                            key={opt}
+                            onClick={() => toggleArray('respuestas.objetivos.principales', opt)}
+                            className={`p-3 rounded-xl border transition-all ${formData.respuestas.objetivos.principales.includes(opt) ? 'bg-naranja/20 border-naranja text-blanco' : 'bg-marino-3 border-marino-4 text-gris'}`}
+                        >
+                            <span className="text-[0.65rem] font-black uppercase tracking-tight">{opt}</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="space-y-2">
+                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-1 block">¿Qué te motiva a empezar hoy?</label>
+                <textarea
+                    value={formData.respuestas.objetivos.motivacion}
+                    onChange={(e) => updateNested('respuestas.objetivos.motivacion', e.target.value)}
+                    className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco text-sm focus:border-naranja/50 outline-none transition-all resize-none h-24"
+                    placeholder="Tu por qué..."
+                ></textarea>
+            </div>
+        </div>
+    );
+
+    const renderStep5 = () => (
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <h2 className="text-2xl font-barlow-condensed font-black uppercase text-naranja mb-6 flex items-center gap-3">
+                <ClipboardCheck className="text-blanco" /> Logística y Disponibilidad
+            </h2>
+
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-1 block">Sesiones Semanales</label>
+                    <select
+                        value={formData.respuestas.disponibilidad.sesionesSemanales}
+                        onChange={(e) => updateNested('respuestas.disponibilidad.sesionesSemanales', e.target.value)}
+                        className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco text-xs focus:border-naranja/50 outline-none transition-all cursor-pointer"
+                    >
+                        <option value="">Seleccionar</option>
+                        <option value="1-2">1 a 2 días</option>
+                        <option value="3">3 días</option>
+                        <option value="4">4 días</option>
+                        <option value="5+">5 o más días</option>
+                    </select>
+                </div>
+                <div className="space-y-2">
+                    <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-1 block">Tiempo por Sesión</label>
+                    <select
+                        value={formData.respuestas.disponibilidad.tiempoSesion}
+                        onChange={(e) => updateNested('respuestas.disponibilidad.tiempoSesion', e.target.value)}
+                        className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco text-xs focus:border-naranja/50 outline-none transition-all cursor-pointer"
+                    >
+                        <option value="">Seleccionar</option>
+                        <option value="45min">~45 min</option>
+                        <option value="60min">~60 min</option>
+                        <option value="90min+">90 min o más</option>
+                    </select>
+                </div>
+            </div>
+
+            <div className="space-y-4">
+                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block">¿Dónde entrenarás?</label>
+                <div className="grid grid-cols-2 gap-3">
+                    {['Gimnasio', 'Casa', 'Parque', 'Sin Equipo'].map((opt) => (
+                        <button
+                            key={opt}
+                            onClick={() => updateNested('respuestas.disponibilidad.lugar', opt)}
+                            className={`p-3 rounded-xl border text-[0.65rem] font-black uppercase tracking-widest transition-all ${formData.respuestas.disponibilidad.lugar === opt ? 'bg-naranja border-naranja text-marino' : 'bg-marino-3 border-marino-4 text-gris'}`}
+                        >
+                            {opt}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="space-y-4">
+                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-1 block">Personalizacion y Notas</label>
+                <textarea
+                    value={formData.respuestas.personalizacion.notas}
+                    onChange={(e) => updateNested('respuestas.personalizacion.notas', e.target.value)}
+                    className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco text-sm focus:border-naranja/50 outline-none h-24 resize-none"
+                    placeholder="Cualquier otra información..."
+                ></textarea>
+            </div>
+
+            <div className="p-4 bg-marino-3 border-l-4 border-l-naranja rounded-r-xl">
+                <button
+                    onClick={() => updateNested('respuestas.consentimiento.declaracionFinal', !formData.respuestas.consentimiento.declaracionFinal)}
+                    className="flex items-start gap-3 text-left"
+                >
+                    <div className={`mt-1 w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-all ${formData.respuestas.consentimiento.declaracionFinal ? 'bg-naranja border-naranja' : 'border-marino-4'}`}>
+                        {formData.respuestas.consentimiento.declaracionFinal && <CheckCircle2 size={12} className="text-marino" />}
+                    </div>
+                    <div>
+                        <p className="text-[0.6rem] font-bold text-blanco uppercase tracking-widest leading-relaxed">
+                            Declaro que la información es fidedigna y estoy apto para realizar actividad física.
+                        </p>
+                    </div>
+                </button>
+            </div>
+        </div>
+    );
 
     return (
         <main className="min-h-screen bg-marino flex flex-col items-center p-4 md:p-8 relative overflow-hidden">
@@ -191,7 +431,7 @@ export default function InscripcionPage() {
 
                     {/* STEP 0: BIENVENIDA */}
                     {step === 0 && (
-                        <div className="space-y-8 fade-up visible">
+                        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                             <div className="space-y-4">
                                 <h2 className="text-2xl font-barlow-condensed font-black uppercase text-naranja">¡Bienvenido a IL Coaching!</h2>
                                 <p className="text-gris-claro leading-relaxed font-medium">
@@ -230,7 +470,7 @@ export default function InscripcionPage() {
 
                     {/* STEP 1: DATOS PERSONALES */}
                     {step === 1 && (
-                        <div className="space-y-6 fade-up visible">
+                        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                             <h2 className="text-2xl font-barlow-condensed font-black uppercase text-naranja mb-6 flex items-center gap-3">
                                 <User className="text-blanco" /> Datos Personales
                             </h2>
@@ -337,292 +577,58 @@ export default function InscripcionPage() {
                         </div>
                     )}
 
-                    {/* STEP 2: SALUD Y VIDA */}
+                    {/* STEP 2: ESTILO DE VIDA */}
                     {step === 2 && (
-                        <div className="space-y-8 fade-up visible">
+                        <div className="space-y-6">
                             <h2 className="text-2xl font-barlow-condensed font-black uppercase text-naranja mb-6 flex items-center gap-3">
-                                <Heart className="text-blanco" /> Salud y Estilo de Vida
+                                <Heart className="text-blanco" /> Estilo de Vida
                             </h2>
-
-                            <div className="space-y-4">
-                                <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Acta de Consentimiento *</label>
-                                <div className="space-y-3 bg-marino border border-marino-4 p-5 rounded-xl">
-                                    {[
-                                        "Entiendo que el entrenamiento implica esfuerzo físico",
-                                        "Comprendo los posibles riesgos asociados",
-                                        "Me me comprometo a informar cualquier molestia o síntoma",
-                                        "Autorizo el uso de mis datos para el diseño del programa"
-                                    ].map((texto, i) => (
-                                        <label key={i} className="flex items-start gap-3 cursor-pointer group">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.respuestas.salud.consentimiento}
-                                                onChange={(e) => updateNested('respuestas.salud.consentimiento', e.target.checked)}
-                                                className="mt-1 accent-naranja h-4 w-4 rounded border-marino-4"
-                                            />
-                                            <span className="text-xs text-gris-claro group-hover:text-blanco transition-colors">{texto}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">¿Tenés o tuviste alguna de estas condiciones? *</label>
-                                <div className="grid grid-cols-2 gap-3">
-                                    {["Hipertensión", "Diabetes", "Prob. Cardíacos", "Asma", "Lesiones Musc.", "Pie Plano/Arqueado"].map((cond) => (
-                                        <label key={cond} className="bg-marino border border-marino-4 p-4 rounded-xl flex items-center gap-3 cursor-pointer hover:border-naranja/50 transition-colors">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.respuestas.salud.condiciones.includes(cond)}
-                                                onChange={() => toggleArray('respuestas.salud.condiciones', cond)}
-                                                className="accent-naranja h-4 w-4"
-                                            />
-                                            <span className="text-xs text-blanco font-medium">{cond}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-marino-4">
-                                <div className="space-y-4">
-                                    <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Actividad Diaria *</label>
-                                    <div className="flex flex-col gap-2">
-                                        {["Sedentario", "Activo", "Muy Variado"].map((opc) => (
-                                            <label key={opc} className="flex items-center gap-3 p-3 bg-marino rounded-lg cursor-pointer">
-                                                <input
-                                                    type="radio"
-                                                    name="actividad"
-                                                    checked={formData.respuestas.estiloVida.actividad === opc}
-                                                    onChange={() => updateNested('respuestas.estiloVida.actividad', opc)}
-                                                    className="accent-naranja"
-                                                />
-                                                <span className="text-xs font-bold text-gris-claro">{opc}</span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="space-y-4">
-                                    <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Horas de Sueño *</label>
-                                    <div className="flex flex-col gap-2">
-                                        {["1 a 4 hs", "5 a 6 hs", "7 a 8 hs", "Más de 8 hs"].map((opc) => (
-                                            <label key={opc} className="flex items-center gap-3 p-3 bg-marino rounded-lg cursor-pointer">
-                                                <input
-                                                    type="radio"
-                                                    name="sueno"
-                                                    checked={formData.respuestas.estiloVida.sueno === opc}
-                                                    onChange={() => updateNested('respuestas.estiloVida.sueno', opc)}
-                                                    className="accent-naranja"
-                                                />
-                                                <span className="text-xs font-bold text-gris-claro">{opc}</span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
+                            {renderStep2()}
                         </div>
                     )}
 
-                    {/* STEP 3: EXPERIENCIA Y OBJETIVOS */}
+                    {/* STEP 3: SALUD Y CONDICIONES */}
                     {step === 3 && (
-                        <div className="space-y-8 fade-up visible">
+                        <div className="space-y-6">
                             <h2 className="text-2xl font-barlow-condensed font-black uppercase text-naranja mb-6 flex items-center gap-3">
-                                <Dumbbell className="text-blanco" /> Experiencia y Objetivos
+                                <ShieldCheck className="text-blanco" /> Salud y Condiciones
                             </h2>
-
-                            <div className="space-y-4">
-                                <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">¿Entrenás actualmente? *</label>
-                                <div className="grid grid-cols-2 gap-4">
-                                    {["Sí, frecuentemente", "Sí, a veces", "No, hace tiempo", "Nunca"].map((opc) => (
-                                        <label key={opc} className="bg-marino border border-marino-4 p-4 rounded-xl flex items-center gap-3 cursor-pointer hover:border-naranja/50 transition-colors">
-                                            <input
-                                                type="radio"
-                                                name="entrena"
-                                                checked={formData.respuestas.experiencia.entrenaActualmente === opc}
-                                                onChange={() => updateNested('respuestas.experiencia.entrenaActualmente', opc)}
-                                                className="accent-naranja"
-                                            />
-                                            <span className="text-xs text-blanco font-bold">{opc}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Objetivos Principales (Seleccioná varios) *</label>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                    {[
-                                        { l: "Fuerza", i: <Zap size={14} /> },
-                                        { l: "Hipertrofia", i: <Dumbbell size={14} /> },
-                                        { l: "Pérdida Grasa", i: <Zap size={14} /> },
-                                        { l: "Salud", i: <Heart size={14} /> }
-                                    ].map((obj) => (
-                                        <label key={obj.l} className="flex flex-col items-center gap-2 p-4 bg-marino border border-marino-4 rounded-xl cursor-pointer hover:border-naranja transition-all group">
-                                            <div className="text-gris group-hover:text-naranja transition-colors">{obj.i}</div>
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.respuestas.objetivos.principal.includes(obj.l)}
-                                                onChange={() => toggleArray('respuestas.objetivos.principal', obj.l)}
-                                                className="accent-naranja"
-                                            />
-                                            <span className="text-[0.6rem] font-black uppercase tracking-tighter text-gris-claro">{obj.l}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">¿Qué te motiva realmente a empezar hoy? (Opcional)</label>
-                                <textarea
-                                    value={formData.respuestas.objetivos.motivacion}
-                                    onChange={(e) => updateNested('respuestas.objetivos.motivacion', e.target.value)}
-                                    className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all h-24 resize-none"
-                                    placeholder="Contanos tu para qué..."
-                                ></textarea>
-                            </div>
+                            {renderStep3()}
                         </div>
                     )}
 
-                    {/* STEP 4: LOGÍSTICA Y EQUIPO */}
-                    {step === 4 && (
-                        <div className="space-y-8 fade-up visible">
-                            <h2 className="text-2xl font-barlow-condensed font-black uppercase text-naranja mb-6 flex items-center gap-3">
-                                <Clock className="text-blanco" /> Logística y Disponibilidad
-                            </h2>
+                    {/* STEP 4: EXPERIENCIA Y OBJETIVOS */}
+                    {step === 4 && renderStep4()}
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div className="space-y-4">
-                                    <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Sesiones por semana *</label>
-                                    <div className="grid grid-cols-4 gap-2">
-                                        {[2, 3, 4, 5, 6].map(num => (
-                                            <label key={num} className="bg-marino border border-marino-4 p-3 rounded-lg flex items-center justify-center cursor-pointer hover:border-naranja">
-                                                <input
-                                                    type="radio"
-                                                    name="sesiones"
-                                                    checked={formData.respuestas.logistica.sesionesSemana === num.toString()}
-                                                    onChange={() => updateNested('respuestas.logistica.sesionesSemana', num.toString())}
-                                                    className="hidden peer"
-                                                />
-                                                <span className="text-sm font-black text-gris-claro peer-checked:text-naranja">{num}</span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="space-y-4">
-                                    <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Tiempo por sesión *</label>
-                                    <select
-                                        value={formData.respuestas.logistica.tiempoSesion}
-                                        onChange={(e) => updateNested('respuestas.logistica.tiempoSesion', e.target.value)}
-                                        className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco outline-none"
-                                    >
-                                        <option value="">Seleccionar</option>
-                                        <option value="45min">45 min</option>
-                                        <option value="60min">60 min (Ideal)</option>
-                                        <option value="90min">90 min</option>
-                                        <option value="+2hs">+2 hs</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">¿Dónde vas a entrenar? *</label>
-                                <div className="grid grid-cols-3 gap-3">
-                                    {["Gimnasio Comercial", "Home Gym / Casa", "Parque / Aire Libre"].map(lugar => (
-                                        <label key={lugar} className="bg-marino border border-marino-4 p-4 rounded-xl flex flex-col items-center text-center gap-2 cursor-pointer hover:border-naranja">
-                                            <input
-                                                type="radio"
-                                                name="lugar"
-                                                checked={formData.respuestas.logistica.dondeEntrena === lugar}
-                                                onChange={() => updateNested('respuestas.logistica.dondeEntrena', lugar)}
-                                                className="accent-naranja"
-                                            />
-                                            <span className="text-[0.65rem] font-bold text-gris-claro uppercase">{lugar}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Equipamiento disponible (Seleccionar)</label>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                    {["Mancuernas", "Barra Olímpica", "Máquinas Polea", "Bandas Elásticas", "Kettlebells", "Peso Corporal"].map(eq => (
-                                        <label key={eq} className="flex items-center gap-3 p-3 bg-marino border border-marino-4 rounded-lg cursor-pointer hover:bg-marino-3">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.respuestas.logistica.equipamiento.includes(eq)}
-                                                onChange={() => toggleArray('respuestas.logistica.equipamiento', eq)}
-                                                className="accent-naranja"
-                                            />
-                                            <span className="text-[0.7rem] font-medium text-blanco/80">{eq}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* STEP 5: PERSONALIZACIÓN AVANZADA */}
-                    {step === 5 && (
-                        <div className="space-y-8 fade-up visible">
-                            <h2 className="text-2xl font-barlow-condensed font-black uppercase text-naranja mb-6 flex items-center gap-3">
-                                <ClipboardCheck className="text-blanco" /> Personalización Avanzada
-                            </h2>
-
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">¿Qué ejercicios NO te gusta hacer? (Opcional)</label>
-                                    <input
-                                        type="text"
-                                        value={formData.respuestas.personalizacion.noGusta}
-                                        onChange={(e) => updateNested('respuestas.personalizacion.noGusta', e.target.value)}
-                                        className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none"
-                                        placeholder="Ej: No me gusta hacer estocadas..."
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">¿Algo importante que deba saber?</label>
-                                    <textarea
-                                        value={formData.respuestas.personalizacion.notasImportantes}
-                                        onChange={(e) => updateNested('respuestas.personalizacion.notasImportantes', e.target.value)}
-                                        className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none h-24 resize-none"
-                                        placeholder="Algun detalle adicional..."
-                                    ></textarea>
-                                </div>
-                            </div>
-
-                            <div className="bg-marino shadow-inner p-6 rounded-2xl border border-naranja/20">
-                                <label className="flex items-start gap-4 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={formData.respuestas.personalizacion.declaracionFinal}
-                                        onChange={(e) => updateNested('respuestas.personalizacion.declaracionFinal', e.target.checked)}
-                                        className="mt-1 h-5 w-5 accent-naranja shrink-0"
-                                    />
-                                    <div className="space-y-1">
-                                        <p className="text-xs font-black uppercase text-blanco tracking-widest">Declaración Final *</p>
-                                        <p className="text-[0.65rem] text-gris-claro leading-relaxed">
-                                            Confirmo que la información brindada es verídica y me comprometo a informar cualquier cambio relevante en mi estado de salud durante el proceso.
-                                        </p>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    )}
+                    {/* STEP 5: LOGÍSTICA */}
+                    {step === 5 && renderStep5()}
 
                     {/* STEP 6: FINALIZAR */}
                     {step === 6 && (
-                        <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 fade-up visible">
+                        <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in duration-700">
                             {estadoEnviado === 'exito' ? (
                                 <>
-                                    <CheckCircle2 size={48} className="text-[#22C55E] mb-4" />
-                                    <p className="text-xl font-black uppercase text-blanco font-barlow-condensed tracking-tight">¡Formulario Recibido!</p>
-                                    <p className="text-sm text-gris max-w-xs mx-auto">Iñaki Legarreta ya tiene tu perfil. Se pondrá en contacto con vos pronto para comenzar.</p>
-                                    <Link href="/" className="mt-4 text-naranja text-[0.65rem] font-black uppercase tracking-[0.2em] border-b border-naranja/30 pb-1">Volver al inicio</Link>
+                                    <div className="p-6 bg-green-500/10 rounded-full">
+                                        <CheckCircle2 size={64} className="text-green-500" />
+                                    </div>
+                                    <h2 className="text-3xl font-barlow-condensed font-black uppercase text-blanco">¡Formulario Enviado!</h2>
+                                    <p className="text-gris max-w-sm mx-auto font-medium">Iñaki ya recibió tu perfil. Se pondrá en contacto con vos pronto para comenzar tu proceso.</p>
+                                    <Link href="/" className="px-8 py-3 bg-marino-3 border border-marino-4 text-blanco rounded-xl font-black uppercase tracking-widest text-xs hover:border-naranja transition-all mt-4">
+                                        Volver al Inicio
+                                    </Link>
                                 </>
                             ) : (
                                 <>
-                                    <Zap size={48} className="text-naranja mb-4 animate-pulse" />
-                                    <p className="text-sm font-medium text-blanco">Revisá tus respuestas antes de enviar.</p>
-                                    <p className="text-xs text-gris mt-1">Al confirmar, Iñaki recibirá toda tu información.</p>
+                                    <div className="p-6 bg-naranja/10 rounded-full animate-pulse">
+                                        <Target size={64} className="text-naranja" />
+                                    </div>
+                                    <h2 className="text-3xl font-barlow-condensed font-black uppercase text-blanco">¿Todo listo?</h2>
+                                    <p className="text-gris max-w-sm mx-auto font-medium">Al presionar &quot;Enviar&quot;, tus respuestas se guardarán en tu perfil de atleta para que tu coach pueda revisarlas.</p>
+                                    {estadoEnviado === 'error' && (
+                                        <p className="text-red-500 text-xs font-bold uppercase tracking-widest bg-red-500/10 p-3 rounded-lg border border-red-500/20 w-full mb-4">
+                                            Hubo un error al enviar. Por favor, reintenta.
+                                        </p>
+                                    )}
                                 </>
                             )}
                         </div>

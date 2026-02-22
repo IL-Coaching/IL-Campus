@@ -1,8 +1,7 @@
-/** Biblioteca Maestra de Ejercicios — IL-Campus */
-import { Plus } from "lucide-react";
 import { buscarEjercicios } from "@/nucleo/acciones/ejercicio.accion";
 import BibliotecaEjercicios from "./BibliotecaEjercicios";
 import BotonImportador from "./BotonImportador";
+import BotonAltaEjercicio from "./BotonAltaEjercicio";
 
 export default async function RutinasPage() {
     // Carga inicial de datos
@@ -24,9 +23,7 @@ export default async function RutinasPage() {
                     {ejerciciosIniciales.length === 0 && (
                         <BotonImportador />
                     )}
-                    <button className="bg-naranja hover:bg-naranja-h transition-all text-marino font-black px-6 py-2.5 rounded-lg uppercase tracking-widest font-barlow-condensed text-sm flex items-center gap-2 shadow-lg shadow-naranja/20">
-                        <Plus size={18} /> Nuevo Ejercicio
-                    </button>
+                    <BotonAltaEjercicio />
                 </div>
             </div>
 

@@ -12,32 +12,35 @@ interface RespuestasInscripcion {
         altura?: string;
         ubicacion?: string;
     };
-    salud?: {
+    saludMedica?: {
         condiciones?: string[];
-        consentimiento?: boolean;
-        aptoMedico?: string | boolean;
+        otrasCondiciones?: string;
+        aptoMedico?: string;
     };
-    estiloVida?: {
+    estiloDeVida?: {
         actividad?: string;
         sueno?: string;
     };
     experiencia?: {
         entrenaActualmente?: string;
-        tiempoEntrenando?: string;
+        tiempo?: string;
     };
     objetivos?: {
-        principal?: string[];
+        principales?: string[];
         motivacion?: string;
     };
-    logistica?: {
-        sesionesSemana?: string;
+    disponibilidad?: {
+        sesionesSemanales?: string;
         tiempoSesion?: string;
-        dondeEntrena?: string;
+        lugar?: string;
         equipamiento?: string[];
     };
     personalizacion?: {
         noGusta?: string;
-        notasImportantes?: string;
+        notas?: string;
+    };
+    consentimiento?: {
+        aceptado?: boolean;
         declaracionFinal?: boolean;
     };
 }
@@ -74,36 +77,13 @@ export async function enviarFormularioInscripcion(datos: {
                 whatsapp: datos.telefono,
                 email: datos.email,
             },
-            saludMedica: {
-                condiciones: datos.respuestas.salud?.condiciones,
-                aptoMedico: datos.respuestas.salud?.aptoMedico,
-            },
-            estiloDeVida: {
-                actividad: datos.respuestas.estiloVida?.actividad,
-                sueno: datos.respuestas.estiloVida?.sueno,
-            },
-            experiencia: {
-                entrenaActualmente: datos.respuestas.experiencia?.entrenaActualmente,
-                tiempo: datos.respuestas.experiencia?.tiempoEntrenando,
-            },
-            objetivos: {
-                principales: datos.respuestas.objetivos?.principal,
-                motivacion: datos.respuestas.objetivos?.motivacion,
-            },
-            disponibilidad: {
-                sesionesSemana: datos.respuestas.logistica?.sesionesSemana,
-                tiempoSesion: datos.respuestas.logistica?.tiempoSesion,
-                lugar: datos.respuestas.logistica?.dondeEntrena,
-                equipamiento: datos.respuestas.logistica?.equipamiento,
-            },
-            personalizacion: {
-                noGusta: datos.respuestas.personalizacion?.noGusta,
-                notas: datos.respuestas.personalizacion?.notasImportantes,
-            },
-            consentimiento: {
-                aceptado: datos.respuestas.salud?.consentimiento,
-                declaracionFinal: datos.respuestas.personalizacion?.declaracionFinal
-            }
+            saludMedica: datos.respuestas.saludMedica,
+            estiloDeVida: datos.respuestas.estiloDeVida,
+            experiencia: datos.respuestas.experiencia,
+            objetivos: datos.respuestas.objetivos,
+            disponibilidad: datos.respuestas.disponibilidad,
+            personalizacion: datos.respuestas.personalizacion,
+            consentimiento: datos.respuestas.consentimiento
         };
 
         const result = await ClienteServicio.crearProspectoConFormulario({

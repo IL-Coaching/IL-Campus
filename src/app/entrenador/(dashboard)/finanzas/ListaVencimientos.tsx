@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { AlertCircle, CheckCircle2, DollarSign, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import ModalRegistrarPago from "./ModalRegistrarPago";
+import ModalRegistrarPago from "@/app/entrenador/(dashboard)/finanzas/ModalRegistrarPago";
 
 export interface Vencimiento {
     id: string;

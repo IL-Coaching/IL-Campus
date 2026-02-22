@@ -12,6 +12,9 @@ import { MacrocicloCompleto, ClientePlanificacion, BloqueConSemanas, SemanaConDi
 import { crearNuevoMacrociclo, agregarEjercicio } from '@/nucleo/acciones/planificacion.accion';
 import { Loader2, Settings } from 'lucide-react';
 
+import ModalConfigurarMacro from './componentes/ModalConfigurarMacro';
+import ModalNuevoMesociclo from './componentes/ModalNuevoMesociclo';
+
 type NivelVista = 'macro' | 'meso' | 'micro' | 'sesion';
 
 interface ConstructorClienteProps {
@@ -26,6 +29,8 @@ export default function ConstructorCliente({ cliente, macrocicloInicial }: Const
     const [semanaActiva, setSemanaActiva] = useState(1);
     const [diaActivo, setDiaActivo] = useState('Lunes');
     const [buscadorOpen, setBuscadorOpen] = useState(false);
+    const [configurarMacroOpen, setConfigurarMacroOpen] = useState(false);
+    const [nuevoMesoOpen, setNuevoMesoOpen] = useState(false);
     const [creandoPlan, setCreandoPlan] = useState(false);
 
     const router = useRouter();
@@ -115,8 +120,8 @@ export default function ConstructorCliente({ cliente, macrocicloInicial }: Const
                                 <VistaMacrociclo
                                     macrociclo={macrocicloInicial}
                                     onSelectMeso={(n) => { setMesActivo(n); irA('meso'); }}
-                                    onConfigurar={() => alert("Módulo de configuración de Macrociclo (nombre, duración, fechas) estará disponible en la próxima versión.")}
-                                    onNuevoMesociclo={() => alert("Función para agregar un nuevo mesociclo a la planificación actual próximamente.")}
+                                    onConfigurar={() => setConfigurarMacroOpen(true)}
+                                    onNuevoMesociclo={() => setNuevoMesoOpen(true)}
                                 />
                             )}
 
@@ -170,6 +175,20 @@ export default function ConstructorCliente({ cliente, macrocicloInicial }: Const
                             }
                         }
                     }}
+                />
+            )}
+
+            {configurarMacroOpen && macrocicloInicial && (
+                <ModalConfigurarMacro
+                    macrociclo={macrocicloInicial}
+                    onClose={() => setConfigurarMacroOpen(false)}
+                />
+            )}
+
+            {nuevoMesoOpen && macrocicloInicial && (
+                <ModalNuevoMesociclo
+                    macrociclo={macrocicloInicial}
+                    onClose={() => setNuevoMesoOpen(false)}
                 />
             )}
         </div>

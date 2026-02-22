@@ -71,17 +71,21 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                     <div className="space-y-5 animate-in fade-in slide-in-from-left-2">
                         <div>
                             <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Objetivo Principal</span>
-                            <p className="text-[0.82rem] text-blanco font-bold">{cliente?.formularioInscripcion?.objetivos?.principal || 'No definido'}</p>
+                            <p className="text-[0.82rem] text-blanco font-bold">
+                                {cliente?.formularioInscripcion?.objetivos?.principal ||
+                                    cliente?.formularioInscripcion?.objetivos?.principales?.join(', ') ||
+                                    'No definido'}
+                            </p>
                         </div>
                         <div>
                             <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Plazo Deseado</span>
                             <p className="text-[0.82rem] text-gris-claro font-medium">{cliente?.formularioInscripcion?.objetivos?.plazo || 'Sin especificar'}</p>
                         </div>
-                        {cliente?.formularioInscripcion?.objetivos?.motivacionReal && (
+                        {(cliente?.formularioInscripcion?.objetivos?.motivacionReal || cliente?.formularioInscripcion?.objetivos?.motivacion) && (
                             <div>
                                 <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Motivación Real</span>
                                 <p className="text-[0.82rem] text-gris-claro font-light leading-relaxed italic">
-                                    &quot;{cliente.formularioInscripcion.objetivos.motivacionReal}&quot;
+                                    &quot;{cliente.formularioInscripcion.objetivos.motivacionReal || cliente.formularioInscripcion.objetivos.motivacion}&quot;
                                 </p>
                             </div>
                         )}
@@ -92,11 +96,17 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                     <div className="space-y-5 animate-in fade-in slide-in-from-left-2">
                         <div>
                             <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Sesiones por Semana</span>
-                            <p className="text-[0.82rem] text-blanco font-bold">{cliente?.formularioInscripcion?.disponibilidad?.diasSemana || '--'} días</p>
+                            <p className="text-[0.82rem] text-blanco font-bold">
+                                {cliente?.formularioInscripcion?.disponibilidad?.diasSemana ||
+                                    cliente?.formularioInscripcion?.disponibilidad?.sesionesSemana || '--'} días
+                            </p>
                         </div>
                         <div>
                             <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Duración Sesión</span>
-                            <p className="text-[0.82rem] text-gris-claro font-medium">{cliente?.formularioInscripcion?.disponibilidad?.minutosSesion || '--'} min</p>
+                            <p className="text-[0.82rem] text-gris-claro font-medium">
+                                {cliente?.formularioInscripcion?.disponibilidad?.minutosSesion ||
+                                    cliente?.formularioInscripcion?.disponibilidad?.tiempoSesion || '--'}
+                            </p>
                         </div>
                         <div>
                             <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Equipamiento</span>
@@ -119,13 +129,15 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                 {tabActiva === 2 && (
                     <div className="space-y-5 animate-in fade-in slide-in-from-left-2">
                         <div>
-                            <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Lesiones / Patologías</span>
+                            <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Salud / Condiciones</span>
                             <p className="text-[0.82rem] text-gris-claro leading-relaxed">
-                                {cliente?.formularioInscripcion?.saludMedica?.lesiones || 'Ninguna reportada'}
+                                {cliente?.formularioInscripcion?.saludMedica?.lesiones ||
+                                    cliente?.formularioInscripcion?.saludMedica?.condiciones?.join(', ') ||
+                                    'Ninguna reportada'}
                             </p>
                         </div>
                         <div>
-                            <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Medicación</span>
+                            <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Medicación / Otros</span>
                             <p className="text-[0.82rem] text-gris-claro leading-relaxed">
                                 {cliente?.formularioInscripcion?.saludMedica?.medicacion || 'Ninguna'}
                             </p>
