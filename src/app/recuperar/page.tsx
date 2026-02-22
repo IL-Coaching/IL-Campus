@@ -4,7 +4,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, Key, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 
-export default function RecuperarPasswordPage() {
+import { Suspense } from 'react';
+
+function RecuperarContent() {
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
 
@@ -15,6 +17,18 @@ export default function RecuperarPasswordPage() {
 
     // Si HAY token, el flujo es ESTABLECER nueva clave
     return <EstablecerNuevaClave token={token} />;
+}
+
+export default function RecuperarPasswordPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-marino flex items-center justify-center">
+                <Loader2 className="animate-spin text-naranja" size={48} />
+            </div>
+        }>
+            <RecuperarContent />
+        </Suspense>
+    );
 }
 
 // ----------------------------------------------------
