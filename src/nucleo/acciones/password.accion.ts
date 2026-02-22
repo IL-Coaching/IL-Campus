@@ -67,3 +67,44 @@ export async function solicitarReseteoPassword(formData: FormData) {
         return { error: "Ocurrió un error inesperado al procesar tu solicitud." };
     }
 }
+
+/**
+ * Genera un link de reseteo manualmente para que el entrenador se lo pase al cliente
+ * por fuera de email (Ej: WhatsApp).
+ */
+export async function generarLinkRecuperacionManual(clienteId: string) {
+    try {
+        const cliente = await prisma.cliente.findUnique({
+            where: { id: clienteId }
+        });
+
+        if (!cliente || !cliente.activo) {
+            return { error: "Cliente no encontrado o inactivo." };
+        }
+
+        // 1. Crear Token (más duración, ej 24hs por ser envío manual)
+        const token = CriptoServicio.generateRandomToken(48);
+        const expires = new Date(Date.now() + 24 * 60 * 60000); // 24 horas
+
+        const accessor = (prisma.cliente as unknown) as {
+            update: (args: { where: { id: string }, data: Record<string, unknown> }) => Promise<unknown>
+        };
+
+        await accessor.update({
+            where: { id: cliente.id },
+            data: {
+                passwordResetToken: token,
+                passwordResetExpires: expires
+            }
+        });
+
+        // 2. Construir link
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const urlReseteo = `${baseUrl}/recuperar?token=${token}`;
+
+        return { success: true, link: urlReseteo };
+    } catch (error) {
+        console.error("Error al generar link manual:", error);
+        return { error: "No se pudo generar el link de recuperación." };
+    }
+}

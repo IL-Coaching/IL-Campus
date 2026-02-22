@@ -9,10 +9,15 @@ import {
     Zap, // Added Zap for Ciclo
     ChevronLeft,
     ChevronRight,
-    Info // Added Info for notes
+    Info, // Added Info for notes
+    ShieldAlert,
+    Copy,
+    CheckCircle2,
+    Loader2
 } from 'lucide-react';
 
 import { ClientePlanificacion } from '@/nucleo/tipos/planificacion.tipos';
+import { generarLinkRecuperacionManual } from '@/nucleo/acciones/password.accion';
 
 interface SidebarPerfilProps {
     cliente: ClientePlanificacion;
@@ -29,7 +34,31 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
         { id: 3, icon: Heart, label: 'Preferencias' },
         { id: 5, icon: Zap, label: 'Ciclo' }, // New tab
         { id: 4, icon: User, label: 'Métricas' },
+        { id: 6, icon: ShieldAlert, label: 'Cuenta' },
     ];
+
+    const [generandoLink, setGenerandoLink] = useState(false);
+    const [linkRecuperacion, setLinkRecuperacion] = useState<string | null>(null);
+    const [copiado, setCopiado] = useState(false);
+
+    const handleGenerarLink = async () => {
+        setGenerandoLink(true);
+        const result = await generarLinkRecuperacionManual(cliente.id);
+        setGenerandoLink(false);
+
+        if (result.success && result.link) {
+            setLinkRecuperacion(result.link);
+        } else {
+            alert(result.error || "Ocurrió un error al generar el link.");
+        }
+    };
+
+    const copiarLink = () => {
+        if (!linkRecuperacion) return;
+        navigator.clipboard.writeText(linkRecuperacion);
+        setCopiado(true);
+        setTimeout(() => setCopiado(false), 3000);
+    };
 
     if (colapsado) {
         return (
@@ -210,6 +239,43 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                     <div className="space-y-5 animate-in fade-in slide-in-from-left-2">
                         <div className="p-4 bg-naranja/5 border border-naranja/10 rounded-xl text-center">
                             <p className="text-xs text-gris italic">Gráfica de métricas corporales llegará pronto.</p>
+                        </div>
+                    </div>
+                )}
+
+                {tabActiva === 6 && (
+                    <div className="space-y-5 animate-in fade-in slide-in-from-left-2">
+                        <div>
+                            <div className="flex items-center gap-2 mb-2">
+                                <ShieldAlert size={16} className="text-naranja" />
+                                <span className="text-[0.65rem] text-naranja font-black uppercase tracking-widest block">Acceso y Seguridad</span>
+                            </div>
+                            <p className="text-[0.7rem] text-gris leading-relaxed font-medium mb-4">
+                                Si el cliente olvidó su contraseña o nunca la generó, puedes crear un link de un solo uso válido por 24 horas y enviárselo manualmente.
+                            </p>
+
+                            {!linkRecuperacion ? (
+                                <button
+                                    onClick={handleGenerarLink}
+                                    disabled={generandoLink}
+                                    className="w-full flex items-center justify-center gap-2 py-3 bg-marino-3 border border-marino-4 hover:border-naranja/50 rounded-lg text-xs font-bold text-blanco uppercase tracking-widest transition-all disabled:opacity-50 group"
+                                >
+                                    {generandoLink ? <Loader2 size={16} className="animate-spin text-naranja" /> : <ShieldAlert size={16} className="text-gris group-hover:text-naranja transition-colors" />}
+                                    Generar Link de Recuperación
+                                </button>
+                            ) : (
+                                <div className="bg-marino border border-naranja/50 rounded-xl p-4 flex flex-col items-center gap-2 relative group animate-in zoom-in-95">
+                                    <span className="text-[0.65rem] text-naranja font-black uppercase tracking-widest text-center">Link Generado Exitosamente</span>
+                                    <p className="text-[0.6rem] text-gris text-center italic break-all px-2">{linkRecuperacion}</p>
+
+                                    <button
+                                        onClick={copiarLink}
+                                        className="mt-3 flex items-center gap-2 text-[0.65rem] uppercase font-black tracking-widest px-4 py-2.5 bg-naranja/10 text-naranja hover:bg-naranja hover:text-marino transition-colors rounded-lg w-full justify-center"
+                                    >
+                                        {copiado ? <><CheckCircle2 size={16} /> Link Copiado</> : <><Copy size={16} /> Copiar para WhatsApp</>}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
