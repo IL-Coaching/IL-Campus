@@ -11,7 +11,9 @@ import { revalidatePath } from "next/cache";
  */
 export async function actualizarCredencialesAdmin(data: { email?: string, password?: string }) {
     try {
-        const entrenador = await getEntrenadorSesion();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const entrenador = await getEntrenadorSesion() as any;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const updateData: any = {};
 
         if (data.email) updateData.email = data.email;
@@ -19,14 +21,14 @@ export async function actualizarCredencialesAdmin(data: { email?: string, passwo
             updateData.password = await CriptoServicio.hashPassword(data.password);
         }
 
-        await prisma.entrenador.update({
+        await (prisma.entrenador as any).update({
             where: { id: entrenador.id },
             data: updateData
         });
 
         revalidatePath('/entrenador/configuracion');
         return { success: true };
-    } catch (error) {
+    } catch {
         return { error: "No se pudo actualizar el perfil." };
     }
 }
@@ -37,13 +39,14 @@ export async function actualizarCredencialesAdmin(data: { email?: string, passwo
  */
 export async function iniciarConfiguracionMFA() {
     try {
-        const entrenador = await getEntrenadorSesion();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const entrenador = await getEntrenadorSesion() as any;
         const secreto = MFAServicio.generarSecreto();
         const uri = MFAServicio.generarURI(entrenador.email, secreto);
         const qr = await MFAServicio.generarQR(uri);
 
         return { success: true, qr, secreto };
-    } catch (error) {
+    } catch {
         return { error: "Error al iniciar configuración MFA." };
     }
 }
@@ -53,22 +56,23 @@ export async function iniciarConfiguracionMFA() {
  */
 export async function activarMFA(token: string, secreto: string) {
     try {
-        const entrenador = await getEntrenadorSesion();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const entrenador = await getEntrenadorSesion() as any;
 
         const esValido = MFAServicio.verificarToken(token, secreto);
         if (!esValido) return { error: "Código incorrecto." };
 
-        await prisma.entrenador.update({
+        await (prisma.entrenador as any).update({
             where: { id: entrenador.id },
             data: {
-                mfaSecret: secreto, // Ahora guardamos el secreto real
+                mfaSecret: secreto,
                 mfaEnabled: true
             }
         });
 
         revalidatePath('/entrenador/configuracion');
         return { success: true };
-    } catch (error) {
+    } catch {
         return { error: "No se pudo activar el MFA." };
     }
 }
@@ -78,8 +82,9 @@ export async function activarMFA(token: string, secreto: string) {
  */
 export async function desactivarMFA() {
     try {
-        const entrenador = await getEntrenadorSesion();
-        await prisma.entrenador.update({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const entrenador = await getEntrenadorSesion() as any;
+        await (prisma.entrenador as any).update({
             where: { id: entrenador.id },
             data: {
                 mfaSecret: null,
@@ -88,7 +93,7 @@ export async function desactivarMFA() {
         });
         revalidatePath('/entrenador/configuracion');
         return { success: true };
-    } catch (error) {
+    } catch {
         return { error: "No se pudo desactivar." };
     }
 }

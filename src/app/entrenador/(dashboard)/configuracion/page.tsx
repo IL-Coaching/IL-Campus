@@ -1,10 +1,10 @@
 import { Shield, User, Camera, Mail, Phone } from "lucide-react";
 import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";
 import GestionSeguridadAdmin from "./componentes/GestionSeguridadAdmin";
-import { actualizarCredencialesAdmin } from "@/nucleo/acciones/admin.accion";
 
 export default async function ConfiguracionPage() {
-    const entrenador = await getEntrenadorSesion();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const entrenador = await getEntrenadorSesion() as any;
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700">

@@ -1,4 +1,5 @@
 import * as otplib from 'otplib';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const { authenticator } = otplib as any;
 import QRCode from 'qrcode';
 

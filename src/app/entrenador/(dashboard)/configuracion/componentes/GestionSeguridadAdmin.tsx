@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react";
-import { Shield, Key, Smartphone, CheckCircle2, XCircle, Loader2, QrCode } from "lucide-react";
+import { Key, Smartphone, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import Image from "next/image";
 import { actualizarCredencialesAdmin, iniciarConfiguracionMFA, activarMFA, desactivarMFA } from "@/nucleo/acciones/admin.accion";
 
 interface Props {
@@ -15,7 +16,6 @@ export default function GestionSeguridadAdmin({ entrenador }: Props) {
     const [loading, setLoading] = useState(false);
     const [mfaConfig, setMfaConfig] = useState<{ qr: string, secreto: string } | null>(null);
     const [mfaToken, setMfaToken] = useState("");
-    const [error, setError] = useState<string | null>(null);
 
     // Manejo de cambio de Password
     const handleCambiarPassword = async () => {
@@ -38,7 +38,7 @@ export default function GestionSeguridadAdmin({ entrenador }: Props) {
         if (res.success && res.qr && res.secreto) {
             setMfaConfig({ qr: res.qr, secreto: res.secreto });
         } else {
-            setError(res.error || "No se pudo iniciar MFA.");
+            console.error(res.error || "No se pudo iniciar MFA.");
         }
     };
 
@@ -133,8 +133,14 @@ export default function GestionSeguridadAdmin({ entrenador }: Props) {
                 {mfaConfig && (
                     <div className="mt-6 p-6 bg-marino-3 rounded-2xl border border-naranja/20 animate-in zoom-in-95 duration-300">
                         <div className="flex flex-col md:flex-row gap-8 items-center">
-                            <div className="bg-blanco p-2 rounded-xl shadow-2xl">
-                                <img src={mfaConfig.qr} alt="MFA QR" className="w-32 h-32" />
+                            <div className="bg-blanco p-2 rounded-xl shadow-2xl relative w-32 h-32">
+                                <Image
+                                    src={mfaConfig.qr}
+                                    alt="MFA QR"
+                                    fill
+                                    className="object-contain p-1"
+                                    unoptimized
+                                />
                             </div>
                             <div className="flex-1 space-y-4">
                                 <p className="text-xs text-blanco leading-relaxed">

@@ -34,7 +34,7 @@ export async function loginEntrenador(formData: FormData) {
         }
 
         // Si el MFA está habilitado, no iniciamos sesión aún.
-        // Si el MFA está habilitado, no iniciamos sesión aún.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if ((entrenador as any).mfaEnabled) {
             return { success: true, mfaRequired: true, adminId: entrenador.id };
         }
@@ -58,11 +58,13 @@ export async function verificarMFALogin(adminId: string, token: string) {
             where: { id: adminId }
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (!entrenador || !(entrenador as any).mfaSecret) {
             return { error: "Acceso denegado o MFA no configurado." };
         }
 
         const { MFAServicio } = await import("@/nucleo/seguridad/mfa");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const esValido = MFAServicio.verificarToken(token, (entrenador as any).mfaSecret);
 
         if (!esValido) {
@@ -108,7 +110,7 @@ export async function loginAlumno(formData: FormData) {
         }
 
         // Actualizar último login
-        // Actualizar último login
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (prisma.cliente as any).update({
             where: { id: cliente.id },
             data: { lastLogin: new Date() }
