@@ -46,7 +46,7 @@ export default function SidebarEntrenador() {
                     } pt-16 md:pt-0`}
             >
                 {/* Header Logo */}
-                <div className="hidden md:flex flex-col h-20 items-center justify-center border-b border-marino-4">
+                <div className="hidden md:flex flex-col h-24 pt-4 items-center justify-center border-b border-marino-4">
                     {/* Logo IL */}
                     <div className="flex items-center gap-1 text-gris-claro">
                         <div className="w-1.5 h-6 bg-gris-claro rounded-sm"></div>

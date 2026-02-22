@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react";
-import { X, CheckCircle2, Calendar, CreditCard } from "lucide-react";
+import { X, CheckCircle2, Calendar, CreditCard, Shield } from "lucide-react";
 import { asignarMembresia } from "@/nucleo/acciones/cliente.accion";
 
 interface Plan {
@@ -90,18 +90,18 @@ export default function ModalAsignarPlan({ clienteId, clienteNombre, planes, onC
                         <div className="grid grid-cols-1 gap-2">
                             {planes.length === 0 ? (
                                 <div className="p-8 border border-dashed border-marino-4 rounded-xl text-center space-y-4">
-                                    <p className="text-xs text-gris italic">No has creado planes de asesoría todavía.</p>
+                                    <p className="text-xs text-gris italic">No se encontraron los planes del flyer en tu cuenta.</p>
                                     <button
                                         type="button"
                                         onClick={async () => {
                                             setIsSubmitting(true);
-                                            const { cargarPlanesOficiales } = await import("@/nucleo/acciones/biblioteca.accion");
-                                            await cargarPlanesOficiales();
+                                            const { sincronizarPlanesMaestros } = await import("@/nucleo/acciones/biblioteca.accion");
+                                            await sincronizarPlanesMaestros();
                                             window.location.reload();
                                         }}
-                                        className="text-[0.6rem] font-black text-naranja uppercase tracking-widest border border-naranja/30 px-4 py-2 rounded-lg hover:bg-naranja/10 transition-all"
+                                        className="text-[0.6rem] font-black text-naranja uppercase tracking-widest border border-naranja/30 px-4 py-2 rounded-lg hover:bg-naranja/10 transition-all flex items-center justify-center gap-2 mx-auto"
                                     >
-                                        Provisionar Planes Maestros
+                                        <Shield size={12} /> Sincronizar con Flyer Oficial
                                     </button>
                                 </div>
                             ) : (

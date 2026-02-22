@@ -120,11 +120,38 @@ const BIBLIOTECA_OFICIAL = [
 ];
 
 const PLANES_OFICIALES = [
-    { nombre: "Sesión Suelta", precio: 2500, duracionDias: 1, visible: true },
-    { nombre: "Plan Mensual / 4 Semanas", precio: 15000, duracionDias: 30, visible: true },
-    { nombre: "Plan Trimestral / 12 Semanas", precio: 40000, duracionDias: 90, visible: true },
-    { nombre: "Plan Semestral / 24 Semanas", precio: 75000, duracionDias: 180, visible: true },
+    { nombre: "Nivel 1 - Start ★", precio: 15000, duracionDias: 30, visible: true },
+    { nombre: "Nivel 2 - GymRat 🧠", precio: 40000, duracionDias: 90, visible: true },
+    { nombre: "Nivel 3 - Elite 🚀", precio: 125000, duracionDias: 365, visible: true },
 ];
+
+export async function sincronizarPlanesMaestros() {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        // 1. Marcar planes viejos como invisibles (para no borrar historial de asignaciones)
+        await prisma.plan.updateMany({
+            where: { entrenadorId: entrenador.id, visible: true },
+            data: { visible: false }
+        });
+
+        // 2. Crear los nuevos planes del flyer
+        for (const plan of PLANES_OFICIALES) {
+            await prisma.plan.create({
+                data: {
+                    ...plan,
+                    entrenadorId: entrenador.id,
+                    beneficios: ["Plan Personalizado", "Seguimiento Directo", "Guía de Entrenamiento"]
+                }
+            });
+        }
+
+        return { exito: true };
+    } catch (error) {
+        console.error("Error al sincronizar planes:", error);
+        return { error: "No se pudieron actualizar los planes." };
+    }
+}
 
 export async function cargarPlanesOficiales() {
     try {
