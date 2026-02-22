@@ -2,6 +2,7 @@
 
 import { prisma } from "@/baseDatos/conexion";
 import { getEntrenadorSesion } from "../seguridad/sesion";
+import { BIBLIOTECA_EXTENSA } from "../constantes/biblioteca_data";
 
 const BIBLIOTECA_OFICIAL = [
     // --- HOMBROS / EMPUJE VERTICAL ---
@@ -180,7 +181,10 @@ export async function cargarBibliotecaOficial() {
         const entrenador = await getEntrenadorSesion();
 
         let creados = 0;
-        for (const exe of BIBLIOTECA_OFICIAL) {
+        // Combinamos la oficial (que ya estaba) con la extensa (extraída de los extras)
+        const bibliotecaCompleta = [...BIBLIOTECA_OFICIAL, ...BIBLIOTECA_EXTENSA];
+
+        for (const exe of bibliotecaCompleta) {
             // Evitar duplicados por nombre para el mismo entrenador
             const existe = await prisma.ejercicio.findFirst({
                 where: { nombre: exe.nombre, entrenadorId: entrenador.id }
