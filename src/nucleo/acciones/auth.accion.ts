@@ -1,23 +1,10 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import * as otplib from 'otplib';
+import { OTP } from 'otplib';
 
-// Tipado estricto para otplib
-interface AuthenticatorMod {
-    check: (token: string, secret: string) => boolean;
-}
-
-/**
- * Acceso resiliente al authenticator para el login
- */
-const getAuthLogin = (): AuthenticatorMod => {
-    const otp = otplib as unknown as { authenticator?: AuthenticatorMod, default?: { authenticator?: AuthenticatorMod }, check?: unknown };
-    const instance = otp.authenticator || otp.default?.authenticator || (typeof otp.check === 'function' ? otp : null);
-    return instance as AuthenticatorMod;
-};
-
-const authenticator = getAuthLogin();
+// Instancia global estable de OTP para TOTP (compatible con Vercel/NextJS)
+const otp = new OTP({ strategy: 'totp' });
 
 import { prisma } from "@/baseDatos/conexion";
 import { CriptoServicio } from "@/nucleo/seguridad/cripto";
@@ -100,9 +87,9 @@ export async function verificarMFALogin(adminId: string, token: string) {
             return { error: "MFA no configurado." };
         }
 
-        const esValido = authenticator.check(token, entrenador.mfaSecret);
+        const result = otp.verifySync({ token, secret: entrenador.mfaSecret });
 
-        if (!esValido) {
+        if (!result.valid) {
             return { error: "Código incorrecto." };
         }
 
