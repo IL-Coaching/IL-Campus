@@ -39,8 +39,7 @@ export const CobroServicio = {
                 cliente: true,
                 plan: true,
                 cobros: {
-                    orderBy: { fecha: 'desc' },
-                    take: 1
+                    orderBy: { fecha: 'desc' }
                 }
             },
             orderBy: { fechaVencimiento: 'asc' }
@@ -57,6 +56,7 @@ export const CobroServicio = {
         metodo: string;
         periodoDesde: Date;
         periodoHasta: Date;
+        comprobanteUrl?: string; // ADDED
     }) {
         return await prisma.cobro.create({
             data: {
@@ -65,8 +65,27 @@ export const CobroServicio = {
                 montoArs: data.monto,
                 metodo: data.metodo,
                 periodoDesde: data.periodoDesde,
-                periodoHasta: data.periodoHasta
+                periodoHasta: data.periodoHasta,
+                comprobanteUrl: data.comprobanteUrl
             }
+        });
+    },
+
+    /**
+     * Anula (elimina) un cobro específico si pertenece a un cliente del entrenador.
+     */
+    async anularCobro(cobroId: string, entrenadorId: string) {
+        const cobro = await prisma.cobro.findUnique({
+            where: { id: cobroId },
+            include: { cliente: true }
+        });
+
+        if (!cobro || cobro.cliente.entrenadorId !== entrenadorId) {
+            throw new Error("No tienes permiso para anular este cobro o no existe.");
+        }
+
+        return await prisma.cobro.delete({
+            where: { id: cobroId }
         });
     }
 };

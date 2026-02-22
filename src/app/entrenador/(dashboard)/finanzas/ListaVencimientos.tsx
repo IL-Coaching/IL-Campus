@@ -6,6 +6,7 @@ import { es } from "date-fns/locale";
 import { AlertCircle, CheckCircle2, DollarSign, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import ModalRegistrarPago from "@/app/entrenador/(dashboard)/finanzas/ModalRegistrarPago";
+import ModalCobrosHistorial from "@/app/entrenador/(dashboard)/finanzas/ModalCobrosHistorial";
 
 export interface Vencimiento {
     id: string;
@@ -14,7 +15,12 @@ export interface Vencimiento {
     plan: { nombre: string, precio: number };
     cobros: {
         id: string;
+        fecha: Date;
+        montoArs: number;
+        metodo: string;
+        periodoDesde: Date;
         periodoHasta: Date;
+        comprobanteUrl: string | null;
     }[];
 }
 
@@ -24,6 +30,7 @@ interface Props {
 
 export default function ListaVencimientos({ vencimientos }: Props) {
     const [cobroSeleccionado, setCobroSeleccionado] = useState<Vencimiento | null>(null);
+    const [historialSeleccionado, setHistorialSeleccionado] = useState<Vencimiento | null>(null);
 
     const hoy = new Date();
 
@@ -50,10 +57,15 @@ export default function ListaVencimientos({ vencimientos }: Props) {
                         vencimientos.map((item) => {
                             const diasParaVencer = Math.ceil((new Date(item.fechaVencimiento).getTime() - hoy.getTime()) / (1000 * 3600 * 24));
                             const estaVencido = diasParaVencer < 0;
-                            const ultimoCobro = item.cobros[0];
 
-                            // Lógica de estado sugerida: Si el último cobro cubre el periodo actual
-                            const esPagado = ultimoCobro && new Date(ultimoCobro.periodoHasta) >= new Date(item.fechaVencimiento);
+                            // Lógica de Pagos Parciales: Buscar cobros que cubren el periodo en cuestión
+                            const cobrosDelCiclo = item.cobros.filter(c => new Date(c.periodoHasta) >= new Date(item.fechaVencimiento));
+                            const totalPagado = cobrosDelCiclo.reduce((sum, c) => sum + c.montoArs, 0);
+                            const metaPago = item.plan.precio;
+
+                            let estadoPago = "PENDIENTE";
+                            if (totalPagado >= metaPago) estadoPago = "PAGADO";
+                            else if (totalPagado > 0) estadoPago = "PARCIAL";
 
                             return (
                                 <tr key={item.id} className="hover:bg-marino-3/50 transition-all group">
@@ -85,28 +97,43 @@ export default function ListaVencimientos({ vencimientos }: Props) {
                                         </div>
                                     </td>
                                     <td className="p-4 text-center">
-                                        {esPagado ? (
+                                        {estadoPago === "PAGADO" ? (
                                             <span className="bg-verde/10 text-verde border border-verde/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1 w-fit mx-auto shadow-[0_0_10px_rgba(34,197,94,0.1)]">
-                                                <CheckCircle2 size={12} /> Pagado
+                                                <CheckCircle2 size={12} /> AL DÍA
                                             </span>
+                                        ) : estadoPago === "PARCIAL" ? (
+                                            <div className="flex flex-col items-center">
+                                                <span className="bg-[#EAB308]/10 text-[#EAB308] border border-[#EAB308]/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1 w-fit mx-auto cursor-pointer" onClick={() => setHistorialSeleccionado(item)}>
+                                                    PAGO PARCIAL
+                                                </span>
+                                                <span className="text-[10px] text-naranja font-black uppercase tracking-tighter mt-1 hover:underline cursor-pointer" onClick={() => setHistorialSeleccionado(item)}>
+                                                    Falta ${(metaPago - totalPagado).toLocaleString('es-AR')}
+                                                </span>
+                                            </div>
                                         ) : (
                                             <span className={`${estaVencido ? 'bg-rojo/10 text-rojo border-rojo/20 animate-pulse' : 'bg-marino-4 text-gris border-marino-3'} px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1 w-fit mx-auto`}>
-                                                <AlertCircle size={12} /> Pendiente
+                                                <AlertCircle size={12} /> IMPAGO
                                             </span>
                                         )}
                                     </td>
-                                    <td className="p-4 text-right">
+                                    <td className="p-4 text-right flex items-center justify-end gap-2">
+                                        <button
+                                            onClick={() => setHistorialSeleccionado(item)}
+                                            className="text-gris hover:text-blanco border border-marino-4 bg-marino-3 hover:bg-marino-4 px-3 py-2 rounded text-xs uppercase font-bold tracking-widest transition-all"
+                                            title="Ver Historial"
+                                        >
+                                            Ver Hist.
+                                        </button>
                                         <button
                                             onClick={() => setCobroSeleccionado(item)}
-                                            className={`${esPagado
-                                                ? 'bg-marino-4 text-gris cursor-not-allowed opacity-50'
+                                            className={`${estadoPago === "PAGADO"
+                                                ? 'bg-verde/20 hover:bg-verde/30 text-verde'
                                                 : 'bg-naranja hover:bg-naranja-h text-marino shadow-lg shadow-naranja/10 hover:shadow-naranja/20'
-                                                } px-4 py-2 rounded font-barlow-condensed font-bold text-xs uppercase tracking-widest transition-all`}
-                                            disabled={esPagado}
+                                                } px-4 py-2 rounded font-barlow-condensed font-bold text-xs uppercase tracking-widest transition-all min-w-32 justify-center flex`}
                                         >
                                             <div className="flex items-center gap-2">
                                                 <DollarSign size={14} />
-                                                Registrar Pago
+                                                {estadoPago === "PAGADO" ? "ADELANTAR PAGO" : "SUMAR PAGO"}
                                             </div>
                                         </button>
                                     </td>
@@ -132,6 +159,14 @@ export default function ListaVencimientos({ vencimientos }: Props) {
                         }
                     }}
                     onClose={() => setCobroSeleccionado(null)}
+                />
+            )}
+
+            {historialSeleccionado && (
+                <ModalCobrosHistorial
+                    clienteNombre={historialSeleccionado.cliente.nombre}
+                    cobros={historialSeleccionado.cobros}
+                    onClose={() => setHistorialSeleccionado(null)}
                 />
             )}
         </div>

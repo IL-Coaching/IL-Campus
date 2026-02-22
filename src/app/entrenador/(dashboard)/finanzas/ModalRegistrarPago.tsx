@@ -26,8 +26,25 @@ export default function ModalRegistrarPago({ vencimiento, onClose }: Props) {
         return d.toISOString().split('T')[0];
     });
 
+    const [comprobanteBase64, setComprobanteBase64] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            setError("El archivo es muy pesado. Máximo 5MB.");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setComprobanteBase64(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -42,7 +59,8 @@ export default function ModalRegistrarPago({ vencimiento, onClose }: Props) {
                 metodo,
                 periodoDesde: desde,
                 periodoHasta: hasta,
-                fechaPago: fecha // La acción lo usará si es necesario, por ahora usa default now
+                fechaPago: fecha, // La acción lo usará si es necesario, por ahora usa default now
+                comprobanteBase64: comprobanteBase64 || undefined
             });
 
             if (res.error) {
@@ -126,6 +144,19 @@ export default function ModalRegistrarPago({ vencimiento, onClose }: Props) {
                             />
                         </div>
                         <p className="text-[10px] text-gris italic">Se recomienda cubrir desde el último vencimiento.</p>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-gris uppercase tracking-widest flex items-center gap-2">
+                            Adjuntar Comprobante (Opcional)
+                        </label>
+                        <input
+                            type="file"
+                            accept="image/png, image/jpeg, application/pdf"
+                            onChange={handleFileChange}
+                            className="w-full bg-marino border border-marino-4 rounded-xl p-2 text-gris text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-marino-4 file:text-blanco hover:file:bg-naranja hover:file:text-marino transition-all  outline-none"
+                        />
+                        {comprobanteBase64 && <p className="text-[10px] text-verde italic">Archivo adjunto listo.</p>}
                     </div>
 
                     {error && (

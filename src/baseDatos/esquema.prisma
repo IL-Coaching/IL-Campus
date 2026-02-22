@@ -248,6 +248,7 @@ model Cobro {
   periodoDesde   DateTime
   periodoHasta   DateTime
   notas          String?
+  comprobanteUrl String?
   cliente        Cliente       @relation(fields: [clienteId], references: [id])
   planAsignado   PlanAsignado? @relation(fields: [planAsignadoId], references: [id])
 }

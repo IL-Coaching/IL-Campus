@@ -7,7 +7,8 @@ export const EsquemaRegistrarCobro = z.object({
     metodo: z.string().min(1, "El método es obligatorio"),
     periodoDesde: z.string().transform((val) => new Date(val)),
     periodoHasta: z.string().transform((val) => new Date(val)),
-    notas: z.string().optional()
+    notas: z.string().optional(),
+    comprobanteBase64: z.string().optional()
 });
 
 export type TRegistrarCobro = z.infer<typeof EsquemaRegistrarCobro>;
