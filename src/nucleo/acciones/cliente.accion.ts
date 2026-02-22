@@ -124,14 +124,13 @@ export async function eliminarCliente(clienteId: string) {
 export async function obtenerCondicionesClinicas(clienteId: string) {
     try {
         await getEntrenadorSesion();
-        const formulario = await prisma.formularioInscripcion.findUnique({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const formulario = await (prisma.formularioInscripcion as any).findUnique({
             where: { clienteId },
             select: {
-                // @ts-expect-error - Campo agregado recientemente
                 condicionesClinicas: true
             }
         });
-        // @ts-expect-error - Campo agregado recientemente
         return { exito: true, condiciones: formulario?.condicionesClinicas || [] };
     } catch {
         return { error: "Error al obtener condiciones" };

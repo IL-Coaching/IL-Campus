@@ -13,20 +13,20 @@ export async function configurarDiaTesteo(semanaId: string, ejercicioId: string,
     try {
         await getEntrenadorSesion();
 
-        // @ts-expect-error - Campos de esquema extendidos
-        const config = await prisma.configTesteoEjercicio.findFirst({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const config = await (prisma as any).configTesteoEjercicio.findFirst({
             where: { semanaId, ejercicioId }
         });
 
         if (config) {
-            // @ts-expect-error - Campos de esquema extendidos
-            await prisma.configTesteoEjercicio.update({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await (prisma as any).configTesteoEjercicio.update({
                 where: { id: config.id },
                 data: { modalidad }
             });
         } else {
-            // @ts-expect-error - Campos de esquema extendidos
-            await prisma.configTesteoEjercicio.create({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await (prisma as any).configTesteoEjercicio.create({
                 data: { semanaId, ejercicioId, modalidad }
             });
         }
@@ -49,7 +49,6 @@ export async function registrarResultadoTesteo(data: {
     try {
         const entrenador = await getEntrenadorSesion();
 
-        // 1. Validar que el cliente pertenece al entrenador
         const cliente = await prisma.cliente.findFirst({
             where: { id: data.clienteId, entrenadorId: entrenador.id },
             include: { checkins: { orderBy: { fecha: 'desc' }, take: 1 } }
@@ -58,13 +57,13 @@ export async function registrarResultadoTesteo(data: {
         if (!cliente) throw new Error("Acceso denegado.");
 
         const unRM = calcularUnRM(data.pesoKg, data.reps);
-        const checkinReciente = (cliente as { checkins?: { pesoKg?: number }[] }).checkins?.[0];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const checkinReciente = (cliente as any).checkins?.[0];
         const pesoCorporal = checkinReciente?.pesoKg || 0;
         const fuerzaRelativa = calcularFuerzaRelativa(unRM, pesoCorporal);
 
-        // 3. Registrar en Historial
-        // @ts-expect-error - Campos de esquema extendidos
-        await prisma.resultadoTesteo.create({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (prisma as any).resultadoTesteo.create({
             data: {
                 clienteId: data.clienteId,
                 ejercicioId: data.ejercicioId,
@@ -77,10 +76,9 @@ export async function registrarResultadoTesteo(data: {
             }
         });
 
-        // 4. Cachear porcentajes para acceso rápido
         const tabla = calcularTablaCompleta(unRM);
-        // @ts-expect-error - Campos de esquema extendidos
-        await prisma.porcentajesCliente.upsert({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (prisma as any).porcentajesCliente.upsert({
             where: {
                 clienteId_ejercicioId: {
                     clienteId: data.clienteId,
@@ -111,8 +109,8 @@ export async function registrarResultadoTesteo(data: {
 
 export async function obtenerResultadosTesteo(clienteId: string, ejercicioId: string) {
     try {
-        // @ts-expect-error - Campos de esquema extendidos
-        return await prisma.resultadoTesteo.findMany({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return await (prisma as any).resultadoTesteo.findMany({
             where: { clienteId, ejercicioId },
             orderBy: { fecha: 'desc' }
         });
@@ -124,8 +122,8 @@ export async function obtenerResultadosTesteo(clienteId: string, ejercicioId: st
 
 export async function obtenerPorcentajesCalculados(clienteId: string, ejercicioId: string) {
     try {
-        // @ts-expect-error - Campos de esquema extendidos
-        const data = await prisma.porcentajesCliente.findUnique({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data = await (prisma as any).porcentajesCliente.findUnique({
             where: {
                 clienteId_ejercicioId: {
                     clienteId,
