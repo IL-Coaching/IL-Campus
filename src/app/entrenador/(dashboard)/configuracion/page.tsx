@@ -1,69 +1,126 @@
-import { Shield, User, Camera } from "lucide-react";
+import { Shield, User, Camera, Mail, Phone } from "lucide-react";
+import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";
+import GestionSeguridadAdmin from "./componentes/GestionSeguridadAdmin";
+import { actualizarCredencialesAdmin } from "@/nucleo/acciones/admin.accion";
 
-export default function ConfiguracionPage() {
+export default async function ConfiguracionPage() {
+    const entrenador = await getEntrenadorSesion();
+
     return (
-        <div className="space-y-8 fade-up visible">
-            <div>
-                <h1 className="text-3xl font-barlow-condensed font-black uppercase tracking-tight text-blanco mb-1">
-                    Configuración
-                </h1>
-                <p className="text-gris font-medium text-sm">
-                    Ajustes de tu perfil y cuenta de administrador
-                </p>
+        <div className="space-y-8 animate-in fade-in duration-700">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-marino-4 pb-8">
+                <div>
+                    <h1 className="text-5xl font-barlow-condensed font-black uppercase tracking-tight text-blanco mb-1">
+                        Configuración <span className="text-naranja">Sistémica</span>
+                    </h1>
+                    <p className="text-gris font-medium text-sm flex items-center gap-2">
+                        <Shield size={14} className="text-naranja" /> Control de identidad y protocolos de acceso para administradores
+                    </p>
+                </div>
             </div>
 
-            <div className="max-w-4xl space-y-6">
-                {/* Sección Perfil */}
-                <div className="bg-marino-2 border border-marino-4 rounded-2xl overflow-hidden shadow-xl">
-                    <div className="p-6 border-b border-marino-4 bg-marino-3/30 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <User size={18} className="text-naranja" />
-                            <h3 className="font-barlow-condensed font-bold tracking-widest uppercase text-sm text-blanco">Perfil Profesional</h3>
+            <div className="max-w-5xl grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Columna Izquierda: Perfil */}
+                <div className="lg:col-span-2 space-y-8">
+                    {/* Sección Perfil Profesional */}
+                    <div className="bg-marino-2 border border-marino-4 rounded-3xl overflow-hidden shadow-2xl">
+                        <div className="p-6 border-b border-marino-4 bg-marino-3/30 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-marino-3 rounded-lg border border-marino-4">
+                                    <User size={18} className="text-naranja" />
+                                </div>
+                                <h3 className="font-barlow-condensed font-bold tracking-widest uppercase text-sm text-blanco">Perfil Profesional</h3>
+                            </div>
                         </div>
-                        <button className="text-[0.6rem] font-black text-naranja uppercase tracking-widest hover:underline transition-all">Editar Información</button>
+                        <div className="p-8 flex flex-col md:flex-row gap-10 items-start md:items-center">
+                            <div className="relative group mx-auto md:mx-0">
+                                <div className="w-32 h-32 rounded-3xl bg-marino-3 border-2 border-dashed border-marino-4 flex flex-col items-center justify-center gap-2 overflow-hidden shadow-inner group-hover:border-naranja/50 transition-all duration-500 cursor-pointer">
+                                    <Camera size={32} className="text-gris/40 group-hover:text-naranja group-hover:scale-110 transition-all" />
+                                    <span className="text-[0.55rem] font-black text-gris/40 uppercase tracking-[0.2em] group-hover:text-naranja">Avatar</span>
+                                </div>
+                                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-naranja rounded-xl flex items-center justify-center shadow-lg border-2 border-marino-2">
+                                    <Camera size={14} className="text-marino" />
+                                </div>
+                            </div>
+                            <div className="space-y-6 flex-1 w-full">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[0.6rem] font-black text-naranja uppercase tracking-[0.3em] ml-1">Nombre Maestro</label>
+                                        <div className="w-full bg-marino/50 border border-marino-4 rounded-2xl px-5 py-4 text-blanco font-bold text-sm shadow-inner">
+                                            {entrenador.nombre}
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[0.6rem] font-black text-naranja uppercase tracking-[0.3em] ml-1">Vía de Contacto</label>
+                                        <div className="w-full bg-marino/50 border border-marino-4 rounded-2xl px-5 py-4 text-blanco font-bold text-sm shadow-inner flex items-center gap-3">
+                                            <Phone size={14} className="text-gris" /> {entrenador.telefono || 'No definido'}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[0.6rem] font-black text-naranja uppercase tracking-[0.3em] ml-1">Email de Acceso Primario</label>
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                            <Mail size={16} className="text-gris/50" />
+                                        </div>
+                                        <div className="w-full bg-marino/50 border border-marino-4 rounded-2xl pl-12 pr-5 py-4 text-blanco font-bold text-sm shadow-inner">
+                                            {entrenador.email}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div className="p-8 flex flex-col md:flex-row gap-8 items-start md:items-center">
-                        <div className="relative group">
-                            <div className="w-24 h-24 rounded-2xl bg-marino-3 border-2 border-dashed border-marino-4 flex flex-col items-center justify-center gap-2 overflow-hidden shadow-inner group-hover:border-naranja/50 transition-colors">
-                                <Camera size={24} className="text-gris group-hover:text-naranja transition-colors" />
-                                <span className="text-[0.5rem] font-bold text-gris uppercase">Subir Foto</span>
+
+                    {/* Sección Seguridad (Cliente Component) */}
+                    <div className="bg-marino-2 border border-marino-4 rounded-3xl overflow-hidden shadow-2xl">
+                        <div className="p-6 border-b border-marino-4 bg-marino-3/30 flex items-center gap-3">
+                            <div className="p-2 bg-marino-3 rounded-lg border border-marino-4">
+                                <Shield size={18} className="text-verde" />
                             </div>
+                            <h3 className="font-barlow-condensed font-bold tracking-widest uppercase text-sm text-blanco">Protocolos de Seguridad</h3>
                         </div>
-                        <div className="space-y-4 flex-1 w-full">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-1.5">
-                                    <label className="text-[0.6rem] font-bold text-gris-claro uppercase tracking-widest ml-1">Nombre Completo</label>
-                                    <div className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-2.5 text-blanco font-medium text-sm">Iñaki Legarreta</div>
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[0.6rem] font-bold text-gris-claro uppercase tracking-widest ml-1">Email Profesional</label>
-                                    <div className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-2.5 text-blanco font-medium text-sm">legarretatraining@gmail.com</div>
-                                </div>
-                            </div>
+                        <div className="p-8">
+                            <GestionSeguridadAdmin entrenador={entrenador} />
                         </div>
                     </div>
                 </div>
 
-                {/* Sección Seguridad */}
-                <div className="bg-marino-2 border border-marino-4 rounded-2xl overflow-hidden shadow-xl">
-                    <div className="p-6 border-b border-marino-4 bg-marino-3/30 flex items-center gap-3">
-                        <Shield size={18} className="text-[#22C55E]" />
-                        <h3 className="font-barlow-condensed font-bold tracking-widest uppercase text-sm text-blanco">Seguridad y Acceso</h3>
-                    </div>
-                    <div className="p-6 space-y-4">
-                        <div className="flex items-center justify-between p-4 rounded-xl bg-marino border border-marino-4">
-                            <div>
-                                <p className="text-sm font-bold text-blanco">Contraseña de Administrador</p>
-                                <p className="text-xs text-gris">Último cambio: Hace 3 meses</p>
-                            </div>
-                            <button className="text-[0.6rem] font-bold text-naranja border border-naranja/30 px-3 py-1.5 rounded-lg uppercase tracking-widest hover:bg-naranja/5 transition-all">Cambiar clave</button>
+                {/* Columna Derecha: Info / Status */}
+                <div className="space-y-6">
+                    <div className="bg-gradient-to-br from-naranja/20 to-marino-3 border border-naranja/20 rounded-3xl p-8 space-y-4">
+                        <div className="p-3 bg-naranja/20 rounded-2xl w-fit">
+                            <Shield size={24} className="text-naranja" />
                         </div>
-                        <div className="flex items-center justify-between p-4 rounded-xl bg-marino border border-marino-4">
-                            <div>
-                                <p className="text-sm font-bold text-blanco">Autenticación de 2 Factores</p>
-                                <p className="text-xs text-[#EF4444] font-bold">Desactivado</p>
+                        <h4 className="text-xl font-barlow-condensed font-black uppercase text-blanco">Estado de Blindaje</h4>
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between text-xs py-2 border-b border-blanco/5">
+                                <span className="text-gris font-bold">Base de Datos</span>
+                                <span className="text-verde font-black uppercase tracking-widest">Protegida</span>
                             </div>
-                            <button className="text-[0.6rem] font-bold text-gris border border-marino-4 px-3 py-1.5 rounded-lg uppercase tracking-widest hover:bg-marino-2 transition-all">Activar 2FA</button>
+                            <div className="flex items-center justify-between text-xs py-2 border-b border-blanco/5">
+                                <span className="text-gris font-bold">Sesiones H.Only</span>
+                                <span className="text-verde font-black uppercase tracking-widest">Activas</span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs py-2">
+                                <span className="text-gris font-bold">MFA Admin</span>
+                                <span className={`${entrenador.mfaEnabled ? 'text-verde' : 'text-rojo'} font-black uppercase tracking-widest`}>
+                                    {entrenador.mfaEnabled ? 'Fortificado' : 'Expuesto'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-marino-2 border border-marino-4 rounded-3xl p-6">
+                        <p className="text-[0.6rem] text-gris font-black uppercase tracking-[0.2em] mb-4">Registro de Sistema</p>
+                        <div className="space-y-4">
+                            <div className="flex items-start gap-3">
+                                <div className="w-1.5 h-1.5 rounded-full bg-naranja mt-1.5 shrink-0"></div>
+                                <div>
+                                    <p className="text-[0.65rem] text-blanco font-bold">Hash Bcrypt consolidado en DB</p>
+                                    <p className="text-[0.6rem] text-gris font-medium">Automatizado hoy a las 01:30hs</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

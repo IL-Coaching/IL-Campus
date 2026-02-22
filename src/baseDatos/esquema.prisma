@@ -14,6 +14,8 @@ model Entrenador {
   email      String      @unique
   password   String
   telefono   String?
+  mfaSecret  String?     // Para Google Authenticator
+  mfaEnabled Boolean     @default(false)
   activo     Boolean     @default(true)
   creadoEn   DateTime    @default(now())
   clientes   Cliente[]
@@ -64,6 +66,15 @@ model Cliente {
   fechaAlta             DateTime               @default(now())
   activo                Boolean                @default(true)
   notas                 String?
+
+  // Seguridad y Alta
+  invitationToken       String?    @unique // Para completar registro
+  invitationExpires     DateTime?
+  passwordResetToken    String?    @unique
+  passwordResetExpires  DateTime?
+  forcePasswordChange   Boolean    @default(false)
+  lastLogin             DateTime?
+
   checkins              Checkin[]
   cicloMenstrual        CicloMenstrual?
   entrenador            Entrenador             @relation(fields: [entrenadorId], references: [id])

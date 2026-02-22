@@ -1,6 +1,9 @@
 "use client"
-import { SemanaConDias, DiaConEjercicios, EjercicioConDetalle } from "@/nucleo/tipos/planificacion.tipos";
-import { Calendar, ChevronRight, Moon, Zap, Activity, Info } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { SemanaConDias } from "@/nucleo/tipos/planificacion.tipos";
+import { Calendar, Trash2, Zap, Plus, Activity, Info } from "lucide-react";
+import { crearSesion, eliminarSesion } from "@/nucleo/acciones/planificacion.accion";
 
 interface VistaMicrocicloProps {
     semana: SemanaConDias;
@@ -8,30 +11,32 @@ interface VistaMicrocicloProps {
 }
 
 export default function VistaMicrociclo({ semana, onSelectSesion }: VistaMicrocicloProps) {
-    const dias = semana.diasSesion.map((d: DiaConEjercicios) => ({
-        id: d.id,
-        dia: d.diaSemana,
-        foco: d.focoMuscular,
-        active: true,
-        info: `${d.ejercicios.length} ejercicios · ${d.ejercicios.reduce((acc: number, curr: EjercicioConDetalle) => acc + curr.series, 0)} series`,
-        color: "text-blanco",
-        accent: "bg-naranja"
-    }));
+    const [isCreating, setIsCreating] = useState(false);
+    const router = useRouter();
+
+    const handleCrearSesion = async (dia: string) => {
+        setIsCreating(true);
+        const res = await crearSesion(semana.id, dia);
+        if (res.exito) {
+            router.refresh();
+        } else {
+            alert("Error al crear sesión: " + res.error);
+        }
+        setIsCreating(false);
+    };
+
+    const handleEliminarSesion = async (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        if (!confirm("¿Eliminar esta sesión permanentemente?")) return;
+        const res = await eliminarSesion(id);
+        if (res.exito) {
+            router.refresh();
+        } else {
+            alert("Error al eliminar: " + res.error);
+        }
+    };
 
     const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
-    const layout = diasSemana.map((nombre: string) => {
-        const existente = dias.find(d => d.dia === nombre);
-        if (existente) return existente;
-        return {
-            id: nombre,
-            dia: nombre,
-            foco: "Rest",
-            active: false,
-            info: "Recuperación",
-            color: "text-gris/40",
-            accent: "bg-marino-4"
-        };
-    });
 
     return (
         <div className="space-y-10 animate-in fade-in duration-700">
@@ -60,60 +65,64 @@ export default function VistaMicrociclo({ semana, onSelectSesion }: VistaMicroci
                     </div>
                     <div className="text-center px-4">
                         <span className="text-[0.55rem] font-bold text-gris uppercase tracking-widest block mb-1">Sesiones</span>
-                        <span className="text-xl font-black text-blanco">{dias.length}</span>
+                        <span className="text-xl font-black text-blanco">{semana.diasSesion.length}</span>
                     </div>
                 </div>
             </div>
 
-            {/* Grid de Días con diseño de Cards Profesionales */}
+            {/* Grid de Días */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
-                {layout.map((d, i: number) => (
-                    <div
-                        key={i}
-                        onClick={() => d.active && onSelectSesion(d.dia)}
-                        className={`group relative bg-marino-2 border border-marino-4 rounded-2xl p-6 min-h-[220px] flex flex-col transition-all duration-300 ${d.active
-                            ? 'cursor-pointer hover:border-naranja/50 hover:bg-marino-3 hover:-translate-y-1 shadow-lg hover:shadow-naranja/5'
-                            : 'opacity-40 grayscale-[0.5] cursor-default'
-                            }`}
-                    >
-                        {/* Indicador de Tipo de Día */}
-                        <div className="flex justify-between items-start mb-6">
-                            <span className="text-[0.7rem] text-gris font-black uppercase tracking-[0.2em]">{d.dia}</span>
-                            {d.active ? (
-                                <div className="w-8 h-8 rounded-lg bg-naranja/10 flex items-center justify-center text-naranja group-hover:bg-naranja group-hover:text-marino transition-all">
-                                    <Zap size={16} />
-                                </div>
+                {diasSemana.map((nombre) => {
+                    const sesionesEnEsteDia = semana.diasSesion.filter(d => d.diaSemana === nombre);
+
+                    return (
+                        <div key={nombre} className="space-y-3">
+                            <div className="text-[0.7rem] text-gris font-black uppercase tracking-[0.2em] border-b border-marino-4 pb-2 mb-4">
+                                {nombre}
+                            </div>
+
+                            {sesionesEnEsteDia.length > 0 ? (
+                                sesionesEnEsteDia.map((s) => (
+                                    <div
+                                        key={s.id}
+                                        onClick={() => onSelectSesion(s.diaSemana)}
+                                        className="group relative bg-marino-2 border border-marino-4 rounded-2xl p-6 min-h-[160px] flex flex-col transition-all duration-300 cursor-pointer hover:border-naranja/50 hover:bg-marino-3 shadow-lg hover:shadow-naranja/5"
+                                    >
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="w-8 h-8 rounded-lg bg-naranja/10 flex items-center justify-center text-naranja group-hover:bg-naranja group-hover:text-marino transition-all">
+                                                <Zap size={16} />
+                                            </div>
+                                            <button
+                                                onClick={(e) => handleEliminarSesion(e, s.id)}
+                                                className="opacity-0 group-hover:opacity-100 p-2 text-gris hover:text-[#EF4444] transition-all"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
+                                        <div className="mb-auto">
+                                            <h4 className="text-xl font-barlow-condensed font-black uppercase leading-tight text-blanco group-hover:text-naranja transition-colors">
+                                                {s.focoMuscular}
+                                            </h4>
+                                            <span className="text-[0.6rem] text-gris font-bold uppercase tracking-widest">
+                                                {s.ejercicios.length} Ejercicios
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))
                             ) : (
-                                <div className="text-gris/40">
-                                    <Moon size={16} />
+                                <div
+                                    onClick={() => !isCreating && handleCrearSesion(nombre)}
+                                    className="group h-[160px] border-2 border-dashed border-marino-4 rounded-2xl flex flex-col items-center justify-center p-4 opacity-40 hover:opacity-100 hover:border-naranja/40 hover:bg-naranja/[0.02] transition-all cursor-pointer"
+                                >
+                                    <div className="p-3 bg-marino-3 rounded-full mb-2 group-hover:bg-naranja group-hover:text-marino transition-all shadow-inner">
+                                        <Plus size={16} />
+                                    </div>
+                                    <span className="text-[0.6rem] font-black uppercase tracking-widest text-gris">Añadir</span>
                                 </div>
                             )}
                         </div>
-
-                        <div className="mb-auto">
-                            <h4 className={`text-2xl font-barlow-condensed font-black uppercase leading-[0.9] mb-2 ${d.color} group-hover:text-naranja transition-colors`}>
-                                {d.foco}
-                            </h4>
-                            <p className="text-[0.6rem] text-gris font-bold uppercase tracking-widest">
-                                {d.info}
-                            </p>
-                        </div>
-
-                        {d.active ? (
-                            <div className="mt-8 flex justify-between items-center group-hover:translate-x-1 transition-transform">
-                                <span className="text-[0.65rem] font-black text-naranja tracking-[0.2em] uppercase">Entrar</span>
-                                <ChevronRight size={18} className="text-naranja" />
-                            </div>
-                        ) : (
-                            <div className="mt-8 text-[0.65rem] font-bold text-gris/40 uppercase tracking-widest">Off-Day</div>
-                        )}
-
-                        {/* Glow effect on hover top-left */}
-                        {d.active && (
-                            <div className="absolute top-0 left-0 w-12 h-12 bg-naranja/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        )}
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {/* Leyenda Meta-data */}

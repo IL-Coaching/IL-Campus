@@ -2,10 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { prisma } from "@/baseDatos/conexion";
-import { cookies } from "next/headers";
+import { CriptoServicio } from "@/nucleo/seguridad/cripto";
+import { establecerSesion, cerrarSesion } from "@/nucleo/seguridad/sesion";
 
 /**
  * Procesa el inicio de sesión del entrenador.
+ * Soporta autenticación de primer paso y verificación MFA de segundo paso.
  */
 export async function loginEntrenador(formData: FormData) {
     const email = formData.get("email") as string;
@@ -20,26 +22,56 @@ export async function loginEntrenador(formData: FormData) {
             where: { email }
         });
 
-        if (!entrenador || entrenador.password !== password) {
-            // NOTA: En producción deberíamos usar bcrypt.compare
+        if (!entrenador) {
             return { error: "Credenciales no válidas." };
         }
 
-        // Crear sesión (Cookie)
-        cookies().set("session_id", entrenador.id, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            path: "/",
-            maxAge: 60 * 60 * 24 * 7 // 1 semana
-        });
+        // Comparar contraseña con el hash almacenado
+        const passwordValida = await CriptoServicio.comparePassword(password, entrenador.password);
 
-        cookies().set("user_role", "entrenador", { path: "/" });
+        if (!passwordValida) {
+            return { error: "Credenciales no válidas." };
+        }
+
+        // Si el MFA está habilitado, no iniciamos sesión aún.
+        if (entrenador.mfaEnabled) {
+            return { success: true, mfaRequired: true, adminId: entrenador.id };
+        }
+
+        // Establecer sesión segura con JWT y HttpOnly Cookies
+        await establecerSesion(entrenador.id, "entrenador");
 
         return { success: true };
     } catch (error) {
         console.error("Login Error:", error);
         return { error: "Error de conexión con la base de datos." };
+    }
+}
+
+/**
+ * Verifica el código MFA para completar el login del admin.
+ */
+export async function verificarMFALogin(adminId: string, token: string) {
+    try {
+        const entrenador = await prisma.entrenador.findUnique({
+            where: { id: adminId }
+        });
+
+        if (!entrenador || !entrenador.mfaSecret) {
+            return { error: "Acceso denegado o MFA no configurado." };
+        }
+
+        const { MFAServicio } = await import("@/nucleo/seguridad/mfa");
+        const esValido = MFAServicio.verificarToken(token, entrenador.mfaSecret);
+
+        if (!esValido) {
+            return { error: "Código incorrecto." };
+        }
+
+        await establecerSesion(entrenador.id, "entrenador");
+        return { success: true };
+    } catch {
+        return { error: "Error en la verificación." };
     }
 }
 
@@ -59,7 +91,14 @@ export async function loginAlumno(formData: FormData) {
             where: { email }
         });
 
-        if (!cliente || cliente.password !== password) {
+        if (!cliente || !cliente.password) {
+            return { error: "Email o contraseña incorrectos." };
+        }
+
+        // Verificar contraseña hasheada
+        const passwordValida = await CriptoServicio.comparePassword(password, cliente.password);
+
+        if (!passwordValida) {
             return { error: "Email o contraseña incorrectos." };
         }
 
@@ -67,16 +106,14 @@ export async function loginAlumno(formData: FormData) {
             return { error: "Tu cuenta está desactivada. Contacta a tu entrenador." };
         }
 
-        // Crear sesión (Cookie)
-        cookies().set("session_id", cliente.id, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            path: "/",
-            maxAge: 60 * 60 * 24 * 7
+        // Actualizar último login
+        await prisma.cliente.update({
+            where: { id: cliente.id },
+            data: { lastLogin: new Date() }
         });
 
-        cookies().set("user_role", "alumno", { path: "/" });
+        // Establecer sesión segura
+        await establecerSesion(cliente.id, "alumno");
 
         return { success: true };
     } catch (error) {
@@ -86,7 +123,6 @@ export async function loginAlumno(formData: FormData) {
 }
 
 export async function logout() {
-    cookies().delete("session_id");
-    cookies().delete("user_role");
+    cerrarSesion();
     redirect("/ingresar");
 }

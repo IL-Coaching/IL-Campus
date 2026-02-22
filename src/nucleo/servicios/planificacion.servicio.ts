@@ -203,8 +203,14 @@ export const PlanificacionServicio = {
         metodo?: string;
         rangoReferencia?: string;
         numeroMes: number;
+        numSemanas?: number;
+        numSesionesPorSemana?: number;
     }) {
-        const diasBase = ['Lunes', 'Miércoles', 'Viernes'];
+        const numSemanas = data.numSemanas || 4;
+        const numSesiones = data.numSesionesPorSemana || 3;
+        const diasDisponibles = ['Lunes', 'Miércoles', 'Viernes', 'Martes', 'Jueves', 'Sábado', 'Domingo'];
+        const diasBase = diasDisponibles.slice(0, numSesiones);
+
         const startWeek = ((data.numeroMes - 1) * 4) + 1;
 
         return await prisma.bloqueMensual.create({
@@ -213,9 +219,9 @@ export const PlanificacionServicio = {
                 objetivo: data.objetivo,
                 metodo: data.metodo,
                 rangoReferencia: data.rangoReferencia,
-                duracion: 4,
+                duracion: numSemanas,
                 semanas: {
-                    create: [0, 1, 2, 3].map(offset => ({
+                    create: Array.from({ length: numSemanas }).map((_, offset) => ({
                         numeroSemana: startWeek + offset,
                         objetivoSemana: "Fase de carga / Acumulación",
                         RIRobjetivo: 3,
@@ -229,6 +235,28 @@ export const PlanificacionServicio = {
                     }))
                 }
             }
+        });
+    },
+
+    /**
+     * Crea una nueva sesión manualmente dentro de una semana específica.
+     */
+    async crearNuevaSesion(semanaId: string, diaSemana: string) {
+        return await prisma.diaSesion.create({
+            data: {
+                semanaId,
+                diaSemana,
+                focoMuscular: "Foco a Definir"
+            }
+        });
+    },
+
+    /**
+     * Elimina una sesión.
+     */
+    async eliminarSesion(id: string) {
+        return await prisma.diaSesion.delete({
+            where: { id }
         });
     }
 };

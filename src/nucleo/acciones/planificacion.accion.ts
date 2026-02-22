@@ -222,14 +222,73 @@ export async function agregarMesociclo(macrocicloId: string, data: {
     metodo?: string;
     rangoReferencia?: string;
     numeroMes: number;
+    numSemanas?: number;
+    numSesiones?: number;
 }) {
     try {
         await getEntrenadorSesion();
-        await PlanificacionServicio.agregarMesociclo(macrocicloId, data);
+        await PlanificacionServicio.agregarMesociclo(macrocicloId, {
+            ...data,
+            numSesionesPorSemana: data.numSesiones
+        });
         revalidatePath(`/entrenador/clientes`);
         return { exito: true };
     } catch (error) {
         const mensaje = error instanceof Error ? error.message : "Error desconocido";
         return { error: mensaje };
+    }
+}
+
+export async function crearSesion(semanaId: string, diaSemana: string) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        // Mitigación BOLA
+        const semanaPropia = await prisma.semana.findFirst({
+            where: {
+                id: semanaId,
+                bloqueMensual: {
+                    macrociclo: {
+                        cliente: { entrenadorId: entrenador.id }
+                    }
+                }
+            }
+        });
+
+        if (!semanaPropia) throw new Error("Acceso denegado.");
+
+        await PlanificacionServicio.crearNuevaSesion(semanaId, diaSemana);
+        revalidatePath(`/entrenador/clientes`);
+        return { exito: true };
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : "Error" };
+    }
+}
+
+export async function eliminarSesion(id: string) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        // Mitigación BOLA
+        const sesionPropia = await prisma.diaSesion.findFirst({
+            where: {
+                id,
+                semana: {
+                    bloqueMensual: {
+                        macrociclo: {
+                            cliente: { entrenadorId: entrenador.id }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!sesionPropia) throw new Error("Acceso denegado.");
+
+        await PlanificacionServicio.eliminarSesion(id);
+        revalidatePath(`/entrenador/clientes`);
+        return { exito: true };
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : "Error" };
     }
 }
