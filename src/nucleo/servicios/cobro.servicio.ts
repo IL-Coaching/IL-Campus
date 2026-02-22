@@ -31,15 +31,9 @@ export const CobroServicio = {
      * Identifica clientes con planes próximos a vencer o vencidos.
      */
     async obtenerVencimientos(entrenadorId: string) {
-        const hoy = new Date();
-        const limiteVencimiento = new Date();
-        limiteVencimiento.setDate(hoy.getDate() + 10); // Miramos 10 días al futuro
-
         return await prisma.planAsignado.findMany({
             where: {
-                cliente: { entrenadorId },
-                fechaVencimiento: { lte: limiteVencimiento },
-                estado: 'ACTIVO'
+                cliente: { entrenadorId: entrenadorId, activo: true }
             },
             include: {
                 cliente: true,

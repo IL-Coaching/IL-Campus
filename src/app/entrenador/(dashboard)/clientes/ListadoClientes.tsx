@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Users } from "lucide-react";
 import ModalAsignarPlan from "./ModalAsignarPlan";
+import { eliminarCliente } from "@/nucleo/acciones/cliente.accion";
 
 interface Cliente {
     id: string;
@@ -31,6 +32,20 @@ interface Props {
 
 export default function ListadoClientes({ clientes, planes, tabActual }: Props) {
     const [clienteSeleccionado, setClienteSeleccionado] = useState<{ id: string, nombre: string } | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleEliminarCliente = async (id: string, nombre: string) => {
+        if (confirm(`¿Estás seguro de eliminar a ${nombre} de forma permanente? Esta acción no se puede deshacer y borrará todo su historial, facturación y planes.`)) {
+            setIsDeleting(true);
+            const res = await eliminarCliente(id);
+            setIsDeleting(false);
+            if (res.error) {
+                alert(res.error);
+            } else {
+                alert("Cliente eliminado exitosamente.");
+            }
+        }
+    };
 
     return (
         <div className="bg-marino-2 border border-marino-4 rounded-xl overflow-hidden shadow-lg">
@@ -82,12 +97,15 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                                             )}
                                         </td>
                                         <td className="p-4">
-                                            <span className={`px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-wider border ${cliente.activo
-                                                ? 'bg-verde/10 text-verde border-verde/20'
-                                                : 'bg-rojo/10 text-rojo border-rojo/20'
-                                                }`}>
-                                                {cliente.activo ? "Activo" : "En Espera"}
-                                            </span>
+                                            {tabActual === "activos" ? (
+                                                <span className={`px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-wider border bg-verde/10 text-verde border-verde/20`}>
+                                                    Competidor Activo
+                                                </span>
+                                            ) : (
+                                                <span className={`px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-wider border ${cliente.activo ? 'bg-[#EAB308]/10 text-[#EAB308] border-[#EAB308]/20' : 'bg-rojo/10 text-rojo border-rojo/20'}`}>
+                                                    {cliente.activo ? "Sin Plan Asignado" : "Esperando Registro"}
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="p-4 text-right">
                                             {tabActual === "activos" ? (
@@ -98,12 +116,21 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                                                     Ver Perfil
                                                 </Link>
                                             ) : (
-                                                <button
-                                                    onClick={() => setClienteSeleccionado({ id: cliente.id, nombre: cliente.nombre })}
-                                                    className="bg-naranja hover:bg-naranja-h text-marino px-4 py-2 rounded font-barlow-condensed font-bold text-xs uppercase tracking-widest transition-all inline-block"
-                                                >
-                                                    Asignar Plan
-                                                </button>
+                                                <div className="flex justify-end gap-2">
+                                                    <button
+                                                        onClick={() => setClienteSeleccionado({ id: cliente.id, nombre: cliente.nombre })}
+                                                        className="bg-naranja hover:bg-naranja-h text-marino px-4 py-2 rounded font-barlow-condensed font-bold text-xs uppercase tracking-widest transition-all"
+                                                    >
+                                                        Asignar Plan
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleEliminarCliente(cliente.id, cliente.nombre)}
+                                                        disabled={isDeleting}
+                                                        className={`bg-marino-4 hover:bg-[#EF4444] text-gris hover:text-blanco px-4 py-2 rounded font-barlow-condensed font-bold text-xs uppercase tracking-widest transition-all ${isDeleting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                    >
+                                                        {isDeleting ? 'Borrando...' : 'Eliminar'}
+                                                    </button>
+                                                </div>
                                             )}
                                         </td>
                                     </tr>

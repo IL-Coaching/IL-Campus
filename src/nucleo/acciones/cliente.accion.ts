@@ -76,3 +76,70 @@ export async function asignarMembresia(data: { clienteId: string; planId: string
         return { error: "No se pudo asignar la membresía." };
     }
 }
+
+/**
+ * Elimina de raíz a un cliente y todos sus registros asociados.
+ */
+export async function eliminarCliente(clienteId: string) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        const clientePropio = await prisma.cliente.findFirst({
+            where: { id: clienteId, entrenadorId: entrenador.id }
+        });
+
+        if (!clientePropio) {
+            return { error: "No tienes permiso para gestionar este cliente." };
+        }
+
+        // Eliminación en cascada manual (por limitaciones de base de datos relacional si onDelete: Cascade no está configurado en todos lados)
+        // Por seguridad, usamos un transact para asegurar consistencia
+        await prisma.$transaction(async (tx) => {
+            await tx.cobro.deleteMany({ where: { clienteId } });
+            await tx.checkin.deleteMany({ where: { clienteId } });
+            await tx.cicloMenstrual.deleteMany({ where: { clienteId } });
+            await tx.formularioInscripcion.deleteMany({ where: { clienteId } });
+            await tx.mensaje.deleteMany({ where: { clienteId } });
+
+            // Registros de Sesiones Reales (SeriesReal -> SesionRegistrada -> Cliente)
+            const sesiones = await tx.sesionRegistrada.findMany({ where: { clienteId } });
+            for (const sesion of sesiones) {
+                await tx.serieRegistrada.deleteMany({ where: { sesionId: sesion.id } });
+                await tx.metricasSesion.deleteMany({ where: { sesionId: sesion.id } });
+            }
+            await tx.sesionRegistrada.deleteMany({ where: { clienteId } });
+
+            // Planes Asignados
+            await tx.planAsignado.deleteMany({ where: { clienteId } });
+
+            // Macrociclos (Cascada Hacia Abajo)
+            const macros = await tx.macrociclo.findMany({ where: { clienteId } });
+            for (const macro of macros) {
+                const bloques = await tx.bloqueMensual.findMany({ where: { macrocicloId: macro.id } });
+                for (const bloque of bloques) {
+                    const semanas = await tx.semana.findMany({ where: { bloqueMensualId: bloque.id } });
+                    for (const semana of semanas) {
+                        const dias = await tx.diaSesion.findMany({ where: { semanaId: semana.id } });
+                        for (const dia of dias) {
+                            await tx.ejercicioPlanificado.deleteMany({ where: { diaId: dia.id } });
+                        }
+                        await tx.diaSesion.deleteMany({ where: { semanaId: semana.id } });
+                    }
+                    await tx.semana.deleteMany({ where: { bloqueMensualId: bloque.id } });
+                }
+                await tx.bloqueMensual.deleteMany({ where: { macrocicloId: macro.id } });
+            }
+            await tx.macrociclo.deleteMany({ where: { clienteId } });
+
+            // Finalmente Borramos al Cliente
+            await tx.cliente.delete({ where: { id: clienteId } });
+        });
+
+        revalidatePath("/entrenador/clientes");
+        return { exito: true };
+
+    } catch (error) {
+        console.error("Error crítico al eliminar cliente:", error);
+        return { error: "Ocurrió un error al eliminar el cliente de la base de datos." };
+    }
+}
