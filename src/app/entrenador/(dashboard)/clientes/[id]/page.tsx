@@ -7,6 +7,7 @@ import {
     ChevronLeft
 } from "lucide-react";
 import DetallesFormulario from "./DetallesFormulario";
+import BotonRecuperacion from "./BotonRecuperacion";
 
 export default async function PerfilClientePage({ params }: { params: { id: string } }) {
     const cliente = await ClienteServicio.obtenerPorId(params.id);
@@ -86,6 +87,9 @@ export default async function PerfilClientePage({ params }: { params: { id: stri
                             {cliente.notas || "Sin notas adicionales del entrenador."}
                         </div>
                     </div>
+
+                    {/* Tarjeta de Seguridad y MFA (Manual MFA Link) */}
+                    <BotonRecuperacion clienteId={cliente.id} />
                 </div>
 
                 {/* Columna Derecha: Detalles del Formulario */}
