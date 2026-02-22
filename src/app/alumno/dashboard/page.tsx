@@ -5,13 +5,27 @@ import {
     AlertCircle,
     ChevronRight,
     Flame,
-    Weight
+    Weight,
+    Zap,
+    Info
 } from 'lucide-react';
 import AlumnoNav from '@/compartido/componentes/AlumnoNav';
 import { getAlumnoSesion } from '@/nucleo/seguridad/sesion';
+import { prisma } from '@/baseDatos/conexion';
+import { calcularFaseMenstrual } from '@/nucleo/utilidades/ciclo';
 
 export default async function AlumnoDashboard() {
     const alumno = await getAlumnoSesion();
+
+    // Consultar ciclo menstrual si está habilitado
+    const ciclo = await prisma.cicloMenstrual.findUnique({
+        where: { clienteId: alumno.id }
+    });
+
+    let infoCiclo = null;
+    if (ciclo && ciclo.activo) {
+        infoCiclo = calcularFaseMenstrual(new Date(ciclo.fechaInicioUltimoCiclo), ciclo.duracionCiclo);
+    }
 
     // Obtenemos las iniciales para el avatar
     const iniciales = alumno.nombre
@@ -32,12 +46,47 @@ export default async function AlumnoDashboard() {
                         <span className="text-[0.6rem] font-bold text-gris uppercase tracking-[0.15em]">Seguimiento Activo</span>
                     </div>
                 </div>
-                <div className="w-12 h-12 rounded-full border-2 border-naranja overflow-hidden bg-marino-3 flex items-center justify-center font-barlow-condensed font-black text-naranja text-xl">
+                <div className="w-12 h-12 rounded-full border-2 border-naranja overflow-hidden bg-marino-3 flex items-center justify-center font-barlow-condensed font-black text-naranja text-xl shadow-lg shadow-naranja/20">
                     {iniciales}
                 </div>
             </header>
 
-            <main className="p-6 space-y-8 fade-up visible">
+            <main className="p-6 space-y-8 animate-in fade-in duration-700">
+
+                {/* Banner de Ciclo Menstrual (Si aplica) */}
+                {infoCiclo && (
+                    <section className="animate-in slide-in-from-top-4 duration-500">
+                        <div
+                            className="relative overflow-hidden p-5 rounded-3xl border-2 shadow-2xl transition-all"
+                            style={{
+                                borderColor: `${infoCiclo.color}40`,
+                                background: `linear-gradient(135deg, ${infoCiclo.color}15, var(--marino-2))`
+                            }}
+                        >
+                            <div className="relative z-10 flex items-start gap-4">
+                                <div
+                                    className="p-3 rounded-2xl border flex items-center justify-center shrink-0"
+                                    style={{ backgroundColor: `${infoCiclo.color}20`, borderColor: `${infoCiclo.color}30`, color: infoCiclo.color }}
+                                >
+                                    <Zap size={24} fill="currentColor" className="animate-pulse" />
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="font-barlow-condensed font-black uppercase text-xl leading-none" style={{ color: infoCiclo.color }}>{infoCiclo.titulo}</h3>
+                                        <span className="text-[0.6rem] font-bold px-2 py-0.5 rounded-full bg-blanco/5 text-gris uppercase border border-blanco/10">Recomendado</span>
+                                    </div>
+                                    <p className="text-blanco font-bold text-sm leading-tight italic">{infoCiclo.intensidad}</p>
+                                    <p className="text-gris-claro text-xs leading-relaxed max-w-sm mt-2">{infoCiclo.recomendacion}</p>
+                                </div>
+                            </div>
+
+                            {/* Decoración fondo */}
+                            <div className="absolute -right-8 -bottom-8 opacity-10 rotate-12">
+                                <Zap size={120} color={infoCiclo.color} />
+                            </div>
+                        </div>
+                    </section>
+                )}
 
                 {/* Acción Principal: Entrenar */}
                 <section className="relative group">
@@ -88,7 +137,7 @@ export default async function AlumnoDashboard() {
                 </section>
 
                 {/* Alerta de Check-in */}
-                <section className="bg-marino-3/50 border border-[#EAB308]/30 p-5 rounded-2xl flex gap-4 items-center">
+                <section className="bg-marino-3/50 border border-[#EAB308]/30 p-5 rounded-2xl flex gap-4 items-center group cursor-pointer hover:border-[#EAB308]/60 transition-colors">
                     <div className="w-10 h-10 rounded-full bg-[#EAB308]/10 flex items-center justify-center shrink-0 border border-[#EAB308]/20">
                         <AlertCircle size={20} className="text-[#EAB308]" />
                     </div>
@@ -96,11 +145,11 @@ export default async function AlumnoDashboard() {
                         <h4 className="text-sm font-bold text-blanco leading-tight">Check-in Pendiente</h4>
                         <p className="text-xs text-gris-claro font-medium mt-0.5">Subí tus fotos y reportes de la semana.</p>
                     </div>
-                    <ChevronRight size={20} className="text-gris" />
+                    <ChevronRight size={20} className="text-gris group-hover:translate-x-1 transition-transform" />
                 </section>
 
                 {/* Frase Motivadora */}
-                <section className="py-6 text-center italic text-gris-claro text-sm font-light leading-relaxed">
+                <section className="py-6 text-center italic text-gris-claro text-sm font-light leading-relaxed max-w-xs mx-auto">
                     &quot;Entrenar es un privilegio que muchos no tienen, aprovecha cada repetición.&quot;
                 </section>
 
