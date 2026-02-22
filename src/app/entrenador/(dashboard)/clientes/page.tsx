@@ -22,7 +22,7 @@ export default async function ClientesPage({
     const inscripciones = todosLosClientes.filter(c => c.planesAsignados.length === 0);
 
     const tabActual = searchParams.tab === "inscripciones" ? "inscripciones" : "activos";
-    const clientesAMostrar = tabActual === "activos" ? activos : (inscripciones as any);
+    const clientesAMostrar = tabActual === "activos" ? activos : inscripciones;
 
     return (
         <div className="space-y-8 fade-up visible">
@@ -63,9 +63,9 @@ export default async function ClientesPage({
 
             {/* Listado dinámico (Componente de Cliente) */}
             <ListadoClientes
-                clientes={clientesAMostrar}
+                clientes={clientesAMostrar as unknown as { id: string, nombre: string, email: string, activo: boolean, planesAsignados: { plan: { nombre: string } }[] }[]}
                 planes={planes}
-                tabActual={tabActual as any}
+                tabActual={tabActual as "activos" | "inscripciones"}
             />
         </div>
     );

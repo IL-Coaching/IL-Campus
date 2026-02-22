@@ -11,7 +11,10 @@ interface Vencimiento {
     fechaVencimiento: Date;
     cliente: { id: string, nombre: string, email: string };
     plan: { nombre: string, precio: number };
-    cobros: any[];
+    cobros: {
+        id: string;
+        periodoHasta: Date;
+    }[];
 }
 
 interface Props {
@@ -95,8 +98,8 @@ export default function ListaVencimientos({ vencimientos }: Props) {
                                         <button
                                             onClick={() => setCobroSeleccionado(item)}
                                             className={`${esPagado
-                                                    ? 'bg-marino-4 text-gris cursor-not-allowed opacity-50'
-                                                    : 'bg-naranja hover:bg-naranja-h text-marino shadow-lg shadow-naranja/10 hover:shadow-naranja/20'
+                                                ? 'bg-marino-4 text-gris cursor-not-allowed opacity-50'
+                                                : 'bg-naranja hover:bg-naranja-h text-marino shadow-lg shadow-naranja/10 hover:shadow-naranja/20'
                                                 } px-4 py-2 rounded font-barlow-condensed font-bold text-xs uppercase tracking-widest transition-all`}
                                             disabled={esPagado}
                                         >
@@ -115,7 +118,18 @@ export default function ListaVencimientos({ vencimientos }: Props) {
 
             {cobroSeleccionado && (
                 <ModalRegistrarPago
-                    vencimiento={cobroSeleccionado}
+                    vencimiento={{
+                        id: cobroSeleccionado.id,
+                        fechaVencimiento: cobroSeleccionado.fechaVencimiento,
+                        cliente: {
+                            id: cobroSeleccionado.cliente.id,
+                            nombre: cobroSeleccionado.cliente.nombre
+                        },
+                        plan: {
+                            nombre: cobroSeleccionado.plan.nombre,
+                            precio: cobroSeleccionado.plan.precio
+                        }
+                    }}
                     onClose={() => setCobroSeleccionado(null)}
                 />
             )}

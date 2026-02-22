@@ -13,14 +13,26 @@ export async function buscarEjercicios(query: string = "") {
     }
 }
 
-export async function crearEjercicio(formData: any) {
+// Alias para compatibilidad con componentes existentes
+export const buscarEjerciciosCatalogo = buscarEjercicios;
+
+export async function crearEjercicio(formData: Record<string, unknown>) {
     try {
         const entrenador = await getEntrenadorSesion();
 
         // Aquí iría la validación Zod (pendiente crear validador)
 
         await EjercicioServicio.crear({
-            ...formData,
+            nombre: formData.nombre as string,
+            grupoMuscular: formData.grupoMuscular as string,
+            patronMovimiento: formData.patronMovimiento as string,
+            musculosPrincipales: formData.musculosPrincipales as string,
+            musculosAccesorios: formData.musculosAccesorios as string,
+            analisisBiomecanico: formData.analisisBiomecanico as string,
+            equipoNecesario: formData.equipoNecesario as string,
+            videoUrl: formData.videoUrl as string,
+            fotoUrl: formData.fotoUrl as string,
+            descripcion: formData.descripcion as string,
             entrenadorId: entrenador.id
         });
 

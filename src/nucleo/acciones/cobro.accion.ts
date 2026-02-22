@@ -6,7 +6,7 @@ import { getEntrenadorSesion } from "../seguridad/sesion";
 import { CobroServicio } from "../servicios/cobro.servicio";
 import { EsquemaRegistrarCobro } from "../validadores/cobro.validador";
 
-export async function registrarCobro(formData: any) {
+export async function registrarCobro(formData: Record<string, unknown>) {
     try {
         const entrenador = await getEntrenadorSesion();
 

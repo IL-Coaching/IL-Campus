@@ -3,8 +3,18 @@ import { useState, useEffect } from "react";
 import { Search, Play, FileText, Dumbbell, Filter } from "lucide-react";
 import { buscarEjercicios } from "@/nucleo/acciones/ejercicio.accion";
 
-export default function BibliotecaEjercicios({ iniciales }: { iniciales: any[] }) {
-    const [ejercicios, setEjercicios] = useState(iniciales);
+interface Ejercicio {
+    id: string;
+    nombre: string;
+    patronMovimiento?: string | null;
+    grupoMuscular: string;
+    equipoNecesario?: string | null;
+    analisisBiomecanico?: string | null;
+    videoUrl?: string | null;
+}
+
+export default function BibliotecaEjercicios({ iniciales }: { iniciales: Ejercicio[] }) {
+    const [ejercicios, setEjercicios] = useState<Ejercicio[]>(iniciales);
     const [query, setQuery] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -91,7 +101,7 @@ export default function BibliotecaEjercicios({ iniciales }: { iniciales: any[] }
                             {/* Footer Acciones */}
                             <div className="bg-marino-3/50 p-4 border-t border-marino-4 flex items-center justify-between gap-3">
                                 <a
-                                    href={ejercicio.videoUrl}
+                                    href={ejercicio.videoUrl || "#"}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex-1 bg-marino-4 hover:bg-red-600/10 hover:text-red-500 border border-marino-4 hover:border-red-600/30 text-gris-claro p-2.5 rounded-lg flex items-center justify-center gap-2 transition-all group/btn"

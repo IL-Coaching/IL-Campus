@@ -9,7 +9,11 @@ interface Cliente {
     nombre: string;
     email: string;
     activo: boolean;
-    planesAsignados: any[];
+    planesAsignados: {
+        plan: {
+            nombre: string;
+        };
+    }[];
 }
 
 interface Plan {
@@ -79,8 +83,8 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                                         </td>
                                         <td className="p-4">
                                             <span className={`px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-wider border ${cliente.activo
-                                                    ? 'bg-verde/10 text-verde border-verde/20'
-                                                    : 'bg-rojo/10 text-rojo border-rojo/20'
+                                                ? 'bg-verde/10 text-verde border-verde/20'
+                                                : 'bg-rojo/10 text-rojo border-rojo/20'
                                                 }`}>
                                                 {cliente.activo ? "Activo" : "En Espera"}
                                             </span>

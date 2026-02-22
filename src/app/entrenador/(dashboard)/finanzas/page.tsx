@@ -1,4 +1,4 @@
-import { CreditCard, TrendingUp, Users } from "lucide-react";
+import { CreditCard } from "lucide-react";
 import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";
 import { CobroServicio } from "@/nucleo/servicios/cobro.servicio";
 import StatsFinanzas from "./StatsFinanzas";
@@ -37,7 +37,7 @@ export default async function FinanzasPage() {
                     </h3>
                 </div>
 
-                <ListaVencimientos vencimientos={vencimientos as any} />
+                <ListaVencimientos vencimientos={vencimientos as any[]} />
             </div>
 
             {/* Sección Informativa - Auditoría */}
