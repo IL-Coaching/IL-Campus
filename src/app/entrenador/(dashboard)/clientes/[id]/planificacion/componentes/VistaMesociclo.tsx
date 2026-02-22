@@ -4,6 +4,7 @@ import { BloqueConSemanas, SemanaConDias, DiaConEjercicios } from "@/nucleo/tipo
 import { actualizarMesociclo, actualizarSemana } from '@/nucleo/acciones/planificacion.accion';
 import { TIPOS_CARGA_MESOCICLO } from '@/nucleo/planificacion/zonas.constantes';
 import { useRouter } from 'next/navigation';
+import { TipoCarga } from "@prisma/client";
 
 interface VistaMesocicloProps {
     bloque: BloqueConSemanas;
@@ -44,7 +45,7 @@ export default function VistaMesociclo({ bloque, mes, onSelectSemana }: VistaMes
         dias: s.diasSesion.map((d: DiaConEjercicios) => d.focoMuscular)
     }));
 
-    const handleCambiarTipoCarga = async (semanaId: string, tipo: string) => {
+    const handleCambiarTipoCarga = async (semanaId: string, tipo: TipoCarga) => {
         let rir = 3;
         let vol = "100% Base";
 

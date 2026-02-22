@@ -124,8 +124,7 @@ export async function eliminarCliente(clienteId: string) {
 export async function obtenerCondicionesClinicas(clienteId: string) {
     try {
         await getEntrenadorSesion();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const formulario = await (prisma.formularioInscripcion as any).findUnique({
+        const formulario = await prisma.formularioInscripcion.findUnique({
             where: { clienteId },
             select: {
                 condicionesClinicas: true
