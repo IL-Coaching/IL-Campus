@@ -1,4 +1,4 @@
-import { Cliente, Macrociclo, Semana, DiaSesion, EjercicioPlanificado, Ejercicio, Prisma } from "@prisma/client";
+import { Cliente, Macrociclo, Semana, DiaSesion, EjercicioPlanificado, Ejercicio, Prisma, TipoCarga } from "@prisma/client";
 
 /**
  * Tipos de Planificación — ArchSecure AI
@@ -15,7 +15,7 @@ export type DiaConEjercicios = DiaSesion & {
 
 export type SemanaConDias = Semana & {
     diasSesion: DiaConEjercicios[];
-    tipoCarga?: any;
+    tipoCarga?: TipoCarga | null;
 };
 
 // Bloque Mensual (Mesociclo) con sus semanas
@@ -92,4 +92,3 @@ export interface PlanificacionEstado {
     cliente: ClientePlanificacion;
     macrociclo: MacrocicloCompleto | null;
 }
-
