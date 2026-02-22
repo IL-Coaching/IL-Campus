@@ -1,10 +1,8 @@
 "use client"
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, Key, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
-
-import { Suspense } from 'react';
 
 function RecuperarContent() {
     const searchParams = useSearchParams();
@@ -110,6 +108,8 @@ function SolicitarRecuperacion() {
 // ----------------------------------------------------
 // FLUJO 2: Establecer nueva clave con Token
 // ----------------------------------------------------
+// FLUJO 2: Establecer nueva clave con Token
+// ----------------------------------------------------
 function EstablecerNuevaClave({ token }: { token: string }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
@@ -125,7 +125,7 @@ function EstablecerNuevaClave({ token }: { token: string }) {
         const p2 = formData.get("password_confirm") as string;
 
         if (p1 !== p2) {
-            setMsjError("Las contraseñas no coinciden mamerto.");
+            setMsjError("Las contraseñas no coinciden.");
             setLoading(false);
             return;
         }
@@ -149,7 +149,7 @@ function EstablecerNuevaClave({ token }: { token: string }) {
 
     return (
         <main className="min-h-screen bg-marino flex flex-col items-center justify-center p-6">
-            <div className="w-full max-w-md bg-marino-2 p-10 rounded-3xl border border-marino-4 shadow-2xl fade-up">
+            <div className="w-full max-w-md bg-marino-2 p-10 rounded-3xl border border-marino-4 shadow-2xl fade-up visible">
                 <div className="w-16 h-16 bg-naranja/10 text-naranja rounded-2xl flex items-center justify-center mb-6 border border-naranja/20">
                     <Key size={32} />
                 </div>
