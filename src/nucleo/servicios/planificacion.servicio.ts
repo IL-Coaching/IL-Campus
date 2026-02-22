@@ -92,11 +92,28 @@ export const PlanificacionServicio = {
         volumenEstimado?: string;
         esFaseDeload?: boolean;
         esSemanaTesteo?: boolean;
+        tipoCarga?: any;
     }) {
-        return await prisma.semana.update({
+        const semanaActualizada = await prisma.semana.update({
             where: { id },
-            data
+            data,
+            include: { diasSesion: true }
         });
+
+        // Automatización Científica: Si es descarga/test, configurar el día de testeo
+        if (data.tipoCarga === 'DESCARGA_TEST') {
+            const diaTest = semanaActualizada.diasSesion.find(d => d.diaSemana === 'Viernes' || d.diaSemana === 'Sábado')
+                || semanaActualizada.diasSesion[semanaActualizada.diasSesion.length - 1];
+
+            if (diaTest) {
+                await prisma.diaSesion.update({
+                    where: { id: diaTest.id },
+                    data: { focoMuscular: "TESTEO 1RM + DELOAD" }
+                });
+            }
+        }
+
+        return semanaActualizada;
     },
 
     /**
@@ -178,9 +195,10 @@ export const PlanificacionServicio = {
                         semanas: {
                             create: [1, 2, 3, 4].map(num => ({
                                 numeroSemana: num,
-                                objetivoSemana: "Acumulación de volumen",
-                                RIRobjetivo: 3,
-                                volumenEstimado: "Medio",
+                                objetivoSemana: num === 4 ? "Deload / Resíntesis" : "Acumulación de volumen",
+                                RIRobjetivo: num === 4 ? 5 : 3,
+                                volumenEstimado: num === 4 ? "Bajo (Deload)" : "Medio",
+                                esFaseDeload: num === 4,
                                 diasSesion: {
                                     create: diasBase.map(dia => ({
                                         diaSemana: dia,
@@ -221,18 +239,22 @@ export const PlanificacionServicio = {
                 rangoReferencia: data.rangoReferencia,
                 duracion: numSemanas,
                 semanas: {
-                    create: Array.from({ length: numSemanas }).map((_, offset) => ({
-                        numeroSemana: startWeek + offset,
-                        objetivoSemana: "Fase de carga / Acumulación",
-                        RIRobjetivo: 3,
-                        volumenEstimado: "Medio",
-                        diasSesion: {
-                            create: diasBase.map(dia => ({
-                                diaSemana: dia,
-                                focoMuscular: "General"
-                            }))
-                        }
-                    }))
+                    create: Array.from({ length: numSemanas }).map((_, offset) => {
+                        const isDeload = numSemanas >= 4 && (offset + 1) === 4;
+                        return {
+                            numeroSemana: startWeek + offset,
+                            objetivoSemana: isDeload ? "Deload / Resíntesis Científica" : "Fase de carga / Acumulación",
+                            RIRobjetivo: isDeload ? 5 : 3,
+                            volumenEstimado: isDeload ? "Reducido (50-60%)" : "Medio",
+                            esFaseDeload: isDeload,
+                            diasSesion: {
+                                create: diasBase.map(dia => ({
+                                    diaSemana: dia,
+                                    focoMuscular: "General"
+                                }))
+                            }
+                        };
+                    })
                 }
             }
         });
@@ -256,6 +278,15 @@ export const PlanificacionServicio = {
      */
     async eliminarSesion(id: string) {
         return await prisma.diaSesion.delete({
+            where: { id }
+        });
+    },
+
+    /**
+     * Elimina un bloque mensual (Mesociclo) y toda su jerarquía.
+     */
+    async eliminarBloqueMensual(id: string) {
+        return await prisma.bloqueMensual.delete({
             where: { id }
         });
     }

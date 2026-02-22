@@ -1,5 +1,5 @@
 "use client"
-import { TrendingUp, Settings, Plus, ChevronRight, Target, FlaskConical, Zap } from "lucide-react";
+import { TrendingUp, Settings, Plus, ChevronRight, Target, Zap, Trash2 } from "lucide-react";
 import { MacrocicloCompleto, BloqueConSemanas } from "@/nucleo/tipos/planificacion.tipos";
 
 interface VistaMacrocicloProps {
@@ -68,7 +68,10 @@ export default function VistaMacrociclo({ macrociclo, onSelectMeso, onConfigurar
                                 <span className="px-2 py-0.5 bg-marino-3 border border-marino-4 rounded text-[0.55rem] font-bold text-gris uppercase tracking-widest">v2.0 Beta</span>
                             </div>
                             <h3 className="text-3xl font-barlow-condensed font-black text-blanco uppercase tracking-tight leading-none">
-                                Macrociclo: {macrociclo.duracionSemanas} Semanas <span className="text-gris/40 mx-2">/</span> <span className="text-naranja">Bajar intensidad al 50% cada 4 sem.</span>
+                                {macrociclo.duracionSemanas} Semanas <span className="text-gris/40 mx-2">/</span>
+                                <span className="text-naranja">
+                                    {macrociclo.notas ? macrociclo.notas.split('\n')[0] : "Distribución Personalizada IL-Coaching"}
+                                </span>
                             </h3>
                             <p className="text-gris font-medium text-xs mt-2 uppercase tracking-[0.1em] flex items-center gap-2">
                                 <span className="w-2 h-2 rounded-full bg-naranja animate-pulse"></span>
@@ -113,31 +116,33 @@ export default function VistaMacrociclo({ macrociclo, onSelectMeso, onConfigurar
                                     <span className="text-[0.6rem] font-black text-naranja uppercase tracking-[0.2em]">{b.n > 1 ? `Meses ${b.n}-${b.n + 1}` : `Semanas 1-4`}</span>
                                     <h4 className="text-2xl font-barlow-condensed font-black uppercase text-blanco leading-none group-hover:text-naranja transition-colors">{b.nombre}</h4>
                                 </div>
-                                <div className="p-2 bg-marino-3 rounded-lg text-gris group-hover:text-blanco transition-colors">
-                                    <ChevronRight size={20} />
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (confirm("¿Seguro que deseas eliminar este mesociclo? Se borrarán todas las semanas y sesiones asociadas.")) {
+                                                import("@/nucleo/acciones/planificacion.accion").then(m => m.eliminarMesociclo(b.id)).then(() => window.location.reload());
+                                            }
+                                        }}
+                                        className="p-2 bg-marino-3 rounded-lg text-gris hover:text-rojo transition-all relative z-10"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                    <div className="p-2 bg-marino-3 rounded-lg text-gris group-hover:text-blanco transition-colors">
+                                        <ChevronRight size={20} />
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Detalle Metodológico - Guía Gualda Style */}
-                            <div className="grid grid-cols-2 gap-4 mt-6">
-                                <div className="bg-marino-3/50 p-3 rounded-lg border border-marino-4/50">
-                                    <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest mb-1 block opacity-70">Método</label>
-                                    <p className="text-[0.75rem] font-bold text-blanco line-clamp-1">{b.metodo}</p>
+                            <div className="space-y-3 mt-6">
+                                <div className="bg-marino-3/50 p-4 rounded-xl border border-marino-4/50 group-hover:bg-marino-3 transition-colors">
+                                    <label className="text-[0.6rem] font-black text-naranja uppercase tracking-widest mb-1.5 block opacity-50">Método de Trabajo</label>
+                                    <p className="text-[0.8rem] font-medium text-blanco leading-relaxed whitespace-pre-wrap">{b.metodo}</p>
                                 </div>
-                                <div className="bg-marino-3/50 p-3 rounded-lg border border-marino-4/50">
-                                    <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest mb-1 block opacity-70">Rango</label>
-                                    <p className="text-[0.75rem] font-bold text-blanco line-clamp-1">{b.rango}</p>
-                                </div>
-                            </div>
-
-                            <div className="mt-6 space-y-3">
-                                <div className="flex items-center gap-3 text-xs">
-                                    <FlaskConical size={14} className="text-gris" />
-                                    <span className="text-gris font-bold uppercase tracking-wider text-[0.6rem]">RIR Objetivo: <span className="text-blanco">{b.rir}</span></span>
-                                </div>
-                                <div className="flex items-center gap-3 text-xs">
-                                    <Target size={14} className="text-gris" />
-                                    <span className="text-gris font-bold uppercase tracking-wider text-[0.6rem]">Volumen: <span className="text-blanco">{b.vol}</span></span>
+                                <div className="bg-marino-3/50 p-4 rounded-xl border border-marino-4/50 group-hover:bg-marino-3 transition-colors">
+                                    <label className="text-[0.6rem] font-black text-naranja uppercase tracking-widest mb-1.5 block opacity-50">Rango & Dosificación</label>
+                                    <p className="text-[0.8rem] font-medium text-blanco leading-relaxed whitespace-pre-wrap">{b.rango}</p>
                                 </div>
                             </div>
                         </div>

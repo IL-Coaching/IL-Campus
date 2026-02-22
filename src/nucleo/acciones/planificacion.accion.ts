@@ -292,3 +292,38 @@ export async function eliminarSesion(id: string) {
         return { error: error instanceof Error ? error.message : "Error" };
     }
 }
+
+export async function eliminarMesociclo(id: string) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        // Mitigación BOLA
+        const bloquePropio = await prisma.bloqueMensual.findFirst({
+            where: {
+                id,
+                macrociclo: {
+                    cliente: { entrenadorId: entrenador.id }
+                }
+            }
+        });
+
+        if (!bloquePropio) throw new Error("Acceso denegado.");
+
+        await PlanificacionServicio.eliminarBloqueMensual(id);
+        revalidatePath(`/entrenador/clientes`);
+        return { exito: true };
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : "Error" };
+    }
+}
+
+export async function obtenerVolumenSemanal(semanaId: string) {
+    try {
+        await getEntrenadorSesion();
+        const { VolumenServicio } = await import("../servicios/volumen.servicio");
+        const volumen = await VolumenServicio.calcularVolumenSemanal(semanaId);
+        return { exito: true, volumen };
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : "Error" };
+    }
+}

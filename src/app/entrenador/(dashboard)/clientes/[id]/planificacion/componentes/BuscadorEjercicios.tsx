@@ -1,8 +1,9 @@
 "use client"
 import { useState, useEffect } from 'react';
-import { Search, X, Dumbbell, Loader2 } from 'lucide-react';
+import { Search, X, Dumbbell, Loader2, Star } from 'lucide-react';
 import { buscarEjerciciosCatalogo } from '@/nucleo/acciones/ejercicio.accion';
 import type { Ejercicio } from '@prisma/client';
+import { PosicionCarga } from '@prisma/client';
 
 interface BuscadorEjerciciosProps {
     onClose: () => void;
@@ -104,8 +105,13 @@ export default function BuscadorEjercicios({ onClose, onSelect }: BuscadorEjerci
                                 </div>
                                 <div className="text-left">
                                     <p className="text-blanco font-bold leading-none mb-1">{ej.nombre}</p>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 items-center">
                                         <span className="text-[0.6rem] text-naranja font-black uppercase tracking-widest">{ej.grupoMuscular}</span>
+                                        {ej.posicionCarga === PosicionCarga.LONGITUD_LARGA && (
+                                            <span className="flex items-center gap-1 bg-naranja/20 text-naranja px-2 py-0.5 rounded text-[0.55rem] font-black uppercase tracking-tighter border border-naranja/30">
+                                                <Star size={8} fill="currentColor" /> Longitud Larga
+                                            </span>
+                                        )}
                                         {ej.equipoNecesario && (
                                             <span className="text-[0.6rem] text-[#60A5FA] font-black uppercase tracking-widest leading-none">• {ej.equipoNecesario}</span>
                                         )}

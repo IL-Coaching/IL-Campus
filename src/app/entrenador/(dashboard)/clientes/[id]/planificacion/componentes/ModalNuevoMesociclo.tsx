@@ -92,30 +92,36 @@ export default function ModalNuevoMesociclo({ macrociclo, onClose }: Props) {
                         <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest flex items-center gap-2">
                             <Target size={12} className="text-naranja" /> Objetivo del Bloque
                         </label>
-                        <select
+                        <textarea
                             name="objetivo"
                             required
-                            className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:border-naranja/50 outline-none transition-all appearance-none cursor-pointer"
-                        >
-                            <option value="">Seleccionar Objetivo</option>
-                            <option value="Hipertrofia Estructural">Hipertrofia Estructural</option>
-                            <option value="Fuerza Máxima">Fuerza Máxima</option>
-                            <option value="Potencia / Explosividad">Potencia / Explosividad</option>
-                            <option value="Base / Acondicionamiento">Base / Acondicionamiento</option>
-                            <option value="Resistencia Muscular">Resistencia Muscular</option>
-                            <option value="Deload / Recuperación">Deload / Recuperación</option>
-                        </select>
+                            rows={3}
+                            placeholder="Ej: Mejorar técnica en básicos, acondicionamiento cardiovascular..."
+                            className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco focus:border-naranja/50 outline-none transition-all resize-none text-sm font-medium"
+                        />
                     </div>
 
-                    <div className="space-y-2 text-right">
+                    <div className="space-y-2">
                         <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest flex items-center gap-2">
                             <Zap size={12} className="text-naranja" /> Método Sugerido
                         </label>
-                        <input
+                        <textarea
                             name="metodo"
-                            type="text"
-                            placeholder="Ej: Push/Pull/Legs..."
-                            className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco focus:border-naranja/50 outline-none transition-all"
+                            rows={2}
+                            placeholder="Ej: Full body / Intensidad: 70-75% RM..."
+                            className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco focus:border-naranja/50 outline-none transition-all resize-none text-sm font-medium"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest flex items-center gap-2">
+                            <Zap size={12} className="text-naranja" /> Rango & Descanso
+                        </label>
+                        <textarea
+                            name="rangoReferencia"
+                            rows={2}
+                            placeholder="Ej: 10-12 reps / 1.30 min descanso..."
+                            className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco focus:border-naranja/50 outline-none transition-all resize-none text-sm font-medium"
                         />
                     </div>
 

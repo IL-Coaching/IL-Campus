@@ -15,18 +15,14 @@ export async function altaManualCliente(formData: FormData) {
             plan: formData.get("plan") as string,
         };
 
-        // 1. Validar datos (Sanitización)
         const validacion = EsquemaAltaCliente.safeParse(rawData);
         if (!validacion.success) {
             return { error: validacion.error.issues[0].message };
         }
 
         const { nombre, email, telefono, plan } = validacion.data;
-
-        // 2. Obtener el Entrenador desde la sesión (Capa de Seguridad)
         const entrenador = await getEntrenadorSesion();
 
-        // 3. Crear el Cliente usando el Servicio
         const nuevoCliente = await ClienteServicio.crear({
             nombre,
             email,
@@ -35,9 +31,7 @@ export async function altaManualCliente(formData: FormData) {
             notas: `Alta inicial con plan: ${plan}`
         });
 
-        // Revalidar la vista de clientes
         revalidatePath("/entrenador/clientes");
-
         return { exito: true, cliente: nuevoCliente, codigoActivacion: nuevoCliente.codigoActivacion };
 
     } catch (error: unknown) {
@@ -49,14 +43,11 @@ export async function altaManualCliente(formData: FormData) {
 export async function asignarMembresia(data: { clienteId: string; planId: string; fechaInicio: string }) {
     try {
         const entrenador = await getEntrenadorSesion();
-
-        // 1. Validar datos
         const validacion = EsquemaAsignarPlan.safeParse(data);
         if (!validacion.success) {
             return { error: validacion.error.issues[0].message };
         }
 
-        // 2. BOLA: Verificar que el cliente pertenece al entrenador
         const clientePropio = await prisma.cliente.findFirst({
             where: { id: data.clienteId, entrenadorId: entrenador.id }
         });
@@ -65,9 +56,7 @@ export async function asignarMembresia(data: { clienteId: string; planId: string
             return { error: "No tienes permiso para gestionar este cliente." };
         }
 
-        // 3. Ejecutar servicio
         await ClienteServicio.asignarPlan(validacion.data);
-
         revalidatePath("/entrenador/clientes");
         return { exito: true };
 
@@ -77,13 +66,9 @@ export async function asignarMembresia(data: { clienteId: string; planId: string
     }
 }
 
-/**
- * Elimina de raíz a un cliente y todos sus registros asociados.
- */
 export async function eliminarCliente(clienteId: string) {
     try {
         const entrenador = await getEntrenadorSesion();
-
         const clientePropio = await prisma.cliente.findFirst({
             where: { id: clienteId, entrenadorId: entrenador.id }
         });
@@ -92,8 +77,6 @@ export async function eliminarCliente(clienteId: string) {
             return { error: "No tienes permiso para gestionar este cliente." };
         }
 
-        // Eliminación en cascada manual (por limitaciones de base de datos relacional si onDelete: Cascade no está configurado en todos lados)
-        // Por seguridad, usamos un transact para asegurar consistencia
         await prisma.$transaction(async (tx) => {
             await tx.cobro.deleteMany({ where: { clienteId } });
             await tx.checkin.deleteMany({ where: { clienteId } });
@@ -101,18 +84,14 @@ export async function eliminarCliente(clienteId: string) {
             await tx.formularioInscripcion.deleteMany({ where: { clienteId } });
             await tx.mensaje.deleteMany({ where: { clienteId } });
 
-            // Registros de Sesiones Reales (SeriesReal -> SesionRegistrada -> Cliente)
             const sesiones = await tx.sesionRegistrada.findMany({ where: { clienteId } });
             for (const sesion of sesiones) {
                 await tx.serieRegistrada.deleteMany({ where: { sesionId: sesion.id } });
                 await tx.metricasSesion.deleteMany({ where: { sesionId: sesion.id } });
             }
             await tx.sesionRegistrada.deleteMany({ where: { clienteId } });
-
-            // Planes Asignados
             await tx.planAsignado.deleteMany({ where: { clienteId } });
 
-            // Macrociclos (Cascada Hacia Abajo)
             const macros = await tx.macrociclo.findMany({ where: { clienteId } });
             for (const macro of macros) {
                 const bloques = await tx.bloqueMensual.findMany({ where: { macrocicloId: macro.id } });
@@ -130,8 +109,6 @@ export async function eliminarCliente(clienteId: string) {
                 await tx.bloqueMensual.deleteMany({ where: { macrocicloId: macro.id } });
             }
             await tx.macrociclo.deleteMany({ where: { clienteId } });
-
-            // Finalmente Borramos al Cliente
             await tx.cliente.delete({ where: { id: clienteId } });
         });
 
@@ -141,5 +118,21 @@ export async function eliminarCliente(clienteId: string) {
     } catch (error) {
         console.error("Error crítico al eliminar cliente:", error);
         return { error: "Ocurrió un error al eliminar el cliente de la base de datos." };
+    }
+}
+
+export async function obtenerCondicionesClinicas(clienteId: string) {
+    try {
+        await getEntrenadorSesion();
+        const formulario = await prisma.formularioInscripcion.findUnique({
+            where: { clienteId },
+            select: {
+                // @ts-expect-error - Campo agregado en esquema real
+                condicionesClinicas: true
+            } as any
+        });
+        return { exito: true, condiciones: (formulario as any)?.condicionesClinicas || [] };
+    } catch {
+        return { error: "Error al obtener condiciones" };
     }
 }
