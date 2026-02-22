@@ -166,6 +166,7 @@ export async function loginAlumno(formData: FormData) {
 
 /**
  * Recibe el token temporal de activación y la nueva contraseña, la asigna y establece la sesión.
+ * USADO SOLO PARA EL FLUJO DE ACTIVACION INICIAL (FORCE PASSWORD CHANGE).
  */
 export async function completarForzarPassword(tempToken: string, newPasswordPlana: string) {
     try {
@@ -203,6 +204,45 @@ export async function completarForzarPassword(tempToken: string, newPasswordPlan
         return { success: true };
     } catch {
         return { error: "Error al cambiar la contraseña." };
+    }
+}
+
+/**
+ * Restablece la contraseña usando un token de recuperación (Olvido su clave).
+ */
+export async function restablecerPasswordConToken(token: string, newPasswordPlana: string) {
+    try {
+        const accessor = (prisma.cliente as unknown) as {
+            findFirst: (args: { where: Record<string, unknown> }) => Promise<Record<string, unknown> | null>,
+            update: (args: { where: { id: string }, data: Record<string, unknown> }) => Promise<unknown>
+        };
+
+        const clienteRaw = await accessor.findFirst({
+            where: { passwordResetToken: token }
+        });
+
+        if (!clienteRaw || !clienteRaw.passwordResetExpires || (clienteRaw.passwordResetExpires as Date) < new Date()) {
+            return { error: "El link ha expirado o ya fue utilizado." };
+        }
+
+        const passwordHash = await CriptoServicio.hashPassword(newPasswordPlana);
+
+        await accessor.update({
+            where: { id: clienteRaw.id as string },
+            data: {
+                password: passwordHash,
+                forcePasswordChange: false, // Por las dudas, lo desactivamos si estaba activo
+                passwordResetToken: null,
+                passwordResetExpires: null,
+                lastLogin: new Date()
+            }
+        });
+
+        await establecerSesion(clienteRaw.id as string, "alumno");
+        return { success: true };
+    } catch (error) {
+        console.error("Error en restablecerPasswordConToken:", error);
+        return { error: "No se pudo restablecer la contraseña." };
     }
 }
 

@@ -136,8 +136,8 @@ function EstablecerNuevaClave({ token }: { token: string }) {
             return;
         }
 
-        const { completarForzarPassword } = await import('@/nucleo/acciones/auth.accion');
-        const r = await completarForzarPassword(token, p1);
+        const { restablecerPasswordConToken } = await import('@/nucleo/acciones/auth.accion');
+        const r = await restablecerPasswordConToken(token, p1);
 
         if (r.success) {
             router.push('/alumno/dashboard');
