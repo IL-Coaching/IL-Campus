@@ -5,7 +5,7 @@ import { prisma } from "@/baseDatos/conexion";
 import { getEntrenadorSesion } from "../seguridad/sesion";
 import { CobroServicio } from "../servicios/cobro.servicio";
 import { EsquemaRegistrarCobro } from "../validadores/cobro.validador";
-import { createClient } from "@supabase/supabase-js";
+import { StorageServicio } from "../servicios/storage.servicio";
 
 export async function registrarCobro(formData: Record<string, unknown>) {
     try {
@@ -32,36 +32,13 @@ export async function registrarCobro(formData: Record<string, unknown>) {
 
         // Procesamiento del comprobante
         if (data.comprobanteBase64) {
-            try {
-                const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-                const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+            const fileName = `comprobantes/${entrenador.id}/${data.clienteId}_${Date.now()}.png`;
+            const upload = await StorageServicio.subirImagenBase64(data.comprobanteBase64, fileName);
 
-                if (supabaseUrl && supabaseKey) {
-                    const supabase = createClient(supabaseUrl, supabaseKey);
-                    const base64Data = data.comprobanteBase64.replace(/^data:image\/\w+;base64,/, "");
-                    const buffer = Buffer.from(base64Data, "base64");
-                    const fileName = `comprobantes/${entrenador.id}/${data.clienteId}_${Date.now()}.png`;
-
-                    const { error: uploadError } = await supabase
-                        .storage
-                        .from('archivos')
-                        .upload(fileName, buffer, {
-                            contentType: 'image/png',
-                            upsert: true
-                        });
-
-                    if (uploadError) {
-                        console.warn("No se pudo subir a Supabase, guardando como Base64 en DB (Fallback)", uploadError);
-                        finalComprobanteUrl = data.comprobanteBase64;
-                    } else {
-                        const { data: publicUrlData } = supabase.storage.from('archivos').getPublicUrl(fileName);
-                        finalComprobanteUrl = publicUrlData.publicUrl;
-                    }
-                } else {
-                    finalComprobanteUrl = data.comprobanteBase64;
-                }
-            } catch (e) {
-                console.error("Error procesando imagen:", e);
+            if (upload.success) {
+                finalComprobanteUrl = upload.url;
+            } else {
+                console.warn("Fallback a base64 por error en storage:", upload.error);
                 finalComprobanteUrl = data.comprobanteBase64;
             }
         }

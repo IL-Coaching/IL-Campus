@@ -119,39 +119,22 @@ export async function desactivarMFA(passwordConfirmacion: string) {
     }
 }
 
+import { StorageServicio } from "../servicios/storage.servicio";
+
 /**
  * Actualiza el Avatar del entrenador.
  */
 export async function actualizarAvatarAdmin(base64: string) {
     try {
         const entrenador = await getEntrenadorSesion();
-
-        // 1. Limpieza y preparación de la imagen
-        const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
-        const buffer = Buffer.from(base64Data, 'base64');
         const fileName = `avatares/${entrenador.id}-${Date.now()}.png`;
 
-        // 2. Subida a Supabase Storage (Public)
-        // Nota: El cliente de Supabase se importa por demanda para evitar fugas de memoria en build
-        const { createClient } = await import('@supabase/supabase-js');
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-        );
+        const upload = await StorageServicio.subirImagenBase64(base64, fileName);
+        if (!upload.success) return { error: upload.error };
 
-        const { error: uploadError } = await supabase.storage
-            .from('archivos')
-            .upload(fileName, buffer, {
-                contentType: 'image/png',
-                upsert: true
-            });
+        const avatarUrl = upload.url;
 
-        if (uploadError) throw uploadError;
-
-        const { data: publicUrlData } = supabase.storage.from('archivos').getPublicUrl(fileName);
-        const avatarUrl = publicUrlData.publicUrl;
-
-        // 3. Persistencia en DB
+        // Persistencia en DB
         const accessor = (prisma.entrenador as unknown) as PrismaUpdateAccessor;
         await accessor.update({
             where: { id: entrenador.id },
@@ -166,39 +149,20 @@ export async function actualizarAvatarAdmin(base64: string) {
     }
 }
 
-/**
- * Actualiza una foto de la landing page (Hero o Bio).
- */
 export async function actualizarFotoLanding(base64: string, tipo: 'hero' | 'bio') {
     try {
         const entrenador = await getEntrenadorSesion();
-
-        const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
-        const buffer = Buffer.from(base64Data, 'base64');
         const fileName = `landing/${tipo}-${entrenador.id}-${Date.now()}.png`;
 
-        const { createClient } = await import('@supabase/supabase-js');
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-        );
+        const upload = await StorageServicio.subirImagenBase64(base64, fileName);
+        if (!upload.success) return { error: upload.error };
 
-        const { error: uploadError } = await supabase.storage
-            .from('archivos')
-            .upload(fileName, buffer, {
-                contentType: 'image/png',
-                upsert: true
-            });
-
-        if (uploadError) throw uploadError;
-
-        const { data: publicUrlData } = supabase.storage.from('archivos').getPublicUrl(fileName);
-        const imageUrl = publicUrlData.publicUrl;
+        const imageUrl = upload.url;
 
         const accessor = (prisma.entrenador as unknown) as PrismaUpdateAccessor;
         const updateData: Record<string, string> = {};
-        if (tipo === 'hero') updateData.landingHeroUrl = imageUrl;
-        if (tipo === 'bio') updateData.landingBioUrl = imageUrl;
+        if (tipo === 'hero') updateData.landingHeroUrl = imageUrl!;
+        if (tipo === 'bio') updateData.landingBioUrl = imageUrl!;
 
         await accessor.update({
             where: { id: entrenador.id },
