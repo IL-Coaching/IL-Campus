@@ -22,7 +22,7 @@ export default function Nav() {
                         </div>
                         {/* Textos */}
                         <Link href="/" className="hidden sm:flex flex-col cursor-pointer">
-                            <span className="text-[0.65rem] font-bold tracking-widest text-gris uppercase">Fitness Coach</span>
+                            <span className="text-[0.65rem] font-bold tracking-widest text-gris uppercase">Personal Trainer</span>
                             <span className="text-sm font-barlow-condensed font-bold tracking-wide text-naranja uppercase leading-none">{sitioConfig.entrenador}</span>
                         </Link>
                     </div>

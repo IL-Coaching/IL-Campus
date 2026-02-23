@@ -1,24 +1,7 @@
 export default function Testimonios() {
-    const testimonios = [
-        {
-            iniciales: "MV",
-            nombre: "Martín V.",
-            plan: "GYMRAT · 3 MESES",
-            texto: "Desde que empecé con IL-Coaching cambié mi forma de entender el entrenamiento. Ahora sé por qué hago cada ejercicio y el progreso es visible."
-        },
-        {
-            iniciales: "LG",
-            nombre: "Laura G.",
-            plan: "ELITE · 1 AÑO",
-            texto: "La planificación por mesociclos es un antes y un después. Nunca había logrado ser tan constante y medir mis avances con tanta claridad."
-        },
-        {
-            iniciales: "FA",
-            nombre: "Franco A.",
-            plan: "START · 1 MES",
-            texto: "Increíble la calidad del seguimiento. Las videollamadas semanales me ayudan a ajustar la técnica y mantener la motivación a tope."
-        },
-    ];
+    const testimonios: { iniciales: string; nombre: string; plan: string; texto: string; }[] = [];
+
+    if (testimonios.length === 0) return null;
 
     return (
         <section id="testimonios" className="bg-marino-2 border-t border-marino-4 py-24">

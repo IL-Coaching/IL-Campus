@@ -165,3 +165,51 @@ export async function actualizarAvatarAdmin(base64: string) {
         return { error: "No se pudo procesar la imagen." };
     }
 }
+
+/**
+ * Actualiza una foto de la landing page (Hero o Bio).
+ */
+export async function actualizarFotoLanding(base64: string, tipo: 'hero' | 'bio') {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
+        const buffer = Buffer.from(base64Data, 'base64');
+        const fileName = `landing/${tipo}-${entrenador.id}-${Date.now()}.png`;
+
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+
+        const { error: uploadError } = await supabase.storage
+            .from('archivos')
+            .upload(fileName, buffer, {
+                contentType: 'image/png',
+                upsert: true
+            });
+
+        if (uploadError) throw uploadError;
+
+        const { data: publicUrlData } = supabase.storage.from('archivos').getPublicUrl(fileName);
+        const imageUrl = publicUrlData.publicUrl;
+
+        const accessor = (prisma.entrenador as unknown) as PrismaUpdateAccessor;
+        const updateData: Record<string, string> = {};
+        if (tipo === 'hero') updateData.landingHeroUrl = imageUrl;
+        if (tipo === 'bio') updateData.landingBioUrl = imageUrl;
+
+        await accessor.update({
+            where: { id: entrenador.id },
+            data: updateData
+        });
+
+        revalidatePath('/entrenador/configuracion');
+        revalidatePath('/'); // También revalidar la landing
+        return { success: true, imageUrl };
+    } catch (error) {
+        console.error(`Error landing ${tipo}:`, error);
+        return { error: "No se pudo procesar la imagen." };
+    }
+}

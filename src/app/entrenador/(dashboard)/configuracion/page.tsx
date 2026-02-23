@@ -1,7 +1,8 @@
-import { Shield, User, Mail, Phone } from "lucide-react";
+import { Shield, User, Mail, Phone, Image as ImageIcon } from "lucide-react";
 import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";
 import GestionSeguridadAdmin from "./componentes/GestionSeguridadAdmin";
 import GestionAvatarAdmin from "./componentes/GestionAvatarAdmin";
+import GestionFotosLandingAdmin from "./componentes/GestionFotosLandingAdmin";
 
 export default async function ConfiguracionPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -78,6 +79,22 @@ export default async function ConfiguracionPage() {
                         </div>
                         <div className="p-8">
                             <GestionSeguridadAdmin entrenador={entrenador} />
+                        </div>
+                    </div>
+
+                    {/* Sección Landing Page */}
+                    <div className="bg-marino-2 border border-marino-4 rounded-3xl overflow-hidden shadow-2xl">
+                        <div className="p-6 border-b border-marino-4 bg-marino-3/30 flex items-center gap-3">
+                            <div className="p-2 bg-marino-3 rounded-lg border border-marino-4">
+                                <ImageIcon size={18} className="text-naranja" />
+                            </div>
+                            <h3 className="font-barlow-condensed font-bold tracking-widest uppercase text-sm text-blanco">Identidad Visual Landing Page</h3>
+                        </div>
+                        <div className="p-8">
+                            <GestionFotosLandingAdmin
+                                heroUrl={entrenador.landingHeroUrl}
+                                bioUrl={entrenador.landingBioUrl}
+                            />
                         </div>
                     </div>
                 </div>

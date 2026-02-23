@@ -17,8 +17,10 @@ model Entrenador {
   activo     Boolean     @default(true)
   creadoEn   DateTime    @default(now())
   mfaEnabled Boolean     @default(false)
-  mfaSecret  String?
-  clientes   Cliente[]
+  mfaSecret      String?
+  landingHeroUrl String?
+  landingBioUrl  String?
+  clientes       Cliente[]
   ejercicios Ejercicio[]
   planes     Plan[]
 }

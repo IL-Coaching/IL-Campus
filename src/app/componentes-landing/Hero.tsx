@@ -1,7 +1,12 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { sitioConfig } from '../../../config/sitio.config';
 
-export default function Hero() {
+interface Props {
+    imageUrl?: string | null;
+}
+
+export default function Hero({ imageUrl }: Props) {
 
     return (
         <section className="relative pt-32 pb-16 md:pt-48 md:pb-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col md:grid md:grid-cols-2 gap-12 items-center">
@@ -49,14 +54,25 @@ export default function Hero() {
 
                 {/* Contenedor de la foto */}
                 <div className="relative w-full aspect-[380/480] bg-marino-2 border border-marino-4 rounded-2xl flex flex-col items-center justify-center text-gris-claro overflow-hidden shadow-2xl transition-all duration-500 group-hover:border-naranja/30 group-hover:shadow-naranja/5">
+                    {imageUrl ? (
+                        <Image
+                            src={imageUrl}
+                            alt={sitioConfig.entrenador}
+                            fill
+                            className="object-cover"
+                            priority
+                        />
+                    ) : (
+                        <>
+                            {/* Patrón de puntos decorativos */}
+                            <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 
-                    {/* Patrón de puntos decorativos */}
-                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
-
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20 mb-6 opacity-20 group-hover:opacity-40 transition-opacity duration-500 text-naranja" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    <span className="font-barlow-condensed font-black tracking-[0.3em] uppercase opacity-40 text-[0.6rem] group-hover:opacity-60 transition-opacity">Espacio para fotografía</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20 mb-6 opacity-20 group-hover:opacity-40 transition-opacity duration-500 text-naranja" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            <span className="font-barlow-condensed font-black tracking-[0.3em] uppercase opacity-40 text-[0.6rem] group-hover:opacity-60 transition-opacity">Espacio para fotografía</span>
+                        </>
+                    )}
 
                     {/* Overlay gradiente inferior */}
                     <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-marino-2 to-transparent group-hover:from-naranja/10 transition-colors duration-700"></div>

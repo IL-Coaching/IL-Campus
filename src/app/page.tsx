@@ -9,8 +9,11 @@ import Footer from "./componentes-landing/Footer";
 import ModalWhatsapp from "./componentes-landing/ModalWhatsapp";
 import { ModalProvider } from "./componentes-landing/ModalProvider";
 import ObserverScript from "./componentes-landing/ObserverScript";
+import { prisma } from "@/baseDatos/conexion";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const entrenador = await prisma.entrenador.findFirst();
+
   return (
     <ModalProvider>
       <ObserverScript />
@@ -30,10 +33,10 @@ export default function LandingPage() {
 
       <main className="overflow-hidden">
         {/* 2. HERO */}
-        <Hero />
+        <Hero imageUrl={entrenador?.landingHeroUrl} />
 
         {/* 3. BIO DEL ENTRENADOR */}
-        <Bio />
+        <Bio imageUrl={entrenador?.landingBioUrl} />
 
         {/* 4. PLANES */}
         <Planes />

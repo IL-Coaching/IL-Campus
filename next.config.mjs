@@ -7,6 +7,11 @@ const nextConfig = {
                 hostname: 'img.youtube.com',
                 pathname: '/vi/**',
             },
+            {
+                protocol: 'https',
+                hostname: 'rybdfdlxpsruyznzekoj.supabase.co',
+                pathname: '/storage/v1/object/public/**',
+            },
         ],
     },
 };
