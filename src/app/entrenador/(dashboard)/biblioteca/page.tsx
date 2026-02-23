@@ -1,10 +1,8 @@
 import { buscarEjercicios } from "@/nucleo/acciones/ejercicio.accion";
 import BibliotecaEjercicios from "./BibliotecaEjercicios";
-import BotonImportador from "./BotonImportador";
 import BotonAltaEjercicio from "./BotonAltaEjercicio";
 
 export default async function BibliotecaPage() {
-    // Carga inicial de datos (ejercicios no archivados)
     const ejerciciosIniciales = await buscarEjercicios("");
 
     return (
@@ -21,16 +19,15 @@ export default async function BibliotecaPage() {
                         Biblioteca <span className="text-naranja">IL-Campus</span>
                     </h1>
                     <p className="text-gris font-medium text-sm mt-1 max-w-xl">
-                        Gestión profesional de ejercicios, vídeos de técnica biomecánica y perfiles de estimulo.
+                        Gestión profesional de ejercicios, vídeos de técnica biomecánica y perfiles de estímulo.
                     </p>
                 </div>
                 <div className="flex gap-3">
-                    <BotonImportador />
                     <BotonAltaEjercicio />
                 </div>
             </div>
 
-            {/* Panel Principal de la Biblioteca */}
+            {/* Panel Principal */}
             <BibliotecaEjercicios iniciales={ejerciciosIniciales} />
         </div>
     );
