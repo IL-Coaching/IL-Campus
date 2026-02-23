@@ -6,7 +6,7 @@ import { Cliente, Macrociclo, Semana, DiaSesion, EjercicioPlanificado, Ejercicio
  */
 
 export type EjercicioConDetalle = EjercicioPlanificado & {
-    ejercicio: Ejercicio;
+    ejercicio: Ejercicio | null;
 };
 
 export type DiaConEjercicios = DiaSesion & {

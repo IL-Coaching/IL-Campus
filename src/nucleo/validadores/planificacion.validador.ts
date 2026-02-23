@@ -21,4 +21,7 @@ export const EsquemaActualizarEjercicio = z.object({
     tempo: z.string().max(10).optional(),
     pesoSugerido: z.number().min(0).optional(),
     notas: z.string().max(500).optional(),
+    ejercicioId: z.string().uuid().nullable().optional(),
+    nombreLibre: z.string().max(100).nullable().optional(),
+    esBiblioteca: z.boolean().optional(),
 });

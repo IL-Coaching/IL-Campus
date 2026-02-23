@@ -42,29 +42,105 @@ model Ejercicio {
   id                  String                 @id @default(uuid())
   entrenadorId        String
   nombre              String
-  grupoMuscular       String
-  equipoNecesario     String?
+  nombresAlternativos String[]
   descripcion         String?
-  videoUrl            String?
-  creadoEn            DateTime               @default(now())
-  analisisBiomecanico String?
-  fotoUrl             String?
-  musculosAccesorios  String?
-  musculosPrincipales String?
-  patronMovimiento    String?
+  erroresComunes      String?
+  musculoPrincipal    GrupoMuscular
+  musculosSecundarios GrupoMuscular[]
+  articulacion        TipoArticulacion
+  patron              PatronMovimiento
+  equipamiento        TipoEquipamiento[]
+  lateralidad         Lateralidad
   posicionCarga       PosicionCarga          @default(NEUTRA)
+  nivelTecnico        NivelTecnico           @default(BASICO)
+  urlVideo            String?
+  thumbnailUrl        String?
+  origen              OrigenEjercicio        @default(BIBLIOTECA_IL)
+  visibleParaClientes Boolean                @default(true)
+  archivado           Boolean                @default(false)
+  creadoEn            DateTime               @default(now())
+  actualizadoEn       DateTime               @updatedAt
+  
   entrenador          Entrenador             @relation(fields: [entrenadorId], references: [id])
-  planificaciones     EjercicioPlanificado[]
+  ejerciciosPlanificados EjercicioPlanificado[]
   alertasEstancamiento AlertaEstancamiento[]
   resultadosTesteo    ResultadoTesteo[]
   configsTesteo       ConfigTesteoEjercicio[]
   porcentajesCliente  PorcentajesCliente[]
 }
 
+enum GrupoMuscular {
+  CUADRICEPS
+  ISQUIOTIBIALES
+  GLUTEO
+  PECHO
+  ESPALDA
+  HOMBROS
+  BICEPS
+  TRICEPS
+  CORE
+  GEMELOS
+  ADUCTORES
+  ABDOMINALES
+  LUMBARES
+  TRAPECIO
+  ANTEBRAZOS
+}
+
+enum TipoArticulacion {
+  MONOARTICULAR
+  BIARTICULAR
+  MULTIARTICULAR
+}
+
+enum PatronMovimiento {
+  EMPUJE_HORIZONTAL
+  EMPUJE_VERTICAL
+  TRACCION_HORIZONTAL
+  TRACCION_VERTICAL
+  BISAGRA
+  SENTADILLA
+  AISLAMIENTO
+  ISOMETRICO
+  CARGADA_OLIMPICA
+  CAMINATA_TRANSPORTE
+}
+
+enum TipoEquipamiento {
+  MAQUINA
+  BARRA
+  MANCUERNA
+  POLEA
+  BANDA_ELASTICA
+  PESO_CORPORAL
+  TRX
+  KETTLEBELL
+  MULTIPOWER
+  BANCO
+  DISCO
+  CABLE
+}
+
+enum Lateralidad {
+  BILATERAL
+  UNILATERAL
+}
+
 enum PosicionCarga {
   LONGITUD_LARGA
   LONGITUD_CORTA
   NEUTRA
+}
+
+enum NivelTecnico {
+  BASICO
+  INTERMEDIO
+  AVANZADO
+}
+
+enum OrigenEjercicio {
+  BIBLIOTECA_IL
+  PERSONALIZADO
 }
 
 model Cliente {
@@ -216,7 +292,9 @@ model DiaSesion {
 model EjercicioPlanificado {
   id                  String            @id @default(uuid())
   diaId               String
-  ejercicioId         String
+  ejercicioId         String?
+  nombreLibre         String?
+  esBiblioteca        Boolean           @default(false)
   series              Int
   repsMin             Int
   repsMax             Int
@@ -230,12 +308,12 @@ model EjercicioPlanificado {
   descansoSegundos    Int
   pesoSugerido        Float?
   zonaIntensidad      ZonaIntensidad?
-  cadencia           String?
-  duracionSerie      String?
+  cadencia            String?
+  duracionSerie       String?
   notasTecnicas       String?
   orden               Int
   diaSesion           DiaSesion         @relation(fields: [diaId], references: [id])
-  ejercicio           Ejercicio         @relation(fields: [ejercicioId], references: [id])
+  ejercicio           Ejercicio?        @relation(fields: [ejercicioId], references: [id])
   seriesRegistradas   SerieRegistrada[]
 }
 

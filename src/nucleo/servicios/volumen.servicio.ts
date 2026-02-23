@@ -39,7 +39,7 @@ export const VolumenServicio = {
 
         semana.diasSesion.forEach(dia => {
             dia.ejercicios.forEach(ep => {
-                const musculo = ep.ejercicio.grupoMuscular;
+                const musculo = ep.ejercicio?.musculoPrincipal?.toString() || "OTROS";
                 mapaVolumen[musculo] = (mapaVolumen[musculo] || 0) + ep.series;
             });
         });

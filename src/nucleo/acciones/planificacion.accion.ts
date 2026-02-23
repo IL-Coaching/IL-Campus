@@ -58,6 +58,9 @@ export async function guardarCambiosEjercicio(ejercicioPlanificadoId: string, da
     tempo?: string;
     pesoSugerido?: number;
     notas?: string;
+    ejercicioId?: string | null;
+    nombreLibre?: string | null;
+    esBiblioteca?: boolean;
 }) {
     try {
         const entrenador = await getEntrenadorSesion();
@@ -98,7 +101,10 @@ export async function guardarCambiosEjercicio(ejercicioPlanificadoId: string, da
             descansoSegundos: validacion.data.descanso,
             tempo: validacion.data.tempo,
             pesoSugerido: validacion.data.pesoSugerido,
-            notasTecnicas: validacion.data.notas
+            notasTecnicas: validacion.data.notas,
+            ejercicioId: validacion.data.ejercicioId,
+            nombreLibre: validacion.data.nombreLibre,
+            esBiblioteca: validacion.data.esBiblioteca
         });
 
         return { exito: true };

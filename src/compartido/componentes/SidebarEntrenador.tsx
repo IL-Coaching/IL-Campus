@@ -19,7 +19,7 @@ import { logout } from '@/nucleo/acciones/auth.accion';
 const MENU_ITEMS = [
     { name: 'Dashboard', icon: LayoutDashboard, href: '/entrenador/dashboard' },
     { name: 'Clientes', icon: Users, href: '/entrenador/clientes' },
-    { name: 'Rutinas', icon: Dumbbell, href: '/entrenador/rutinas' },
+    { name: 'Biblioteca', icon: Dumbbell, href: '/entrenador/biblioteca' },
     { name: 'Check-ins', icon: CheckSquare, href: '/entrenador/checkins' },
     { name: 'Mensajes', icon: MessageCircle, href: '/entrenador/mensajes' },
     { name: 'Finanzas', icon: CreditCard, href: '/entrenador/finanzas' },

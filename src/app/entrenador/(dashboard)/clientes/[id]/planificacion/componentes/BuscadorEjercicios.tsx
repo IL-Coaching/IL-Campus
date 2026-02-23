@@ -1,9 +1,8 @@
 "use client"
 import { useState, useEffect } from 'react';
-import { Search, X, Dumbbell, Loader2, Star } from 'lucide-react';
+import { Search, X, Dumbbell, Loader2, Play, Video } from 'lucide-react';
 import { buscarEjerciciosCatalogo } from '@/nucleo/acciones/ejercicio.accion';
 import type { Ejercicio } from '@prisma/client';
-import { PosicionCarga } from '@prisma/client';
 
 interface BuscadorEjerciciosProps {
     onClose: () => void;
@@ -94,33 +93,45 @@ export default function BuscadorEjercicios({ onClose, onSelect }: BuscadorEjerci
                         </div>
                     )}
 
-                    {resultados.map((ej) => (
+                    {resultados.map((ej: Ejercicio) => (
                         <div
                             key={ej.id}
                             className="flex items-center justify-between p-4 bg-marino-3/50 border border-marino-4 rounded-xl hover:border-naranja/40 group transition-all"
                         >
                             <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded bg-marino-4 flex items-center justify-center text-gris group-hover:text-naranja transition-colors">
-                                    <Dumbbell size={20} />
+                                <div className="relative w-12 h-12 rounded-xl bg-marino-4 flex items-center justify-center text-gris group-hover:text-naranja transition-colors overflow-hidden">
+                                    {ej.thumbnailUrl ? (
+                                        <img src={ej.thumbnailUrl} alt={ej.nombre} className="w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity" />
+                                    ) : (
+                                        <Dumbbell size={24} />
+                                    )}
+                                    {ej.urlVideo && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-marino/40">
+                                            <Play size={16} className="text-blanco fill-blanco" />
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="text-left">
-                                    <p className="text-blanco font-bold leading-none mb-1">{ej.nombre}</p>
-                                    <div className="flex gap-2 items-center">
-                                        <span className="text-[0.6rem] text-naranja font-black uppercase tracking-widest">{ej.grupoMuscular}</span>
-                                        {ej.posicionCarga === PosicionCarga.LONGITUD_LARGA && (
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <p className="text-blanco font-black text-[0.9rem] uppercase tracking-tight">{ej.nombre}</p>
+                                        {ej.urlVideo && <Video size={14} className="text-rojo" />}
+                                    </div>
+                                    <div className="flex gap-2 items-center flex-wrap">
+                                        <span className="text-[0.6rem] text-naranja font-black uppercase tracking-widest">{ej.musculoPrincipal}</span>
+                                        {ej.posicionCarga === 'LONGITUD_LARGA' && (
                                             <span className="flex items-center gap-1 bg-naranja/20 text-naranja px-2 py-0.5 rounded text-[0.55rem] font-black uppercase tracking-tighter border border-naranja/30">
-                                                <Star size={8} fill="currentColor" /> Longitud Larga
+                                                🟢 IUSCA: Larga
                                             </span>
                                         )}
-                                        {ej.equipoNecesario && (
-                                            <span className="text-[0.6rem] text-[#60A5FA] font-black uppercase tracking-widest leading-none">• {ej.equipoNecesario}</span>
+                                        {ej.articulacion && (
+                                            <span className="text-[0.55rem] text-gris font-bold uppercase tracking-widest leading-none">• {ej.articulacion}</span>
                                         )}
                                     </div>
                                 </div>
                             </div>
                             <button
                                 onClick={() => onSelect && onSelect(ej)}
-                                className="bg-marino-4 hover:bg-naranja hover:text-marino text-naranja font-bold py-2 px-4 rounded-lg text-xs uppercase tracking-widest transition-all"
+                                className="bg-marino-4 hover:bg-naranja hover:text-marino text-naranja font-black py-2.5 px-6 rounded-xl text-[0.65rem] uppercase tracking-widest transition-all border border-marino-4 hover:border-naranja shadow-lg"
                             >
                                 + Agregar
                             </button>

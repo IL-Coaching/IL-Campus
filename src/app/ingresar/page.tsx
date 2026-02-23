@@ -54,7 +54,7 @@ export default function IngresarPage() {
 
                         <h2 className="text-2xl font-barlow-condensed font-black uppercase text-blanco mb-4 group-hover:text-naranja transition-colors">Entrenador</h2>
                         <p className="text-gris text-sm leading-relaxed mb-8">
-                            Gestioná atletas, creá nuevas rutinas y revisá los reportes de progreso de tus alumnos.
+                            Gestioná atletas, administrá la biblioteca de ejercicios y revisá los reportes de progreso de tus alumnos.
                         </p>
 
                         <div className="mt-auto flex items-center gap-2 text-naranja font-bold uppercase tracking-widest text-xs">

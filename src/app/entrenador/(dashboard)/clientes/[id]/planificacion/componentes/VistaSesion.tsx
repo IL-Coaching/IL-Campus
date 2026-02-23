@@ -7,6 +7,7 @@ import { guardarCambiosEjercicio, eliminarEjercicio } from '@/nucleo/acciones/pl
 import { obtenerCondicionesClinicas } from '@/nucleo/acciones/cliente.accion';
 import { ZONAS_INTENSIDAD } from '@/nucleo/planificacion/zonas.constantes';
 import { useRouter, useParams } from 'next/navigation';
+import SelectorEjercicioCelda from './SelectorEjercicioCelda';
 
 
 interface VistaSesionProps {
@@ -72,10 +73,10 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
         }
     };
 
-    const handleUpdateChange = (id: string, field: string, value: string | number) => {
+    const handleUpdateChange = (id: string, updates: Partial<EjercicioConDetalle>) => {
         setEjercicios(prev => prev.map(ej => {
             if (ej.id === id) {
-                return { ...ej, [field]: value };
+                return { ...ej, ...updates };
             }
             return ej;
         }));
@@ -93,7 +94,10 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                     descanso: ej.descansoSegundos,
                     tempo: ej.tempo || undefined,
                     pesoSugerido: ej.pesoSugerido || undefined,
-                    notas: ej.notasTecnicas || undefined
+                    notas: ej.notasTecnicas || undefined,
+                    ejercicioId: ej.ejercicioId,
+                    nombreLibre: ej.nombreLibre,
+                    esBiblioteca: ej.esBiblioteca
                 });
             }
             router.refresh();
@@ -326,10 +330,16 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                                 <tr key={ej.id} className="group hover:bg-marino-3/40 transition-all">
                                     <td className="p-5 text-gris font-black text-lg text-center opacity-30 group-hover:opacity-100 transition-opacity">{idx + 1}</td>
                                     <td className="p-5">
-                                        <div className="flex flex-col">
-                                            <p className="font-black text-blanco mb-0.5 text-[0.9rem] uppercase tracking-tight group-hover:text-naranja transition-colors">{ej.ejercicio.nombre}</p>
-                                            <span className="text-[0.6rem] text-naranja font-black uppercase tracking-[0.2em]">{ej.ejercicio.grupoMuscular}</span>
-                                        </div>
+                                        <SelectorEjercicioCelda
+                                            initialValue={ej.ejercicio?.nombre || ej.nombreLibre || ""}
+                                            ejercicioId={ej.ejercicioId}
+                                            esBiblioteca={ej.esBiblioteca}
+                                            onSelect={(data) => handleUpdateChange(ej.id, {
+                                                ejercicioId: data.ejercicioId,
+                                                nombreLibre: data.nombre,
+                                                esBiblioteca: data.esBiblioteca
+                                            })}
+                                        />
                                     </td>
                                     <td className="p-5">
                                         <div className="flex flex-col gap-2">
@@ -337,7 +347,7 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                                                 <input
                                                     type="number"
                                                     value={ej.repsMin}
-                                                    onChange={(e) => handleUpdateChange(ej.id, 'repsMin', parseInt(e.target.value))}
+                                                    onChange={(e) => handleUpdateChange(ej.id, { repsMin: parseInt(e.target.value) })}
                                                     className="w-full bg-transparent py-2.5 text-center text-blanco focus:outline-none text-[0.8rem] font-bold"
                                                     placeholder="Min"
                                                 />
@@ -345,7 +355,7 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                                                 <input
                                                     type="number"
                                                     value={ej.repsMax}
-                                                    onChange={(e) => handleUpdateChange(ej.id, 'repsMax', parseInt(e.target.value))}
+                                                    onChange={(e) => handleUpdateChange(ej.id, { repsMax: parseInt(e.target.value) })}
                                                     className="w-full bg-transparent py-2.5 text-center text-blanco focus:outline-none text-[0.8rem] font-bold"
                                                     placeholder="Max"
                                                 />
@@ -380,8 +390,10 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                                                         <button
                                                             onClick={() => {
                                                                 const zonaData = ZONAS_INTENSIDAD[detectarZona(ej.repsMin, ej.repsMax)!];
-                                                                handleUpdateChange(ej.id, 'descansoSegundos', zonaData.tiempoDescansoMin * 60);
-                                                                handleUpdateChange(ej.id, 'tempo', zonaData.cadencia);
+                                                                handleUpdateChange(ej.id, {
+                                                                    descansoSegundos: zonaData.tiempoDescansoMin * 60,
+                                                                    tempo: zonaData.cadencia
+                                                                });
                                                             }}
                                                             className="w-full py-1.5 bg-naranja/10 hover:bg-naranja hover:text-marino transition-all border border-naranja/20 rounded-lg text-[0.5rem] font-black text-naranja uppercase tracking-tighter"
                                                         >
@@ -396,7 +408,7 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                                         <input
                                             type="number"
                                             value={ej.series}
-                                            onChange={(e) => handleUpdateChange(ej.id, 'series', parseInt(e.target.value))}
+                                            onChange={(e) => handleUpdateChange(ej.id, { series: parseInt(e.target.value) })}
                                             className="w-full bg-marino-3 border border-marino-4/30 p-2.5 rounded-xl text-center text-blanco focus:outline-none focus:border-naranja/50 transition-all font-black text-[0.9rem]"
                                         />
                                     </td>
@@ -404,7 +416,7 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                                         <input
                                             type="number"
                                             value={ej.RIR}
-                                            onChange={(e) => handleUpdateChange(ej.id, 'RIR', parseInt(e.target.value))}
+                                            onChange={(e) => handleUpdateChange(ej.id, { RIR: parseInt(e.target.value) })}
                                             className="w-full bg-marino-3 border border-marino-4/30 p-2.5 rounded-xl text-center text-naranja focus:outline-none focus:border-naranja/50 transition-all font-black text-[0.9rem]"
                                         />
                                     </td>
@@ -413,7 +425,7 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                                             <input
                                                 type="number"
                                                 value={ej.descansoSegundos}
-                                                onChange={(e) => handleUpdateChange(ej.id, 'descansoSegundos', parseInt(e.target.value))}
+                                                onChange={(e) => handleUpdateChange(ej.id, { descansoSegundos: parseInt(e.target.value) })}
                                                 className="w-full bg-transparent py-2.5 text-center text-blanco focus:outline-none text-[0.75rem] font-bold"
                                             />
                                             <span className="text-gris text-[0.5rem] font-black uppercase tracking-widest px-1">Seg</span>
@@ -425,7 +437,7 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                                                 type="number"
                                                 step="0.5"
                                                 value={ej.pesoSugerido || ''}
-                                                onChange={(e) => handleUpdateChange(ej.id, 'pesoSugerido', parseFloat(e.target.value))}
+                                                onChange={(e) => handleUpdateChange(ej.id, { pesoSugerido: parseFloat(e.target.value) })}
                                                 placeholder="0.0"
                                                 className="w-full bg-marino-3 border border-marino-4/30 py-2.5 rounded-xl text-center text-naranja focus:outline-none text-[0.85rem] font-black"
                                             />
@@ -437,7 +449,7 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                                     <td className="p-5">
                                         <textarea
                                             value={ej.notasTecnicas || ''}
-                                            onChange={(e) => handleUpdateChange(ej.id, 'notasTecnicas', e.target.value)}
+                                            onChange={(e) => handleUpdateChange(ej.id, { notasTecnicas: e.target.value })}
                                             rows={3}
                                             className="w-full bg-marino-3/50 border border-marino-4/50 p-2 rounded-lg text-gris-claro text-[0.65rem] focus:outline-none focus:border-naranja/40 transition-all resize-none font-medium italic"
                                             placeholder="Feedback..."

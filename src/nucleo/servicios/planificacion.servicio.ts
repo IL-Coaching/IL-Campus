@@ -1,6 +1,6 @@
 import { prisma } from "@/baseDatos/conexion";
 import { MacrocicloCompleto } from "../tipos/planificacion.tipos";
-import { TipoCarga } from "@prisma/client";
+import { TipoCarga, Prisma } from "@prisma/client";
 
 /**
  * Servicio de Planificación — ArchSecure AI
@@ -168,10 +168,13 @@ export const PlanificacionServicio = {
         descansoSegundos?: number;
         pesoSugerido?: number;
         notasTecnicas?: string;
+        ejercicioId?: string | null;
+        nombreLibre?: string | null;
+        esBiblioteca?: boolean;
     }) {
         return await prisma.ejercicioPlanificado.update({
             where: { id },
-            data
+            data: data as Prisma.EjercicioPlanificadoUpdateInput
         });
     },
 
