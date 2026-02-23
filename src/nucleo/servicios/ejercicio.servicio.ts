@@ -18,8 +18,7 @@ export const EjercicioServicio = {
                     { nombresAlternativos: { has: query } }
                 ]
             },
-            orderBy: { nombre: 'asc' },
-            take: 20
+            orderBy: { nombre: 'asc' }
         });
     },
 
