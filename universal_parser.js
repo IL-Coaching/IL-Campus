@@ -1,8 +1,8 @@
 const fs = require('fs');
 
-const namePrefixes = ["Press", "Remo", "Sentadilla", "Curl", "Extensión", "Extension", "Jalón", "Jalon", "Peso Muerto", "Hip", "Elevación", "Elevacion", "Apertura", "Zancada", "Estocada", "Vuelos", "Cruces", "Peck", "Dorsalera", "Flexión", "Flexion", "Tracción", "Traccion", "Empuje", "Zancadas", "Swing", "Plancha", "Puente", "Dominada", "Fondos", "Abducción", "Abduccion", "Aducción", "Aduccion", "Prensa", "Box", "Step", "Arnold", "Skull", "Face", "Front", "Side", "Back", "Overhead", "Lateral", "Leg", "Chest", "Gakk", "Pull", "Bulgara"];
+const nameSuffixes = ["ress", "emo", "entadilla", "url", "xtens", "alón", "jalon", "eso muerto", "elevaci", "apertura", "zancada", "estocada", "vuelo", "vuelos", "cruce", "cruces", "peck", "flexi", "tracci", "swing", "plancha", "puente", "dominada", "fondo", "abducci", "aducci", "prensa", "step", "arnold", "skull", "face pull", "bulgara", "gakk", "hip thrust", "ancadilla", "ullover", "elevación", "aducción", "abducción", "flexión", "tracción", "mancuerna", "barra", "polea"];
 
-const triggerWords = ["Articulación", "Músculo", "Monoarticular", "Multiarticular", "Pectoral", "Deltoides", "(Exte", "(Flex", "Biceps", "Triceps", "Trapecios", "Gluteo", "Anterior", "Dorsal", "YOUTUBE", "PATRON", "MOVIMIENTO", "TIPO", "EJERCICIO", "Nº", "FOTO", "VIDEO", "ANÁLISIS", "raining.com", "Empuje vertical", "Empuje horizontal", "Tracción vertical", "Tracción horizontal"];
+const triggerWords = ["Articulación", "Músculo", "Monoarticular", "Multiarticular", "Pectoral", "Deltoides", "(Exte", "(Flex", "Biceps", "Triceps", "Trapecios", "Gluteo", "Anterior", "Dorsal", "YOUTUBE", "PATRON", "MOVIMIENTO", "TIPO", "EJERCICIO", "Nº", "FOTO", "VIDEO", "ANÁLISIS", "raining.com"];
 
 function parseDocument(pdfTxtPath, pdfInfoPath) {
     const text = fs.readFileSync(pdfTxtPath, 'utf8');
@@ -17,22 +17,14 @@ function parseDocument(pdfTxtPath, pdfInfoPath) {
     const names = [];
     let current = "";
 
-    for (let i = 0; i < lines.length; i++) {
-        let line = lines[i];
-
-        // ID check
-        let idMatch = line.match(/^(\d+)/);
-        if (idMatch && idMatch[1].length < 5) {
-            if (current) {
-                names.push(current.trim());
-                current = "";
-            }
-            line = line.substring(idMatch[1].length).trim();
+    for (let line of lines) {
+        let isId = line.match(/^\d+$/) && line.length < 5;
+        if (isId) {
+            if (current) names.push(current.trim());
+            current = "";
+            continue;
         }
 
-        if (!line) continue;
-
-        // Trigger check
         let earliestT = -1;
         for (let t of triggerWords) {
             let idx = line.indexOf(t);
@@ -45,44 +37,47 @@ function parseDocument(pdfTxtPath, pdfInfoPath) {
 
         if (earliestT !== -1) {
             let part = line.substring(0, earliestT).trim();
-            part = part.replace(/--+$/, '').trim();
-            if (part && (namePrefixes.some(p => part.includes(p)) || current)) {
+            if (part && (nameSuffixes.some(s => part.toLowerCase().includes(s)) || current)) {
                 if (current) current += " " + part;
                 else current = part;
             }
-            if (current) {
-                names.push(current.trim());
-                current = "";
-            }
+            if (current) names.push(current.trim());
+            current = "";
             continue;
         }
 
-        // Potential name part
-        const isPrefixStart = namePrefixes.some(p => line.startsWith(p));
-        if (isPrefixStart && current && current.length > 15) {
-            // Likely a new name starting on a new line
-            names.push(current.trim());
-            current = line;
-        } else if (namePrefixes.some(p => line.includes(p)) || current) {
+        if (nameSuffixes.some(s => line.toLowerCase().includes(s)) || current) {
             if (current) current += " " + line;
             else current = line;
         }
     }
     if (current) names.push(current.trim());
 
-    // Filter and unique roughly
-    const filtered = names.filter(n => n.length > 5 && namePrefixes.some(p => n.includes(p)));
+    // CRITICAL FIX: Aggressive cleaning
+    const cleanNames = names.map(n => {
+        let sc = n.replace(/^[^a-zA-ZÁÉÍÓÚñÑ]+/, '').trim(); // Remove leading non-letters
+        sc = sc.replace(/--.*?--/g, '').trim(); // Remove -- X of Y --
+        sc = sc.replace(/\(.*?\)/g, '').trim(); // Remove (Anything)
+        sc = sc.replace(/\s\s+/g, ' '); // Collapse spaces
+        sc = sc.replace(/\)/g, '').replace(/\(/g, ''); // Remove stray parentheses
+        // Manual trim of known bad fragments that might have leaked
+        const badSuffixes = ["Empuje vertical ascendente", "Empuje horizontal", "Deltoides", "Empuje vertical", "Triceps, Trapecios", "Pectoral mayor", "Flexión - aducción -", "Extensión", "Aducción horizontal", "Abducción", "Tracción", "horizontal", "vertical"];
+        for (const bad of badSuffixes) {
+            sc = sc.replace(new RegExp(bad, 'gi'), '').trim();
+        }
+        return sc;
+    }).filter(n => n.length > 5 && nameSuffixes.some(s => n.toLowerCase().includes(s)));
 
-    console.log(`Doc ${pdfTxtPath}: Found ${filtered.length} names, ${allLinks.length} links.`);
+    console.log(`Doc ${pdfTxtPath}: ${cleanNames.length} names, ${allLinks.length} links.`);
 
-    const results = [];
+    const docResults = [];
     for (let i = 0; i < allLinks.length; i++) {
-        results.push({
-            nombre: filtered[i] || `Ejercicio ${i + 1} (Identificación manual)`,
+        docResults.push({
+            nombre: cleanNames[i] || `Ejercicio ${i + 1} (Identificación manual requerida)`,
             urlVideo: allLinks[i]
         });
     }
-    return results;
+    return docResults;
 }
 
 const r1 = parseDocument(
@@ -94,6 +89,6 @@ const r2 = parseDocument(
     "Extras/Bibliotecas de ejercicios/17_48_2024_515405_Biblioteca Máquinas e Instalaciones de Gimnasio-.pdf.info.json"
 );
 
-const total = [...r1, ...r2];
-console.log(`Final Collection: ${total.length} paired exercises.`);
-fs.writeFileSync('extracted_exercises_final.json', JSON.stringify(total, null, 2));
+const final = [...r1, ...r2];
+console.log(`Final collection: ${final.length} exercises.`);
+fs.writeFileSync('extracted_exercises_final.json', JSON.stringify(final, null, 2));
