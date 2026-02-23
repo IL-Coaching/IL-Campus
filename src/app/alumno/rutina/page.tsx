@@ -2,7 +2,6 @@ import AlumnoNav from "@/compartido/componentes/AlumnoNav";
 import { getAlumnoSesion } from "@/nucleo/seguridad/sesion";
 import { prisma } from "@/baseDatos/conexion";
 import { Dumbbell, Play, ChevronRight, Calendar, Clock, Target, Zap, BookOpen } from "lucide-react";
-import Link from "next/link";
 
 const DIA_ORDEN: Record<string, number> = {
     Lunes: 1, Martes: 2, Miércoles: 3, Miercoles: 3,
