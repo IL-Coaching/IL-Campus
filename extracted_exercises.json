@@ -1,0 +1,98 @@
+[
+  {
+    "id": 1,
+    "nombre": "Press de hombros con barra en rack sentado",
+    "urlVideo": "https://youtu.be/3IVTFTIwxnM",
+    "origen": "Peso Libre"
+  },
+  {
+    "id": 5,
+    "nombre": "Press de hombros con mancuerna sentado Press de hombros con barra en rack parado\tTriceps, Trapecios Triceps, Trapecios",
+    "urlVideo": "https://youtu.be/kG_wVGZLW5M",
+    "origen": "Peso Libre"
+  },
+  {
+    "id": 50,
+    "nombre": "Sentadilla rusa con kettlebell\tAductores, gemelos Cambio de nivel con predominancia en la rodilla",
+    "urlVideo": "https://youtu.be/hNe_Pumcki8",
+    "origen": "Peso Libre"
+  },
+  {
+    "id": 55,
+    "nombre": "Hip-thrust con medicine ball\tCuádriceps\tCambio de nivel con predominancia en la cadera Glúteos, isquiotibiales",
+    "urlVideo": "https://youtu.be/5RgRMyemfGw",
+    "origen": "Peso Libre"
+  },
+  {
+    "id": 5,
+    "nombre": "Press de hombros en máquina Smith Press de hombros con barra en rack parado",
+    "urlVideo": "https://youtu.be/wGPvUCH_idA",
+    "origen": "Máquinas"
+  },
+  {
+    "id": 1,
+    "nombre": "Press de hombros con barra en rack sentado",
+    "urlVideo": "https://youtu.be/MYTfpdlFMs4",
+    "origen": "Máquinas"
+  },
+  {
+    "id": 16,
+    "nombre": "Press con mancuerna unilateral",
+    "urlVideo": "https://youtu.be/CmeE4pH2Hr8",
+    "origen": "Máquinas"
+  },
+  {
+    "id": 50,
+    "nombre": "Remo al menton en",
+    "urlVideo": "https://youtu.be/Y_3AFUwMV24",
+    "origen": "Máquinas"
+  },
+  {
+    "id": 52,
+    "nombre": "Remo en máquina con polea",
+    "urlVideo": "https://youtu.be/3Obss8gg1aY",
+    "origen": "Máquinas"
+  },
+  {
+    "id": 53,
+    "nombre": "Remo en máquina unilateral",
+    "urlVideo": "https://youtu.be/MJ1ZNiT_Yag",
+    "origen": "Máquinas"
+  },
+  {
+    "id": 65,
+    "nombre": "PATRON DE MOVIMINTO /",
+    "urlVideo": "https://youtu.be/qIpjOnlBrYc",
+    "origen": "Máquinas"
+  },
+  {
+    "id": 74,
+    "nombre": "PATRON DE MOVIMINTO /",
+    "urlVideo": "https://youtu.be/QOPaylYTOJE",
+    "origen": "Máquinas"
+  },
+  {
+    "id": 84,
+    "nombre": "PATRON DE MOVIMINTO /",
+    "urlVideo": "https://youtu.be/G5ZEL0FYuAs",
+    "origen": "Máquinas"
+  },
+  {
+    "id": 104,
+    "nombre": "Flexión de rodilla en camilla de isquiosurales",
+    "urlVideo": "https://youtu.be/AZ22dxI13y0",
+    "origen": "Máquinas"
+  },
+  {
+    "id": 105,
+    "nombre": "Flexión de rodilla en camilla de isquiosurales unilateral",
+    "urlVideo": "https://youtu.be/1Ias03Uc9NE",
+    "origen": "Máquinas"
+  },
+  {
+    "id": 103,
+    "nombre": "PATRON DE MOVIMINTO /",
+    "urlVideo": "https://youtu.be/nCTb_jgku-Y",
+    "origen": "Máquinas"
+  }
+]

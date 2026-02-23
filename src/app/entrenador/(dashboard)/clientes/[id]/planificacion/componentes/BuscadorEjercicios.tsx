@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect } from 'react';
 import { Search, X, Dumbbell, Loader2, Play, Video } from 'lucide-react';
+import Image from 'next/image';
 import { buscarEjerciciosCatalogo } from '@/nucleo/acciones/ejercicio.accion';
 import type { Ejercicio } from '@prisma/client';
 
@@ -22,7 +23,7 @@ export default function BuscadorEjercicios({ onClose, onSelect }: BuscadorEjerci
                 const busqueda = query === '' && musculoFiltro !== 'Todos' ? musculoFiltro : query;
                 const res = await buscarEjerciciosCatalogo(busqueda);
                 if (res.exito) {
-                    setResultados(res.resultados);
+                    setResultados(res.resultados as Ejercicio[]);
                 }
                 setLoading(false);
             } else {
@@ -42,7 +43,7 @@ export default function BuscadorEjercicios({ onClose, onSelect }: BuscadorEjerci
                 {/* Header */}
                 <div className="p-6 border-b border-marino-4 flex items-center justify-between">
                     <div>
-                        <h3 className="text-2xl font-barlow-condensed font-black uppercase text-blanco mb-1">Cátalogo de Ejercicios</h3>
+                        <h3 className="text-2xl font-barlow-condensed font-black uppercase text-blanco mb-1">Catálogo de Ejercicios</h3>
                         <p className="text-xs text-gris font-bold tracking-widest uppercase italic font-barlow">Busca en tu biblioteca personal de IL-Coaching</p>
                     </div>
                     <button onClick={onClose} className="text-gris hover:text-blanco transition-colors p-2">
@@ -101,7 +102,12 @@ export default function BuscadorEjercicios({ onClose, onSelect }: BuscadorEjerci
                             <div className="flex items-center gap-4">
                                 <div className="relative w-12 h-12 rounded-xl bg-marino-4 flex items-center justify-center text-gris group-hover:text-naranja transition-colors overflow-hidden">
                                     {ej.thumbnailUrl ? (
-                                        <img src={ej.thumbnailUrl} alt={ej.nombre} className="w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity" />
+                                        <Image
+                                            src={ej.thumbnailUrl}
+                                            alt={ej.nombre}
+                                            fill
+                                            className="object-cover opacity-50 group-hover:opacity-100 transition-opacity"
+                                        />
                                     ) : (
                                         <Dumbbell size={24} />
                                     )}

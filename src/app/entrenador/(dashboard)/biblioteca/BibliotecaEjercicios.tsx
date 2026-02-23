@@ -22,16 +22,20 @@ import {
     archivarEjercicio
 } from "@/nucleo/acciones/ejercicio.accion";
 import { cargarBibliotecaOficial } from "@/nucleo/acciones/biblioteca.accion";
+import Image from 'next/image';
 import {
     GrupoMuscular,
     TipoEquipamiento,
     PatronMovimiento,
     TipoArticulacion,
     PosicionCarga,
-    Lateralidad
-} from "@prisma/client";
+    Lateralidad,
+    OrigenEjercicio,
+    NivelTecnico
+} from ".prisma/client";
 import { useRouter } from "next/navigation";
 
+// Definición extendida para la UI
 interface Ejercicio {
     id: string;
     nombre: string;
@@ -42,10 +46,11 @@ interface Ejercicio {
     equipamiento: TipoEquipamiento[];
     lateralidad: Lateralidad;
     posicionCarga: PosicionCarga;
+    nivelTecnico: NivelTecnico;
     descripcion?: string | null;
     urlVideo?: string | null;
     thumbnailUrl?: string | null;
-    origen: string;
+    origen: OrigenEjercicio;
     visibleParaClientes: boolean;
 }
 
@@ -275,7 +280,12 @@ export default function BibliotecaEjercicios({ iniciales }: { iniciales: Ejercic
                             {/* Thumbnail Area */}
                             <div className="aspect-video bg-marino-3 relative overflow-hidden">
                                 {ej.thumbnailUrl ? (
-                                    <img src={ej.thumbnailUrl} alt={ej.nombre} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-60 group-hover:opacity-90" />
+                                    <Image
+                                        src={ej.thumbnailUrl}
+                                        alt={ej.nombre}
+                                        fill
+                                        className="object-cover group-hover:scale-110 transition-transform duration-500 opacity-60 group-hover:opacity-90"
+                                    />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-marino-4">
                                         <Play size={40} className="opacity-20" />
