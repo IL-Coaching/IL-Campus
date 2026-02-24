@@ -2,18 +2,11 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-    const stats = await prisma.ejercicio.groupBy({
-        by: ['entrenadorId', 'origen'],
-        _count: {
-            id: true
-        }
+    const notifs = await prisma.notificacion.findMany({
+        take: 1,
+        select: { id: true, gravedad: true, tipo: true }
     });
-    console.log(JSON.stringify(stats, null, 2));
-
-    const trainers = await prisma.entrenador.findMany({
-        select: { id: true, nombre: true, email: true }
-    });
-    console.log('Trainers:', JSON.stringify(trainers, null, 2));
+    console.log('✅ Campo gravedad OK:', JSON.stringify(notifs));
 }
 
-main().catch(console.error).finally(() => prisma.$disconnect());
+main().catch(e => { console.error('❌ ERROR:', e.message); }).finally(() => prisma.$disconnect());
