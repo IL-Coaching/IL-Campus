@@ -1,6 +1,8 @@
 import { obtenerCMSDatos } from "@/nucleo/acciones/cms.accion";
 import CMSPanel from "./componentes/CMSPanel";
 
+export const dynamic = 'force-dynamic';
+
 export default async function CMSPage() {
     const res = await obtenerCMSDatos();
 

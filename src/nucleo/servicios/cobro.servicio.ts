@@ -33,7 +33,9 @@ export const CobroServicio = {
     async obtenerVencimientos(entrenadorId: string) {
         return await prisma.planAsignado.findMany({
             where: {
-                cliente: { entrenadorId: entrenadorId, activo: true }
+                cliente: { entrenadorId: entrenadorId, activo: true },
+                estado: "ACTIVO",
+                fechaInicio: { lte: new Date() }
             },
             include: {
                 cliente: true,

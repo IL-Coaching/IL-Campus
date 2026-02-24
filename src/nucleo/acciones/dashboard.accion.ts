@@ -3,6 +3,8 @@
 import { prisma } from "@/baseDatos/conexion";
 import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";
 
+import { dispararAlertasFinancieras } from "./notificacion.accion";
+
 /**
  * Obtiene todas las métricas del dashboard central del entrenador.
  * Incluye KPIs, contadores operativos y notificaciones no leídas.
@@ -10,6 +12,10 @@ import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";
 export async function obtenerMetricasDashboard() {
     try {
         const entrenador = await getEntrenadorSesion();
+
+        // Disparar alertas automáticas
+        await dispararAlertasFinancieras();
+
         const ahora = new Date();
 
         // ──── KPI 1: Clientes Activos ────

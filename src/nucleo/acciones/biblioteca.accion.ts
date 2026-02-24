@@ -8,7 +8,6 @@ import { BIBLIOTECA_EXTENSA } from "../constantes/biblioteca_data";
 
 /**
  * Acciones para gestionar la biblioteca oficial de IL-Coaching.
- * Los datos de ejercicios base provienen de src/nucleo/constantes/biblioteca_data.ts
  */
 
 export async function sincronizarPlanesMaestros() {
@@ -32,7 +31,7 @@ export async function cargarBibliotecaOficial() {
             if (!existe) {
                 await EjercicioServicio.crear({
                     nombre: ej.nombre,
-                    musculoPrincipal: "CUADRICEPS", // valor por defecto — la biblioteca_data usa texto libre
+                    musculoPrincipal: "CUADRICEPS", // valor por defecto
                     articulacion: "MULTIARTICULAR",
                     patron: "AISLAMIENTO",
                     equipamiento: [],
@@ -55,5 +54,24 @@ export async function cargarBibliotecaOficial() {
     } catch (error) {
         console.error("Error al cargar biblioteca:", error);
         return { error: "No se pudo cargar la biblioteca oficial." };
+    }
+}
+
+export async function purgarBibliotecaOficial() {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        const res = await prisma.ejercicio.deleteMany({
+            where: {
+                entrenadorId: entrenador.id,
+                origen: 'BIBLIOTECA_IL'
+            }
+        });
+
+        revalidatePath("/entrenador/biblioteca");
+        return { success: true, exito: true, eliminados: res.count };
+    } catch (error) {
+        console.error("Error al purgar biblioteca:", error);
+        return { error: "No se pudo purgar la biblioteca oficial." };
     }
 }

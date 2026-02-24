@@ -21,7 +21,7 @@ import {
     duplicarEjercicio,
     archivarEjercicio
 } from "@/nucleo/acciones/ejercicio.accion";
-import { cargarBibliotecaOficial } from "@/nucleo/acciones/biblioteca.accion";
+import { cargarBibliotecaOficial, purgarBibliotecaOficial } from "@/nucleo/acciones/biblioteca.accion";
 import Image from 'next/image';
 import {
     GrupoMuscular,
@@ -134,6 +134,20 @@ export default function BibliotecaEjercicios({ iniciales }: { iniciales: Ejercic
         setLoading(false);
     };
 
+    const handlePurgar = async () => {
+        if (!confirm("Esto eliminará TODOS los ejercicios de la biblioteca oficial IL-Coaching. Tus ejercicios creados manualmente no se tocarán. ¿Proceder?")) return;
+        setLoading(true);
+        const res = await purgarBibliotecaOficial();
+        if (res.exito) {
+            alert(`Se han eliminado ${res.eliminados} ejercicios.`);
+            const nuevos = await buscarEjercicios("");
+            setEjercicios(nuevos as Ejercicio[]);
+        } else {
+            alert(res.error || "Error al purgar biblioteca");
+        }
+        setLoading(false);
+    };
+
     const extractYouTubeId = useCallback((url: string) => {
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
         const match = url.match(regExp);
@@ -174,6 +188,16 @@ export default function BibliotecaEjercicios({ iniciales }: { iniciales: Ejercic
                         >
                             {loading ? <Loader2 size={16} className="animate-spin" /> : <Dumbbell size={16} />}
                             Cargar Biblioteca IL
+                        </button>
+
+                        <button
+                            onClick={handlePurgar}
+                            disabled={loading}
+                            className="px-4 py-3 rounded-xl border bg-marino-3 border-marino-4 text-gris hover:text-rojo transition-all flex items-center gap-2 text-[0.6rem] font-black uppercase tracking-widest disabled:opacity-50"
+                            title="Eliminar ejercicios pre-cargados"
+                        >
+                            <Trash2 size={16} />
+                            Limpiar
                         </button>
 
                         <div className="bg-marino-3 border border-marino-4 rounded-xl p-1 flex gap-1">

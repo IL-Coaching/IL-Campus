@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useTransition } from 'react';
-import { Bell, Check, Eye, EyeOff, Trash2, MessageCircle, DollarSign, Clock, FileText } from 'lucide-react';
+import { Bell, Check, Eye, EyeOff, Trash2, MessageCircle, DollarSign, Clock, FileText, Activity } from 'lucide-react';
 import { obtenerNotificaciones, toggleLeidaNotificacion, purgarNotificaciones } from '@/nucleo/acciones/notificacion.accion';
 
 interface Notificacion {
     id: string;
     tipo: string;
+    gravedad: 'INFO' | 'ALERTA' | 'CRITICO';
     titulo: string;
     cuerpo: string;
     leida: boolean;
@@ -17,7 +18,14 @@ const ICONO_TIPO: Record<string, { icono: typeof Bell; color: string; bgColor: s
     MENSAJE_DIRECTO: { icono: MessageCircle, color: 'text-naranja', bgColor: 'bg-naranja/10' },
     FINANZA: { icono: DollarSign, color: 'text-[#22C55E]', bgColor: 'bg-[#22C55E]/10' },
     VENCIMIENTO_MEMBRESIA: { icono: Clock, color: 'text-[#EF4444]', bgColor: 'bg-[#EF4444]/10' },
-    NUEVO_FORMULARIO: { icono: FileText, color: 'text-[#EAB308]', bgColor: 'bg-[#EAB308]/10' }
+    NUEVO_FORMULARIO: { icono: FileText, color: 'text-[#EAB308]', bgColor: 'bg-[#EAB308]/10' },
+    CHECKIN: { icono: Activity, color: 'text-blue-400', bgColor: 'bg-blue-400/10' }
+};
+
+const BORDER_GRAVEDAD: Record<string, string> = {
+    INFO: 'border-marino-4',
+    ALERTA: 'border-naranja/40 shadow-[0_0_10px_rgba(255,152,0,0.1)]',
+    CRITICO: 'border-rojo/50 shadow-[0_0_15px_rgba(239,68,68,0.15)]'
 };
 
 export default function PanelNotificaciones() {
@@ -33,7 +41,7 @@ export default function PanelNotificaciones() {
     async function cargarNotificaciones() {
         const res = await obtenerNotificaciones();
         if (res.exito) {
-            setNotificaciones(res.notificaciones as Notificacion[]);
+            setNotificaciones(res.notificaciones as unknown as Notificacion[]);
         }
     }
 
@@ -129,7 +137,7 @@ export default function PanelNotificaciones() {
                                 key={notif.id}
                                 className={`p-3 rounded-xl border transition-all ${notif.leida
                                     ? 'bg-marino-3/30 border-marino-4 opacity-60'
-                                    : 'bg-marino-3/50 border-naranja/20'
+                                    : `bg-marino-3/50 ${BORDER_GRAVEDAD[notif.gravedad] || 'border-naranja/20'}`
                                     } ${isSelected ? 'ring-1 ring-naranja' : ''}`}
                             >
                                 <div className="flex items-start gap-3">

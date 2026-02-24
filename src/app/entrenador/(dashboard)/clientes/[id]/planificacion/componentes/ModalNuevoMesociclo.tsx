@@ -54,8 +54,8 @@ export default function ModalNuevoMesociclo({ macrociclo, onClose }: Props) {
                 {/* Header */}
                 <div className="p-6 border-b border-marino-4 flex items-center justify-between bg-naranja/10">
                     <div>
-                        <h3 className="text-2xl font-barlow-condensed font-black uppercase text-blanco mb-1">Añadir Mes {proximoMes}</h3>
-                        <p className="text-xs text-naranja font-black tracking-[0.2em] uppercase">Nuevo Mesociclo de Entrenamiento</p>
+                        <h3 className="text-2xl font-barlow-condensed font-black uppercase text-blanco mb-1">Añadir Fase {proximoMes}</h3>
+                        <p className="text-xs text-naranja font-black tracking-[0.2em] uppercase">Nuevo Bloque de Entrenamiento</p>
                     </div>
                     <button onClick={onClose} className="text-gris hover:text-blanco transition-colors p-2">
                         <X size={24} />
@@ -139,7 +139,7 @@ export default function ModalNuevoMesociclo({ macrociclo, onClose }: Props) {
                         {loading ? (
                             <><Loader2 size={24} className="animate-spin" /> Estructurando...</>
                         ) : (
-                            <><PlusCircle size={24} /> Inicializar Mes {proximoMes}</>
+                            <><PlusCircle size={24} /> Inicializar Fase {proximoMes}</>
                         )}
                     </button>
                 </form>

@@ -1,0 +1,2 @@
+FILE: C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\src\app\entrenador\(dashboard)\dashboard\componentes\PanelNotificaciones.tsx
+L44: Unexpected any. Specify a different type. (@typescript-eslint/no-explicit-any)

@@ -45,7 +45,8 @@ export const ClienteServicio = {
         return {
             ...cliente,
             plan: cliente.planesAsignados[0]?.plan?.nombre || 'Sin Plan',
-            formularioInscripcion: cliente.formularioInscripcion as ClientePlanificacion['formularioInscripcion']
+            formularioInscripcion: cliente.formularioInscripcion as ClientePlanificacion['formularioInscripcion'],
+            enEstasis: cliente.enEstasis || false
         };
     },
 
@@ -197,7 +198,13 @@ export const ClienteServicio = {
         }
 
         await prisma.$transaction([
-            // 1. Crear la asignación del plan
+            // 1. Archivar planes anteriores que estén activos (solo si el nuevo empieza hoy o antes)
+            // O mejor: archivar siempre los anteriores para que solo el nuevo/programado sea el referente.
+            prisma.planAsignado.updateMany({
+                where: { clienteId: data.clienteId, estado: "ACTIVO" },
+                data: { estado: "ARCHIVADO" }
+            }),
+            // 2. Crear la asignación del plan
             prisma.planAsignado.create({
                 data: {
                     clienteId: data.clienteId,
@@ -207,7 +214,7 @@ export const ClienteServicio = {
                     estado: "ACTIVO"
                 }
             }),
-            // 2. Actualizar estado y credenciales si aplica
+            // 3. Actualizar estado y credenciales si aplica
             prisma.cliente.update({
                 where: { id: data.clienteId },
                 data: updates

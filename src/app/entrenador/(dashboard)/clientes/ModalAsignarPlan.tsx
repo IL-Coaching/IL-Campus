@@ -13,17 +13,31 @@ interface Plan {
 interface Props {
     clienteId: string;
     clienteNombre: string;
+    ultimoPlanVencimiento?: string | Date;
     planes: Plan[];
     onClose: () => void;
 }
 
-export default function ModalAsignarPlan({ clienteId, clienteNombre, planes, onClose }: Props) {
+export default function ModalAsignarPlan({ clienteId, clienteNombre, ultimoPlanVencimiento, planes, onClose }: Props) {
     const [planId, setPlanId] = useState("");
     const [fechaInicio, setFechaInicio] = useState(new Date().toISOString().split('T')[0]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
     const [successCode, setSuccessCode] = useState<string | null>(null);
     const [copied, setCopied] = useState(false);
+
+    // Detección de Conflicto
+    const hoy = new Date();
+    const vencimientoActual = ultimoPlanVencimiento ? new Date(ultimoPlanVencimiento) : null;
+    const tienePlanActivo = vencimientoActual && vencimientoActual > hoy;
+
+    function handleProgramarAlVencimiento() {
+        if (vencimientoActual) {
+            const mananaAlVencimiento = new Date(vencimientoActual);
+            mananaAlVencimiento.setDate(mananaAlVencimiento.getDate() + 1);
+            setFechaInicio(mananaAlVencimiento.toISOString().split('T')[0]);
+        }
+    }
 
     const handleAsignar = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -133,6 +147,26 @@ export default function ModalAsignarPlan({ clienteId, clienteNombre, planes, onC
                     </div>
                 ) : (
                     <form onSubmit={handleAsignar} className="p-6 space-y-6">
+                        {/* Alerta de Conflicto de Plan Activo */}
+                        {tienePlanActivo && (
+                            <div className="p-4 bg-naranja/10 border border-naranja/30 rounded-2xl space-y-3 animate-in fade-in slide-in-from-top-2">
+                                <div className="flex items-center gap-3">
+                                    <Shield className="text-naranja" size={20} />
+                                    <div className="flex-1">
+                                        <p className="text-[0.65rem] font-black uppercase text-naranja tracking-widest">Atención: Plan Vigente</p>
+                                        <p className="text-[0.6rem] text-gris font-medium">El atleta tiene un plan activo hasta el {vencimientoActual?.toLocaleDateString()}.</p>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={handleProgramarAlVencimiento}
+                                    className="w-full py-2 bg-naranja/20 hover:bg-naranja/30 border border-naranja/30 rounded-xl text-[0.6rem] font-black uppercase tracking-widest text-blanco transition-all"
+                                >
+                                    Programar al finalizar el actual
+                                </button>
+                            </div>
+                        )}
+
                         {/* Selección de Plan */}
                         <div className="space-y-3">
                             <label className="text-xs font-bold text-gris uppercase tracking-widest flex items-center gap-2">

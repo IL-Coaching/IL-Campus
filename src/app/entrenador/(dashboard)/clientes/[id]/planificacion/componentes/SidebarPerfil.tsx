@@ -198,6 +198,53 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                     </div>
                 )}
 
+                {tabActiva === 3 && (
+                    <div className="space-y-5 animate-in fade-in slide-in-from-left-2">
+                        <div>
+                            <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Experiencia y Actividad</span>
+                            <p className="text-[0.82rem] text-blanco font-bold">
+                                {cliente?.formularioInscripcion?.experiencia?.entrenaActualmente || 'No especificada'}
+                            </p>
+                            <p className="text-[0.82rem] text-gris mt-1">
+                                {cliente?.formularioInscripcion?.experiencia?.tiempo || 'Tiempo no detallado'}
+                            </p>
+                        </div>
+                        <div>
+                            <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Evitar Ejercicios / Preferencias</span>
+                            <p className="text-[0.82rem] text-gris-claro leading-relaxed">
+                                {cliente?.formularioInscripcion?.personalizacion?.noGusta || 'Ninguna especificada'}
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {tabActiva === 5 && (
+                    <div className="space-y-5 animate-in fade-in slide-in-from-left-2">
+                        {cliente?.cicloMenstrual?.activo ? (
+                            <>
+                                <div>
+                                    <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Duración del ciclo</span>
+                                    <p className="text-[0.82rem] text-blanco font-bold">
+                                        {cliente.cicloMenstrual.duracionCiclo} días
+                                    </p>
+                                </div>
+                                <div className="p-4 bg-marino-3 border border-marino-4 rounded-xl">
+                                    <p className="text-[0.7rem] text-gris leading-relaxed">
+                                        El seguimiento de ciclo está activo para esta atleta. El sistema sincronizará las cargas según la fase del mes para optimizar el rendimiento y la recuperación.
+                                    </p>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="p-6 bg-marino-3/50 border border-marino-4 border-dashed rounded-2xl text-center">
+                                <Info size={24} className="text-gris mx-auto mb-3 opacity-30" />
+                                <p className="text-[0.65rem] text-gris font-medium uppercase tracking-widest leading-relaxed">
+                                    Ciclo menstrual no activo<br />o no aplica para este perfil.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 {tabActiva === 4 && (
                     <div className="space-y-6 animate-in fade-in slide-in-from-left-2 pb-10">
                         <div className="space-y-2">

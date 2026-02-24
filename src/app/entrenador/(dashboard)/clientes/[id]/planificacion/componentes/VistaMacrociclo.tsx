@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { TrendingUp, Settings, Plus, ChevronRight, Target, Zap, Trash2 } from "lucide-react";
 import { MacrocicloCompleto, BloqueConSemanas } from "@/nucleo/tipos/planificacion.tipos";
+import { eliminarMesociclo } from "@/nucleo/acciones/planificacion.accion";
 
 interface VistaMacrocicloProps {
     macrociclo: MacrocicloCompleto;
@@ -16,45 +17,64 @@ interface BloqueMapped {
     id: string;
     n: number;
     nombre: string;
-    s: string;
-    rir: string | number;
-    vol: string;
+    semanasText: string;
     metodo: string;
-    rango: string;
+    numSemanas: number;
+    semanasItems: { ordenBloque: number; ordenGlobal: number; id: string }[];
     prog: number;
     color: string;
 }
 
 export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMeso, onSelectWeek, onConfigurar, onNuevoMesociclo }: VistaMacrocicloProps) {
 
-    // Mapeo dinámico con lógica de "Gualda Style" para los campos extras
-    const bloques: BloqueMapped[] = macrociclo.bloquesMensuales.map((b: BloqueConSemanas, idx: number) => {
-        // Lógica de placeholders basada en el objetivo si no hay datos específicos
-        const metodo = b.metodo || "Leg, Push, Pull, Adicional";
-        const rango = b.rangoReferencia || (b.objetivo.toLowerCase().includes('fuerza') ? "6-8 reps" : "8-12 reps");
+    let semanaGlobalActual = 1;
 
-        // Colores según fase
+    const bloques: BloqueMapped[] = macrociclo.bloquesMensuales.map((b: BloqueConSemanas, idx: number) => {
+        const metodo = b.metodo || (b.objetivo.toLowerCase().includes('fuerza') ? "Enfoque Neuromuscular" : "Enfoque Estructural / Tensión");
+
         let color = "border-naranja";
         if (b.objetivo.toLowerCase().includes('adaptación')) color = "border-azul-claro";
-        if (b.objetivo.toLowerCase().includes('fuerza')) color = "border-rojo-500";
-        if (b.objetivo.toLowerCase().includes('hipertrofia')) color = "border-naranja";
+        else if (b.objetivo.toLowerCase().includes('fuerza')) color = "border-rojo-500";
+        else if (b.objetivo.toLowerCase().includes('hipertrofia')) color = "border-naranja";
+
+        const numSemanas = b.semanas.length;
+        const inicioSemana = semanaGlobalActual;
+        const finSemana = inicioSemana + numSemanas - 1;
+        semanaGlobalActual += numSemanas;
 
         return {
             id: b.id,
             n: idx + 1,
             nombre: b.objetivo,
-            s: `${(idx * 4) + 1}-${(idx + 1) * 4}`,
-            rir: b.semanas[0]?.RIRobjetivo || "3-4",
-            vol: b.semanas[0]?.volumenEstimado || "Medio",
+            semanasText: `Semanas ${inicioSemana}-${finSemana}`,
+            numSemanas,
+            semanasItems: b.semanas.map((sem, i) => ({
+                ordenBloque: i + 1,
+                ordenGlobal: inicioSemana + i,
+                id: sem.id
+            })),
             metodo,
-            rango,
-            prog: idx === 0 ? 100 : (idx === 1 ? 0 : 0),
+            prog: idx === 0 ? 100 : 0, // Simplificación temporal
             color: color === "border-azul-claro" ? "border-[#60A5FA]" :
                 (color === "border-rojo-500" ? "border-[#EF4444]" : "border-[#FF6B00]")
         };
     });
 
     const [mesoExpandido, setMesoExpandido] = useState<string | null>(null);
+
+    const handleEliminar = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (confirm("¿Seguro que deseas eliminar esta fase? Se borrarán todas las semanas y sesiones asociadas.")) {
+            try {
+                const res = await eliminarMesociclo(id);
+                if (res.exito) window.location.reload();
+                else alert(res.error || "No se pudo eliminar.");
+            } catch (err) {
+                console.error(err);
+                alert("Ocurrió un error al intentar eliminar la fase.");
+            }
+        }
+    };
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 pb-10">
@@ -122,19 +142,15 @@ export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMes
 
                         <div className="p-6 flex-1">
                             <div className="flex justify-between items-start mb-4">
-                                <div className="space-y-1">
-                                    <span className="text-[0.6rem] font-black text-naranja uppercase tracking-[0.2em]">{b.n > 1 ? `Meses ${b.n}-${b.n + 1}` : `Semanas 1-4`}</span>
-                                    <h4 className="text-2xl font-barlow-condensed font-black uppercase text-blanco leading-none group-hover:text-naranja transition-colors">{b.nombre}</h4>
+                                <div className="space-y-1 pr-6">
+                                    <span className="text-[0.6rem] font-black text-naranja uppercase tracking-[0.2em]">Fase {b.n} • {b.semanasText}</span>
+                                    <h4 className="text-2xl font-barlow-condensed font-black uppercase text-blanco leading-none group-hover:text-naranja transition-colors break-words">{b.nombre}</h4>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            if (confirm("¿Seguro que deseas eliminar este mesociclo? Se borrarán todas las semanas y sesiones asociadas.")) {
-                                                import("@/nucleo/acciones/planificacion.accion").then(m => m.eliminarMesociclo(b.id)).then(() => window.location.reload());
-                                            }
-                                        }}
+                                        onClick={(e) => handleEliminar(b.id, e)}
                                         className="p-2 bg-marino-3 rounded-lg text-gris hover:text-rojo transition-all relative z-10"
+                                        title="Eliminar Fase"
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -164,19 +180,18 @@ export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMes
                                 <div className="mt-6 pt-6 border-t border-marino-4/50 space-y-3 animate-in slide-in-from-top-4 duration-300">
                                     <label className="text-[0.6rem] font-black text-gris-claro uppercase tracking-[0.2em] mb-2 block">Semanas del Bloque</label>
                                     <div className="grid grid-cols-2 gap-3">
-                                        {[1, 2, 3, 4].map((num) => {
-                                            const realNum = ((b.n - 1) * 4) + num;
+                                        {b.semanasItems.map((sem) => {
                                             return (
                                                 <button
-                                                    key={num}
+                                                    key={sem.id}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        onSelectWeek(b.n, realNum);
+                                                        onSelectWeek(b.n, sem.ordenGlobal);
                                                     }}
                                                     className="p-3 bg-marino-3 hover:bg-naranja/10 border border-marino-4 rounded-xl text-left transition-all group/week"
                                                 >
-                                                    <span className="text-[0.55rem] font-black text-naranja uppercase block">Micro {realNum}</span>
-                                                    <span className="text-[0.7rem] font-bold text-blanco group-hover/week:text-naranja transition-colors">Fase {num}</span>
+                                                    <span className="text-[0.55rem] font-black text-naranja uppercase block">S. {sem.ordenGlobal}</span>
+                                                    <span className="text-[0.7rem] font-bold text-blanco group-hover/week:text-naranja transition-colors">Micro {sem.ordenBloque}</span>
                                                 </button>
                                             );
                                         })}

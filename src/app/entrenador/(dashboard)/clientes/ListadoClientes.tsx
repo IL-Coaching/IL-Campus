@@ -4,7 +4,8 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Users, MoreVertical, Ban, CheckCircle2, MessageCircle, CreditCard } from "lucide-react";
 import ModalAsignarPlan from "./ModalAsignarPlan";
-import { cambiarEstadoPagoPlan, alternarEstadoCliente } from "@/nucleo/acciones/cliente.accion";
+import ModalGestionPago from "./ModalGestionPago";
+import { alternarEstadoCliente } from "@/nucleo/acciones/cliente.accion";
 
 interface PlanAsignado {
     id: string;
@@ -46,7 +47,8 @@ const ESTADOS_PAGO = [
 ];
 
 export default function ListadoClientes({ clientes, planes, tabActual }: Props) {
-    const [clienteAsignando, setClienteAsignando] = useState<{ id: string, nombre: string } | null>(null);
+    const [clienteAsignando, setClienteAsignando] = useState<{ id: string, nombre: string, ultimoPlanVencimiento?: string | Date } | null>(null);
+    const [clientePago, setClientePago] = useState<{ clienteId: string, planAsignadoId: string, nombre: string, estado: string } | null>(null);
     const [menuAbierto, setMenuAbierto] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
 
@@ -57,13 +59,6 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
     }
 
     // Handlers
-    function handleUpdateEstadoPago(planAsignadoId: string, nuevoEstado: string) {
-        startTransition(async () => {
-            const res = await cambiarEstadoPagoPlan(planAsignadoId, nuevoEstado);
-            if (!res.exito) alert(res.error || "No se pudo cambiar el estado");
-        });
-    }
-
     function handleToggleStatus(id: string, activo: boolean) {
         startTransition(async () => {
             setMenuAbierto(null);
@@ -177,6 +172,14 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                                             <>
                                                 <td className="block md:table-cell py-1 md:py-4 px-0 md:px-4 md:border-l border-marino-4/30">
                                                     <div className="flex md:flex-col items-center justify-between gap-1">
+                                                        <span className="md:hidden text-[0.6rem] font-black text-gris uppercase tracking-[0.2em]">Inicio</span>
+                                                        <span className="text-xs font-black text-gris-claro uppercase tracking-widest">
+                                                            {ultimoPlan?.fechaInicio ? new Date(ultimoPlan.fechaInicio).toLocaleDateString('es-AR') : '-'}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="block md:table-cell py-1 md:py-4 px-0 md:px-4 md:border-l border-marino-4/30">
+                                                    <div className="flex md:flex-col items-center justify-between gap-1">
                                                         <span className="md:hidden text-[0.6rem] font-black text-gris uppercase tracking-[0.2em]">Vencimiento</span>
                                                         <span className={`text-xs font-black uppercase tracking-widest ${ultimoPlan && new Date(ultimoPlan.fechaVencimiento) < new Date() ? 'text-rojo' : 'text-gris-claro'
                                                             }`}>
@@ -196,20 +199,14 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                                                     <div className="flex md:flex-col items-center justify-between gap-3">
                                                         <span className="md:hidden text-[0.6rem] font-black text-gris uppercase tracking-[0.2em]">Estado Pago</span>
                                                         {ultimoPlan && (
-                                                            <div className="relative w-full max-w-[140px]">
-                                                                <select
-                                                                    className={`appearance-none w-full bg-marino-3 border border-marino-4 text-[0.65rem] font-black uppercase tracking-widest rounded-xl py-2.5 pl-8 pr-8 cursor-pointer focus:outline-none focus:border-naranja transition-all ${ultimoPlan.estado === 'ABONADO' ? 'text-verde' : 'text-blanco'
-                                                                        }`}
-                                                                    value={ultimoPlan.estado || "PENDIENTE"}
-                                                                    onChange={(e) => handleUpdateEstadoPago(ultimoPlan.id, e.target.value)}
-                                                                    disabled={isPending}
-                                                                >
-                                                                    {ESTADOS_PAGO.map(est => (
-                                                                        <option key={est.value} value={est.value}>{est.label}</option>
-                                                                    ))}
-                                                                </select>
-                                                                <div className={`absolute left-3 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full ${ESTADOS_PAGO.find(e => e.value === (ultimoPlan.estado || "PENDIENTE"))?.color}`} />
-                                                            </div>
+                                                            <button
+                                                                onClick={() => setClientePago({ clienteId: cliente.id, planAsignadoId: ultimoPlan.id, nombre: cliente.nombre, estado: ultimoPlan.estado })}
+                                                                className={`w-full max-w-[140px] flex items-center justify-center gap-2 bg-marino-3 border border-marino-4 text-[0.65rem] font-black uppercase tracking-widest rounded-xl py-2.5 transition-all hover:border-naranja active:scale-95 ${ultimoPlan.estado === 'ABONADO' ? 'text-verde' : 'text-blanco'
+                                                                    }`}
+                                                            >
+                                                                <div className={`w-2.5 h-2.5 rounded-full ${ESTADOS_PAGO.find(e => e.value === (ultimoPlan.estado || "PENDIENTE"))?.color} shadow-[0_0_8px_currentColor]`} />
+                                                                {ESTADOS_PAGO.find(e => e.value === (ultimoPlan.estado || "PENDIENTE"))?.label}
+                                                            </button>
                                                         )}
                                                     </div>
                                                 </td>
@@ -247,7 +244,11 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                                                 </td>
                                                 <td className="block md:table-cell py-3 px-0 md:px-4 md:border-l border-marino-4/30">
                                                     <button
-                                                        onClick={() => setClienteAsignando({ id: cliente.id, nombre: cliente.nombre })}
+                                                        onClick={() => setClienteAsignando({
+                                                            id: cliente.id,
+                                                            nombre: cliente.nombre,
+                                                            ultimoPlanVencimiento: ultimoPlan?.fechaVencimiento
+                                                        })}
                                                         className="w-full md:w-auto px-6 py-3 bg-naranja/10 text-naranja border border-naranja/20 rounded-xl text-[0.65rem] font-black uppercase tracking-widest active:scale-95 transition-all"
                                                     >
                                                         Asignar Plan Inicial
@@ -298,7 +299,14 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                                                                     <CheckCircle2 size={20} /> Reactivar Cliente
                                                                 </button>
                                                                 <button
-                                                                    onClick={() => { setMenuAbierto(null); setClienteAsignando({ id: cliente.id, nombre: cliente.nombre }) }}
+                                                                    onClick={() => {
+                                                                        setMenuAbierto(null);
+                                                                        setClienteAsignando({
+                                                                            id: cliente.id,
+                                                                            nombre: cliente.nombre,
+                                                                            ultimoPlanVencimiento: ultimoPlan?.fechaVencimiento
+                                                                        })
+                                                                    }}
                                                                     className="w-full text-left px-8 py-6 md:px-4 md:py-3 text-[0.65rem] font-black uppercase tracking-widest text-naranja hover:bg-naranja/10 flex items-center gap-4 transition-colors active:bg-naranja/20 md:pb-3 pb-12"
                                                                 >
                                                                     <CreditCard size={20} /> Nueva Membresía
@@ -321,8 +329,16 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                 <ModalAsignarPlan
                     clienteId={clienteAsignando.id}
                     clienteNombre={clienteAsignando.nombre}
+                    ultimoPlanVencimiento={clienteAsignando.ultimoPlanVencimiento}
                     planes={planes}
                     onClose={() => setClienteAsignando(null)}
+                />
+            )}
+
+            {clientePago && (
+                <ModalGestionPago
+                    data={clientePago}
+                    onClose={() => setClientePago(null)}
                 />
             )}
         </div>

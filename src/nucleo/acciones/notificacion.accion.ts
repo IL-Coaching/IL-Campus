@@ -1,25 +1,52 @@
 "use server";
 
 import { prisma } from "@/baseDatos/conexion";
-import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";
+import { getEntrenadorSesion } from "../seguridad/sesion";
+import { revalidatePath } from "next/cache";
+import { TipoNotificacion, GravedadNotificacion } from "@prisma/client";
 
 /**
- * Obtiene todas las notificaciones no purgadas del entrenador.
- * Las no leídas aparecen primero, ordenadas por fecha descendente.
+ * Crea una nueva notificación para un entrenador.
  */
-export async function obtenerNotificaciones() {
+export async function crearNotificacionAction(data: {
+    entrenadorId: string;
+    tipo: TipoNotificacion;
+    gravedad: GravedadNotificacion;
+    titulo: string;
+    cuerpo: string;
+}) {
+    try {
+        await prisma.notificacion.create({
+            data: {
+                entrenadorId: data.entrenadorId,
+                tipo: data.tipo,
+                gravedad: data.gravedad,
+                titulo: data.titulo,
+                cuerpo: data.cuerpo
+            }
+        });
+        revalidatePath("/entrenador");
+        return { exito: true };
+    } catch (error) {
+        console.error("Error al crear notificación:", error);
+        return { error: "No se pudo crear la notificación" };
+    }
+}
+
+/**
+ * Obtiene las notificaciones del entrenador en sesión.
+ */
+export async function obtenerNotificaciones(soloNoLeidas = false) {
     try {
         const entrenador = await getEntrenadorSesion();
 
         const notificaciones = await prisma.notificacion.findMany({
             where: {
                 entrenadorId: entrenador.id,
-                purgada: false
+                purgada: false,
+                ...(soloNoLeidas ? { leida: false } : {})
             },
-            orderBy: [
-                { leida: 'asc' },
-                { creadaEn: 'desc' }
-            ]
+            orderBy: { creadaEn: 'desc' }
         });
 
         return { exito: true, notificaciones };
@@ -30,80 +57,107 @@ export async function obtenerNotificaciones() {
 }
 
 /**
- * Marca una notificación como leída o no leída (toggle).
- * @security Valida que la notificación pertenece al entrenador en sesión (BOLA).
+ * Marca una notificación como leída/no leída.
  */
-export async function toggleLeidaNotificacion(notificacionId: string) {
+export async function toggleLeidaNotificacion(id: string) {
     try {
         const entrenador = await getEntrenadorSesion();
 
-        const notificacion = await prisma.notificacion.findFirst({
-            where: { id: notificacionId, entrenadorId: entrenador.id }
+        const notif = await prisma.notificacion.findUnique({
+            where: { id, entrenadorId: entrenador.id }
         });
 
-        if (!notificacion) return { error: "Notificación no encontrada." };
+        if (!notif) return { error: "No encontrada" };
 
         await prisma.notificacion.update({
-            where: { id: notificacionId },
-            data: { leida: !notificacion.leida }
+            where: { id },
+            data: { leida: !notif.leida }
         });
 
+        revalidatePath("/entrenador");
         return { exito: true };
     } catch (error) {
-        console.error("Error toggle notificación:", error);
-        return { error: "No se pudo actualizar la notificación." };
+        console.error("Error al alternar estado de notificación:", error);
+        return { error: "No se pudo actualizar la notificación" };
     }
 }
 
 /**
- * Purga notificaciones leídas (las marca como purgadas, no elimina de DB).
- * @param ids - Array de IDs a purgar. Si está vacío, purga todas las leídas.
+ * Purgar (ocultar) una lista de notificaciones o todas las leídas.
  */
-export async function purgarNotificaciones(ids: string[]) {
+export async function purgarNotificaciones(ids?: string[]) {
     try {
         const entrenador = await getEntrenadorSesion();
 
-        if (ids.length > 0) {
+        if (ids && ids.length > 0) {
             await prisma.notificacion.updateMany({
-                where: {
-                    id: { in: ids },
-                    entrenadorId: entrenador.id
-                },
+                where: { id: { in: ids }, entrenadorId: entrenador.id },
                 data: { purgada: true }
             });
         } else {
-            // Purgar todas las leídas
             await prisma.notificacion.updateMany({
-                where: {
-                    entrenadorId: entrenador.id,
-                    leida: true
-                },
+                where: { entrenadorId: entrenador.id, leida: true },
                 data: { purgada: true }
             });
         }
 
+        revalidatePath("/entrenador");
         return { exito: true };
     } catch (error) {
         console.error("Error al purgar notificaciones:", error);
-        return { error: "No se pudieron purgar las notificaciones." };
+        return { error: "No se pudieron eliminar las notificaciones" };
     }
 }
 
 /**
- * Crea una notificación para el entrenador.
- * Uso interno desde otros módulos (finanzas, vencimientos, formularios, mensajes).
+ * Lógica automática: Generar alertas de finanzas para el dashboard.
+ * Se puede llamar desde un cron o al cargar el dashboard.
  */
-export async function crearNotificacion(data: {
-    entrenadorId: string;
-    tipo: "MENSAJE_DIRECTO" | "FINANZA" | "VENCIMIENTO_MEMBRESIA" | "NUEVO_FORMULARIO";
-    titulo: string;
-    cuerpo: string;
-}) {
+export async function dispararAlertasFinancieras() {
     try {
-        await prisma.notificacion.create({ data });
+        const entrenador = await getEntrenadorSesion();
+        const ahora = new Date();
+        const enTresDias = new Date();
+        enTresDias.setDate(ahora.getDate() + 3);
+
+        // 1. Buscar planes activos que vencen pronto y no tienen notificación reciente
+        const planesParaVencer = await prisma.planAsignado.findMany({
+            where: {
+                cliente: { entrenadorId: entrenador.id, activo: true },
+                fechaVencimiento: { lte: enTresDias, gte: ahora },
+                estado: "ACTIVO"
+            },
+            include: { cliente: true }
+        });
+
+        for (const plan of planesParaVencer) {
+            // Evitar duplicados del mismo tipo para el mismo cliente en las últimas 24h
+            const existePlan = await prisma.notificacion.findFirst({
+                where: {
+                    entrenadorId: entrenador.id,
+                    tipo: "FINANZA",
+                    titulo: { contains: plan.cliente.nombre },
+                    creadaEn: { gte: new Date(ahora.getTime() - 24 * 60 * 60 * 1000) }
+                }
+            });
+
+            if (!existePlan) {
+                await prisma.notificacion.create({
+                    data: {
+                        entrenadorId: entrenador.id,
+                        tipo: "FINANZA",
+                        gravedad: "ALERTA",
+                        titulo: `Vencimiento de Membresía: ${plan.cliente.nombre}`,
+                        cuerpo: `El plan asignado a ${plan.cliente.nombre} vence el ${plan.fechaVencimiento.toLocaleDateString()}. Recordá gestionar el próximo cobro.`
+                    }
+                });
+            }
+        }
+
+        revalidatePath("/entrenador");
         return { exito: true };
     } catch (error) {
-        console.error("Error al crear notificación:", error);
-        return { error: "No se pudo crear la notificación." };
+        console.error("Error en dispararAlertasFinancieras:", error);
+        return { error: "Error procesando alertas" };
     }
 }

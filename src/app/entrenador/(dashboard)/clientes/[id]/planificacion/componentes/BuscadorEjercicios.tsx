@@ -62,14 +62,14 @@ export default function BuscadorEjercicios({ onClose, onSelect }: BuscadorEjerci
                         />
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
-                        {['Todos', 'Pectoral', 'Espalda', 'Hombro', 'Brazo', 'Cuádriceps', 'Isquios', 'Glúteo', 'Core'].map(m => (
+                    <div className="flex flex-wrap gap-2 text-white">
+                        {['TODOS', 'PECHO', 'ESPALDA', 'HOMBROS', 'BICEPS', 'TRICEPS', 'CUADRICEPS', 'ISQUIOTIBIALES', 'GLUTEO', 'CORE'].map(m => (
                             <button
                                 key={m}
-                                onClick={() => setMusculoFiltro(m)}
-                                className={`px-4 py-2 rounded-full text-[0.65rem] font-bold uppercase tracking-widest transition-all ${musculoFiltro === m
-                                    ? 'bg-naranja text-marino shadow-lg shadow-naranja/20'
-                                    : 'bg-marino-3 border border-marino-4 text-gris hover:text-blanco hover:border-gris'
+                                onClick={() => setMusculoFiltro(m === 'TODOS' ? 'Todos' : m)}
+                                className={`px-4 py-2 rounded-full text-[0.65rem] font-bold uppercase tracking-widest transition-all ${(musculoFiltro === m || (m === 'TODOS' && musculoFiltro === 'Todos'))
+                                        ? 'bg-naranja text-marino shadow-lg shadow-naranja/20'
+                                        : 'bg-marino-3 border border-marino-4 text-gris hover:text-blanco hover:border-gris'
                                     }`}
                             >
                                 {m}

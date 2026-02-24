@@ -5,6 +5,9 @@
   "prisma": {
     "schema": "src/baseDatos/esquema.prisma"
   },
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate --schema=src/baseDatos/esquema.prisma && next build",
@@ -24,6 +27,7 @@
     ]
   },
   "dependencies": {
+    "@prisma/client": "^5.22.0",
     "@radix-ui/react-tabs": "^1.1.13",
     "@supabase/supabase-js": "^2.97.0",
     "bcryptjs": "^3.0.3",
@@ -36,11 +40,11 @@
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "recharts": "^3.7.0",
     "resend": "^6.9.2",
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@prisma/client": "^5.22.0",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^18",

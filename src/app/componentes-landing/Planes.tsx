@@ -2,7 +2,20 @@
 import { useModal } from './ModalProvider';
 import { sitioConfig } from '../../../config/sitio.config';
 
-export default function Planes() {
+interface Plan {
+    id: string;
+    nombre: string;
+    precio: number;
+    duracionDias: number;
+    descripcion: string | null;
+    beneficios: string[];
+}
+
+interface Props {
+    planes: Plan[];
+}
+
+export default function Planes({ planes }: Props) {
     const { openModal } = useModal();
 
     return (
@@ -25,137 +38,58 @@ export default function Planes() {
                 </div>
 
                 {/* Planes Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10 items-stretch">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-10 items-stretch">
+                    {planes.map((plan, index) => {
+                        const isDestacado = plan.nombre.toLowerCase().includes('popular') || plan.nombre.toLowerCase().includes('rat') || index === 1;
 
-                    {/* Plan 1 - Start */}
-                    <div className="group bg-marino-2 border border-marino-4 p-8 flex flex-col fade-up delay-100 hover:-translate-y-2 hover:border-naranja/40 hover:shadow-2xl hover:shadow-naranja/5 transition-all duration-500 rounded-2xl relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-naranja/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        return (
+                            <div
+                                key={plan.id}
+                                className={`group bg-marino-2 border ${isDestacado ? 'border-naranja/50 lg:scale-[1.05] z-10' : 'border-marino-4'} p-8 flex flex-col fade-up transition-all duration-500 rounded-2xl relative overflow-hidden hover:-translate-y-2 hover:border-naranja/40 hover:shadow-2xl ${isDestacado ? 'hover:shadow-naranja/20' : 'hover:shadow-naranja/5'}`}
+                                style={{ transitionDelay: `${(index + 1) * 100}ms` }}
+                            >
+                                {isDestacado && (
+                                    <>
+                                        <div className="absolute top-0 left-0 w-32 h-32 bg-naranja/20 blur-[60px] rounded-full opacity-60 group-hover:opacity-100 transition-opacity"></div>
+                                        <div className="absolute top-0 right-0 bg-naranja text-marino text-[0.65rem] font-black uppercase tracking-widest px-5 py-1.5 rounded-bl-xl shadow-lg">
+                                            Más popular
+                                        </div>
+                                    </>
+                                )}
 
-                        <span className="text-naranja font-barlow-condensed font-bold tracking-widest text-xs uppercase block mb-1">Nivel 1</span>
-                        <h3 className="text-3xl font-barlow-condensed font-black text-blanco uppercase mb-2">Start ⭐</h3>
-                        <p className="text-gris text-sm mb-6 border-b border-marino-4 pb-6 font-medium">Mensual · 30 días</p>
+                                <span className="text-naranja font-barlow-condensed font-bold tracking-widest text-xs uppercase block mb-1">Nivel {index + 1}</span>
+                                <h3 className="text-3xl font-barlow-condensed font-black text-blanco uppercase mb-2">{plan.nombre}</h3>
+                                <p className="text-gris text-sm mb-6 border-b border-marino-4 pb-6 font-medium">Ciclo de {plan.duracionDias} días</p>
 
-                        <div className="mb-6">
-                            <span className="text-gris line-through text-lg block leading-none mb-1 font-bold">$15.000</span>
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-4xl font-barlow-condensed font-black text-naranja tracking-tight">$7.000</span>
-                                <span className="text-naranja text-xs font-bold uppercase tracking-wider">primer mes</span>
+                                <div className="mb-6">
+                                    <div className="flex items-baseline gap-2">
+                                        <span className="text-4xl font-barlow-condensed font-black text-naranja tracking-tight">${plan.precio.toLocaleString('es-AR')}</span>
+                                        <span className="text-naranja text-xs font-bold uppercase tracking-wider">final</span>
+                                    </div>
+                                </div>
+
+                                {plan.descripcion && (
+                                    <p className="text-naranja font-semibold mb-6 text-sm italic">→ {plan.descripcion}</p>
+                                )}
+
+                                <ul className="space-y-4 mb-8 flex-grow">
+                                    {plan.beneficios.map((b, i) => (
+                                        <li key={i} className="flex items-start gap-3 group/item">
+                                            <span className="text-naranja text-lg leading-none transition-transform group-hover/item:scale-125">✓</span>
+                                            <span className="text-gris-claro font-medium text-sm">{b}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+
+                                <button
+                                    onClick={() => openModal(plan.nombre, `$${plan.precio.toLocaleString('es-AR')}`, `${plan.duracionDias} días`)}
+                                    className={`mt-auto w-full border transition-all font-bold py-4 rounded-xl text-sm uppercase tracking-widest text-center ${isDestacado ? 'bg-naranja text-marino border-naranja hover:bg-naranja-h' : 'bg-transparent text-blanco border-marino-4 group-hover:border-naranja group-hover:text-naranja'}`}
+                                >
+                                    Seleccionar
+                                </button>
                             </div>
-                        </div>
-
-                        <div className="bg-naranja/15 border border-naranja/30 text-naranja text-[0.65rem] font-bold uppercase px-3 py-1.5 inline-block mb-6 shadow-sm rounded">
-                            🎉 Promoción primer mes
-                        </div>
-
-                        <p className="text-naranja font-semibold mb-6 text-sm">→ Ideal para empezar y conocer el sistema</p>
-
-                        <ul className="space-y-4 mb-8 flex-grow">
-                            {["Plan personalizado", "Seguimiento directo", "Guía de entrenamiento", "Videollamada semanal"].map((b, i) => (
-                                <li key={i} className="flex items-center gap-3 group/item">
-                                    <span className="text-naranja text-lg leading-none transition-transform group-hover/item:scale-125">✓</span>
-                                    <span className="text-gris-claro font-medium text-sm">{b}</span>
-                                </li>
-                            ))}
-                        </ul>
-
-                        <button
-                            onClick={() => openModal("Nivel 1 - Start ⭐", "$7.000", "primer mes · luego $15.000/mes")}
-                            className="mt-auto w-full border border-marino-4 group-hover:border-naranja group-hover:text-naranja transition-all text-blanco font-bold py-4 rounded-xl text-sm uppercase tracking-widest text-center bg-transparent"
-                        >
-                            Seleccionar
-                        </button>
-                    </div>
-
-                    {/* Plan 2 - GymRat (Destacado) */}
-                    <div className="group bg-marino-2 border border-naranja/50 p-8 flex flex-col fade-up delay-200 relative lg:scale-[1.05] z-10 hover:-translate-y-2 hover:border-naranja hover:shadow-2xl hover:shadow-naranja/20 transition-all duration-500 rounded-2xl overflow-hidden active:scale-100">
-                        {/* Esquina glow mejorado */}
-                        <div className="absolute top-0 left-0 w-32 h-32 bg-naranja/20 blur-[60px] rounded-full opacity-60 group-hover:opacity-100 transition-opacity"></div>
-
-                        <div className="absolute top-0 right-0 bg-naranja text-marino text-[0.65rem] font-black uppercase tracking-widest px-5 py-1.5 rounded-bl-xl shadow-lg">
-                            Más popular
-                        </div>
-
-                        <span className="text-naranja font-barlow-condensed font-bold tracking-widest text-xs uppercase block mb-1">Nivel 2</span>
-                        <h3 className="text-3xl font-barlow-condensed font-black text-blanco uppercase mb-2">GymRat 🧠</h3>
-                        <p className="text-gris text-sm mb-6 border-b border-naranja/10 pb-6 font-medium">3 Meses · 90 días</p>
-
-                        <div className="mb-6">
-                            <span className="text-4xl font-barlow-condensed font-black text-naranja tracking-tight">$40.000</span>
-                        </div>
-
-                        <p className="text-naranja font-semibold mb-6 text-sm italic">→ Para entrenar con estructura y progresar en serio</p>
-
-                        <ul className="space-y-4 mb-8 flex-grow">
-                            <li className="flex items-center gap-3">
-                                <span className="text-naranja text-lg leading-none opacity-50">✓</span>
-                                <span className="text-gris font-medium text-sm">Plan personalizado</span>
-                            </li>
-                            <li className="flex items-center gap-3">
-                                <span className="text-naranja text-lg leading-none opacity-50">✓</span>
-                                <span className="text-gris font-medium text-sm">Seguimiento directo</span>
-                            </li>
-                            <li className="flex items-center gap-3">
-                                <span className="text-naranja text-lg leading-none opacity-50">✓</span>
-                                <span className="text-gris font-medium text-sm">Guía de entrenamiento</span>
-                            </li>
-                            <li className="flex items-center gap-3 mb-2">
-                                <span className="text-naranja text-lg leading-none opacity-50">✓</span>
-                                <span className="text-gris font-medium text-sm">Videollamada semanal</span>
-                            </li>
-                            {["Planificación por mesociclo", "Explicación detallada", "Acompañamiento premium"].map((b, i) => (
-                                <li key={i} className="flex items-center gap-3 group/item">
-                                    <span className="text-naranja text-lg leading-none transition-transform group-hover/item:scale-125">✓</span>
-                                    <span className="text-blanco font-bold text-sm tracking-tight">{b}</span>
-                                </li>
-                            ))}
-                        </ul>
-
-                        <button
-                            onClick={() => openModal("Nivel 2 - GymRat 🧠", "$40.000", "3 meses")}
-                            className="mt-auto w-full border border-naranja bg-naranja hover:bg-naranja-h transition-all text-marino font-black py-4 rounded-xl text-sm uppercase tracking-widest text-center shadow-lg shadow-naranja/20"
-                        >
-                            Seleccionar
-                        </button>
-                    </div>
-
-                    {/* Plan 3 - Elite */}
-                    <div className="group bg-marino-2 border border-marino-4 p-8 flex flex-col fade-up delay-300 hover:-translate-y-2 hover:border-naranja/40 hover:shadow-2xl hover:shadow-naranja/5 transition-all duration-500 rounded-2xl relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-naranja/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-                        <span className="text-naranja font-barlow-condensed font-bold tracking-widest text-xs uppercase block mb-1">Nivel 3</span>
-                        <h3 className="text-3xl font-barlow-condensed font-black text-blanco uppercase mb-2">Elite 🚀</h3>
-                        <p className="text-gris text-sm mb-6 border-b border-marino-4 pb-6 font-medium">1 Año · 365 días</p>
-
-                        <div className="mb-6">
-                            <span className="text-4xl font-barlow-condensed font-black text-naranja tracking-tight">$125.000</span>
-                            <span className="text-[0.6rem] text-naranja font-black uppercase tracking-widest block mt-2 bg-naranja/10 px-2 py-1 rounded w-fit italic">
-                                💰 Ahorrás un 30% anual
-                            </span>
-                        </div>
-
-                        <p className="text-naranja font-semibold mb-6 text-sm">→ Para llevar tu entrenamiento a un nivel avanzado</p>
-
-                        <ul className="space-y-4 mb-8 flex-grow">
-                            <li className="flex items-center gap-3 mb-2">
-                                <span className="text-gris text-lg leading-none opacity-50 font-bold">✓</span>
-                                <span className="text-gris font-medium text-sm">Todo lo del plan GymRat</span>
-                            </li>
-                            {["Macrociclo completo", "Análisis estratégico", "Prioridad en soporte"].map((b, i) => (
-                                <li key={i} className="flex items-center gap-3 group/item">
-                                    <span className="text-naranja text-lg leading-none transition-transform group-hover/item:scale-125">✓</span>
-                                    <span className="text-gris-claro font-medium text-sm">{b}</span>
-                                </li>
-                            ))}
-                        </ul>
-
-                        <button
-                            onClick={() => openModal("Nivel 3 - Elite 🚀", "$125.000", "1 año")}
-                            className="mt-auto w-full border border-marino-4 group-hover:border-naranja group-hover:text-naranja transition-all text-blanco font-bold py-4 rounded-xl text-sm uppercase tracking-widest text-center bg-transparent"
-                        >
-                            Seleccionar
-                        </button>
-                    </div>
-
+                        );
+                    })}
                 </div>
 
                 {/* Consulta por WhatsApp para dudas */}

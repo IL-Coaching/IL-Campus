@@ -142,7 +142,7 @@ export async function agregarEjercicio(diaId: string, ejercicioId: string, orden
         if (!diaPropio) throw new Error("Acceso denegado al recurso.");
 
         await PlanificacionServicio.agregarEjercicioASesion(diaId, ejercicioId, orden);
-        revalidatePath(`/entrenador/clientes`);
+        revalidatePath(`/entrenador/clientes/[id]/planificacion`, "page");
         return { exito: true };
     } catch (error) {
         const mensaje = error instanceof Error ? error.message : "Error desconocido";
@@ -175,7 +175,7 @@ export async function eliminarEjercicio(id: string) {
         if (!ejercicioPropio) throw new Error("No tienes permiso para eliminar este ejercicio.");
 
         await PlanificacionServicio.eliminarEjercicioPlanificado(id);
-        revalidatePath(`/entrenador/clientes`);
+        revalidatePath(`/entrenador/clientes/[id]/planificacion`, "page");
         return { exito: true };
     } catch (error) {
         const mensaje = error instanceof Error ? error.message : "Error desconocido";
@@ -216,7 +216,7 @@ export async function actualizarSemana(id: string, data: {
         if (!semanaPropia) throw new Error("Acceso denegado.");
 
         await PlanificacionServicio.actualizarSemana(id, validacion.data);
-        revalidatePath(`/entrenador/clientes`);
+        revalidatePath(`/entrenador/clientes/[id]/planificacion`, "page");
         return { exito: true };
     } catch (error) {
         const mensaje = error instanceof Error ? error.message : "Error desconocido";
@@ -250,7 +250,7 @@ export async function actualizarMesociclo(id: string, data: {
         if (!bloquePropio) throw new Error("Acceso denegado.");
 
         await PlanificacionServicio.actualizarBloqueMensual(id, validacion.data);
-        revalidatePath(`/entrenador/clientes`);
+        revalidatePath(`/entrenador/clientes/[id]/planificacion`, "page");
         return { exito: true };
     } catch (error) {
         const mensaje = error instanceof Error ? error.message : "Error desconocido";
