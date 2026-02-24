@@ -145,8 +145,8 @@ export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMes
                         <div className="p-6 flex-1">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="space-y-1 pr-6">
-                                    <span className="text-[0.6rem] font-black text-naranja uppercase tracking-[0.2em]">{b.subtitulo}</span>
-                                    <h4 className="text-2xl font-barlow-condensed font-black uppercase text-blanco leading-none group-hover:text-naranja transition-colors break-words">{b.nombre}</h4>
+                                    <span className="text-[0.6rem] font-black text-naranja uppercase tracking-[0.2em] line-clamp-1">{b.subtitulo}</span>
+                                    <h4 className="text-2xl font-barlow-condensed font-black uppercase text-blanco leading-none group-hover:text-naranja transition-colors break-words line-clamp-2">{b.nombre}</h4>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button

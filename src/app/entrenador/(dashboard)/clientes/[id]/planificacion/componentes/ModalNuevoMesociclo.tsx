@@ -90,21 +90,21 @@ export default function ModalNuevoMesociclo({ macrociclo, onClose }: Props) {
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest flex items-center gap-2">
-                            <PlusCircle size={12} className="text-naranja" /> Título de la Fase
+                    <div className="space-y-1 group">
+                        <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest flex items-center gap-2 opacity-60">
+                            <PlusCircle size={10} /> Título de la Fase
                         </label>
                         <input
                             name="nombre"
                             placeholder="Ej: Readaptación / Fuerza Inicial..."
-                            className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco focus:border-naranja/50 outline-none transition-all text-sm font-bold"
+                            className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-2 text-blanco focus:border-naranja/50 outline-none transition-all text-sm font-bold"
                         />
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                         <div className="flex justify-between items-center">
-                            <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest flex items-center gap-2">
-                                <Target size={12} className="text-naranja" /> Objetivo del Bloque
+                            <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest flex items-center gap-2 opacity-60">
+                                <Target size={10} /> Objetivo del Bloque
                             </label>
                             <div className="flex gap-1">
                                 <button type="button" onClick={() => {
@@ -113,88 +113,83 @@ export default function ModalNuevoMesociclo({ macrociclo, onClose }: Props) {
                                     const end = el.selectionEnd;
                                     const text = el.value;
                                     el.value = text.slice(0, start) + '**' + text.slice(start, end) + '**' + text.slice(end);
-                                }} className="px-2 py-0.5 bg-marino-4 hover:bg-naranja hover:text-marino rounded text-[0.6rem] font-bold transition-colors">B</button>
+                                }} className="px-1.5 py-0.5 bg-marino-4 hover:bg-naranja hover:text-marino rounded text-[0.5rem] font-bold transition-colors">B</button>
                                 <button type="button" onClick={() => {
                                     const el = document.getElementsByName('objetivo')[0] as HTMLTextAreaElement;
                                     const start = el.selectionStart;
                                     const end = el.selectionEnd;
                                     const text = el.value;
                                     el.value = text.slice(0, start) + '*' + text.slice(start, end) + '*' + text.slice(end);
-                                }} className="px-2 py-0.5 bg-marino-4 hover:bg-naranja hover:text-marino rounded text-[0.6rem] italic font-bold transition-colors">I</button>
+                                }} className="px-1.5 py-0.5 bg-marino-4 hover:bg-naranja hover:text-marino rounded text-[0.5rem] italic font-bold transition-colors">I</button>
                                 <button type="button" onClick={() => {
                                     const el = document.getElementsByName('objetivo')[0] as HTMLTextAreaElement;
                                     const start = el.selectionStart;
                                     const text = el.value;
                                     el.value = text.slice(0, start) + '\n- ' + text.slice(start);
-                                }} className="px-2 py-0.5 bg-marino-4 hover:bg-naranja hover:text-marino rounded text-[0.6rem] font-bold transition-colors">List</button>
+                                }} className="px-1.5 py-0.5 bg-marino-4 hover:bg-naranja hover:text-marino rounded text-[0.5rem] font-bold transition-colors">List</button>
                             </div>
                         </div>
                         <textarea
                             name="objetivo"
                             required
-                            rows={4}
-                            placeholder="Ej: Mejorar técnica en básicos, acondicionamiento cardiovascular..."
-                            className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco focus:border-naranja/50 outline-none transition-all resize-none text-sm font-medium"
+                            rows={2}
+                            placeholder="Objetivos principales del entrenamiento..."
+                            className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-2 text-blanco focus:border-naranja/50 outline-none transition-all resize-none text-xs font-medium"
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                            <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest flex items-center gap-2">
-                                <Zap size={12} className="text-naranja" /> Método Sugerido
-                            </label>
-                            <div className="flex gap-1">
-                                <button type="button" onClick={() => {
-                                    const el = document.getElementsByName('metodo')[0] as HTMLTextAreaElement;
-                                    const start = el.selectionStart;
-                                    const end = el.selectionEnd;
-                                    const text = el.value;
-                                    el.value = text.slice(0, start) + '**' + text.slice(start, end) + '**' + text.slice(end);
-                                }} className="px-2 py-0.5 bg-marino-4 hover:bg-naranja hover:text-marino rounded text-[0.6rem] font-bold transition-colors">B</button>
-                                <button type="button" onClick={() => {
-                                    const el = document.getElementsByName('metodo')[0] as HTMLTextAreaElement;
-                                    const start = el.selectionStart;
-                                    const end = el.selectionEnd;
-                                    const text = el.value;
-                                    el.value = text.slice(0, start) + '*' + text.slice(start, end) + '*' + text.slice(end);
-                                }} className="px-2 py-0.5 bg-marino-4 hover:bg-naranja hover:text-marino rounded text-[0.6rem] italic font-bold transition-colors">I</button>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <div className="flex justify-between items-center">
+                                <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest flex items-center gap-2 opacity-60">
+                                    <Zap size={10} /> Método
+                                </label>
+                                <div className="flex gap-1">
+                                    <button type="button" onClick={() => {
+                                        const el = document.getElementsByName('metodo')[0] as HTMLTextAreaElement;
+                                        const start = el.selectionStart;
+                                        const end = el.selectionEnd;
+                                        const text = el.value;
+                                        el.value = text.slice(0, start) + '**' + text.slice(start, end) + '**' + text.slice(end);
+                                    }} className="px-1.5 py-0.5 bg-marino-4 hover:bg-naranja hover:text-marino rounded text-[0.5rem] font-bold transition-colors">B</button>
+                                </div>
                             </div>
+                            <textarea
+                                name="metodo"
+                                rows={1}
+                                placeholder="Ej: Full body..."
+                                className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-2 text-blanco focus:border-naranja/50 outline-none transition-all resize-none text-xs font-medium"
+                            />
                         </div>
-                        <textarea
-                            name="metodo"
-                            rows={2}
-                            placeholder="Ej: Full body / Intensidad: 70-75% RM..."
-                            className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco focus:border-naranja/50 outline-none transition-all resize-none text-sm font-medium"
-                        />
+
+                        <div className="space-y-1">
+                            <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest flex items-center gap-2 opacity-60">
+                                <Zap size={10} /> Rango & Descanso
+                            </label>
+                            <textarea
+                                name="rangoReferencia"
+                                rows={1}
+                                placeholder="Ej: 10-12 reps..."
+                                className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-2 text-blanco focus:border-naranja/50 outline-none transition-all resize-none text-xs font-medium"
+                            />
+                        </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest flex items-center gap-2">
-                            <Zap size={12} className="text-naranja" /> Rango & Descanso
-                        </label>
-                        <textarea
-                            name="rangoReferencia"
-                            rows={2}
-                            placeholder="Ej: 10-12 reps / 1.30 min descanso..."
-                            className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco focus:border-naranja/50 outline-none transition-all resize-none text-sm font-medium"
-                        />
-                    </div>
-
-                    <div className="bg-marino-3 border-l-4 border-l-naranja p-4 rounded-r-lg">
-                        <p className="text-[0.6rem] text-blanco font-medium italic">
-                            Se inicializarán {numSemanas} semanas con {numSesiones} sesiones pre-estructuradas. Podrás añadir o quitar días libremente luego.
+                    <div className="bg-naranja/5 border-l-2 border-l-naranja p-3 rounded-r-lg">
+                        <p className="text-[0.55rem] text-blanco/60 font-medium italic">
+                            Se inicializarán {numSemanas} semanas con {numSesiones} sesiones. Editable luego.
                         </p>
                     </div>
 
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-naranja hover:bg-naranja-h text-marino font-black py-5 rounded-xl text-lg uppercase tracking-[0.2em] font-barlow-condensed shadow-xl shadow-naranja/20 transition-all flex items-center justify-center gap-3 active:scale-95"
+                        className="w-full bg-naranja hover:bg-naranja-h text-marino font-black py-4 rounded-xl text-sm uppercase tracking-[0.2em] font-barlow-condensed shadow-xl shadow-naranja/20 transition-all flex items-center justify-center gap-3 active:scale-95"
                     >
                         {loading ? (
-                            <><Loader2 size={24} className="animate-spin" /> Estructurando...</>
+                            <><Loader2 size={18} className="animate-spin" /> Procesando...</>
                         ) : (
-                            <><PlusCircle size={24} /> Inicializar Fase {proximoMes}</>
+                            <><PlusCircle size={18} /> Inicializar Fase {proximoMes}</>
                         )}
                     </button>
                 </form>

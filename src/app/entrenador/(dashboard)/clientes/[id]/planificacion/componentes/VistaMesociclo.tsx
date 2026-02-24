@@ -116,7 +116,7 @@ export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSem
     return (
         <div className="space-y-10 animate-in fade-in duration-700 pb-10">
             {/* Header Mesociclo Professional */}
-            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6 border-b border-marino-4 pb-8">
+            <div className="group/header flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6 border-b border-marino-4 pb-8">
                 <div className="flex items-start gap-4 flex-1 w-full">
                     <div className="p-3 bg-naranja/10 border border-naranja/20 rounded-2xl shrink-0">
                         <Layers size={28} className="text-naranja" />
@@ -127,63 +127,63 @@ export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSem
                             <span className="px-2 py-0.5 bg-marino-3 border border-marino-4 rounded text-[0.55rem] font-bold text-gris uppercase tracking-widest">Mes {mes}</span>
                         </div>
 
-                        <div className="space-y-1">
+                        <div className="space-y-3">
                             <input
                                 value={nombre}
                                 onChange={(e) => setNombre(e.target.value)}
-                                className="text-2xl md:text-3xl font-barlow-condensed font-bold uppercase text-naranja/80 leading-none tracking-tight bg-transparent border-none focus:ring-0 w-full p-0 placeholder:text-gris/20"
+                                className="text-xl md:text-2xl font-barlow-condensed font-black uppercase text-naranja tracking-wider bg-transparent border-none focus:ring-0 w-full p-0 placeholder:text-gris/20"
                                 placeholder="Nombre de la Fase (Ej: Readaptación)"
                             />
                             <textarea
                                 id="field-objetivo"
                                 value={objetivo}
                                 onChange={(e) => setObjetivo(e.target.value)}
-                                rows={2}
-                                className="text-3xl md:text-5xl font-barlow-condensed font-black uppercase text-blanco leading-none tracking-tight bg-transparent border-none focus:ring-0 w-full p-0 placeholder:text-gris/20 resize-none overflow-hidden"
-                                placeholder="Objetivo del Mesociclo"
+                                rows={1}
+                                className="text-lg md:text-xl font-medium text-blanco/80 leading-snug bg-transparent border-none focus:ring-0 w-full p-0 placeholder:text-gris/20 resize-none overflow-hidden"
+                                placeholder="Escribe aquí el objetivo principal..."
                                 onInput={(e) => {
                                     const target = e.target as HTMLTextAreaElement;
                                     target.style.height = 'auto';
                                     target.style.height = target.scrollHeight + 'px';
                                 }}
                             />
-                            <div className="flex gap-2">
-                                <button onClick={() => applyFormat('objetivo', 'bold')} className="px-3 py-1 bg-marino-3 hover:bg-naranja hover:text-marino rounded-lg text-xs font-bold transition-all border border-marino-4">B</button>
-                                <button onClick={() => applyFormat('objetivo', 'italic')} className="px-3 py-1 bg-marino-3 hover:bg-naranja hover:text-marino rounded-lg text-xs italic font-bold transition-all border border-marino-4">I</button>
-                                <button onClick={() => applyFormat('objetivo', 'list')} className="px-3 py-1 bg-marino-3 hover:bg-naranja hover:text-marino rounded-lg text-xs font-bold transition-all border border-marino-4">List</button>
+                            <div className="flex gap-2 opacity-0 group-hover/header:opacity-100 transition-opacity">
+                                <button onClick={() => applyFormat('objetivo', 'bold')} className="px-2 py-0.5 bg-marino-3 hover:bg-naranja hover:text-marino rounded text-[0.6rem] font-bold transition-all border border-marino-4">B</button>
+                                <button onClick={() => applyFormat('objetivo', 'italic')} className="px-2 py-0.5 bg-marino-3 hover:bg-naranja hover:text-marino rounded text-[0.6rem] italic font-bold transition-all border border-marino-4">I</button>
+                                <button onClick={() => applyFormat('objetivo', 'list')} className="px-2 py-0.5 bg-marino-3 hover:bg-naranja hover:text-marino rounded text-[0.6rem] font-bold transition-all border border-marino-4">List</button>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
-                            <div className="bg-marino-3/30 p-3 rounded-xl border border-marino-4 hover:border-naranja/40 transition-all">
-                                <div className="flex justify-between items-center mb-1.5 ">
-                                    <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest block flex items-center gap-2">
-                                        <FlaskConical size={10} /> Método
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 w-full">
+                            <div className="bg-marino-2 p-3 rounded-xl border border-marino-4 group/box transition-all">
+                                <div className="flex justify-between items-center mb-1">
+                                    <label className="text-[0.5rem] font-black text-naranja uppercase tracking-widest block flex items-center gap-1.5 opacity-60">
+                                        <FlaskConical size={8} /> Método
                                     </label>
-                                    <div className="flex gap-1">
-                                        <button onClick={() => applyFormat('metodo', 'bold')} className="w-5 h-5 flex items-center justify-center bg-marino-4 rounded text-[0.5rem] font-bold">B</button>
-                                        <button onClick={() => applyFormat('metodo', 'italic')} className="w-5 h-5 flex items-center justify-center bg-marino-4 rounded text-[0.5rem] italic font-bold">I</button>
+                                    <div className="flex gap-1 opacity-0 group-hover/box:opacity-100 transition-opacity">
+                                        <button onClick={() => applyFormat('metodo', 'bold')} className="w-4 h-4 flex items-center justify-center bg-marino-4 rounded text-[0.4rem] font-bold">B</button>
+                                        <button onClick={() => applyFormat('metodo', 'italic')} className="w-4 h-4 flex items-center justify-center bg-marino-4 rounded text-[0.4rem] italic font-bold">I</button>
                                     </div>
                                 </div>
                                 <textarea
                                     id="field-metodo"
                                     value={metodo}
                                     onChange={(e) => setMetodo(e.target.value)}
-                                    rows={2}
-                                    className="bg-transparent border-none p-0 text-sm font-bold text-blanco focus:ring-0 w-full placeholder:text-gris/20 resize-none"
-                                    placeholder="Ej: Leg/Push/Pull, Fullbody..."
+                                    rows={1}
+                                    className="bg-transparent border-none p-0 text-xs font-bold text-blanco focus:ring-0 w-full placeholder:text-gris/20 resize-none"
+                                    placeholder="Método..."
                                 />
                             </div>
-                            <div className="bg-marino-3/30 p-3 rounded-xl border border-marino-4 hover:border-naranja/40 transition-all">
-                                <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest mb-1.5 block flex items-center gap-2">
-                                    <Target size={10} /> Rango / Descanso
+                            <div className="bg-marino-2 p-3 rounded-xl border border-marino-4 group/box transition-all">
+                                <label className="text-[0.5rem] font-black text-naranja uppercase tracking-widest mb-1 block flex items-center gap-1.5 opacity-60">
+                                    <Target size={8} /> Rango / Descanso
                                 </label>
                                 <textarea
                                     value={rango}
                                     onChange={(e) => setRango(e.target.value)}
-                                    rows={2}
-                                    className="bg-transparent border-none p-0 text-sm font-bold text-blanco focus:ring-0 w-full placeholder:text-gris/20 resize-none"
-                                    placeholder="Ej: 8-12 reps, 5-8 reps..."
+                                    rows={1}
+                                    className="bg-transparent border-none p-0 text-xs font-bold text-blanco focus:ring-0 w-full placeholder:text-gris/20 resize-none"
+                                    placeholder="Repeticiones..."
                                 />
                             </div>
                             <div className="bg-marino-3/30 p-3 rounded-xl border border-marino-4 hover:border-naranja/30 transition-colors group/input">

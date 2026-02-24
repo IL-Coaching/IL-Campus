@@ -22,10 +22,7 @@ export type SemanaConDias = Semana & {
 // Bloque Mensual (Mesociclo) con sus semanas
 export type BloqueConSemanas = Prisma.BloqueMensualGetPayload<{
     include: { semanas: { include: { diasSesion: { include: { ejercicios: { include: { ejercicio: true } } } } } } }
-}> & {
-    metodo?: string;
-    rangoReferencia?: string;
-};
+}>;
 
 export type MacrocicloCompleto = Macrociclo & {
     bloquesMensuales: BloqueConSemanas[];
