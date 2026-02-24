@@ -21,7 +21,8 @@ import {
     duplicarEjercicio,
     archivarEjercicio
 } from "@/nucleo/acciones/ejercicio.accion";
-import { cargarBibliotecaOficial, purgarBibliotecaOficial } from "@/nucleo/acciones/biblioteca.accion";
+import { cargarBibliotecaOficial } from "@/nucleo/acciones/biblioteca.accion";
+import { purgarTodaLaBiblioteca } from "@/nucleo/acciones/purgar.accion";
 import Image from 'next/image';
 import {
     GrupoMuscular,
@@ -135,13 +136,13 @@ export default function BibliotecaEjercicios({ iniciales }: { iniciales: Ejercic
     };
 
     const handlePurgar = async () => {
-        if (!confirm("Esto eliminará TODOS los ejercicios de la biblioteca oficial IL-Coaching. Tus ejercicios creados manualmente no se tocarán. ¿Proceder?")) return;
+        if (!confirm("Esto eliminará TODOS los ejercicios de tu biblioteca (oficiales y personalizados). ¿Estás seguro?")) return;
         setLoading(true);
-        const res = await purgarBibliotecaOficial();
-        if (res.exito) {
+        const res = await purgarTodaLaBiblioteca();
+        if (res.success) {
             alert(`Se han eliminado ${res.eliminados} ejercicios.`);
-            const nuevos = await buscarEjercicios("");
-            setEjercicios(nuevos as Ejercicio[]);
+            setEjercicios([]);
+            router.refresh();
         } else {
             alert(res.error || "Error al purgar biblioteca");
         }
