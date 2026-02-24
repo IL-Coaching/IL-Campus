@@ -6,7 +6,8 @@ import {
     Lateralidad,
     TipoEquipamiento,
     PosicionCarga,
-    OrigenEjercicio
+    OrigenEjercicio,
+    Prisma
 } from "@prisma/client";
 
 /**
@@ -98,11 +99,12 @@ export const EjercicioServicio = {
      * @param id - ID del ejercicio a actualizar
      * @param data - Campos a actualizar (parcial)
      */
-    async actualizar(id: string, data: DatosActualizarEjercicio) {
+    async actualizar(id: string, data: Partial<Prisma.EjercicioUpdateInput>) {
         let thumbnailUrl: string | null | undefined = undefined;
         if (data.urlVideo !== undefined) {
-            if (data.urlVideo) {
-                const videoId = this.extraerIdYouTube(data.urlVideo);
+            const videoUrl = typeof data.urlVideo === 'string' ? data.urlVideo : (data.urlVideo as { set?: string })?.set;
+            if (videoUrl) {
+                const videoId = this.extraerIdYouTube(videoUrl as string);
                 thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
             } else {
                 thumbnailUrl = null;

@@ -2,7 +2,7 @@
 
 import { getEntrenadorSesion } from "../seguridad/sesion";
 import { EjercicioServicio } from "../servicios/ejercicio.servicio";
-import { GrupoMuscular, TipoArticulacion, PatronMovimiento, TipoEquipamiento, Lateralidad } from "@prisma/client";
+import { GrupoMuscular, TipoArticulacion, PatronMovimiento, TipoEquipamiento, Lateralidad, Prisma } from "@prisma/client";
 import { prisma } from "@/baseDatos/conexion";
 
 export async function buscarEjercicios(query: string = "", musculoFiltro?: string) {
@@ -32,11 +32,10 @@ export async function crearEjercicio(formData: Record<string, unknown>) {
             entrenadorId: entrenador.id
         };
 
-        // Limpiar campos vacíos para que Prisma use null o default
-        if (data.urlVideo === "") delete data.urlVideo;
-        if (data.descripcion === "") delete (data as any).descripcion;
+        if (data.urlVideo === "") data.urlVideo = undefined;
+        if (data.descripcion === "") data.descripcion = undefined;
 
-        await EjercicioServicio.crear(data as any);
+        await EjercicioServicio.crear(data);
 
         return { exito: true };
     } catch (error) {
@@ -55,17 +54,17 @@ export async function actualizarEjercicio(id: string, formData: Record<string, u
 
         if (!ejercicioPropio) throw new Error("Acceso denegado.");
 
-        const updateData: any = {};
-        if (formData.nombre) updateData.nombre = formData.nombre;
-        if (formData.musculoPrincipal) updateData.musculoPrincipal = formData.musculoPrincipal;
-        if (formData.articulacion) updateData.articulacion = formData.articulacion;
+        const updateData: Partial<Prisma.EjercicioUpdateInput> = {};
+        if (formData.nombre) updateData.nombre = formData.nombre as string;
+        if (formData.musculoPrincipal) updateData.musculoPrincipal = formData.musculoPrincipal as GrupoMuscular;
+        if (formData.articulacion) updateData.articulacion = formData.articulacion as TipoArticulacion;
         if (formData.patronMovimiento || formData.patron)
-            updateData.patron = formData.patronMovimiento || formData.patron;
-        if (formData.equipamiento) updateData.equipamiento = formData.equipamiento;
-        if (formData.lateralidad) updateData.lateralidad = formData.lateralidad;
-        if (formData.descripcion !== undefined) updateData.descripcion = formData.descripcion || null;
+            updateData.patron = (formData.patronMovimiento || formData.patron) as PatronMovimiento;
+        if (formData.equipamiento) updateData.equipamiento = formData.equipamiento as TipoEquipamiento[];
+        if (formData.lateralidad) updateData.lateralidad = formData.lateralidad as Lateralidad;
+        if (formData.descripcion !== undefined) updateData.descripcion = (formData.descripcion as string) || null;
         if (formData.videoUrl !== undefined || formData.urlVideo !== undefined)
-            updateData.urlVideo = formData.videoUrl || formData.urlVideo || null;
+            updateData.urlVideo = (formData.videoUrl as string) || (formData.urlVideo as string) || null;
 
         await EjercicioServicio.actualizar(id, updateData);
         return { exito: true };

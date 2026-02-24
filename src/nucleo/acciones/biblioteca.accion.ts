@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/baseDatos/conexion";
+import { GrupoMuscular, PatronMovimiento } from "@prisma/client";
 import { getEntrenadorSesion } from "../seguridad/sesion";
 import { EjercicioServicio } from "../servicios/ejercicio.servicio";
 import { BIBLIOTECA_EXTENSA } from "../constantes/biblioteca_data";
@@ -30,7 +31,7 @@ export async function cargarBibliotecaOficial() {
 
             if (!existe) {
                 // Mapeo básico de strings a Enums
-                const musculoMap: Record<string, any> = {
+                const musculoMap: Record<string, GrupoMuscular> = {
                     "Hombros": "HOMBROS",
                     "Pecho": "PECHO",
                     "Espalda": "ESPALDA",
@@ -42,7 +43,7 @@ export async function cargarBibliotecaOficial() {
                     "General / Piernas": "CUADRICEPS"
                 };
 
-                const patronMap: Record<string, any> = {
+                const patronMap: Record<string, PatronMovimiento> = {
                     "Empuje vertical": "EMPUJE_VERTICAL",
                     "Empuje horizontal": "EMPUJE_HORIZONTAL",
                     "Tracción vertical": "TRACCION_VERTICAL",
@@ -54,9 +55,9 @@ export async function cargarBibliotecaOficial() {
 
                 await EjercicioServicio.crear({
                     nombre: ej.nombre,
-                    musculoPrincipal: (musculoMap[ej.grupoMuscular] || "CORE") as any,
+                    musculoPrincipal: (musculoMap[ej.grupoMuscular] || "CORE") as GrupoMuscular,
                     articulacion: "MULTIARTICULAR",
-                    patron: (patronMap[ej.patronMovimiento] || "AISLAMIENTO") as any,
+                    patron: (patronMap[ej.patronMovimiento] || "AISLAMIENTO") as PatronMovimiento,
                     equipamiento: [],
                     lateralidad: "BILATERAL",
                     descripcion: [
