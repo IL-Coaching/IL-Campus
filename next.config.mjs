@@ -19,6 +19,13 @@ const nextConfig = {
             bodySizeLimit: '10mb',
         },
     },
+    async redirects() {
+        return [
+            { source: '/entrenador/configuracion', destination: '/entrenador/cuenta', permanent: true },
+            { source: '/entrenador/checkins', destination: '/entrenador/mensajeria', permanent: true },
+            { source: '/entrenador/mensajes', destination: '/entrenador/mensajeria', permanent: true }
+        ];
+    }
 };
 
 export default nextConfig;

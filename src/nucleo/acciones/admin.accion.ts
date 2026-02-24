@@ -39,7 +39,7 @@ export async function actualizarCredencialesAdmin(data: { email?: string, passwo
 
         await actualizarEntrenador({ where: { id: entrenadorFull.id }, data: updateData });
 
-        revalidatePath('/entrenador/configuracion');
+        revalidatePath('/entrenador/cuenta');
         return { success: true };
     } catch {
         return { error: "No se pudo actualizar el perfil." };
@@ -84,7 +84,7 @@ export async function activarMFA(token: string, secreto: string, passwordConfirm
             data: { mfaSecret: secreto, mfaEnabled: true }
         });
 
-        revalidatePath('/entrenador/configuracion');
+        revalidatePath('/entrenador/cuenta');
         return { success: true };
     } catch {
         return { error: "No se pudo activar el MFA." };
@@ -108,7 +108,7 @@ export async function desactivarMFA(passwordConfirmacion: string) {
             data: { mfaSecret: null, mfaEnabled: false }
         });
 
-        revalidatePath('/entrenador/configuracion');
+        revalidatePath('/entrenador/cuenta');
         return { success: true };
     } catch {
         return { error: "No se pudo desactivar." };
@@ -131,7 +131,7 @@ export async function actualizarAvatarAdmin(base64: string) {
             data: { avatarUrl: upload.url }
         });
 
-        revalidatePath('/entrenador/configuracion');
+        revalidatePath('/entrenador/cuenta');
         return { success: true, avatarUrl: upload.url };
     } catch (error) {
         console.error("Error avatar:", error);

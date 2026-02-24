@@ -1,5 +1,6 @@
 import SidebarEntrenador from "@/compartido/componentes/SidebarEntrenador";
 import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";
+import { obtenerContadorMensajeria } from "@/nucleo/acciones/mensajeria.accion";
 
 export default async function EntrenadorLayout({
     children,
@@ -8,6 +9,9 @@ export default async function EntrenadorLayout({
 }) {
     // Protección de ruta: Si no hay sesión, getEntrenadorSesion redirige automáticamente
     await getEntrenadorSesion();
+
+    const badgeReq = await obtenerContadorMensajeria();
+    const countBadge = badgeReq.exito ? badgeReq.total : 0;
 
     return (
         <div className="flex min-h-screen bg-[#060912] text-blanco relative">
@@ -25,7 +29,7 @@ export default async function EntrenadorLayout({
             </div>
 
             {/* Sidebar fijo a la izquierda */}
-            <SidebarEntrenador />
+            <SidebarEntrenador badgeMensajeria={countBadge} />
 
             {/* Contenido principal con padding superior de seguridad (Safe Area) */}
             <main className="flex-1 md:ml-64 pt-28 md:pt-20 pb-16 min-h-screen relative z-10">

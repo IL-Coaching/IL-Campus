@@ -5,10 +5,11 @@ import {
     LayoutDashboard,
     Users,
     Dumbbell,
-    CheckSquare,
     MessageCircle,
     CreditCard,
     Settings,
+    LayoutTemplate,
+    ClipboardList,
     LogOut,
     Menu,
     X
@@ -19,14 +20,15 @@ import { logout } from '@/nucleo/acciones/auth.accion';
 const MENU_ITEMS = [
     { name: 'Dashboard', icon: LayoutDashboard, href: '/entrenador/dashboard' },
     { name: 'Clientes', icon: Users, href: '/entrenador/clientes' },
+    { name: 'Planes', icon: ClipboardList, href: '/entrenador/planes' },
     { name: 'Biblioteca', icon: Dumbbell, href: '/entrenador/biblioteca' },
-    { name: 'Check-ins', icon: CheckSquare, href: '/entrenador/checkins' },
-    { name: 'Mensajes', icon: MessageCircle, href: '/entrenador/mensajes' },
+    { name: 'Mensajería', icon: MessageCircle, href: '/entrenador/mensajeria' },
     { name: 'Finanzas', icon: CreditCard, href: '/entrenador/finanzas' },
-    { name: 'Configuración', icon: Settings, href: '/entrenador/configuracion' },
+    { name: 'CMS', icon: LayoutTemplate, href: '/entrenador/cms' },
+    { name: 'Cuenta', icon: Settings, href: '/entrenador/cuenta' },
 ];
 
-export default function SidebarEntrenador() {
+export default function SidebarEntrenador({ badgeMensajeria = 0 }: { badgeMensajeria?: number }) {
     const pathname = usePathname();
     const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -75,6 +77,11 @@ export default function SidebarEntrenador() {
                             >
                                 <item.icon size={20} />
                                 <span className="tracking-wide text-sm">{item.name}</span>
+                                {item.name === 'Mensajería' && badgeMensajeria > 0 && (
+                                    <div className="ml-auto bg-rojo text-blanco text-[0.6rem] font-black w-5 h-5 flex items-center justify-center rounded-full shadow-lg shadow-rojo/20">
+                                        {badgeMensajeria > 99 ? '+99' : badgeMensajeria}
+                                    </div>
+                                )}
                             </Link>
                         )
                     })}

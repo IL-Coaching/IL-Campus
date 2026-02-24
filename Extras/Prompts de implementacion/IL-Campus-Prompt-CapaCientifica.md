@@ -1,4 +1,73 @@
-# PROMPT — IL-CAMPUS: CAPA CIENTÍFICA IUSCA
+06:34:49.947 Running build in Washington, D.C., USA (East) – iad1
+06:34:49.947 Build machine configuration: 2 cores, 8 GB
+06:34:50.107 Cloning github.com/IL-Coaching/IL-Campus (Branch: main, Commit: 4ce8d82)
+06:34:51.970 Cloning completed: 1.863s
+06:34:52.115 Restored build cache from previous deployment (FrqWWvGjkVzEAYYi3Y78iFRofFut)
+06:34:53.246 Running "vercel build"
+06:34:53.868 Vercel CLI 50.22.0
+06:34:54.194 Installing dependencies...
+06:34:55.472
+06:34:55.473 up to date in 1s
+06:34:55.473
+06:34:55.474 203 packages are looking for funding
+06:34:55.474   run `npm fund` for details
+06:34:55.505 Detected Next.js version: 14.2.35
+06:34:55.510 Running "npm run build"
+06:34:55.627
+06:34:55.628 > il-campus@0.1.0 build
+06:34:55.628 > prisma generate --schema=src/baseDatos/esquema.prisma && next build
+06:34:55.628
+06:34:56.014 Environment variables loaded from .env
+06:34:56.015 Prisma schema loaded from src/baseDatos/esquema.prisma
+06:34:56.801
+06:34:56.801 ✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 403ms
+06:34:56.802
+06:34:56.802 Start by importing your Prisma Client (See: <https://pris.ly/d/importing-client>)
+06:34:56.802
+06:34:56.802 Tip: Want real-time updates to your database without manual polling? Discover how with Pulse: <https://pris.ly/tip-0-pulse>
+06:34:56.802
+06:34:57.661   ▲ Next.js 14.2.35
+06:34:57.662   - Environments: .env
+06:34:57.663
+06:34:57.681    Creating an optimized production build ...
+06:35:09.202  ✓ Compiled successfully
+06:35:09.203    Linting and checking validity of types ...
+06:35:16.776
+06:35:16.777 Failed to compile.
+06:35:16.777
+06:35:16.777 ./src/app/entrenador/(dashboard)/clientes/[id]/planificacion/componentes/SidebarPerfil.tsx
+06:35:16.777 14:5  Error: 'Copy' is defined but never used.  @typescript-eslint/no-unused-vars
+06:35:16.777 15:5  Error: 'CheckCircle2' is defined but never used.  @typescript-eslint/no-unused-vars
+06:35:16.777 23:10  Error: 'ZONAS_INTENSIDAD' is defined but never used.  @typescript-eslint/no-unused-vars
+06:35:16.777 46:12  Error: 'copiado' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+06:35:16.777 47:52  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+06:35:16.778 62:11  Error: 'copiarLink' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+06:35:16.778 259:148  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+06:35:16.778 280:38  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+06:35:16.778
+06:35:16.778 ./src/nucleo/acciones/cliente.accion.ts
+06:35:16.778 132:18  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+06:35:16.778 134:59  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+06:35:16.778
+06:35:16.778 ./src/nucleo/acciones/testeo.accion.ts
+06:35:16.778 12:93  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+06:35:16.779 16:41  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+06:35:16.779 21:30  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+06:35:16.779 26:30  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+06:35:16.779 33:14  Error: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+06:35:16.779 41:16  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+06:35:16.779 63:26  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+06:35:16.779 78:26  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+06:35:16.779 101:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+06:35:16.779 108:33  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+06:35:16.779 120:39  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+06:35:16.779
+06:35:16.780 ./src/nucleo/servicios/planificacion.servicio.ts
+06:35:16.780 95:21  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+06:35:16.780
+06:35:16.780 info  - Need to disable some ESLint rules? Learn more here: <https://nextjs.org/docs/basic-features/eslint#disabling-rules>
+06:35:16.822 Error: Command "npm run build" exited with 1# PROMPT — IL-CAMPUS: CAPA CIENTÍFICA IUSCA
+
 ## Actualización de la app ya funcional con inteligencia basada en evidencia
 
 ---
@@ -207,6 +276,7 @@ Tríceps      ██████████░░  10 series  ✓ óptimo
 ```
 
 Colores:
+
 - Verde `--verde`: óptimo (10-20 series)
 - Amarillo `--amarillo`: bajo mínimo (< 10 series)
 - Naranja `--naranja`: elevado (> 20 series)
@@ -221,6 +291,7 @@ series puede superar el umbral de recuperación individual."*
 edita o elimina un ejercicio en cualquier sesión de la semana.
 
 **Endpoint nuevo:**
+
 ```
 GET /api/planificacion/semana/[id]/volumen
 → retorna VolumenPorMusculo[]
@@ -303,6 +374,7 @@ recuperación más lenta — el deload es aún más crítico en esta población.
 
 Al crear un nuevo mesociclo de 4+ semanas, la Semana 4 se
 pre-marca automáticamente como DELOAD con:
+
 - Badge "Deload" en amarillo
 - RIR pre-cargado en 4-5
 - Volumen pre-cargado en "Reducido (50-60% del pico)"
@@ -340,6 +412,7 @@ de pierna sentado supera al acostado en hipertrofia de los
 isquiotibiales debido a la posición de elongación."
 
 **Dónde vive:**
+
 - Biblioteca de Ejercicios (panel del entrenador)
 - BuscadorEjercicios (modal en constructor de planificaciones)
 - Editor de ejercicio (formulario de alta/edición)
@@ -378,6 +451,7 @@ Sentadilla búlgara            [LONGITUD LARGA 🟢] [Cuád]   [Mancuernas]
 ```
 
 Filtro adicional en el buscador:
+
 ```
 [Todos] [Longitud larga ⭐] [Cuádriceps] [Glúteo] ...
 ```
@@ -688,6 +762,7 @@ Compendio Praxis de Élite — Sección 6: Prescripción Clínica.
 Tabla de prescripción por población.
 
 **Dónde vive:**
+
 - SidebarPerfil (Tab Salud — expandido)
 - Constructor de planificaciones (lógica de restricciones)
 - App del entrenado (campos adicionales en check-in)
@@ -769,6 +844,7 @@ por qué algunos atletas responden de forma masiva y otros mínimamente
 ante el mismo estímulo."
 
 **Dónde vive:**
+
 - Perfil del cliente (panel entrenador)
 - Dashboard (card por cliente)
 
@@ -819,6 +895,7 @@ Evaluado el: 15/06/2025 · Semana 8
 **En el Dashboard del entrenador:**
 
 Badge de color en la card del cliente:
+
 - Verde: alta respuesta
 - Gris: respuesta normal
 - Amarillo: baja respuesta (requiere revisión)
@@ -837,6 +914,7 @@ repeticiones siempre que el esfuerzo sea alto."
 `1RM = peso × (1 + reps/30)`
 
 **Dónde vive:**
+
 - Semana de testeo (VistaSesion)
 - Editor de ejercicios en el constructor (campo peso sugerido)
 
@@ -975,6 +1053,7 @@ Ana Martínez       ████░░░░░░░░  40%  🚨 abandono inm
 ```
 
 Umbrales:
+
 - ≥ 85%: verde, "Excelente"
 - 70-84%: amarillo suave, "Buena"
 - 50-69%: amarillo, "En riesgo" → alerta al entrenador
