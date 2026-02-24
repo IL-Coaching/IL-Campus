@@ -47,6 +47,7 @@ export const EsquemaActualizarSemana = z.object({
  */
 export const EsquemaActualizarMesociclo = z.object({
     objetivo: z.string().max(200).optional(),
+    duracion: z.number().min(1).max(12).optional(),
     metodo: z.string().max(200).optional(),
     rangoReferencia: z.string().max(100).optional(),
 });

@@ -138,6 +138,7 @@ export default function ConstructorCliente({ cliente, macrocicloInicial, limiteC
                                     mes={mesActivo}
                                     limiteSemanas={limiteComercialSemanas}
                                     onSelectSemana={(n) => { setSemanaActiva(n); irA('micro'); }}
+                                    onBack={volver}
                                 />
                             )}
 

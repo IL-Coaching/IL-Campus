@@ -69,18 +69,91 @@ export const PlanificacionServicio = {
         });
     },
 
-    /**
-     * Actualiza un bloque mensual.
-     */
     async actualizarBloqueMensual(id: string, data: {
         objetivo?: string;
         duracion?: number;
         metodo?: string;
         rangoReferencia?: string;
     }) {
-        return await prisma.bloqueMensual.update({
-            where: { id },
-            data
+        return await prisma.$transaction(async (tx) => {
+            const bloqueActual = await tx.bloqueMensual.findUnique({
+                where: { id },
+                include: { semanas: { orderBy: { numeroSemana: 'asc' } } }
+            });
+
+            if (!bloqueActual) throw new Error("Bloque no encontrado");
+
+            // Si hay cambio de duración, ajustamos las semanas
+            if (data.duracion && data.duracion !== bloqueActual.duracion) {
+                const diff = data.duracion - bloqueActual.duracion;
+
+                if (diff < 0) {
+                    // Eliminar semanas sobrantes (las últimas)
+                    const semanasAEliminar = bloqueActual.semanas.slice(diff);
+                    for (const sem of semanasAEliminar) {
+                        const dias = await tx.diaSesion.findMany({ where: { semanaId: sem.id } });
+                        const diasIds = dias.map(d => d.id);
+                        if (diasIds.length > 0) {
+                            await tx.ejercicioPlanificado.deleteMany({ where: { diaId: { in: diasIds } } });
+                        }
+                        await tx.diaSesion.deleteMany({ where: { semanaId: sem.id } });
+                        await tx.volumenSemanal.deleteMany({ where: { semanaId: sem.id } });
+                        await tx.configTesteoEjercicio.deleteMany({ where: { semanaId: sem.id } });
+                        await tx.semana.delete({ where: { id: sem.id } });
+                    }
+                } else {
+                    // Agregar semanas nuevas
+                    const ultimaSemana = bloqueActual.semanas[bloqueActual.semanas.length - 1];
+                    const ultimoNumero = ultimaSemana ? ultimaSemana.numeroSemana : 0;
+                    const numSesiones = ultimaSemana ? await tx.diaSesion.count({ where: { semanaId: ultimaSemana.id } }) : 3;
+                    const diasBase = ['Lunes', 'Miércoles', 'Viernes', 'Martes', 'Jueves', 'Sábado', 'Domingo'].slice(0, numSesiones || 3);
+
+                    for (let i = 1; i <= diff; i++) {
+                        const numS = ultimoNumero + i;
+                        // Protocolo IL: La semana 4 suele ser descarga, pero si estamos agregando más, 
+                        // quizás solo la última del bloque debería serlo. Por ahora, creamos estándar.
+                        await tx.semana.create({
+                            data: {
+                                bloqueMensualId: id,
+                                numeroSemana: numS,
+                                objetivoSemana: "Fase de carga / Acumulación",
+                                RIRobjetivo: 3,
+                                volumenEstimado: "Medio",
+                                diasSesion: {
+                                    create: diasBase.map(dia => ({
+                                        diaSemana: dia,
+                                        focoMuscular: "General"
+                                    }))
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+
+            const bloqueActualizado = await tx.bloqueMensual.update({
+                where: { id },
+                data: {
+                    objetivo: data.objetivo,
+                    duracion: data.duracion,
+                    metodo: data.metodo,
+                    rangoReferencia: data.rangoReferencia
+                }
+            });
+
+            // Recalcular duración total del macrociclo
+            const todosLosBloques = await tx.bloqueMensual.findMany({
+                where: { macrocicloId: bloqueActualizado.macrocicloId },
+                select: { duracion: true }
+            });
+            const nuevaDuracionTotal = todosLosBloques.reduce((sum, b) => sum + b.duracion, 0);
+
+            await tx.macrociclo.update({
+                where: { id: bloqueActualizado.macrocicloId },
+                data: { duracionSemanas: nuevaDuracionTotal }
+            });
+
+            return bloqueActualizado;
         });
     },
 
@@ -305,7 +378,21 @@ export const PlanificacionServicio = {
                 await tx.configTesteoEjercicio.deleteMany({ where: { semanaId: { in: semanasIds } } });
                 await tx.semana.deleteMany({ where: { bloqueMensualId: id } });
             }
-            return await tx.bloqueMensual.delete({ where: { id } });
+            const bloqueEliminado = await tx.bloqueMensual.delete({ where: { id } });
+
+            // Recalcular duración total del macrociclo restante
+            const bloquesRestantes = await tx.bloqueMensual.findMany({
+                where: { macrocicloId: bloqueEliminado.macrocicloId },
+                select: { duracion: true }
+            });
+            const nuevaDuracionTotal = bloquesRestantes.reduce((sum, b) => sum + b.duracion, 0);
+
+            await tx.macrociclo.update({
+                where: { id: bloqueEliminado.macrocicloId },
+                data: { duracionSemanas: nuevaDuracionTotal }
+            });
+
+            return bloqueEliminado;
         });
     }
 };

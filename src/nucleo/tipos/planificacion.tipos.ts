@@ -16,7 +16,7 @@ export type DiaConEjercicios = DiaSesion & {
 export type SemanaConDias = Semana & {
     diasSesion: DiaConEjercicios[];
     tipoCarga?: TipoCarga | null;
-    checkinRequerido: boolean;
+    checkinRequerido?: boolean;
 };
 
 // Bloque Mensual (Mesociclo) con sus semanas

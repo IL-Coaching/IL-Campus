@@ -29,11 +29,34 @@ export async function cargarBibliotecaOficial() {
             });
 
             if (!existe) {
+                // Mapeo básico de strings a Enums
+                const musculoMap: Record<string, any> = {
+                    "Hombros": "HOMBROS",
+                    "Pecho": "PECHO",
+                    "Espalda": "ESPALDA",
+                    "Bíceps": "BICEPS",
+                    "Tríceps": "TRICEPS",
+                    "Piernas": "CUADRICEPS",
+                    "Glúteos": "GLUTEO",
+                    "Cadena Posterior": "ISQUIOTIBIALES",
+                    "General / Piernas": "CUADRICEPS"
+                };
+
+                const patronMap: Record<string, any> = {
+                    "Empuje vertical": "EMPUJE_VERTICAL",
+                    "Empuje horizontal": "EMPUJE_HORIZONTAL",
+                    "Tracción vertical": "TRACCION_VERTICAL",
+                    "Tracción horizontal": "TRACCION_HORIZONTAL",
+                    "Dominante de Rodilla": "SENTADILLA",
+                    "Dominante de Cadera": "BISAGRA",
+                    "Bisagra de Cadera": "BISAGRA"
+                };
+
                 await EjercicioServicio.crear({
                     nombre: ej.nombre,
-                    musculoPrincipal: "CUADRICEPS", // valor por defecto
+                    musculoPrincipal: (musculoMap[ej.grupoMuscular] || "CORE") as any,
                     articulacion: "MULTIARTICULAR",
-                    patron: "AISLAMIENTO",
+                    patron: (patronMap[ej.patronMovimiento] || "AISLAMIENTO") as any,
                     equipamiento: [],
                     lateralidad: "BILATERAL",
                     descripcion: [

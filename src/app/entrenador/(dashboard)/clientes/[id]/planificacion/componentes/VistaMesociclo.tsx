@@ -1,7 +1,7 @@
-import { Layers, ChevronRight, Activity, Flame, MoveUp, Save, Loader2, FlaskConical, Target, Copy } from "lucide-react";
+import { Layers, ChevronRight, Activity, MoveUp, Save, Loader2, FlaskConical, Target, Copy, Trash2, CalendarDays } from "lucide-react";
 import { useState } from 'react';
-import { BloqueConSemanas, SemanaConDias, DiaConEjercicios } from "@/nucleo/tipos/planificacion.tipos";
-import { actualizarMesociclo, actualizarSemana, clonarContenidoSemana } from '@/nucleo/acciones/planificacion.accion';
+import { BloqueConSemanas } from "@/nucleo/tipos/planificacion.tipos";
+import { actualizarMesociclo, actualizarSemana, clonarContenidoSemana, eliminarMesociclo } from '@/nucleo/acciones/planificacion.accion';
 import { TIPOS_CARGA_MESOCICLO } from '@/nucleo/planificacion/zonas.constantes';
 import { useRouter } from 'next/navigation';
 import { TipoCarga } from "@prisma/client";
@@ -11,12 +11,14 @@ interface VistaMesocicloProps {
     mes: number;
     limiteSemanas: number;
     onSelectSemana: (semana: number) => void;
+    onBack?: () => void;
 }
 
-export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSemana }: VistaMesocicloProps) {
+export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSemana, onBack }: VistaMesocicloProps) {
     const [objetivo, setObjetivo] = useState(bloque.objetivo);
     const [metodo, setMetodo] = useState(bloque.metodo || '');
     const [rango, setRango] = useState(bloque.rangoReferencia || '');
+    const [duracion, setDuracion] = useState(bloque.duracion || 4);
     const [saving, setSaving] = useState(false);
     const router = useRouter();
 
@@ -24,6 +26,7 @@ export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSem
         setSaving(true);
         const res = await actualizarMesociclo(bloque.id, {
             objetivo,
+            duracion,
             metodo,
             rangoReferencia: rango
         });
@@ -36,14 +39,28 @@ export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSem
         setSaving(false);
     };
 
-    const semanas = bloque.semanas.map((s: SemanaConDias) => ({
+    const handleEliminar = async () => {
+        if (confirm("¿Seguro que deseas eliminar esta fase? Se borrarán todas las semanas y sesiones asociadas.")) {
+            setSaving(true);
+            const res = await eliminarMesociclo(bloque.id);
+            if (res.exito) {
+                if (onBack) onBack();
+                router.refresh();
+            } else {
+                alert("Error: " + res.error);
+                setSaving(false);
+            }
+        }
+    };
+
+    const semanas = bloque.semanas.map((s) => ({
         id: s.id,
         n: s.numeroSemana,
         tipo: s.esFaseDeload ? "Deload" : (s.esSemanaTesteo ? "Testeo" : "Trabajo"),
         tipoCarga: s.tipoCarga || '',
         rir: s.RIRobjetivo || "3-4",
         vol: s.volumenEstimado || "8 sets",
-        dias: s.diasSesion.map((d: DiaConEjercicios) => d.focoMuscular)
+        dias: s.diasSesion.map((d) => d.focoMuscular)
     }));
 
     const handleCambiarTipoCarga = async (semanaId: string, tipo: TipoCarga) => {
@@ -88,7 +105,7 @@ export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSem
                             placeholder="Objetivo del Mesociclo"
                         />
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl">
                             <div className="bg-marino-3/30 p-3 rounded-xl border border-marino-4">
                                 <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest mb-1.5 block flex items-center gap-2">
                                     <FlaskConical size={10} /> Método de Carga
@@ -111,36 +128,45 @@ export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSem
                                     placeholder="Ej: 8-12 reps, 5-8 reps..."
                                 />
                             </div>
+                            <div className="bg-marino-3/30 p-3 rounded-xl border border-marino-4">
+                                <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest mb-1.5 block flex items-center gap-2">
+                                    <CalendarDays size={10} /> Duración (Semanas)
+                                </label>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="number"
+                                        min={1}
+                                        max={12}
+                                        value={duracion}
+                                        onChange={(e) => setDuracion(parseInt(e.target.value))}
+                                        className="bg-transparent border-none p-0 text-sm font-bold text-blanco focus:ring-0 w-full"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div className="flex flex-col gap-4 w-full xl:w-auto">
                     <div className="flex gap-4">
-                        <div className="flex-1 xl:flex-none flex flex-col bg-marino-2 p-4 rounded-xl border border-marino-4 min-w-[140px]">
-                            <span className="text-[0.55rem] font-black text-gris uppercase tracking-widest mb-1.5 opacity-60">Volumen Global</span>
-                            <div className="flex items-center gap-2">
-                                <Activity className="text-naranja" size={16} />
-                                <span className="text-lg font-black text-blanco uppercase tracking-tight">{bloque.semanas[0]?.volumenEstimado || 'ESTÁNDAR'}</span>
-                            </div>
-                        </div>
-                        <div className="flex-1 xl:flex-none flex flex-col bg-marino-2 p-4 rounded-xl border border-marino-4 min-w-[140px]">
-                            <span className="text-[0.55rem] font-black text-gris uppercase tracking-widest mb-1.5 opacity-60">Intensidad Media</span>
-                            <div className="flex items-center gap-2">
-                                <Flame className="text-naranja" size={16} />
-                                <span className="text-lg font-black text-blanco uppercase tracking-tight">RIR {bloque.semanas[0]?.RIRobjetivo || '3'}</span>
-                            </div>
-                        </div>
-                    </div>
+                        <button
+                            onClick={handleEliminar}
+                            disabled={saving}
+                            className="bg-rojo/10 hover:bg-rojo/20 text-rojo p-4 rounded-xl border border-rojo/30 h-full flex items-center justify-center transition-all group"
+                            title="Eliminar Mesociclo Completo"
+                        >
+                            <Trash2 size={20} className="group-hover:scale-110 transition-transform" />
+                        </button>
 
-                    <button
-                        onClick={handleGuardar}
-                        disabled={saving}
-                        className="w-full bg-naranja hover:bg-naranja-h transition-all text-marino font-black py-3 rounded-xl uppercase tracking-widest text-xs flex items-center justify-center gap-2 shadow-lg shadow-naranja/10"
-                    >
-                        {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                        {saving ? "Guardando..." : "Guardar Cambios"}
-                    </button>
+                        <button
+                            onClick={handleGuardar}
+                            disabled={saving}
+                            className="flex-1 bg-naranja hover:bg-naranja-h transition-all text-marino font-black py-4 px-8 rounded-xl uppercase tracking-widest text-xs flex items-center justify-center gap-2 shadow-lg shadow-naranja/10"
+                        >
+                            {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                            {saving ? "Guardando..." : "Guardar Cambios"}
+                        </button>
+                    </div>
                 </div>
             </div>
 

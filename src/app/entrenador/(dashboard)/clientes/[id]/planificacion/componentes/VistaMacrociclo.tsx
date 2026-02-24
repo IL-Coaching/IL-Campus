@@ -114,8 +114,8 @@ export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMes
                         </button>
                         <button
                             onClick={onNuevoMesociclo}
-                            disabled={bloques.length * 4 >= limiteSemanas}
-                            className={`flex-1 lg:flex-none flex items-center justify-center gap-2 px-8 py-3 rounded-xl text-[0.7rem] font-black uppercase tracking-widest transition-all shadow-xl shadow-naranja/20 ${bloques.length * 4 >= limiteSemanas ? "bg-marino-4 text-gris cursor-not-allowed" : "bg-naranja hover:bg-naranja-h text-marino active:scale-95"
+                            disabled={macrociclo.duracionSemanas >= limiteSemanas}
+                            className={`flex-1 lg:flex-none flex items-center justify-center gap-2 px-8 py-3 rounded-xl text-[0.7rem] font-black uppercase tracking-widest transition-all shadow-xl shadow-naranja/20 ${macrociclo.duracionSemanas >= limiteSemanas ? "bg-marino-4 text-gris cursor-not-allowed" : "bg-naranja hover:bg-naranja-h text-marino active:scale-95"
                                 }`}
                         >
                             <Plus size={18} /> Nuevo Mesociclo

@@ -226,6 +226,7 @@ export async function actualizarSemana(id: string, data: {
 
 export async function actualizarMesociclo(id: string, data: {
     objetivo?: string;
+    duracion?: number;
     metodo?: string;
     rangoReferencia?: string;
 }) {

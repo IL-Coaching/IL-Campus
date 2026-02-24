@@ -513,7 +513,7 @@ export default function BibliotecaEjercicios({ iniciales }: { iniciales: Ejercic
                                         <div className="space-y-1">
                                             <p className="text-[0.55rem] font-bold text-gris uppercase">Equipamiento</p>
                                             <div className="flex flex-wrap gap-1 mt-1">
-                                                {selectedEjercicio.equipamiento.map(eq => (
+                                                {(selectedEjercicio.equipamiento || []).map(eq => (
                                                     <span key={`${selectedEjercicio.id}-modal-eq-${eq}`} className="px-2 py-0.5 bg-marino-4 rounded text-[0.6rem] font-medium text-gris uppercase">{eq}</span>
                                                 ))}
                                             </div>

@@ -24,7 +24,7 @@ export default function BotonAltaEjercicio() {
         // Campos por defecto para compatibilidad con el esquema
         const payload = {
             ...data,
-            equipamiento: ["OTRO"],
+            equipamiento: [], // Corregido: no usar "OTRO" que no existe en el Enum
             lateralidad: "BILATERAL",
             visibleParaClientes: true
         };

@@ -5,7 +5,8 @@ import { actualizarEjercicio } from "@/nucleo/acciones/ejercicio.accion";
 import {
     GrupoMuscular,
     TipoArticulacion,
-    PatronMovimiento
+    PatronMovimiento,
+    Lateralidad
 } from "@prisma/client";
 
 interface ModalEditarEjercicioProps {
@@ -15,6 +16,7 @@ interface ModalEditarEjercicioProps {
         musculoPrincipal: GrupoMuscular;
         articulacion: TipoArticulacion;
         patron: PatronMovimiento;
+        lateralidad: Lateralidad;
         urlVideo?: string | null;
         descripcion?: string | null;
     };
@@ -108,6 +110,14 @@ export default function ModalEditarEjercicio({ ejercicio, onClose }: ModalEditar
                                 className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco text-xs focus:border-naranja/50 outline-none transition-all font-medium"
                                 placeholder="https://youtu.be/..."
                             />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[0.6rem] font-black text-gris uppercase tracking-widest">Lateralidad</label>
+                            <select name="lateralidad" defaultValue={ejercicio.lateralidad} className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco text-xs font-bold focus:border-naranja/50 outline-none appearance-none cursor-pointer">
+                                <option value="BILATERAL">Bilateral</option>
+                                <option value="UNILATERAL">Unilateral</option>
+                            </select>
                         </div>
                     </div>
 
