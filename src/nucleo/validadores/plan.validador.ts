@@ -1,0 +1,27 @@
+import { z } from "zod";
+
+/**
+ * Esquema de validación para crear/actualizar un plan.
+ * @security OWASP A03:2021 - Validación de entradas
+ */
+export const EsquemaPlan = z.object({
+    nombre: z.string().min(2, "El nombre debe tener al menos 2 caracteres").max(100),
+    precio: z.number().positive("El precio debe ser positivo").max(100000),
+    duracionDias: z.number().int().positive("La duración debe ser un número entero positivo").max(365),
+    descripcion: z.string().optional().or(z.literal("")),
+    beneficios: z.array(z.string()).optional().default([]),
+    visible: z.boolean().default(true),
+});
+
+export const EsquemaActualizarPlan = z.object({
+    id: z.string().uuid(),
+    nombre: z.string().min(2).max(100).optional(),
+    precio: z.number().positive().max(100000).optional(),
+    duracionDias: z.number().int().positive().max(365).optional(),
+    descripcion: z.string().optional(),
+    beneficios: z.array(z.string()).optional(),
+    visible: z.boolean().optional(),
+});
+
+export type TPlan = z.infer<typeof EsquemaPlan>;
+export type TActualizarPlan = z.infer<typeof EsquemaActualizarPlan>;

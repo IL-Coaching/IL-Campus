@@ -56,9 +56,9 @@ export async function asignarMembresia(data: { clienteId: string; planId: string
             return { error: "No tienes permiso para gestionar este cliente." };
         }
 
-        await ClienteServicio.asignarPlan(validacion.data);
+        const resultado = await ClienteServicio.asignarPlan(validacion.data);
         revalidatePath("/entrenador/clientes");
-        return { exito: true };
+        return { exito: true, codigoActivacion: resultado.codigoActivacion };
 
     } catch (error) {
         console.error("Error al asignar membresía:", error);

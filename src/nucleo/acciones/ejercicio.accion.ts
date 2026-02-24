@@ -14,17 +14,6 @@ export async function buscarEjercicios(query: string = "") {
     }
 }
 
-// Compatibilidad total con el buscador del Constructor de Clientes
-export async function buscarEjerciciosCatalogo(query: string = "") {
-    try {
-        const entrenador = await getEntrenadorSesion();
-        const resultados = await EjercicioServicio.buscar(entrenador.id, query);
-        return { exito: true, resultados };
-    } catch (error) {
-        console.error("Error en buscarEjerciciosCatalogo:", error);
-        return { exito: false, resultados: [] };
-    }
-}
 
 export async function crearEjercicio(formData: Record<string, unknown>) {
     try {

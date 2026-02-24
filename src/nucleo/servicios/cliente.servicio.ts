@@ -163,6 +163,7 @@ export const ClienteServicio = {
 
     /**
      * Asigna un plan a un cliente, calculando el vencimiento y activando su cuenta.
+     * Si el cliente no tiene contraseña (prospecto de landing), genera una temporal.
      */
     async asignarPlan(data: { clienteId: string; planId: string; fechaInicio: Date }) {
         const plan = await prisma.plan.findUnique({
@@ -171,10 +172,31 @@ export const ClienteServicio = {
 
         if (!plan) throw new Error("El plan seleccionado no existe.");
 
+        const cliente = await prisma.cliente.findUnique({
+            where: { id: data.clienteId },
+            select: { id: true, password: true }
+        });
+
+        if (!cliente) throw new Error("Cliente no encontrado.");
+
         const fechaVencimiento = new Date(data.fechaInicio);
         fechaVencimiento.setDate(fechaVencimiento.getDate() + plan.duracionDias);
 
-        return await prisma.$transaction([
+        let codigoActivacion: string | undefined = undefined;
+        const updates: Partial<import("@prisma/client").Cliente> = { activo: true };
+
+        // Si no tiene password, generamos la temporal (Protocolo IL-Campus)
+        if (!cliente.password) {
+            const randomStr1 = Math.random().toString(36).substring(2, 6).toUpperCase();
+            const randomStr2 = Math.random().toString(36).substring(2, 5).toUpperCase();
+            codigoActivacion = `IL-${randomStr1}-${randomStr2}`;
+
+            const { CriptoServicio } = await import('@/nucleo/seguridad/cripto');
+            updates.password = await CriptoServicio.hashPassword(codigoActivacion);
+            updates.forcePasswordChange = true;
+        }
+
+        await prisma.$transaction([
             // 1. Crear la asignación del plan
             prisma.planAsignado.create({
                 data: {
@@ -185,11 +207,13 @@ export const ClienteServicio = {
                     estado: "ACTIVO"
                 }
             }),
-            // 2. Asegurar que el cliente esté activo
+            // 2. Actualizar estado y credenciales si aplica
             prisma.cliente.update({
                 where: { id: data.clienteId },
-                data: { activo: true }
+                data: updates
             })
         ]);
+
+        return { success: true, codigoActivacion };
     }
 };

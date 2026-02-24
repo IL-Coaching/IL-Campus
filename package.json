@@ -9,7 +9,19 @@
     "dev": "next dev",
     "build": "prisma generate --schema=src/baseDatos/esquema.prisma && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'No tests configured yet'",
+    "test:unit": "echo 'No unit tests configured yet'",
+    "test:integracion": "echo 'No integration tests configured yet'",
+    "test:seguridad": "echo 'No security tests configured yet'",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "npm run lint",
+      "npm run typecheck"
+    ]
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.97.0",
@@ -20,7 +32,6 @@
     "lucide-react": "^0.575.0",
     "next": "^14.2.35",
     "otplib": "^13.3.0",
-    "pdf-parse": "^2.4.5",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -35,6 +46,8 @@
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "14.2.35",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "postcss": "^8",
     "prisma": "^5.22.0",
     "tailwindcss": "^3.4.1",

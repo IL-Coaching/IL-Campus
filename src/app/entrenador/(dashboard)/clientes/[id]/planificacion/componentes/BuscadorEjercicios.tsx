@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Search, X, Dumbbell, Loader2, Play, Video } from 'lucide-react';
 import Image from 'next/image';
-import { buscarEjerciciosCatalogo } from '@/nucleo/acciones/ejercicio.accion';
+import { buscarEjercicios } from '@/nucleo/acciones/ejercicio.accion';
 import type { Ejercicio } from '@prisma/client';
 
 interface BuscadorEjerciciosProps {
@@ -21,10 +21,8 @@ export default function BuscadorEjercicios({ onClose, onSelect }: BuscadorEjerci
             if (query.length > 1 || musculoFiltro !== 'Todos') {
                 setLoading(true);
                 const busqueda = query === '' && musculoFiltro !== 'Todos' ? musculoFiltro : query;
-                const res = await buscarEjerciciosCatalogo(busqueda);
-                if (res.exito) {
-                    setResultados(res.resultados as Ejercicio[]);
-                }
+                const resultados = await buscarEjercicios(busqueda);
+                setResultados(resultados as Ejercicio[]);
                 setLoading(false);
             } else {
                 setResultados([]);

@@ -5,6 +5,41 @@ import { prisma } from "@/baseDatos/conexion";
 import { CriptoServicio } from "../seguridad/cripto";
 import { EmailServicio } from "../servicios/email.servicio";
 
+/**
+ * Construye la URL base de la app de forma confiable en el contexto de Next.js.
+ * Prioriza el header 'origin', cae a variables de entorno y termina en localhost.
+ * @returns URL base sin barra al final (ej: https://il-campus.vercel.app)
+ */
+async function obtenerUrlBase(): Promise<string> {
+    const headersList = headers();
+    const origin = headersList.get('origin');
+    const host = headersList.get('host');
+    const protocol = host?.includes('localhost') ? 'http' : 'https';
+
+    return (
+        origin ||
+        (host ? `${protocol}://${host}` : null) ||
+        process.env.NEXT_PUBLIC_APP_URL ||
+        (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null) ||
+        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+        'http://localhost:3000'
+    );
+}
+
+/**
+ * Tipo auxiliar para actualizar campos dinámicos del cliente sin exponer la API
+ * completa de Prisma. Requerido por limitaciones de inferencia de tipos de Prisma + Next.js.
+ */
+type ActualizarCliente = {
+    update: (args: { where: { id: string }; data: Record<string, unknown> }) => Promise<unknown>;
+};
+
+const actualizarCliente = (prisma.cliente as unknown as ActualizarCliente).update.bind(prisma.cliente);
+
+/**
+ * Envía un email de reseteo de contraseña al cliente.
+ * Por seguridad, si el email no existe o la cuenta está inactiva, retorna éxito igual (no delatar).
+ */
 export async function solicitarReseteoPassword(formData: FormData) {
     try {
         const email = formData.get("email") as string;
@@ -13,44 +48,22 @@ export async function solicitarReseteoPassword(formData: FormData) {
             return { error: "Debes proveer un correo válido." };
         }
 
-        const cliente = await prisma.cliente.findUnique({
-            where: { email }
-        });
+        const cliente = await prisma.cliente.findUnique({ where: { email } });
 
-        // Seguridad: Si no existe, no lo delatamos por privacidad. Respondemos OK falsamente.
+        // Seguridad: no revelar si el email existe o no
         if (!cliente || !cliente.activo) {
             return { success: true };
         }
 
-        // 1. Crear un Token de reseteo corto que expira en 30 mins
         const token = CriptoServicio.generateRandomToken(48);
-        const expires = new Date(Date.now() + 30 * 60000); // 30 mins
+        const expires = new Date(Date.now() + 30 * 60000); // 30 minutos
 
-        const accessor = (prisma.cliente as unknown) as {
-            update: (args: { where: { id: string }, data: Record<string, unknown> }) => Promise<unknown>
-        };
-
-        await accessor.update({
+        await actualizarCliente({
             where: { id: cliente.id },
-            data: {
-                passwordResetToken: token,
-                passwordResetExpires: expires
-            }
+            data: { passwordResetToken: token, passwordResetExpires: expires }
         });
 
-        // 2. Construir link y Enviar Email
-        const headersList = headers();
-        const origin = headersList.get('origin');
-        const host = headersList.get('host');
-        const protocol = host?.includes('localhost') ? 'http' : 'https';
-
-        const baseUrl = origin ||
-            (host ? `${protocol}://${host}` : null) ||
-            process.env.NEXT_PUBLIC_APP_URL ||
-            (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null) ||
-            (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
-            'http://localhost:3000';
-
+        const baseUrl = await obtenerUrlBase();
         const urlReseteo = `${baseUrl}/recuperar?token=${token}`;
 
         const plantillaEmail = `
@@ -81,48 +94,26 @@ export async function solicitarReseteoPassword(formData: FormData) {
 }
 
 /**
- * Genera un link de reseteo manualmente para que el entrenador se lo pase al cliente
- * por fuera de email (Ej: WhatsApp).
+ * Genera un link de reseteo manualmente para que el entrenador se lo comparta
+ * al cliente por fuera del email (ej: WhatsApp). Expira en 24 horas.
  */
 export async function generarLinkRecuperacionManual(clienteId: string) {
     try {
-        const cliente = await prisma.cliente.findUnique({
-            where: { id: clienteId }
-        });
+        const cliente = await prisma.cliente.findUnique({ where: { id: clienteId } });
 
         if (!cliente || !cliente.activo) {
             return { error: "Cliente no encontrado o inactivo." };
         }
 
-        // 1. Crear Token (más duración, ej 24hs por ser envío manual)
         const token = CriptoServicio.generateRandomToken(48);
         const expires = new Date(Date.now() + 24 * 60 * 60000); // 24 horas
 
-        const accessor = (prisma.cliente as unknown) as {
-            update: (args: { where: { id: string }, data: Record<string, unknown> }) => Promise<unknown>
-        };
-
-        await accessor.update({
+        await actualizarCliente({
             where: { id: cliente.id },
-            data: {
-                passwordResetToken: token,
-                passwordResetExpires: expires
-            }
+            data: { passwordResetToken: token, passwordResetExpires: expires }
         });
 
-        // 2. Construir link
-        const headersList = headers();
-        const origin = headersList.get('origin');
-        const host = headersList.get('host');
-        const protocol = host?.includes('localhost') ? 'http' : 'https';
-
-        const baseUrl = origin ||
-            (host ? `${protocol}://${host}` : null) ||
-            process.env.NEXT_PUBLIC_APP_URL ||
-            (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null) ||
-            (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
-            'http://localhost:3000';
-
+        const baseUrl = await obtenerUrlBase();
         const urlReseteo = `${baseUrl}/recuperar?token=${token}`;
 
         return { success: true, link: urlReseteo };

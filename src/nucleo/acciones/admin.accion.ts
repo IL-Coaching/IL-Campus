@@ -4,37 +4,40 @@ import { prisma } from "@/baseDatos/conexion";
 import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";
 import { CriptoServicio } from "@/nucleo/seguridad/cripto";
 import { MFAServicio } from "@/nucleo/seguridad/mfa";
+import { StorageServicio } from "../servicios/storage.servicio";
 import { revalidatePath } from "next/cache";
 
-// Tipo auxiliar para evitar el uso de 'any' y satisfacer al linter de producción
-type PrismaUpdateAccessor = {
-    update: (args: { where: { id: string }, data: Record<string, unknown> }) => Promise<unknown>
+/**
+ * Tipo auxiliar para actualizar campos dinámicos del entrenador sin exponer
+ * la API completa de Prisma. Permite pasar Record<string, unknown> como data.
+ * @security Siempre validar que el entrenador sea el mismo que está en sesión antes de llamar.
+ */
+type ActualizarEntrenador = {
+    update: (args: { where: { id: string }; data: Record<string, unknown> }) => Promise<unknown>;
 };
 
+/** Shortcut tipado para actualizar el entrenador con datos dinámicos. */
+const actualizarEntrenador = (prisma.entrenador as unknown as ActualizarEntrenador).update.bind(prisma.entrenador);
+
 /**
- * Actualiza el perfil del entrenador (Email o Password).
+ * Actualiza las credenciales del entrenador (Email o Password).
+ * Requiere la contraseña actual como confirmación de identidad.
  */
 export async function actualizarCredencialesAdmin(data: { email?: string, password?: string, passwordConfirmacion: string }) {
     try {
         const entrenadorFull = await prisma.entrenador.findUnique({ where: { id: (await getEntrenadorSesion()).id } });
         if (!entrenadorFull) return { error: "Sesión inválida." };
 
-        // 1. Validar identidad
         const passValida = await CriptoServicio.comparePassword(data.passwordConfirmacion, entrenadorFull.password);
         if (!passValida) return { error: "Contraseña de confirmación incorrecta." };
 
         const updateData: Record<string, unknown> = {};
-
         if (data.email) updateData.email = data.email;
         if (data.password) {
             updateData.password = await CriptoServicio.hashPassword(data.password);
         }
 
-        const accessor = (prisma.entrenador as unknown) as PrismaUpdateAccessor;
-        await accessor.update({
-            where: { id: entrenadorFull.id },
-            data: updateData
-        });
+        await actualizarEntrenador({ where: { id: entrenadorFull.id }, data: updateData });
 
         revalidatePath('/entrenador/configuracion');
         return { success: true };
@@ -45,7 +48,7 @@ export async function actualizarCredencialesAdmin(data: { email?: string, passwo
 
 /**
  * Inicia el proceso de activación de MFA.
- * Retorna el QR y el secreto temporal.
+ * Retorna el QR y el secreto temporal para que el usuario configure su app autenticadora.
  */
 export async function iniciarConfiguracionMFA() {
     try {
@@ -62,27 +65,23 @@ export async function iniciarConfiguracionMFA() {
 }
 
 /**
- * Confirma y activa definitivamente el MFA si el código es correcto.
+ * Confirma y activa definitivamente el MFA si el código TOTP es correcto.
+ * Requiere confirmación de identidad con contraseña actual.
  */
 export async function activarMFA(token: string, secreto: string, passwordConfirmacion: string) {
     try {
         const entrenadorFull = await prisma.entrenador.findUnique({ where: { id: (await getEntrenadorSesion()).id } });
         if (!entrenadorFull) return { error: "Sesión inválida." };
 
-        // 1. Validar identidad
         const passValida = await CriptoServicio.comparePassword(passwordConfirmacion, entrenadorFull.password);
         if (!passValida) return { error: "Contraseña incorrecta." };
 
         const esValido = MFAServicio.verificarToken(token, secreto);
         if (!esValido) return { error: "Código MFA incorrecto." };
 
-        const accessor = (prisma.entrenador as unknown) as PrismaUpdateAccessor;
-        await accessor.update({
+        await actualizarEntrenador({
             where: { id: entrenadorFull.id },
-            data: {
-                mfaSecret: secreto,
-                mfaEnabled: true
-            }
+            data: { mfaSecret: secreto, mfaEnabled: true }
         });
 
         revalidatePath('/entrenador/configuracion');
@@ -93,25 +92,22 @@ export async function activarMFA(token: string, secreto: string, passwordConfirm
 }
 
 /**
- * Desactiva el MFA.
+ * Desactiva el MFA del entrenador.
+ * Requiere confirmación de identidad con contraseña actual.
  */
 export async function desactivarMFA(passwordConfirmacion: string) {
     try {
         const entrenadorFull = await prisma.entrenador.findUnique({ where: { id: (await getEntrenadorSesion()).id } });
         if (!entrenadorFull) return { error: "Sesión inválida." };
 
-        // 1. Validar identidad
         const passValida = await CriptoServicio.comparePassword(passwordConfirmacion, entrenadorFull.password);
         if (!passValida) return { error: "Contraseña incorrecta." };
 
-        const accessor = (prisma.entrenador as unknown) as PrismaUpdateAccessor;
-        await accessor.update({
+        await actualizarEntrenador({
             where: { id: entrenadorFull.id },
-            data: {
-                mfaSecret: null,
-                mfaEnabled: false
-            }
+            data: { mfaSecret: null, mfaEnabled: false }
         });
+
         revalidatePath('/entrenador/configuracion');
         return { success: true };
     } catch {
@@ -119,10 +115,8 @@ export async function desactivarMFA(passwordConfirmacion: string) {
     }
 }
 
-import { StorageServicio } from "../servicios/storage.servicio";
-
 /**
- * Actualiza el Avatar del entrenador.
+ * Actualiza el avatar del entrenador subiendo la imagen a Supabase Storage.
  */
 export async function actualizarAvatarAdmin(base64: string) {
     try {
@@ -132,23 +126,22 @@ export async function actualizarAvatarAdmin(base64: string) {
         const upload = await StorageServicio.subirImagenBase64(base64, fileName);
         if (!upload.success) return { error: upload.error };
 
-        const avatarUrl = upload.url;
-
-        // Persistencia en DB
-        const accessor = (prisma.entrenador as unknown) as PrismaUpdateAccessor;
-        await accessor.update({
+        await actualizarEntrenador({
             where: { id: entrenador.id },
-            data: { avatarUrl }
+            data: { avatarUrl: upload.url }
         });
 
         revalidatePath('/entrenador/configuracion');
-        return { success: true, avatarUrl };
+        return { success: true, avatarUrl: upload.url };
     } catch (error) {
         console.error("Error avatar:", error);
         return { error: "No se pudo procesar la imagen." };
     }
 }
 
+/**
+ * Actualiza la foto hero o bio de la landing page del entrenador.
+ */
 export async function actualizarFotoLanding(base64: string, tipo: 'hero' | 'bio') {
     try {
         const entrenador = await getEntrenadorSesion();
@@ -157,21 +150,18 @@ export async function actualizarFotoLanding(base64: string, tipo: 'hero' | 'bio'
         const upload = await StorageServicio.subirImagenBase64(base64, fileName);
         if (!upload.success) return { error: upload.error };
 
-        const imageUrl = upload.url;
-
-        const accessor = (prisma.entrenador as unknown) as PrismaUpdateAccessor;
         const updateData: Record<string, string> = {};
-        if (tipo === 'hero') updateData.landingHeroUrl = imageUrl!;
-        if (tipo === 'bio') updateData.landingBioUrl = imageUrl!;
+        if (tipo === 'hero') updateData.landingHeroUrl = upload.url!;
+        if (tipo === 'bio') updateData.landingBioUrl = upload.url!;
 
-        await accessor.update({
+        await actualizarEntrenador({
             where: { id: entrenador.id },
             data: updateData
         });
 
         revalidatePath('/entrenador/configuracion');
-        revalidatePath('/'); // También revalidar la landing
-        return { success: true, imageUrl };
+        revalidatePath('/');
+        return { success: true, imageUrl: upload.url };
     } catch (error) {
         console.error(`Error landing ${tipo}:`, error);
         return { error: "No se pudo procesar la imagen." };
