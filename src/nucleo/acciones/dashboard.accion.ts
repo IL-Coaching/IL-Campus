@@ -3,111 +3,80 @@
 import { prisma } from "@/baseDatos/conexion";
 import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";
 
+/**
+ * Obtiene todas las métricas del dashboard central del entrenador.
+ * Incluye KPIs, contadores operativos y notificaciones no leídas.
+ */
 export async function obtenerMetricasDashboard() {
     try {
         const entrenador = await getEntrenadorSesion();
+        const ahora = new Date();
 
-        // 1. Clientes Activos (que tienen un plan activo y la cuenta activa)
+        // ──── KPI 1: Clientes Activos ────
         const totalActivos = await prisma.cliente.count({
-            where: {
-                entrenadorId: entrenador.id,
-                activo: true
-            }
+            where: { entrenadorId: entrenador.id, activo: true }
         });
 
-        // Simulación: Nuevos clientes este mes (como en ClienteServicio, podríamos filtrarlo)
-        const inicioMes = new Date();
-        inicioMes.setDate(1);
-        inicioMes.setHours(0, 0, 0, 0);
-        const nuevosMes = await prisma.cliente.count({
-            where: {
-                entrenadorId: entrenador.id,
-                fechaAlta: { gte: inicioMes }
-            }
-        });
-
-        // 2. Ingresos Estimados (Suma total de cobros del mes actual, o estimado)
+        // ──── KPI 2: Flujo de Caja Mensual ────
+        const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
         const cobrosMes = await prisma.cobro.aggregate({
-            _sum: {
-                montoArs: true
-            },
+            _sum: { montoArs: true },
             where: {
-                cliente: {
-                    entrenadorId: entrenador.id
-                },
+                cliente: { entrenadorId: entrenador.id },
                 fecha: { gte: inicioMes }
             }
         });
-        const ingresosEstimados = cobrosMes._sum.montoArs || 0;
+        const flujoCajaMensual = cobrosMes._sum.montoArs || 0;
 
-        // 3. Check-ins Pendientes (Check-ins recientes no "revisados", asumiendo últimos 7 días como pendientes de revisión si tuvieran flag, o simplemente el conteo de esta semana)
-        const inicioSemana = new Date();
-        inicioSemana.setDate(inicioSemana.getDate() - 7);
-        const checkinsRecientes = await prisma.checkin.findMany({
+        // ──── KPI 3: Check-ins en Espera ────
+        const checkinsEnEspera = await prisma.checkin.count({
             where: {
-                cliente: {
-                    entrenadorId: entrenador.id
-                },
-                fecha: { gte: inicioSemana }
-            },
-            include: {
-                cliente: { select: { nombre: true, id: true } }
-            },
-            orderBy: { fecha: 'desc' },
-            take: 5
+                cliente: { entrenadorId: entrenador.id },
+                visto: false
+            }
         });
 
-        // 4. Alertas (Por ejemplo, planes vencidos no renovados, o formularios no completados)
-        const planesVencidos = await prisma.planAsignado.findMany({
+        // ──── KPI 4: Planes por Vencer (≤7 días) ────
+        const enSieteDias = new Date(ahora);
+        enSieteDias.setDate(enSieteDias.getDate() + 7);
+        const planesPorVencer = await prisma.planAsignado.count({
             where: {
                 cliente: { entrenadorId: entrenador.id, activo: true },
-                fechaVencimiento: { lt: new Date() }
-            },
-            include: {
-                cliente: { select: { nombre: true, id: true } },
-                plan: { select: { nombre: true } }
-            },
-            orderBy: { fechaVencimiento: 'desc' }
+                fechaVencimiento: { gte: ahora, lte: enSieteDias },
+                estado: "activo"
+            }
         });
 
-        const clientesSinPlan = await prisma.cliente.findMany({
+        // ──── KPI 5: Formularios en Espera ────
+        // Clientes con formulario pero sin plan asignado todavía
+        const formulariosEnEspera = await prisma.cliente.count({
             where: {
                 entrenadorId: entrenador.id,
                 activo: true,
-                planesAsignados: { none: {} },
-                formularioInscripcion: { isNot: null } // Si llenaron el form
-            },
-            select: { id: true, nombre: true }
+                formularioInscripcion: { isNot: null },
+                planesAsignados: { none: {} }
+            }
         });
 
-        // Combinamos actividad reciente (Check-ins + Alta de Clientes recientes + Cobros)
-        const ultimosCobros = await prisma.cobro.findMany({
-            where: { cliente: { entrenadorId: entrenador.id } },
-            include: { cliente: { select: { nombre: true } } },
-            orderBy: { fecha: 'desc' },
-            take: 3
+        // ──── KPI 6: Mensajes No Leídos ────
+        const mensajesNoLeidos = await prisma.mensaje.count({
+            where: {
+                cliente: { entrenadorId: entrenador.id },
+                emisor: "cliente",
+                leido: false
+            }
         });
-
-        const actividad = [
-            ...checkinsRecientes.map(c => ({ tipo: 'checkin', fecha: c.fecha, texto: `${c.cliente.nombre} subió su Check-in semanal.` })),
-            ...planesVencidos.slice(0, 3).map(p => ({ tipo: 'alerta', fecha: p.fechaVencimiento, texto: `El plan de ${p.cliente.nombre} se ha vencido.` })),
-            ...ultimosCobros.map(c => ({ tipo: 'cobro', fecha: c.fecha, texto: `Pago registrado de ${c.cliente.nombre} ($${c.montoArs}).` }))
-        ].sort((a, b) => b.fecha.getTime() - a.fecha.getTime()).slice(0, 10);
 
         return {
-            totalActivos: totalActivos, // Reutilizando la métrica ya mostrada
-            nuevosMes,
-            ingresosMes: ingresosEstimados,
-            checkinsPendientes: checkinsRecientes.length,
-            alertasOperativas: planesVencidos.length + clientesSinPlan.length,
-            detallesAlertas: {
-                vencidos: planesVencidos,
-                sinPlan: clientesSinPlan
-            },
-            actividadReciente: actividad
+            totalActivos,
+            flujoCajaMensual,
+            checkinsEnEspera,
+            planesPorVencer,
+            formulariosEnEspera,
+            mensajesNoLeidos
         };
     } catch (error) {
-        console.error("Error cargando dashboard", error);
+        console.error("Error cargando dashboard:", error);
         return null;
     }
 }
