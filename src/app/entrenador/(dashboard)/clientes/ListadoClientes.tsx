@@ -127,7 +127,7 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                                             <div className="w-10 h-10 rounded-full bg-blanco border-2 border-[#1a233a] flex items-center justify-center text-[0.5rem] text-marino font-black uppercase overflow-hidden shadow-lg shadow-blanco/5 shrink-0">
                                                 FOTO<br />PERFIL
                                             </div>
-                                            <span className="truncate max-w-[150px] font-bold text-blanco/90">{cliente.nombre}</span>
+                                            <span className="font-bold text-blanco/90 whitespace-normal text-left break-words">{cliente.nombre}</span>
                                         </td>
 
                                         {/* CONTACTO */}
@@ -160,7 +160,7 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                                                     <div className="relative inline-block w-full max-w-[150px]">
                                                         {ultimoPlan && (
                                                             <select
-                                                                className="appearance-none w-full bg-[#0a101f] border border-[#1a233a]  text-[#f5f5f5] text-xs font-bold uppercase tracking-widest rounded-lg px-3 py-2 pr-8 cursor-pointer focus:outline-none focus:border-naranja shadow-inner"
+                                                                className="appearance-none w-full bg-[#0a101f] border border-[#1a233a] text-[#f5f5f5] text-[10px] md:text-[11px] font-bold uppercase tracking-widest rounded-lg py-2 pl-7 pr-8 cursor-pointer focus:outline-none focus:border-naranja shadow-inner"
                                                                 value={ultimoPlan.estado || "PENDIENTE"}
                                                                 onChange={(e) => handleUpdateEstadoPago(ultimoPlan.id, e.target.value)}
                                                                 disabled={isPending}
