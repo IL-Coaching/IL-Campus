@@ -11,7 +11,12 @@ import ModalCobrosHistorial from "@/app/entrenador/(dashboard)/finanzas/ModalCob
 export interface Vencimiento {
     id: string;
     fechaVencimiento: Date;
-    cliente: { id: string, nombre: string, email: string };
+    cliente: {
+        id: string,
+        nombre: string,
+        email: string,
+        planesAsignados: { plan: { nombre: string } }[]
+    };
     plan: { nombre: string, precio: number };
     cobros: {
         id: string;
@@ -40,7 +45,7 @@ export default function ListaVencimientos({ vencimientos }: Props) {
                 <thead>
                     <tr className="border-b border-marino-4 bg-marino-3/30">
                         <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs">Atleta</th>
-                        <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs">Plan Vigente</th>
+                        <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs">Suscripción gestionada</th>
                         <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs">Vencimiento</th>
                         <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs text-center">Estado Pago</th>
                         <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs text-right">Acción</th>
@@ -67,11 +72,15 @@ export default function ListaVencimientos({ vencimientos }: Props) {
                             if (totalPagado >= metaPago) estadoPago = "PAGADO";
                             else if (totalPagado > 0) estadoPago = "PARCIAL";
 
+                            // 🚨 DETECCIÓN DE DESCALCE (Plan Cobro vs Plan Acceso)
+                            const planAcceso = item.cliente.planesAsignados[0]?.plan.nombre;
+                            const hayDescalce = planAcceso && planAcceso !== item.plan.nombre;
+
                             return (
                                 <tr key={item.id} className="hover:bg-marino-3/50 transition-all group">
                                     <td className="p-4">
                                         <div className="flex flex-col">
-                                            <span className="font-bold text-blanco flex items-center gap-2">
+                                            <span className="font-bold text-blanco flex items-center gap-2 text-sm">
                                                 {item.cliente.nombre}
                                                 <Link href={`/entrenador/clientes/${item.cliente.id}`} title="Ver Perfil">
                                                     <ExternalLink size={12} className="text-gris group-hover:text-naranja transition-colors" />
@@ -81,9 +90,23 @@ export default function ListaVencimientos({ vencimientos }: Props) {
                                         </div>
                                     </td>
                                     <td className="p-4">
-                                        <span className="text-naranja font-black tracking-tighter text-sm uppercase italic">
-                                            {item.plan.nombre}
-                                        </span>
+                                        <div className="flex flex-col gap-1">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-naranja font-black tracking-tighter text-sm uppercase italic">
+                                                    {item.plan.nombre}
+                                                </span>
+                                                {hayDescalce && (
+                                                    <span className="bg-rojo/10 text-rojo border border-rojo/30 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter animate-pulse" title={`El cliente tiene acceso a ${planAcceso}, pero se le está gestionando un cobro por ${item.plan.nombre}`}>
+                                                        ⚠️ DESCALCE
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {hayDescalce && (
+                                                <span className="text-[9px] text-gris font-bold uppercase italic">
+                                                    Acceso Actual: <span className="text-blanco">{planAcceso}</span>
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="p-4">
                                         <div className="flex flex-col">

@@ -38,7 +38,15 @@ export const CobroServicio = {
                 fechaInicio: { lte: new Date() }
             },
             include: {
-                cliente: true,
+                cliente: {
+                    include: {
+                        planesAsignados: {
+                            orderBy: { fechaInicio: 'desc' },
+                            take: 1,
+                            include: { plan: true }
+                        }
+                    }
+                },
                 plan: true,
                 cobros: {
                     orderBy: { fecha: 'desc' }
