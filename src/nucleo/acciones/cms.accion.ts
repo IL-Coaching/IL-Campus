@@ -39,7 +39,7 @@ export async function obtenerCMSDatos() {
 /**
  * Actualiza campos de texto o JSON (testimonios/faqs) en ConfigLanding.
  */
-export async function actualizarSeccionCMS(datos: Record<string, any>) {
+export async function actualizarSeccionCMS(datos: Record<string, unknown>) {
     try {
         const entrenador = await getEntrenadorSesion();
 
