@@ -139,31 +139,3 @@ export async function actualizarAvatarAdmin(base64: string) {
     }
 }
 
-/**
- * Actualiza la foto hero o bio de la landing page del entrenador.
- */
-export async function actualizarFotoLanding(base64: string, tipo: 'hero' | 'bio') {
-    try {
-        const entrenador = await getEntrenadorSesion();
-        const fileName = `landing/${tipo}-${entrenador.id}-${Date.now()}.png`;
-
-        const upload = await StorageServicio.subirImagenBase64(base64, fileName);
-        if (!upload.success) return { error: upload.error };
-
-        const updateData: Record<string, string> = {};
-        if (tipo === 'hero') updateData.landingHeroUrl = upload.url!;
-        if (tipo === 'bio') updateData.landingBioUrl = upload.url!;
-
-        await actualizarEntrenador({
-            where: { id: entrenador.id },
-            data: updateData
-        });
-
-        revalidatePath('/entrenador/configuracion');
-        revalidatePath('/');
-        return { success: true, imageUrl: upload.url };
-    } catch (error) {
-        console.error(`Error landing ${tipo}:`, error);
-        return { error: "No se pudo procesar la imagen." };
-    }
-}
