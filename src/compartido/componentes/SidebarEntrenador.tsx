@@ -70,9 +70,9 @@ export default function SidebarEntrenador({ badgeMensajeria = 0 }: { badgeMensaj
                                 key={item.href}
                                 href={item.href}
                                 onClick={() => setMobileOpen(false)}
-                                className={`flex items-center gap-3 px-3 py-3 rounded-lg font-medium transition-all duration-200 ${isActive
-                                    ? "bg-naranja/10 text-naranja border-r-2 border-naranja"
-                                    : "text-gris hover:text-blanco hover:bg-marino-3"
+                                className={`flex items-center justify-center md:justify-start gap-4 px-6 py-3.5 rounded-full font-bold uppercase tracking-widest transition-all duration-300 ${isActive
+                                    ? "bg-[#e87717] text-blanco shadow-lg shadow-naranja/20"
+                                    : "text-gris hover:text-blanco hover:bg-[#1a233a]"
                                     }`}
                             >
                                 <item.icon size={20} />
@@ -91,7 +91,7 @@ export default function SidebarEntrenador({ badgeMensajeria = 0 }: { badgeMensaj
                 <div className="p-4 border-t border-marino-4">
                     <button
                         onClick={() => logout()}
-                        className="flex items-center gap-3 px-3 py-3 rounded-lg text-gris hover:text-[#EF4444] hover:bg-[#EF4444]/5 transition-colors duration-200 w-full font-medium"
+                        className="flex items-center justify-center md:justify-start gap-4 px-6 py-3.5 rounded-full text-gris hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors duration-300 w-full font-bold uppercase tracking-widest"
                     >
                         <LogOut size={20} />
                         <span className="tracking-wide text-sm">Cerrar Sesión</span>

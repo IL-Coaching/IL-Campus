@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { Users, MoreVertical, Ban, CheckCircle, Smartphone } from "lucide-react";
+import { Users, MoreVertical, Ban, CheckCircle } from "lucide-react";
 import ModalAsignarPlan from "./ModalAsignarPlan";
 import { cambiarEstadoPagoPlan, alternarEstadoCliente } from "@/nucleo/acciones/cliente.accion";
 
