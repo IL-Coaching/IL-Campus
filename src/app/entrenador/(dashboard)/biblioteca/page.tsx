@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { buscarEjercicios } from "@/nucleo/acciones/ejercicio.accion";
 import BibliotecaConTabs from "./BibliotecaConTabs";
 

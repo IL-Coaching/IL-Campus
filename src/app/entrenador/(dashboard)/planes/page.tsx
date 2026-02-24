@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { obtenerPlanes } from "@/nucleo/acciones/plan.accion";
 import GestionPlanes from "./componentes/GestionPlanes";
 import { Dumbbell } from "lucide-react";

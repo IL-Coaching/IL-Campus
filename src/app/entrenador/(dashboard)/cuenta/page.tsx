@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Shield, User, Mail, Phone } from "lucide-react";
 import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";
 import GestionSeguridadAdmin from "./componentes/GestionSeguridadAdmin";

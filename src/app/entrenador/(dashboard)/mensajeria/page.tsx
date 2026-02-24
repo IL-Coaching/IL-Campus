@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import MensajeriaPanel from "./componentes/MensajeriaPanel";
 
 export default function MensajeriaPage() {

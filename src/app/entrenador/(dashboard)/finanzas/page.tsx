@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 /** Módulo de Finanzas — IL-Campus */
 import { CreditCard } from "lucide-react";
 import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";

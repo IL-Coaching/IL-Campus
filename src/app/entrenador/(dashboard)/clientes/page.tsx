@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import Link from "next/link";
 import BotonAltaManual from "./BotonAltaManual";
 import { ClienteServicio } from "@/nucleo/servicios/cliente.servicio";

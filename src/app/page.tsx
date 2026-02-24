@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import Nav from "./componentes-landing/Nav";
 import Hero from "./componentes-landing/Hero";
 import Bio from "./componentes-landing/Bio";
