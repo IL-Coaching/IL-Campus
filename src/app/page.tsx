@@ -13,6 +13,13 @@ import { prisma } from "@/baseDatos/conexion";
 
 export default async function LandingPage() {
   const entrenador = await prisma.entrenador.findFirst();
+  let configD = null;
+  if (entrenador) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    configD = await (prisma as any).configLanding.findUnique({
+      where: { entrenadorId: entrenador.id }
+    });
+  }
 
   return (
     <ModalProvider>
@@ -33,26 +40,33 @@ export default async function LandingPage() {
 
       <main className="overflow-hidden">
         {/* 2. HERO */}
-        <Hero imageUrl={entrenador?.landingHeroUrl} />
+        <Hero
+          imageUrl={entrenador?.landingHeroUrl}
+          titulo={configD?.heroTitulo}
+          subtitulo={configD?.heroSubtitulo}
+        />
 
         {/* 3. BIO DEL ENTRENADOR */}
-        <Bio imageUrl={entrenador?.landingBioUrl} />
+        <Bio
+          imageUrl={entrenador?.landingBioUrl}
+          texto={configD?.bioTexto}
+        />
 
         {/* 4. PLANES */}
         <Planes />
 
         {/* 5. TESTIMONIOS */}
-        <Testimonios />
+        <Testimonios testimoniosData={configD?.testimonios} />
 
         {/* 6. FAQ */}
-        <Faq />
+        <Faq faqsData={configD?.faqs} />
 
         {/* 7. CTA FINAL */}
         <CtaFinal />
       </main>
 
       {/* 8. FOOTER */}
-      <Footer />
+      <Footer footerTexto={configD?.footerTexto} />
 
       {/* 9. MODAL DE WHATSAPP */}
       <ModalWhatsapp />

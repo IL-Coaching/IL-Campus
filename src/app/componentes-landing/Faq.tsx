@@ -1,5 +1,10 @@
-export default function Faq() {
-    const preguntas = [
+interface Props {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    faqsData?: any;
+}
+
+export default function Faq({ faqsData }: Props) {
+    const preguntasDefault = [
         {
             q: "¿Cómo funciona el proceso de inscripción?",
             a: "Elegís el plan, nos contactamos por WhatsApp para coordinar el pago. Confirmado el pago, te envío acceso a IL-Campus donde completás tu formulario inicial para diseñar tu programa personalizado."
@@ -21,6 +26,8 @@ export default function Faq() {
             a: "Los pagos se coordinan directamente por WhatsApp. Podés transferir o usar el método que te resulte más cómodo."
         }
     ];
+
+    const preguntas = Array.isArray(faqsData) && faqsData.length > 0 ? faqsData.map(f => ({ q: f.pregunta || f.q, a: f.respuesta || f.a })) : preguntasDefault;
 
     return (
         <section id="faq" className="bg-marino border-t border-marino-4 py-24">

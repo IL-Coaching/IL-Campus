@@ -3,9 +3,10 @@ import { sitioConfig } from '../../../config/sitio.config';
 
 interface Props {
     imageUrl?: string | null;
+    texto?: string | null;
 }
 
-export default function Bio({ imageUrl }: Props) {
+export default function Bio({ imageUrl, texto }: Props) {
     return (
         <section id="bio" className="bg-marino-2 border-y border-marino-4 py-24">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:grid md:grid-cols-[1fr_1.4fr] gap-12 lg:gap-20 items-center">
@@ -45,8 +46,8 @@ export default function Bio({ imageUrl }: Props) {
                         Personal Trainer · {sitioConfig.nombre}
                     </p>
 
-                    <p className="text-gris-claro font-light leading-relaxed mb-8 text-lg">
-                        Transformo la salud, el rendimiento y la calidad de vida de las personas mediante sistemas de entrenamiento personalizados, basados en evidencia científica y adaptados a la vida real. Mi enfoque: procesos personalizados, cálidos, medibles y sostenibles.
+                    <p className="text-gris-claro font-light leading-relaxed mb-8 text-lg whitespace-pre-wrap">
+                        {texto || "Transformo la salud, el rendimiento y la calidad de vida de las personas mediante sistemas de entrenamiento personalizados, basados en evidencia científica y adaptados a la vida real. Mi enfoque: procesos personalizados, cálidos, medibles y sostenibles."}
                     </p>
 
                     <ul className="space-y-4">

@@ -4,9 +4,11 @@ import { sitioConfig } from '../../../config/sitio.config';
 
 interface Props {
     imageUrl?: string | null;
+    titulo?: string | null;
+    subtitulo?: string | null;
 }
 
-export default function Hero({ imageUrl }: Props) {
+export default function Hero({ imageUrl, titulo, subtitulo }: Props) {
 
     return (
         <section className="relative pt-32 pb-16 md:pt-48 md:pb-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col md:grid md:grid-cols-2 gap-12 items-center">
@@ -21,14 +23,22 @@ export default function Hero({ imageUrl }: Props) {
                 </div>
 
                 <h1 className="text-5xl sm:text-[clamp(2.8rem,5vw,4.5rem)] font-barlow-condensed font-black uppercase text-blanco leading-[0.95] mb-6 tracking-tight">
-                    Más que<br />entrenar:<br />
-                    <span className="text-naranja">ENTENDER,</span><br />
-                    <span className="text-naranja">ADAPTAR,</span><br />
-                    <span className="text-naranja">PROGRESAR.</span>
+                    {titulo ? titulo.split('\n').map((line, i) => (
+                        <span key={i} className={i >= 2 ? "text-naranja" : ""}>
+                            {line}<br />
+                        </span>
+                    )) : (
+                        <>
+                            Más que<br />entrenar:<br />
+                            <span className="text-naranja">ENTENDER,</span><br />
+                            <span className="text-naranja">ADAPTAR,</span><br />
+                            <span className="text-naranja">PROGRESAR.</span>
+                        </>
+                    )}
                 </h1>
 
-                <p className="text-gris-claro font-light text-lg sm:text-xl max-w-lg mb-10 leading-relaxed">
-                    Asesorías de entrenamiento 100% personalizadas basadas en ciencia.
+                <p className="text-gris-claro font-light text-lg sm:text-xl max-w-lg mb-10 leading-relaxed whitespace-pre-wrap">
+                    {subtitulo || "Asesorías de entrenamiento 100% personalizadas basadas en ciencia."}
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">

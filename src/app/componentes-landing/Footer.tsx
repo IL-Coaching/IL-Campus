@@ -1,6 +1,10 @@
 import Link from 'next/link';
 
-export default function Footer() {
+interface Props {
+    footerTexto?: string | null;
+}
+
+export default function Footer({ footerTexto }: Props) {
     const currentYear = new Date().getFullYear();
 
     return (
@@ -15,7 +19,7 @@ export default function Footer() {
                 {/* Centro: Copyright */}
                 <div className="text-center md:flex-grow">
                     <p className="text-gris text-sm font-medium">
-                        &copy; {currentYear} IL-Coaching &middot; Iñaki Legarreta
+                        {footerTexto || `IL-Coaching © ${currentYear}. Todos los derechos reservados.`}
                     </p>
                 </div>
 

@@ -1,5 +1,10 @@
-export default function Testimonios() {
-    const testimonios: { iniciales: string; nombre: string; plan: string; texto: string; }[] = [];
+interface Props {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    testimoniosData?: any;
+}
+
+export default function Testimonios({ testimoniosData }: Props) {
+    const testimonios = Array.isArray(testimoniosData) && testimoniosData.length > 0 ? testimoniosData : [];
 
     if (testimonios.length === 0) return null;
 
@@ -34,12 +39,12 @@ export default function Testimonios() {
                             <div className="border-t border-marino-4 pt-6 flex items-center gap-4">
                                 {/* Avatar */}
                                 <div className="w-12 h-12 rounded-full bg-marino-4 flex items-center justify-center text-naranja font-barlow-condensed font-black text-lg">
-                                    {t.iniciales}
+                                    {t.nombre ? t.nombre.substring(0, 2).toUpperCase() : 'IL'}
                                 </div>
                                 {/* Info */}
                                 <div>
                                     <h4 className="text-blanco font-bold leading-none mb-1">{t.nombre}</h4>
-                                    <span className="text-gris text-[0.65rem] font-bold tracking-[0.15em] uppercase">{t.plan}</span>
+                                    <span className="text-gris text-[0.65rem] font-bold tracking-[0.15em] uppercase">{t.rating ? '★'.repeat(t.rating) : '⭐⭐⭐⭐⭐'}</span>
                                 </div>
                             </div>
                         </div>

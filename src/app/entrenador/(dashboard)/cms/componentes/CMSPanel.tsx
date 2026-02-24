@@ -44,18 +44,26 @@ export default function CMSPanel({ config, planes }: Props) {
     const [tabActiva, setTabActiva] = useState<TabCMS>('hero');
     const [isPending, startTransition] = useTransition();
 
-    // Estados para inputs libres
-    const [heroTitulo, setHeroTitulo] = useState(config.heroTitulo || '');
-    const [heroSubtitulo, setHeroSubtitulo] = useState(config.heroSubtitulo || '');
-    const [bioTexto, setBioTexto] = useState(config.bioTexto || '');
-    const [footerTexto, setFooterTexto] = useState(config.footerTexto || '');
+    // Estados para inputs libres (con fallback a lo que figura en la landing activa)
+    const [heroTitulo, setHeroTitulo] = useState(config.heroTitulo || 'Más que\nentrenar:\nENTENDER,\nADAPTAR,\nPROGRESAR.');
+    const [heroSubtitulo, setHeroSubtitulo] = useState(config.heroSubtitulo || 'Asesorías de entrenamiento 100% personalizadas basadas en ciencia.');
+    const [bioTexto, setBioTexto] = useState(config.bioTexto || 'Transformo la salud, el rendimiento y la calidad de vida de las personas mediante sistemas de entrenamiento personalizados, basados en evidencia científica y adaptados a la vida real. Mi enfoque: procesos personalizados, cálidos, medibles y sostenibles.');
+    const [footerTexto, setFooterTexto] = useState(config.footerTexto || 'IL-Campus © 2026. Todos los derechos reservados. Las asesorías no reemplazan el consejo de un profesional médico.');
 
-    // Estados para JSON arrays
+    // Estados para JSON arrays (con fallback a FAQS de la landing activa)
+    const defaultFaqs = [
+        { q: "¿Cómo funciona el proceso de inscripción?", a: "Elegís el plan, nos contactamos por WhatsApp para coordinar el pago. Confirmado el pago, te envío acceso a IL-Campus donde completás tu formulario inicial para diseñar tu programa personalizado." },
+        { q: "¿Necesito tener experiencia previa en el gimnasio?", a: "No. El programa se diseña completamente adaptado a tu nivel actual, desde cero o con años de entrenamiento." },
+        { q: "¿Puedo entrenar en casa o necesito ir al gimnasio?", a: "Podés entrenar donde quieras. El programa se adapta al equipamiento disponible que informás en el formulario inicial." },
+        { q: "¿En qué se diferencia el plan GymRat del Start?", a: "Todos los planes incluyen el mismo nivel de atención. La diferencia está en la profundidad de planificación: el Start es mensual, el GymRat incorpora periodización por mesociclo para una progresión más estructurada en 3 meses." },
+        { q: "¿Cómo se realizan los pagos?", a: "Los pagos se coordinan directamente por WhatsApp. Podés transferir o usar el método que te resulte más cómodo." }
+    ];
+
     const [testimonios, setTestimonios] = useState<{ nombre: string; texto: string; rating: number }[]>(
-        Array.isArray(config.testimonios) ? config.testimonios : []
+        Array.isArray(config.testimonios) && config.testimonios.length > 0 ? config.testimonios : []
     );
     const [faqs, setFaqs] = useState<{ pregunta: string; respuesta: string }[]>(
-        Array.isArray(config.faqs) ? config.faqs : []
+        Array.isArray(config.faqs) && config.faqs.length > 0 ? config.faqs : defaultFaqs.map(f => ({ pregunta: f.q, respuesta: f.a }))
     );
 
     const [modoMantenimiento, setModoMantenimiento] = useState(config.modoMantenimiento);
