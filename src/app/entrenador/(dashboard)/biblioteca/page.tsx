@@ -1,6 +1,5 @@
 import { buscarEjercicios } from "@/nucleo/acciones/ejercicio.accion";
-import BibliotecaEjercicios from "./BibliotecaEjercicios";
-import BotonAltaEjercicio from "./BotonAltaEjercicio";
+import BibliotecaConTabs from "./BibliotecaConTabs";
 
 export default async function BibliotecaPage() {
     const ejerciciosIniciales = await buscarEjercicios("");
@@ -8,27 +7,22 @@ export default async function BibliotecaPage() {
     return (
         <div className="space-y-8 fade-up visible">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <div className="flex items-center gap-3 mb-1">
-                        <span className="px-2 py-0.5 bg-naranja/10 border border-naranja/20 rounded text-[0.6rem] font-bold text-naranja uppercase tracking-widest">
-                            Arsenal Técnico
-                        </span>
-                    </div>
-                    <h1 className="text-4xl font-barlow-condensed font-black uppercase tracking-tight text-blanco leading-none">
-                        Biblioteca <span className="text-naranja">IL-Campus</span>
-                    </h1>
-                    <p className="text-gris font-medium text-sm mt-1 max-w-xl">
-                        Gestión profesional de ejercicios, vídeos de técnica biomecánica y perfiles de estímulo.
-                    </p>
+            <div>
+                <div className="flex items-center gap-3 mb-1">
+                    <span className="px-2 py-0.5 bg-naranja/10 border border-naranja/20 rounded text-[0.6rem] font-bold text-naranja uppercase tracking-widest">
+                        Arsenal Técnico
+                    </span>
                 </div>
-                <div className="flex gap-3">
-                    <BotonAltaEjercicio />
-                </div>
+                <h1 className="text-4xl font-barlow-condensed font-black uppercase tracking-tight text-blanco leading-none">
+                    Biblioteca <span className="text-naranja">IL-Campus</span>
+                </h1>
+                <p className="text-gris font-medium text-sm mt-1 max-w-xl">
+                    Gestión profesional de ejercicios, rutinas plantilla y perfiles de estímulo.
+                </p>
             </div>
 
-            {/* Panel Principal */}
-            <BibliotecaEjercicios iniciales={ejerciciosIniciales} />
+            {/* Panel con tabs */}
+            <BibliotecaConTabs ejerciciosIniciales={ejerciciosIniciales} />
         </div>
     );
 }
