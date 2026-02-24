@@ -10,63 +10,84 @@ export default async function ClientesPage({
 }: {
     searchParams: { tab?: string }
 }) {
-    // 1. Obtener sesión
     const entrenador = await getEntrenadorSesion();
 
-    // 2. Usar capa de servicio
     const todosLosClientes = await ClienteServicio.obtenerPorEntrenador(entrenador.id) || [];
     const planes = await PlanServicio.obtenerPorEntrenador(entrenador.id) || [];
 
-    // 3. Segmentación lógica
-    const activos = todosLosClientes.filter(c => (c.planesAsignados?.length || 0) > 0);
-    const inscripciones = todosLosClientes.filter(c => (c.planesAsignados?.length || 0) === 0);
+    // Segmentación lógica (Activos, Inactivos, Inscripciones)
+    const activos = todosLosClientes.filter(c => c.activo === true && (c.planesAsignados?.length || 0) > 0);
+    const inactivos = todosLosClientes.filter(c => c.activo === false && (c.planesAsignados?.length || 0) > 0);
+    const inscripciones = todosLosClientes.filter(c => c.activo === false && (c.planesAsignados?.length || 0) === 0);
 
-    const tabActual = searchParams?.tab === "inscripciones" ? "inscripciones" : "activos";
-    const clientesAMostrar = tabActual === "activos" ? activos : inscripciones;
+    const validTabs = ["activos", "inactivos", "inscripciones"];
+    const tabActual = (searchParams?.tab && validTabs.includes(searchParams.tab)) ? searchParams.tab as "activos" | "inactivos" | "inscripciones" : "activos";
+
+    let clientesAMostrar = activos;
+    if (tabActual === "inactivos") clientesAMostrar = inactivos;
+    if (tabActual === "inscripciones") clientesAMostrar = inscripciones;
 
     return (
         <div className="space-y-8 fade-up visible">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl font-barlow-condensed font-black uppercase tracking-tight text-blanco mb-1">
-                        Gestión de Clientes
-                    </h1>
-                    <p className="text-gris font-medium text-sm">
-                        {tabActual === "activos"
-                            ? "Atletas con membresía activa y seguimiento."
-                            : "Nuevos registros pendientes de asignación de plan."}
-                    </p>
+            {/* Header Mínimo - Diseño de plantilla */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#0a101f] p-6 rounded-t-xl border-l-[3px] border-naranja relative shadow-xl overflow-hidden mt-6">
+                <div className="absolute inset-0 bg-gradient-to-r from-[#060e22] to-transparent pointer-events-none" />
+                <div className="relative z-10 w-full flex justify-between items-center">
+                    <div>
+                        <h1 className="text-3xl font-barlow-condensed font-black uppercase tracking-widest text-[#f5f5f5] mb-1 italic" style={{ textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>
+                            GESTION DE CLIENTES
+                        </h1>
+                        <p className="text-gris/90 font-medium text-sm">
+                            Seguimiento de clientes y formularios:
+                        </p>
+                    </div>
+                    <BotonAltaManual />
                 </div>
-                <BotonAltaManual />
             </div>
 
-            {/* Sistema de Pestañas (Tabs) */}
-            <div className="flex border-b border-marino-4 gap-8">
+            {/* Píldoras Navegación (Tabs) Estilo Plantilla */}
+            <div className="flex flex-wrap lg:flex-nowrap items-center justify-between gap-4 w-full">
                 <Link
                     href="/entrenador/clientes?tab=activos"
-                    className={`pb-4 px-2 font-barlow-condensed font-bold uppercase tracking-widest text-sm transition-all relative ${tabActual === "activos" ? "text-naranja" : "text-gris hover:text-blanco"
+                    className={`flex-1 text-center py-3.5 px-4 rounded-[1.2rem] font-black uppercase tracking-widest text-sm transition-all shadow-xl
+                        ${tabActual === "activos"
+                            ? "bg-[#e87717] text-blanco"
+                            : "bg-[#151c2e] text-blanco hover:bg-[#1a233a] border border-[#1a233a]"
                         }`}
                 >
-                    Activos ({activos.length})
-                    {tabActual === "activos" && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-naranja shadow-[0_0_10px_rgba(249,115,22,0.5)]" />}
+                    Clientes Activos <br className="hidden lg:block" />({activos.length})
+                </Link>
+                <Link
+                    href="/entrenador/clientes?tab=inactivos"
+                    className={`flex-1 text-center py-3.5 px-4 rounded-[1.2rem] font-black uppercase tracking-widest text-sm transition-all shadow-xl
+                        ${tabActual === "inactivos"
+                            ? "bg-[#e87717] text-blanco"
+                            : "bg-[#151c2e] text-blanco hover:bg-[#1a233a] border border-[#1a233a]"
+                        }`}
+                >
+                    Clientes Inactivos <br className="hidden lg:block" />({inactivos.length})
                 </Link>
                 <Link
                     href="/entrenador/clientes?tab=inscripciones"
-                    className={`pb-4 px-2 font-barlow-condensed font-bold uppercase tracking-widest text-sm transition-all relative ${tabActual === "inscripciones" ? "text-naranja" : "text-gris hover:text-blanco"
+                    className={`flex-1 text-center py-3.5 px-4 rounded-[1.2rem] font-black uppercase tracking-widest text-sm transition-all shadow-xl
+                        ${tabActual === "inscripciones"
+                            ? "bg-[#e87717] text-blanco"
+                            : "bg-[#151c2e] text-blanco hover:bg-[#1a233a] border border-[#1a233a]"
                         }`}
                 >
-                    Nuevas Inscripciones ({inscripciones.length})
-                    {tabActual === "inscripciones" && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-naranja shadow-[0_0_10px_rgba(249,115,22,0.5)]" />}
+                    Inscripciones <br className="hidden lg:block" />({inscripciones.length})
                 </Link>
             </div>
 
             {/* Listado dinámico (Componente de Cliente) */}
-            <ListadoClientes
-                clientes={clientesAMostrar as Parameters<typeof ListadoClientes>[0]['clientes']}
-                planes={planes}
-                tabActual={tabActual as "activos" | "inscripciones"}
-            />
+            <div className="animate-in fade-in duration-500">
+                <ListadoClientes
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    clientes={clientesAMostrar as any[]}
+                    planes={planes}
+                    tabActual={tabActual as "activos" | "inactivos" | "inscripciones"}
+                />
+            </div>
         </div>
     );
 }

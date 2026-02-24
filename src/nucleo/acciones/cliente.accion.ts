@@ -135,3 +135,50 @@ export async function obtenerCondicionesClinicas(clienteId: string) {
         return { error: "Error al obtener condiciones" };
     }
 }
+
+export async function cambiarEstadoPagoPlan(planAsignadoId: string, nuevoEstado: string) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        // BOLA: Validar que el plan asignado corresponda a un cliente de este entrenador
+        const plan = await prisma.planAsignado.findFirst({
+            where: { id: planAsignadoId, cliente: { entrenadorId: entrenador.id } }
+        });
+
+        if (!plan) return { error: "Plan no encontrado o acceso denegado." };
+
+        await prisma.planAsignado.update({
+            where: { id: planAsignadoId },
+            data: { estado: nuevoEstado }
+        });
+
+        revalidatePath("/entrenador/clientes");
+        return { exito: true };
+    } catch (error) {
+        console.error("Error al cambiar estado de pago:", error);
+        return { error: "No se pudo actualizar el estado de pago." };
+    }
+}
+
+export async function alternarEstadoCliente(clienteId: string, activo: boolean) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        const cliente = await prisma.cliente.findFirst({
+            where: { id: clienteId, entrenadorId: entrenador.id }
+        });
+
+        if (!cliente) return { error: "Cliente no encontrado o acceso denegado." };
+
+        await prisma.cliente.update({
+            where: { id: clienteId },
+            data: { activo }
+        });
+
+        revalidatePath("/entrenador/clientes");
+        return { exito: true };
+    } catch (error) {
+        console.error("Error al alternar estado cliente:", error);
+        return { error: "No se pudo cambiar el estado del cliente." };
+    }
+}
