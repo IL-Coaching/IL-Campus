@@ -58,7 +58,6 @@ export async function obtenerMetricasDashboard() {
         const formulariosEnEspera = await prisma.cliente.count({
             where: {
                 entrenadorId: entrenador.id,
-                activo: true,
                 formularioInscripcion: { isNot: null },
                 planesAsignados: { none: {} }
             }

@@ -122,7 +122,7 @@ export const ClienteServicio = {
             });
         }
 
-        return await prisma.cliente.create({
+        const prospecto = await prisma.cliente.create({
             data: {
                 nombre: data.nombre,
                 email: data.email,
@@ -134,6 +134,19 @@ export const ClienteServicio = {
                 }
             }
         });
+
+        // Generar notificación para el dashboard
+        await prisma.notificacion.create({
+            data: {
+                entrenadorId: data.entrenadorId,
+                tipo: "NUEVO_FORMULARIO",
+                gravedad: "INFO",
+                titulo: "Nuevo Formulario de Inscripción",
+                cuerpo: `El prospecto ${data.nombre} ha completado el formulario de inscripción desde la landing page.`
+            }
+        });
+
+        return prospecto;
     },
 
     /**
