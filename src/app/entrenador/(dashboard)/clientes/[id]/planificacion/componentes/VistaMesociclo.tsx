@@ -9,10 +9,11 @@ import { TipoCarga } from "@prisma/client";
 interface VistaMesocicloProps {
     bloque: BloqueConSemanas;
     mes: number;
+    limiteSemanas: number;
     onSelectSemana: (semana: number) => void;
 }
 
-export default function VistaMesociclo({ bloque, mes, onSelectSemana }: VistaMesocicloProps) {
+export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSemana }: VistaMesocicloProps) {
     const [objetivo, setObjetivo] = useState(bloque.objetivo);
     const [metodo, setMetodo] = useState(bloque.metodo || '');
     const [rango, setRango] = useState(bloque.rangoReferencia || '');
@@ -220,7 +221,7 @@ export default function VistaMesociclo({ bloque, mes, onSelectSemana }: VistaMes
                 ))}
 
                 {/* Slot para agregar semana si faltan */}
-                {semanas.length < 4 && (
+                {((mes - 1) * 4) + semanas.length < limiteSemanas && semanas.length < 4 && (
                     <div className="border-2 border-dashed border-marino-4 rounded-2xl flex flex-col items-center justify-center p-12 group hover:border-naranja/40 hover:bg-naranja/[0.02] transition-all cursor-pointer opacity-30 hover:opacity-100">
                         <div className="p-4 bg-marino-3 rounded-full mb-4">
                             <MoveUp size={24} className="text-gris group-hover:text-naranja animate-bounce" />

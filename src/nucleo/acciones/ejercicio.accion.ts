@@ -4,10 +4,10 @@ import { getEntrenadorSesion } from "../seguridad/sesion";
 import { EjercicioServicio } from "../servicios/ejercicio.servicio";
 import { GrupoMuscular, TipoArticulacion, PatronMovimiento, TipoEquipamiento, Lateralidad } from "@prisma/client";
 
-export async function buscarEjercicios(query: string = "") {
+export async function buscarEjercicios(query: string = "", musculoFiltro?: string) {
     try {
         const entrenador = await getEntrenadorSesion();
-        return await EjercicioServicio.buscar(entrenador.id, query);
+        return await EjercicioServicio.buscar(entrenador.id, query, musculoFiltro);
     } catch (error) {
         console.error("Error al buscar ejercicios:", error);
         return [];

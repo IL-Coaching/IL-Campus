@@ -18,15 +18,10 @@ export default function BuscadorEjercicios({ onClose, onSelect }: BuscadorEjerci
 
     useEffect(() => {
         const timer = setTimeout(async () => {
-            if (query.length > 1 || musculoFiltro !== 'Todos') {
-                setLoading(true);
-                const busqueda = query === '' && musculoFiltro !== 'Todos' ? musculoFiltro : query;
-                const resultados = await buscarEjercicios(busqueda);
-                setResultados(resultados as Ejercicio[]);
-                setLoading(false);
-            } else {
-                setResultados([]);
-            }
+            setLoading(true);
+            const resultados = await buscarEjercicios(query, musculoFiltro);
+            setResultados(resultados as Ejercicio[]);
+            setLoading(false);
         }, 300);
 
         return () => clearTimeout(timer);
@@ -85,12 +80,7 @@ export default function BuscadorEjercicios({ onClose, onSelect }: BuscadorEjerci
 
                 {/* List Results */}
                 <div className="max-h-[400px] min-h-[100px] overflow-y-auto px-6 pb-6 space-y-2">
-                    {resultados.length === 0 && !loading && (
-                        <div className="text-center py-12">
-                            <Dumbbell size={32} className="mx-auto text-marino-4 mb-3" />
-                            <p className="text-gris italic text-sm">Empieza a escribir para buscar ejercicios...</p>
-                        </div>
-                    )}
+
 
                     {resultados.map((ej: Ejercicio) => (
                         <div

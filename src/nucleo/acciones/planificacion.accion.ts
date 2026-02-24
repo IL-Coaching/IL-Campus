@@ -53,8 +53,8 @@ export async function guardarCambiosEjercicio(ejercicioPlanificadoId: string, da
     series?: number;
     repsMin?: number;
     repsMax?: number;
-    RIR?: number;
-    descanso?: number;
+    RIR?: number | null;
+    descanso?: number | null;
     tempo?: string;
     pesoSugerido?: number;
     notas?: string;

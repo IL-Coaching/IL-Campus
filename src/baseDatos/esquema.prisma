@@ -228,14 +228,14 @@ model EjercicioPlanificado {
   series               Int
   repsMin              Int
   repsMax              Int
-  RIR                  Int
+  RIR                  Int?
   tempo                String?
   tempoExcentrica      Int?
   tempoPausa           Int?
   tempoConcentrica     Int?
   tempoPausaArriba     Int?
   esUltimaSerieAlFallo Boolean           @default(false)
-  descansoSegundos     Int
+  descansoSegundos     Int?
   pesoSugerido         Float?
   zonaIntensidad       ZonaIntensidad?
   cadencia             String?

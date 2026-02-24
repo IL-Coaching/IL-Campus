@@ -4,6 +4,7 @@ import { MacrocicloCompleto, BloqueConSemanas } from "@/nucleo/tipos/planificaci
 
 interface VistaMacrocicloProps {
     macrociclo: MacrocicloCompleto;
+    limiteSemanas: number;
     onSelectMeso: (mes: number) => void;
     onConfigurar: () => void;
     onNuevoMesociclo: () => void;
@@ -22,7 +23,7 @@ interface BloqueMapped {
     color: string;
 }
 
-export default function VistaMacrociclo({ macrociclo, onSelectMeso, onConfigurar, onNuevoMesociclo }: VistaMacrocicloProps) {
+export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMeso, onConfigurar, onNuevoMesociclo }: VistaMacrocicloProps) {
 
     // Mapeo dinámico con lógica de "Gualda Style" para los campos extras
     const bloques: BloqueMapped[] = macrociclo.bloquesMensuales.map((b: BloqueConSemanas, idx: number) => {
@@ -89,7 +90,9 @@ export default function VistaMacrociclo({ macrociclo, onSelectMeso, onConfigurar
                         </button>
                         <button
                             onClick={onNuevoMesociclo}
-                            className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-8 py-3 bg-naranja hover:bg-naranja-h rounded-xl text-[0.7rem] font-black uppercase tracking-widest text-marino transition-all shadow-xl shadow-naranja/20 active:scale-95"
+                            disabled={bloques.length * 4 >= limiteSemanas}
+                            className={`flex-1 lg:flex-none flex items-center justify-center gap-2 px-8 py-3 rounded-xl text-[0.7rem] font-black uppercase tracking-widest transition-all shadow-xl shadow-naranja/20 ${bloques.length * 4 >= limiteSemanas ? "bg-marino-4 text-gris cursor-not-allowed" : "bg-naranja hover:bg-naranja-h text-marino active:scale-95"
+                                }`}
                         >
                             <Plus size={18} /> Nuevo Mesociclo
                         </button>
@@ -166,7 +169,7 @@ export default function VistaMacrociclo({ macrociclo, onSelectMeso, onConfigurar
                 ))}
 
                 {/* Card de "Próximamente / Slot Vacío" */}
-                {bloques.length < 4 && (
+                {bloques.length * 4 < limiteSemanas && bloques.length < 4 && (
                     <div
                         onClick={onNuevoMesociclo}
                         className="border-2 border-dashed border-marino-4 rounded-xl flex flex-col items-center justify-center p-12 group hover:border-naranja/40 hover:bg-naranja/[0.02] transition-all cursor-pointer opacity-40 hover:opacity-100"

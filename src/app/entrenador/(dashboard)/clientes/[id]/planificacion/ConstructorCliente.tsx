@@ -20,9 +20,10 @@ type NivelVista = 'macro' | 'meso' | 'micro' | 'sesion';
 interface ConstructorClienteProps {
     cliente: ClientePlanificacion;
     macrocicloInicial: MacrocicloCompleto | null;
+    limiteComercialSemanas?: number;
 }
 
-export default function ConstructorCliente({ cliente, macrocicloInicial }: ConstructorClienteProps) {
+export default function ConstructorCliente({ cliente, macrocicloInicial, limiteComercialSemanas = 4 }: ConstructorClienteProps) {
     const [vistaActual, setVistaActual] = useState<NivelVista>('macro');
     const [historial, setHistorial] = useState<NivelVista[]>([]);
     const [mesActivo, setMesActivo] = useState(1);
@@ -119,6 +120,7 @@ export default function ConstructorCliente({ cliente, macrocicloInicial }: Const
                             {vistaActual === 'macro' && (
                                 <VistaMacrociclo
                                     macrociclo={macrocicloInicial}
+                                    limiteSemanas={limiteComercialSemanas}
                                     onSelectMeso={(n) => { setMesActivo(n); irA('meso'); }}
                                     onConfigurar={() => setConfigurarMacroOpen(true)}
                                     onNuevoMesociclo={() => setNuevoMesoOpen(true)}
@@ -129,6 +131,7 @@ export default function ConstructorCliente({ cliente, macrocicloInicial }: Const
                                 <VistaMesociclo
                                     bloque={bloqueActual}
                                     mes={mesActivo}
+                                    limiteSemanas={limiteComercialSemanas}
                                     onSelectSemana={(n) => { setSemanaActiva(n); irA('micro'); }}
                                 />
                             )}

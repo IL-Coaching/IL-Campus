@@ -39,9 +39,9 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
     const evaluarPerfilIntensidad = () => {
         if (ejercicios.length === 0) return null;
 
-        const rir_0_1 = ejercicios.filter(e => e.RIR <= 1).length;
-        const rir_2_3 = ejercicios.filter(e => e.RIR >= 2 && e.RIR <= 3).length;
-        const rir_4_mas = ejercicios.filter(e => e.RIR >= 4).length;
+        const rir_0_1 = ejercicios.filter(e => e.RIR !== null && e.RIR <= 1).length;
+        const rir_2_3 = ejercicios.filter(e => e.RIR !== null && e.RIR >= 2 && e.RIR <= 3).length;
+        const rir_4_mas = ejercicios.filter(e => e.RIR !== null && e.RIR >= 4).length;
 
         const total = ejercicios.length;
         const ratioProductivo = (rir_2_3 / total) * 100;
@@ -415,8 +415,8 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                                     <td className="p-5">
                                         <input
                                             type="number"
-                                            value={ej.RIR}
-                                            onChange={(e) => handleUpdateChange(ej.id, { RIR: parseInt(e.target.value) })}
+                                            value={ej.RIR !== null ? ej.RIR : ''}
+                                            onChange={(e) => handleUpdateChange(ej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
                                             className="w-full bg-marino-3 border border-marino-4/30 p-2.5 rounded-xl text-center text-naranja focus:outline-none focus:border-naranja/50 transition-all font-black text-[0.9rem]"
                                         />
                                     </td>
@@ -424,8 +424,8 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                                         <div className="flex items-center gap-1 bg-marino-3 px-2 rounded-lg border border-marino-4/30">
                                             <input
                                                 type="number"
-                                                value={ej.descansoSegundos}
-                                                onChange={(e) => handleUpdateChange(ej.id, { descansoSegundos: parseInt(e.target.value) })}
+                                                value={ej.descansoSegundos !== null ? ej.descansoSegundos : ''}
+                                                onChange={(e) => handleUpdateChange(ej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
                                                 className="w-full bg-transparent py-2.5 text-center text-blanco focus:outline-none text-[0.75rem] font-bold"
                                             />
                                             <span className="text-gris text-[0.5rem] font-black uppercase tracking-widest px-1">Seg</span>

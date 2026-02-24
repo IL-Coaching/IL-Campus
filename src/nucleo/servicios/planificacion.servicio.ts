@@ -163,9 +163,9 @@ export const PlanificacionServicio = {
         series?: number;
         repsMin?: number;
         repsMax?: number;
-        RIR?: number;
+        RIR?: number | null;
         tempo?: string;
-        descansoSegundos?: number;
+        descansoSegundos?: number | null;
         pesoSugerido?: number;
         notasTecnicas?: string;
         ejercicioId?: string | null;

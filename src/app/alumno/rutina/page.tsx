@@ -223,10 +223,12 @@ export default async function RutinaPage() {
                                                         <span className="text-[0.65rem] font-bold text-naranja">
                                                             {ep.series} × {ep.repsMin}-{ep.repsMax}
                                                         </span>
-                                                        <span className="text-[0.6rem] text-gris font-medium">
-                                                            RIR {ep.RIR}
-                                                        </span>
-                                                        {ep.descansoSegundos > 0 && (
+                                                        {ep.RIR !== null && (
+                                                            <span className="text-[0.6rem] text-gris font-medium">
+                                                                RIR {ep.RIR}
+                                                            </span>
+                                                        )}
+                                                        {ep.descansoSegundos !== null && ep.descansoSegundos > 0 && (
                                                             <span className="text-[0.6rem] text-gris font-medium">
                                                                 {ep.descansoSegundos}s descanso
                                                             </span>

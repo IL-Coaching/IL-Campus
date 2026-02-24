@@ -52,14 +52,19 @@ export const EjercicioServicio = {
      * @param entrenadorId - ID del entrenador propietario del catálogo
      * @param query - Texto de búsqueda (nombre o músculo)
      */
-    async buscar(entrenadorId: string, query: string) {
+    async buscar(entrenadorId: string, query: string, musculoFiltro?: string) {
         return await prisma.ejercicio.findMany({
             where: {
                 entrenadorId,
-                OR: [
-                    { nombre: { contains: query, mode: 'insensitive' } },
-                    { nombresAlternativos: { has: query } }
-                ]
+                ...(query ? {
+                    OR: [
+                        { nombre: { contains: query, mode: 'insensitive' } },
+                        { nombresAlternativos: { has: query } }
+                    ]
+                } : {}),
+                ...(musculoFiltro && musculoFiltro !== 'Todos' ? {
+                    musculoPrincipal: musculoFiltro as GrupoMuscular
+                } : {})
             },
             orderBy: { nombre: 'asc' }
         });

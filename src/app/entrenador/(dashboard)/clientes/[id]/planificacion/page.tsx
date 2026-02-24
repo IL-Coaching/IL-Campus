@@ -15,10 +15,22 @@ export default async function Page({ params }: { params: { id: string } }) {
     // 2. Cargar Planificación Activa (Macrociclo)
     const macrociclo = await PlanificacionServicio.obtenerMacrocicloActivo(params.id);
 
+    // 3. Calcular Límite Comercial (+ 1 semana de tolerancia)
+    let limiteComercialSemanas = 4; // Default por si no tiene plan 
+    if (cliente.planesAsignados && cliente.planesAsignados.length > 0) {
+        // Asume el primer plan activo o el más reciente
+        const planAsignado = cliente.planesAsignados[0];
+        const diasTotales = planAsignado.plan?.duracionDias || 0;
+        if (diasTotales > 0) {
+            limiteComercialSemanas = Math.ceil(diasTotales / 7) + 1;
+        }
+    }
+
     return (
         <ConstructorCliente
             cliente={cliente}
             macrocicloInicial={macrociclo}
+            limiteComercialSemanas={limiteComercialSemanas}
         />
     );
 }
