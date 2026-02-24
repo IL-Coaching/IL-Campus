@@ -46,10 +46,11 @@ export const EsquemaActualizarSemana = z.object({
  * Esquema para actualizar un mesociclo (Bloque Mensual).
  */
 export const EsquemaActualizarMesociclo = z.object({
-    objetivo: z.string().max(200).optional(),
+    nombre: z.string().max(200).optional(),
+    objetivo: z.string().max(2000).optional(),
     duracion: z.number().min(1).max(12).optional(),
-    metodo: z.string().max(200).optional(),
-    rangoReferencia: z.string().max(100).optional(),
+    metodo: z.string().max(1000).optional(),
+    rangoReferencia: z.string().max(1000).optional(),
 });
 
 /**
@@ -65,9 +66,10 @@ export const EsquemaActualizarMacrociclo = z.object({
  * Esquema para agregar un nuevo mesociclo.
  */
 export const EsquemaNuevoMesociclo = z.object({
-    objetivo: z.string().min(1).max(200),
-    metodo: z.string().max(200).optional(),
-    rangoReferencia: z.string().max(100).optional(),
+    nombre: z.string().max(200).optional(),
+    objetivo: z.string().min(1).max(2000),
+    metodo: z.string().max(1000).optional(),
+    rangoReferencia: z.string().max(1000).optional(),
     numeroMes: z.number().min(1).max(12),
     numSemanas: z.number().min(1).max(12).optional(),
     numSesiones: z.number().min(1).max(7).optional(),

@@ -70,6 +70,7 @@ export const PlanificacionServicio = {
     },
 
     async actualizarBloqueMensual(id: string, data: {
+        nombre?: string;
         objetivo?: string;
         duracion?: number;
         metodo?: string;
@@ -134,6 +135,7 @@ export const PlanificacionServicio = {
             const bloqueActualizado = await tx.bloqueMensual.update({
                 where: { id },
                 data: {
+                    nombre: data.nombre,
                     objetivo: data.objetivo,
                     duracion: data.duracion,
                     metodo: data.metodo,
@@ -301,6 +303,7 @@ export const PlanificacionServicio = {
                 fechaInicio: data.fechaInicio,
                 bloquesMensuales: {
                     create: {
+                        nombre: "Fase de Iniciación",
                         objetivo: "Adaptación Anatómica / Base",
                         duracion: 4,
                         semanas: {
@@ -328,6 +331,7 @@ export const PlanificacionServicio = {
      * Agrega un nuevo mesociclo a un macrociclo existente.
      */
     async agregarMesociclo(macrocicloId: string, data: {
+        nombre?: string;
         objetivo: string;
         metodo?: string;
         rangoReferencia?: string;
@@ -345,6 +349,7 @@ export const PlanificacionServicio = {
         return await prisma.bloqueMensual.create({
             data: {
                 macrocicloId,
+                nombre: data.nombre,
                 objetivo: data.objetivo,
                 metodo: data.metodo,
                 rangoReferencia: data.rangoReferencia,

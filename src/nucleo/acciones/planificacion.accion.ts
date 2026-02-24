@@ -227,6 +227,7 @@ export async function actualizarSemana(id: string, data: {
 }
 
 export async function actualizarMesociclo(id: string, data: {
+    nombre?: string;
     objetivo?: string;
     duracion?: number;
     metodo?: string;
@@ -360,6 +361,7 @@ export async function clonarContenidoSemana(idOrigen: string, idDestino: string)
 }
 
 export async function agregarMesociclo(macrocicloId: string, data: {
+    nombre?: string;
     objetivo: string;
     metodo?: string;
     rangoReferencia?: string;

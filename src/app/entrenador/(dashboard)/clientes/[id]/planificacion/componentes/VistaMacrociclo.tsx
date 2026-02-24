@@ -17,6 +17,7 @@ interface BloqueMapped {
     id: string;
     n: number;
     nombre: string;
+    subtitulo: string;
     semanasText: string;
     metodo: string;
     numSemanas: number;
@@ -45,7 +46,8 @@ export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMes
         return {
             id: b.id,
             n: idx + 1,
-            nombre: b.objetivo,
+            nombre: b.nombre || b.objetivo,
+            subtitulo: b.nombre ? b.objetivo : `Semanas ${inicioSemana}-${finSemana}`,
             semanasText: `Semanas ${inicioSemana}-${finSemana}`,
             numSemanas,
             semanasItems: b.semanas.map((sem, i) => ({
@@ -143,7 +145,7 @@ export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMes
                         <div className="p-6 flex-1">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="space-y-1 pr-6">
-                                    <span className="text-[0.6rem] font-black text-naranja uppercase tracking-[0.2em]">Fase {b.n} • {b.semanasText}</span>
+                                    <span className="text-[0.6rem] font-black text-naranja uppercase tracking-[0.2em]">{b.subtitulo}</span>
                                     <h4 className="text-2xl font-barlow-condensed font-black uppercase text-blanco leading-none group-hover:text-naranja transition-colors break-words">{b.nombre}</h4>
                                 </div>
                                 <div className="flex items-center gap-2">

@@ -25,11 +25,13 @@ export default function ModalNuevoMesociclo({ macrociclo, onClose }: Props) {
         setError(null);
 
         const formData = new FormData(e.currentTarget);
+        const nombre = formData.get("nombre") as string;
         const objetivo = formData.get("objetivo") as string;
         const metodo = formData.get("metodo") as string;
         const rangoReferencia = formData.get("rangoReferencia") as string;
 
         const res = await agregarMesociclo(macrociclo.id, {
+            nombre,
             objetivo,
             metodo,
             rangoReferencia,
@@ -90,21 +92,74 @@ export default function ModalNuevoMesociclo({ macrociclo, onClose }: Props) {
 
                     <div className="space-y-2">
                         <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest flex items-center gap-2">
-                            <Target size={12} className="text-naranja" /> Objetivo del Bloque
+                            <PlusCircle size={12} className="text-naranja" /> Título de la Fase
                         </label>
+                        <input
+                            name="nombre"
+                            placeholder="Ej: Readaptación / Fuerza Inicial..."
+                            className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco focus:border-naranja/50 outline-none transition-all text-sm font-bold"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                            <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest flex items-center gap-2">
+                                <Target size={12} className="text-naranja" /> Objetivo del Bloque
+                            </label>
+                            <div className="flex gap-1">
+                                <button type="button" onClick={() => {
+                                    const el = document.getElementsByName('objetivo')[0] as HTMLTextAreaElement;
+                                    const start = el.selectionStart;
+                                    const end = el.selectionEnd;
+                                    const text = el.value;
+                                    el.value = text.slice(0, start) + '**' + text.slice(start, end) + '**' + text.slice(end);
+                                }} className="px-2 py-0.5 bg-marino-4 hover:bg-naranja hover:text-marino rounded text-[0.6rem] font-bold transition-colors">B</button>
+                                <button type="button" onClick={() => {
+                                    const el = document.getElementsByName('objetivo')[0] as HTMLTextAreaElement;
+                                    const start = el.selectionStart;
+                                    const end = el.selectionEnd;
+                                    const text = el.value;
+                                    el.value = text.slice(0, start) + '*' + text.slice(start, end) + '*' + text.slice(end);
+                                }} className="px-2 py-0.5 bg-marino-4 hover:bg-naranja hover:text-marino rounded text-[0.6rem] italic font-bold transition-colors">I</button>
+                                <button type="button" onClick={() => {
+                                    const el = document.getElementsByName('objetivo')[0] as HTMLTextAreaElement;
+                                    const start = el.selectionStart;
+                                    const text = el.value;
+                                    el.value = text.slice(0, start) + '\n- ' + text.slice(start);
+                                }} className="px-2 py-0.5 bg-marino-4 hover:bg-naranja hover:text-marino rounded text-[0.6rem] font-bold transition-colors">List</button>
+                            </div>
+                        </div>
                         <textarea
                             name="objetivo"
                             required
-                            rows={3}
+                            rows={4}
                             placeholder="Ej: Mejorar técnica en básicos, acondicionamiento cardiovascular..."
                             className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco focus:border-naranja/50 outline-none transition-all resize-none text-sm font-medium"
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest flex items-center gap-2">
-                            <Zap size={12} className="text-naranja" /> Método Sugerido
-                        </label>
+                        <div className="flex justify-between items-center">
+                            <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest flex items-center gap-2">
+                                <Zap size={12} className="text-naranja" /> Método Sugerido
+                            </label>
+                            <div className="flex gap-1">
+                                <button type="button" onClick={() => {
+                                    const el = document.getElementsByName('metodo')[0] as HTMLTextAreaElement;
+                                    const start = el.selectionStart;
+                                    const end = el.selectionEnd;
+                                    const text = el.value;
+                                    el.value = text.slice(0, start) + '**' + text.slice(start, end) + '**' + text.slice(end);
+                                }} className="px-2 py-0.5 bg-marino-4 hover:bg-naranja hover:text-marino rounded text-[0.6rem] font-bold transition-colors">B</button>
+                                <button type="button" onClick={() => {
+                                    const el = document.getElementsByName('metodo')[0] as HTMLTextAreaElement;
+                                    const start = el.selectionStart;
+                                    const end = el.selectionEnd;
+                                    const text = el.value;
+                                    el.value = text.slice(0, start) + '*' + text.slice(start, end) + '*' + text.slice(end);
+                                }} className="px-2 py-0.5 bg-marino-4 hover:bg-naranja hover:text-marino rounded text-[0.6rem] italic font-bold transition-colors">I</button>
+                            </div>
+                        </div>
                         <textarea
                             name="metodo"
                             rows={2}

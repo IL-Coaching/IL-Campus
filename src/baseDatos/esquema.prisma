@@ -175,6 +175,7 @@ model Macrociclo {
 model BloqueMensual {
   id              String     @id @default(uuid())
   macrocicloId    String
+  nombre          String?
   objetivo        String
   duracion        Int
   metodo          String?

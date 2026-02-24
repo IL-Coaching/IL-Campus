@@ -15,6 +15,7 @@ interface VistaMesocicloProps {
 }
 
 export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSemana, onBack }: VistaMesocicloProps) {
+    const [nombre, setNombre] = useState(bloque.nombre || '');
     const [objetivo, setObjetivo] = useState(bloque.objetivo);
     const [metodo, setMetodo] = useState(bloque.metodo || '');
     const [rango, setRango] = useState(bloque.rangoReferencia || '');
@@ -29,6 +30,7 @@ export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSem
         }
         setSaving(true);
         const res = await actualizarMesociclo(bloque.id, {
+            nombre,
             objetivo,
             duracion,
             metodo,
@@ -55,6 +57,28 @@ export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSem
                 setSaving(false);
             }
         }
+    };
+
+    const applyFormat = (field: 'objetivo' | 'metodo', format: 'bold' | 'italic' | 'list') => {
+        const el = document.getElementById(`field-${field}`) as HTMLTextAreaElement;
+        if (!el) return;
+        const start = el.selectionStart;
+        const end = el.selectionEnd;
+        const text = el.value;
+        let newText = '';
+
+        if (format === 'bold') newText = text.slice(0, start) + '**' + text.slice(start, end) + '**' + text.slice(end);
+        if (format === 'italic') newText = text.slice(0, start) + '*' + text.slice(start, end) + '*' + text.slice(end);
+        if (format === 'list') newText = text.slice(0, start) + '\n- ' + text.slice(start);
+
+        if (field === 'objetivo') setObjetivo(newText);
+        if (field === 'metodo') setMetodo(newText);
+
+        // Mantener el foco
+        setTimeout(() => {
+            el.focus();
+            el.setSelectionRange(start + 2, end + 2);
+        }, 10);
     };
 
     const semanas = bloque.semanas.map((s) => ({
@@ -93,42 +117,72 @@ export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSem
         <div className="space-y-10 animate-in fade-in duration-700 pb-10">
             {/* Header Mesociclo Professional */}
             <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6 border-b border-marino-4 pb-8">
-                <div className="flex items-start gap-4 flex-1">
+                <div className="flex items-start gap-4 flex-1 w-full">
                     <div className="p-3 bg-naranja/10 border border-naranja/20 rounded-2xl shrink-0">
                         <Layers size={28} className="text-naranja" />
                     </div>
-                    <div className="flex-1 space-y-4">
+                    <div className="flex-1 space-y-4 w-full">
                         <div className="flex items-center gap-3">
                             <span className="text-[0.65rem] font-black text-naranja uppercase tracking-[0.3em] block">Configuración de Mesociclo</span>
                             <span className="px-2 py-0.5 bg-marino-3 border border-marino-4 rounded text-[0.55rem] font-bold text-gris uppercase tracking-widest">Mes {mes}</span>
                         </div>
-                        <input
-                            value={objetivo}
-                            onChange={(e) => setObjetivo(e.target.value)}
-                            className="text-4xl md:text-5xl font-barlow-condensed font-black uppercase text-blanco leading-none tracking-tight bg-transparent border-none focus:ring-0 w-full p-0 placeholder:text-gris/20"
-                            placeholder="Objetivo del Mesociclo"
-                        />
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl">
-                            <div className="bg-marino-3/30 p-3 rounded-xl border border-marino-4">
-                                <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest mb-1.5 block flex items-center gap-2">
-                                    <FlaskConical size={10} /> Método de Carga
-                                </label>
-                                <input
+                        <div className="space-y-1">
+                            <input
+                                value={nombre}
+                                onChange={(e) => setNombre(e.target.value)}
+                                className="text-2xl md:text-3xl font-barlow-condensed font-bold uppercase text-naranja/80 leading-none tracking-tight bg-transparent border-none focus:ring-0 w-full p-0 placeholder:text-gris/20"
+                                placeholder="Nombre de la Fase (Ej: Readaptación)"
+                            />
+                            <textarea
+                                id="field-objetivo"
+                                value={objetivo}
+                                onChange={(e) => setObjetivo(e.target.value)}
+                                rows={2}
+                                className="text-3xl md:text-5xl font-barlow-condensed font-black uppercase text-blanco leading-none tracking-tight bg-transparent border-none focus:ring-0 w-full p-0 placeholder:text-gris/20 resize-none overflow-hidden"
+                                placeholder="Objetivo del Mesociclo"
+                                onInput={(e) => {
+                                    const target = e.target as HTMLTextAreaElement;
+                                    target.style.height = 'auto';
+                                    target.style.height = target.scrollHeight + 'px';
+                                }}
+                            />
+                            <div className="flex gap-2">
+                                <button onClick={() => applyFormat('objetivo', 'bold')} className="px-3 py-1 bg-marino-3 hover:bg-naranja hover:text-marino rounded-lg text-xs font-bold transition-all border border-marino-4">B</button>
+                                <button onClick={() => applyFormat('objetivo', 'italic')} className="px-3 py-1 bg-marino-3 hover:bg-naranja hover:text-marino rounded-lg text-xs italic font-bold transition-all border border-marino-4">I</button>
+                                <button onClick={() => applyFormat('objetivo', 'list')} className="px-3 py-1 bg-marino-3 hover:bg-naranja hover:text-marino rounded-lg text-xs font-bold transition-all border border-marino-4">List</button>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
+                            <div className="bg-marino-3/30 p-3 rounded-xl border border-marino-4 hover:border-naranja/40 transition-all">
+                                <div className="flex justify-between items-center mb-1.5 ">
+                                    <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest block flex items-center gap-2">
+                                        <FlaskConical size={10} /> Método
+                                    </label>
+                                    <div className="flex gap-1">
+                                        <button onClick={() => applyFormat('metodo', 'bold')} className="w-5 h-5 flex items-center justify-center bg-marino-4 rounded text-[0.5rem] font-bold">B</button>
+                                        <button onClick={() => applyFormat('metodo', 'italic')} className="w-5 h-5 flex items-center justify-center bg-marino-4 rounded text-[0.5rem] italic font-bold">I</button>
+                                    </div>
+                                </div>
+                                <textarea
+                                    id="field-metodo"
                                     value={metodo}
                                     onChange={(e) => setMetodo(e.target.value)}
-                                    className="bg-transparent border-none p-0 text-sm font-bold text-blanco focus:ring-0 w-full placeholder:text-gris/20"
+                                    rows={2}
+                                    className="bg-transparent border-none p-0 text-sm font-bold text-blanco focus:ring-0 w-full placeholder:text-gris/20 resize-none"
                                     placeholder="Ej: Leg/Push/Pull, Fullbody..."
                                 />
                             </div>
-                            <div className="bg-marino-3/30 p-3 rounded-xl border border-marino-4">
+                            <div className="bg-marino-3/30 p-3 rounded-xl border border-marino-4 hover:border-naranja/40 transition-all">
                                 <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest mb-1.5 block flex items-center gap-2">
-                                    <Target size={10} /> Rango Referencia
+                                    <Target size={10} /> Rango / Descanso
                                 </label>
-                                <input
+                                <textarea
                                     value={rango}
                                     onChange={(e) => setRango(e.target.value)}
-                                    className="bg-transparent border-none p-0 text-sm font-bold text-blanco focus:ring-0 w-full placeholder:text-gris/20"
+                                    rows={2}
+                                    className="bg-transparent border-none p-0 text-sm font-bold text-blanco focus:ring-0 w-full placeholder:text-gris/20 resize-none"
                                     placeholder="Ej: 8-12 reps, 5-8 reps..."
                                 />
                             </div>
