@@ -182,3 +182,26 @@ export async function alternarEstadoCliente(clienteId: string, activo: boolean) 
         return { error: "No se pudo cambiar el estado del cliente." };
     }
 }
+
+export async function actualizarNotasCliente(clienteId: string, notas: string) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        const cliente = await prisma.cliente.findFirst({
+            where: { id: clienteId, entrenadorId: entrenador.id }
+        });
+
+        if (!cliente) return { error: "Cliente no encontrado o acceso denegado." };
+
+        await prisma.cliente.update({
+            where: { id: clienteId },
+            data: { notas }
+        });
+
+        revalidatePath(`/entrenador/clientes/${clienteId}`);
+        return { exito: true };
+    } catch (error) {
+        console.error("Error al actualizar notas del cliente:", error);
+        return { error: "No se pudo actualizar las notas." };
+    }
+}

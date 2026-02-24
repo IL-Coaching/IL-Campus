@@ -9,14 +9,14 @@ datasource db {
 }
 
 model Entrenador {
-  id             String             @id @default(uuid())
+  id             String            @id @default(uuid())
   nombre         String
-  email          String             @unique
+  email          String            @unique
   password       String
   telefono       String?
-  activo         Boolean            @default(true)
-  creadoEn       DateTime           @default(now())
-  mfaEnabled     Boolean            @default(false)
+  activo         Boolean           @default(true)
+  creadoEn       DateTime          @default(now())
+  mfaEnabled     Boolean           @default(false)
   mfaSecret      String?
   avatarUrl      String?
   landingHeroUrl String?
@@ -106,6 +106,7 @@ model Cliente {
   registrosAdherencia   RegistroAdherencia[]
   resultadosTesteo      ResultadoTesteo[]
   sesiones              SesionRegistrada[]
+  auditorias            AuditoriaCliente[]
 }
 
 model PlanAsignado {
@@ -136,6 +137,17 @@ model FormularioInscripcion {
   condicionesClinicas String[]
   creadoEn            DateTime @default(now())
   cliente             Cliente  @relation(fields: [clienteId], references: [id])
+}
+
+model AuditoriaCliente {
+  id            String   @id @default(uuid())
+  clienteId     String
+  campo         String
+  valorViejo    String?
+  valorNuevo    String?
+  modificadoPor String   @default("SISTEMA")
+  fecha         DateTime @default(now())
+  cliente       Cliente  @relation(fields: [clienteId], references: [id])
 }
 
 model CicloMenstrual {
@@ -302,22 +314,22 @@ model RegistroAdherencia {
 }
 
 model Checkin {
-  id                String   @id @default(uuid())
-  clienteId         String
-  fecha             DateTime @default(now())
-  fotosUrls         String[]
-  pesoKg            Float?
-  alturaCm          Float?
-  nota              String?
-  energia           Int?
-  sueno             Int?
-  adherencia        Int?
-  faseCiclo         String?
-  fuerzaRelativa    String?
-  ajustesEsperados  String?
-  videoUrl          String?
-  visto             Boolean  @default(false)
-  cliente           Cliente  @relation(fields: [clienteId], references: [id])
+  id               String   @id @default(uuid())
+  clienteId        String
+  fecha            DateTime @default(now())
+  fotosUrls        String[]
+  pesoKg           Float?
+  alturaCm         Float?
+  nota             String?
+  energia          Int?
+  sueno            Int?
+  adherencia       Int?
+  faseCiclo        String?
+  fuerzaRelativa   String?
+  ajustesEsperados String?
+  videoUrl         String?
+  visto            Boolean  @default(false)
+  cliente          Cliente  @relation(fields: [clienteId], references: [id])
 }
 
 model Cobro {
@@ -530,15 +542,15 @@ enum TipoNotificacion {
 // ===============================
 
 model Notificacion {
-  id           String            @id @default(uuid())
+  id           String           @id @default(uuid())
   entrenadorId String
   tipo         TipoNotificacion
   titulo       String
   cuerpo       String
-  leida        Boolean           @default(false)
-  purgada      Boolean           @default(false)
-  creadaEn     DateTime          @default(now())
-  entrenador   Entrenador        @relation(fields: [entrenadorId], references: [id])
+  leida        Boolean          @default(false)
+  purgada      Boolean          @default(false)
+  creadaEn     DateTime         @default(now())
+  entrenador   Entrenador       @relation(fields: [entrenadorId], references: [id])
 }
 
 model NotaEntrenador {
@@ -552,19 +564,19 @@ model NotaEntrenador {
 }
 
 model RutinaPlantilla {
-  id            String           @id @default(uuid())
+  id            String            @id @default(uuid())
   entrenadorId  String
   nombre        String
   descripcion   String?
   categoria     String?
-  creadaEn      DateTime         @default(now())
-  actualizadaEn DateTime         @updatedAt
-  entrenador    Entrenador       @relation(fields: [entrenadorId], references: [id])
+  creadaEn      DateTime          @default(now())
+  actualizadaEn DateTime          @updatedAt
+  entrenador    Entrenador        @relation(fields: [entrenadorId], references: [id])
   ejercicios    EjercicioRutina[]
 }
 
 model EjercicioRutina {
-  id            String           @id @default(uuid())
+  id            String          @id @default(uuid())
   rutinaId      String
   ejercicioId   String?
   nombreLibre   String?
@@ -576,8 +588,8 @@ model EjercicioRutina {
   metodo        String?
   notasTecnicas String?
   orden         Int
-  rutina        RutinaPlantilla  @relation(fields: [rutinaId], references: [id], onDelete: Cascade)
-  ejercicio     Ejercicio?       @relation(fields: [ejercicioId], references: [id])
+  rutina        RutinaPlantilla @relation(fields: [rutinaId], references: [id], onDelete: Cascade)
+  ejercicio     Ejercicio?      @relation(fields: [ejercicioId], references: [id])
 }
 
 model ConfigLanding {
