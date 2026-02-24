@@ -23,6 +23,10 @@ export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSem
     const router = useRouter();
 
     const handleGuardar = async () => {
+        if (isNaN(duracion) || duracion < 1) {
+            alert("La duración debe ser un número válido (mínimo 1 semana).");
+            return;
+        }
         setSaving(true);
         const res = await actualizarMesociclo(bloque.id, {
             objetivo,
@@ -128,18 +132,26 @@ export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSem
                                     placeholder="Ej: 8-12 reps, 5-8 reps..."
                                 />
                             </div>
-                            <div className="bg-marino-3/30 p-3 rounded-xl border border-marino-4">
-                                <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest mb-1.5 block flex items-center gap-2">
+                            <div className="bg-marino-3/30 p-3 rounded-xl border border-marino-4 hover:border-naranja/30 transition-colors group/input">
+                                <label
+                                    htmlFor="duracion-meso"
+                                    className="text-[0.55rem] font-black text-naranja uppercase tracking-widest mb-1.5 block flex items-center gap-2 cursor-pointer"
+                                >
                                     <CalendarDays size={10} /> Duración (Semanas)
                                 </label>
                                 <div className="flex items-center gap-2">
                                     <input
+                                        id="duracion-meso"
                                         type="number"
                                         min={1}
                                         max={12}
-                                        value={duracion}
-                                        onChange={(e) => setDuracion(parseInt(e.target.value))}
-                                        className="bg-transparent border-none p-0 text-sm font-bold text-blanco focus:ring-0 w-full"
+                                        value={isNaN(duracion) ? '' : duracion}
+                                        onChange={(e) => {
+                                            const val = parseInt(e.target.value);
+                                            setDuracion(val);
+                                        }}
+                                        className="bg-transparent border-none p-0 text-sm font-bold text-blanco focus:ring-0 w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        placeholder="4"
                                     />
                                 </div>
                             </div>

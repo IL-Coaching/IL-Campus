@@ -136,13 +136,14 @@ export async function agregarEjercicio(diaId: string, ejercicioId: string, orden
                         }
                     }
                 }
-            }
+            },
+            include: { semana: { include: { bloqueMensual: { include: { macrociclo: true } } } } }
         });
 
         if (!diaPropio) throw new Error("Acceso denegado al recurso.");
 
         await PlanificacionServicio.agregarEjercicioASesion(diaId, ejercicioId, orden);
-        revalidatePath(`/entrenador/clientes/[id]/planificacion`, "page");
+        revalidatePath(`/entrenador/clientes/${diaPropio.semana.bloqueMensual.macrociclo.clienteId}/planificacion`);
         return { exito: true };
     } catch (error) {
         const mensaje = error instanceof Error ? error.message : "Error desconocido";
@@ -169,13 +170,14 @@ export async function eliminarEjercicio(id: string) {
                         }
                     }
                 }
-            }
+            },
+            include: { diaSesion: { include: { semana: { include: { bloqueMensual: { include: { macrociclo: true } } } } } } }
         });
 
         if (!ejercicioPropio) throw new Error("No tienes permiso para eliminar este ejercicio.");
 
         await PlanificacionServicio.eliminarEjercicioPlanificado(id);
-        revalidatePath(`/entrenador/clientes/[id]/planificacion`, "page");
+        revalidatePath(`/entrenador/clientes/${ejercicioPropio.diaSesion.semana.bloqueMensual.macrociclo.clienteId}/planificacion`);
         return { exito: true };
     } catch (error) {
         const mensaje = error instanceof Error ? error.message : "Error desconocido";
@@ -201,7 +203,6 @@ export async function actualizarSemana(id: string, data: {
             return { error: validacion.error.issues[0].message };
         }
 
-        // Mitigación BOLA
         const semanaPropia = await prisma.semana.findFirst({
             where: {
                 id,
@@ -210,13 +211,14 @@ export async function actualizarSemana(id: string, data: {
                         cliente: { entrenadorId: entrenador.id }
                     }
                 }
-            }
+            },
+            include: { bloqueMensual: { include: { macrociclo: true } } }
         });
 
         if (!semanaPropia) throw new Error("Acceso denegado.");
 
         await PlanificacionServicio.actualizarSemana(id, validacion.data);
-        revalidatePath(`/entrenador/clientes/[id]/planificacion`, "page");
+        revalidatePath(`/entrenador/clientes/${semanaPropia.bloqueMensual.macrociclo.clienteId}/planificacion`);
         return { exito: true };
     } catch (error) {
         const mensaje = error instanceof Error ? error.message : "Error desconocido";
@@ -238,20 +240,20 @@ export async function actualizarMesociclo(id: string, data: {
             return { error: validacion.error.issues[0].message };
         }
 
-        // Mitigación BOLA
         const bloquePropio = await prisma.bloqueMensual.findFirst({
             where: {
                 id,
                 macrociclo: {
                     cliente: { entrenadorId: entrenador.id }
                 }
-            }
+            },
+            include: { macrociclo: true }
         });
 
         if (!bloquePropio) throw new Error("Acceso denegado.");
 
         await PlanificacionServicio.actualizarBloqueMensual(id, validacion.data);
-        revalidatePath(`/entrenador/clientes/[id]/planificacion`, "page");
+        revalidatePath(`/entrenador/clientes/${bloquePropio.macrociclo.clienteId}/planificacion`);
         return { exito: true };
     } catch (error) {
         const mensaje = error instanceof Error ? error.message : "Error desconocido";
@@ -387,7 +389,7 @@ export async function agregarMesociclo(macrocicloId: string, data: {
             ...validacion.data,
             numSesionesPorSemana: validacion.data.numSesiones
         });
-        revalidatePath(`/entrenador/clientes`);
+        revalidatePath(`/entrenador/clientes/${macroPropio.clienteId}/planificacion`);
         return { exito: true };
     } catch (error) {
         const mensaje = error instanceof Error ? error.message : "Error desconocido";
@@ -408,13 +410,14 @@ export async function crearSesion(semanaId: string, diaSemana: string) {
                         cliente: { entrenadorId: entrenador.id }
                     }
                 }
-            }
+            },
+            include: { bloqueMensual: { include: { macrociclo: true } } }
         });
 
         if (!semanaPropia) throw new Error("Acceso denegado.");
 
         await PlanificacionServicio.crearNuevaSesion(semanaId, diaSemana);
-        revalidatePath(`/entrenador/clientes`);
+        revalidatePath(`/entrenador/clientes/${semanaPropia.bloqueMensual.macrociclo.clienteId}/planificacion`);
         return { exito: true };
     } catch (error) {
         return { error: error instanceof Error ? error.message : "Error" };
@@ -436,13 +439,14 @@ export async function eliminarSesion(id: string) {
                         }
                     }
                 }
-            }
+            },
+            include: { semana: { include: { bloqueMensual: { include: { macrociclo: true } } } } }
         });
 
         if (!sesionPropia) throw new Error("Acceso denegado.");
 
         await PlanificacionServicio.eliminarSesion(id);
-        revalidatePath(`/entrenador/clientes`);
+        revalidatePath(`/entrenador/clientes/${sesionPropia.semana.bloqueMensual.macrociclo.clienteId}/planificacion`);
         return { exito: true };
     } catch (error) {
         return { error: error instanceof Error ? error.message : "Error" };
@@ -460,13 +464,14 @@ export async function eliminarMesociclo(id: string) {
                 macrociclo: {
                     cliente: { entrenadorId: entrenador.id }
                 }
-            }
+            },
+            include: { macrociclo: true }
         });
 
         if (!bloquePropio) throw new Error("Acceso denegado.");
 
         await PlanificacionServicio.eliminarBloqueMensual(id);
-        revalidatePath(`/entrenador/clientes`);
+        revalidatePath(`/entrenador/clientes/${bloquePropio.macrociclo.clienteId}/planificacion`);
         return { exito: true };
     } catch (error) {
         return { error: error instanceof Error ? error.message : "Error" };
@@ -513,7 +518,8 @@ export async function reordenarEjercicios(diaId: string, ejercicioIds: string[])
                         }
                     }
                 }
-            }
+            },
+            include: { semana: { include: { bloqueMensual: { include: { macrociclo: true } } } } }
         });
 
         if (!diaPropio) throw new Error("Acceso denegado.");
@@ -527,7 +533,7 @@ export async function reordenarEjercicios(diaId: string, ejercicioIds: string[])
             )
         );
 
-        revalidatePath(`/entrenador/clientes`);
+        revalidatePath(`/entrenador/clientes/${diaPropio.semana.bloqueMensual.macrociclo.clienteId}/planificacion`);
         return { exito: true };
     } catch (error) {
         return { error: error instanceof Error ? error.message : "Error al reordenar" };

@@ -153,6 +153,36 @@ export const PlanificacionServicio = {
                 data: { duracionSemanas: nuevaDuracionTotal }
             });
 
+            // Re-numeración secuencial de todas las semanas del macrociclo para evitar solapamientos
+            const bloquesParaOrdenar = await tx.bloqueMensual.findMany({
+                where: { macrocicloId: bloqueActualizado.macrocicloId },
+                include: { semanas: { orderBy: { numeroSemana: 'asc' } } }
+            });
+
+            // Ordenamos los bloques por la semana más baja que tengan actualmente
+            const bloquesOrdenados = bloquesParaOrdenar.sort((a, b) => {
+                const minA = a.semanas[0]?.numeroSemana || 0;
+                const minB = b.semanas[0]?.numeroSemana || 0;
+                return minA - minB;
+            });
+
+            let contadorSemana = 1;
+            for (const b of bloquesOrdenados) {
+                // Importante: Volvemos a obtener las semanas del bloque para asegurar que tenemos las recién creadas/actualizadas
+                const semanasBloque = await tx.semana.findMany({
+                    where: { bloqueMensualId: b.id },
+                    orderBy: { numeroSemana: 'asc' }
+                });
+
+                for (const s of semanasBloque) {
+                    await tx.semana.update({
+                        where: { id: s.id },
+                        data: { numeroSemana: contadorSemana }
+                    });
+                    contadorSemana++;
+                }
+            }
+
             return bloqueActualizado;
         });
     },
