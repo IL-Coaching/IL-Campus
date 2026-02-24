@@ -290,12 +290,22 @@ export const PlanificacionServicio = {
         });
     },
 
-    /**
-     * Elimina un bloque mensual (Mesociclo) y toda su jerarquía.
-     */
     async eliminarBloqueMensual(id: string) {
-        return await prisma.bloqueMensual.delete({
-            where: { id }
+        return await prisma.$transaction(async (tx) => {
+            const semanas = await tx.semana.findMany({ where: { bloqueMensualId: id }, select: { id: true } });
+            const semanasIds = semanas.map(s => s.id);
+            if (semanasIds.length > 0) {
+                const dias = await tx.diaSesion.findMany({ where: { semanaId: { in: semanasIds } }, select: { id: true } });
+                const diasIds = dias.map(d => d.id);
+                if (diasIds.length > 0) {
+                    await tx.ejercicioPlanificado.deleteMany({ where: { diaId: { in: diasIds } } });
+                }
+                await tx.diaSesion.deleteMany({ where: { semanaId: { in: semanasIds } } });
+                await tx.volumenSemanal.deleteMany({ where: { semanaId: { in: semanasIds } } });
+                await tx.configTesteoEjercicio.deleteMany({ where: { semanaId: { in: semanasIds } } });
+                await tx.semana.deleteMany({ where: { bloqueMensualId: id } });
+            }
+            return await tx.bloqueMensual.delete({ where: { id } });
         });
     }
 };

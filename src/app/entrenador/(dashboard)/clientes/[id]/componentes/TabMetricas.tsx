@@ -92,6 +92,7 @@ export default function TabMetricas({ clienteId }: Props) {
     }
 
     const hasStagnation = datos.tonelaje?.estancamientoDetectado;
+    const isNew = datos.tonelaje?.totalMovidoKg === 0 && (datos.adherencia?.sesionesCompletadas === 0);
     const highAdherence = (datos.adherencia?.porcentajeSeriesCompletadas || 0) > 85;
 
     return (
@@ -99,34 +100,62 @@ export default function TabMetricas({ clienteId }: Props) {
             {/* ──── BANNERS DE INSIGHTS (INTELIGENCIA) ──── */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Insight de Adherencia */}
-                <div className={`p-4 rounded-2xl border flex items-start gap-4 transition-all ${highAdherence ? 'bg-green-500/10 border-green-500/20' : 'bg-naranja/10 border-naranja/30'}`}>
-                    {highAdherence ? <CheckCircle2 className="text-green-500 mt-1" size={20} /> : <Activity className="text-naranja mt-1" size={20} />}
-                    <div>
-                        <h4 className={`text-[0.65rem] font-black uppercase tracking-widest mb-1 ${highAdherence ? 'text-green-400' : 'text-naranja'}`}>
-                            {highAdherence ? 'Apta Adherencia' : 'Análisis de Adherencia'}
-                        </h4>
-                        <p className="text-[0.7rem] text-gris font-medium leading-relaxed">
-                            {highAdherence
-                                ? "El atleta mantiene un cumplimiento óptimo. Listo para incrementar intensidad o volumen en el próximo bloque."
-                                : "Se detectan desvíos en el cumplimiento. Revisar si el volumen actual es sostenible para el estilo de vida del cliente."}
-                        </p>
+                {isNew ? (
+                    <div className="p-4 rounded-2xl border bg-marino-3/50 border-marino-4 flex items-start gap-4">
+                        <Activity className="text-gris mt-1" size={20} />
+                        <div>
+                            <h4 className="text-[0.65rem] font-black uppercase tracking-widest mb-1 text-blanco">
+                                Esperando Datos
+                            </h4>
+                            <p className="text-[0.7rem] text-gris font-medium leading-relaxed">
+                                Aún no hay sesiones completadas para calcular la adherencia del atleta.
+                            </p>
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <div className={`p-4 rounded-2xl border flex items-start gap-4 transition-all ${highAdherence ? 'bg-green-500/10 border-green-500/20' : 'bg-naranja/10 border-naranja/30'}`}>
+                        {highAdherence ? <CheckCircle2 className="text-green-500 mt-1" size={20} /> : <AlertCircle className="text-naranja mt-1" size={20} />}
+                        <div>
+                            <h4 className={`text-[0.65rem] font-black uppercase tracking-widest mb-1 ${highAdherence ? 'text-green-400' : 'text-naranja'}`}>
+                                {highAdherence ? 'Apta Adherencia' : 'Análisis de Adherencia'}
+                            </h4>
+                            <p className="text-[0.7rem] text-gris font-medium leading-relaxed">
+                                {highAdherence
+                                    ? "El atleta mantiene un cumplimiento óptimo. Listo para incrementar intensidad o volumen en el próximo bloque."
+                                    : "Se detectan desvíos en el cumplimiento. Revisar si el volumen actual es sostenible para el estilo de vida del cliente."}
+                            </p>
+                        </div>
+                    </div>
+                )}
 
                 {/* Insight de Progresión */}
-                <div className={`p-4 rounded-2xl border flex items-start gap-4 transition-all ${hasStagnation ? 'bg-rojo/10 border-rojo/30' : 'bg-blue-500/10 border-blue-500/20'}`}>
-                    {hasStagnation ? <TrendingDown className="text-rojo mt-1" size={20} /> : <TrendingUp className="text-blue-400 mt-1" size={20} />}
-                    <div>
-                        <h4 className={`text-[0.65rem] font-black uppercase tracking-widest mb-1 ${hasStagnation ? 'text-rojo' : 'text-blue-400'}`}>
-                            {hasStagnation ? 'Alerta de Estancamiento' : 'Sobreprogreso de Carga'}
-                        </h4>
-                        <p className="text-[0.7rem] text-gris font-medium leading-relaxed">
-                            {hasStagnation
-                                ? "Se detectan 3 semanas sin mejora en el tonelaje total. Considerar una fase de descarga (Deload) o cambio de estímulo."
-                                : "La progresión de carga es positiva. El tonelaje acumulado muestra una curva de adaptación anatómica saludable."}
-                        </p>
+                {isNew ? (
+                    <div className="p-4 rounded-2xl border bg-marino-3/50 border-marino-4 flex items-start gap-4">
+                        <Dumbbell className="text-gris mt-1" size={20} />
+                        <div>
+                            <h4 className="text-[0.65rem] font-black uppercase tracking-widest mb-1 text-blanco">
+                                Construyendo Tonelaje
+                            </h4>
+                            <p className="text-[0.7rem] text-gris font-medium leading-relaxed">
+                                El sistema comenzará a medir el progreso de carga una vez que el cliente registre sus primeros levantamientos.
+                            </p>
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <div className={`p-4 rounded-2xl border flex items-start gap-4 transition-all ${hasStagnation ? 'bg-rojo/10 border-rojo/30' : 'bg-blue-500/10 border-blue-500/20'}`}>
+                        {hasStagnation ? <TrendingDown className="text-rojo mt-1" size={20} /> : <TrendingUp className="text-blue-400 mt-1" size={20} />}
+                        <div>
+                            <h4 className={`text-[0.65rem] font-black uppercase tracking-widest mb-1 ${hasStagnation ? 'text-rojo' : 'text-blue-400'}`}>
+                                {hasStagnation ? 'Alerta de Estancamiento' : 'Progresión de Carga Activa'}
+                            </h4>
+                            <p className="text-[0.7rem] text-gris font-medium leading-relaxed">
+                                {hasStagnation
+                                    ? "Se detectan 3 semanas sin mejora en el tonelaje total. Considerar una fase de descarga (Deload) o cambio de estímulo."
+                                    : "La progresión de carga es positiva. El tonelaje acumulado muestra una curva de adaptación anatómica saludable."}
+                            </p>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* ──── KPI CARDS ──── */}

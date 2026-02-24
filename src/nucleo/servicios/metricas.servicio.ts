@@ -155,14 +155,15 @@ export const MetricasServicio = {
             });
         });
 
-        // Detección de estancamiento (últimas 3 semanas con variaciones < 2%)
         let estancamientoDetectado = false;
         if (porSemana.length >= 3) {
             const ultimas = porSemana.slice(-3);
-            const v1 = Math.abs(ultimas[1].tonelaje - ultimas[0].tonelaje) / (ultimas[0].tonelaje || 1);
-            const v2 = Math.abs(ultimas[2].tonelaje - ultimas[1].tonelaje) / (ultimas[1].tonelaje || 1);
-            if (v1 < 0.02 && v2 < 0.02) {
-                estancamientoDetectado = true;
+            if (ultimas[0].tonelaje > 0 && ultimas[1].tonelaje > 0 && ultimas[2].tonelaje > 0) {
+                const v1 = Math.abs(ultimas[1].tonelaje - ultimas[0].tonelaje) / ultimas[0].tonelaje;
+                const v2 = Math.abs(ultimas[2].tonelaje - ultimas[1].tonelaje) / ultimas[1].tonelaje;
+                if (v1 < 0.02 && v2 < 0.02) {
+                    estancamientoDetectado = true;
+                }
             }
         }
 
