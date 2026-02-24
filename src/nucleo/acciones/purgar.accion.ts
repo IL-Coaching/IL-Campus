@@ -7,26 +7,25 @@ import { getEntrenadorSesion } from "../seguridad/sesion";
 export async function purgarTodaLaBiblioteca() {
     try {
         const entrenador = await getEntrenadorSesion();
+        const id = entrenador.id;
 
-        // 1. Eliminar referencias en sesiones (DiaEjercicio)
-        await prisma.diaEjercicio.deleteMany({
-            where: {
-                dia: {
-                    semana: {
-                        macrociclo: {
-                            cliente: {
-                                entrenadorId: entrenador.id
-                            }
-                        }
-                    }
-                }
-            }
-        });
+        // 1. Limpiar todas las referencias a ejercicios en la planificación
+        // Debido a que no hay cascade delete en algunas relaciones, lo hacemos manualmente
 
-        // 2. Eliminar todos los ejercicios del catálogo del entrenador
+        // Resultados de testeos y porcentajes
+        await prisma.resultadoTesteo.deleteMany({ where: { ejercicio: { entrenadorId: id } } });
+        await prisma.porcentajesCliente.deleteMany({ where: { ejercicio: { entrenadorId: id } } });
+        await prisma.configTesteoEjercicio.deleteMany({ where: { ejercicio: { entrenadorId: id } } });
+        await prisma.alertaEstancamiento.deleteMany({ where: { ejercicio: { entrenadorId: id } } });
+
+        // Ejercicios en rutinas y sesiones
+        await prisma.ejercicioPlanificado.deleteMany({ where: { diaSesion: { semana: { bloqueMensual: { macrociclo: { cliente: { entrenadorId: id } } } } } } });
+        await prisma.ejercicioRutina.deleteMany({ where: { rutina: { entrenadorId: id } } });
+
+        // 2. Finalmente eliminar los ejercicios del catálogo
         const res = await prisma.ejercicio.deleteMany({
             where: {
-                entrenadorId: entrenador.id
+                entrenadorId: id
             }
         });
 
