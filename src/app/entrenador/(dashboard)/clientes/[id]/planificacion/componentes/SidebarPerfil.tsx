@@ -185,9 +185,19 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                     <div className="space-y-5 animate-in fade-in slide-in-from-left-2">
                         <div>
                             <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Salud / Condiciones</span>
-                            <p className="text-[0.82rem] text-gris-claro leading-relaxed">
-                                {cliente?.formularioInscripcion?.saludMedica?.condiciones?.join(', ') || 'Ninguna reportada'}
-                            </p>
+                            <div className="space-y-3">
+                                <p className="text-[0.82rem] text-gris-claro leading-relaxed">
+                                    {cliente?.formularioInscripcion?.saludMedica?.condiciones?.join(', ') || 'Ninguna reportada'}
+                                </p>
+                                {cliente?.formularioInscripcion?.saludMedica?.otrasCondiciones && (
+                                    <div className="p-3 bg-rojo/5 border border-rojo/20 rounded-xl">
+                                        <span className="text-[0.55rem] font-bold text-rojo uppercase tracking-widest block mb-1">Otras Observaciones</span>
+                                        <p className="text-[0.75rem] text-gris-claro italic leading-relaxed">
+                                            &quot;{cliente.formularioInscripcion.saludMedica.otrasCondiciones}&quot;
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <div>
                             <span className="text-[0.65rem] text-naranja font-bold uppercase tracking-widest block mb-1">Apto Médico</span>
@@ -215,6 +225,14 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                                 {cliente?.formularioInscripcion?.personalizacion?.noGusta || 'Ninguna especificada'}
                             </p>
                         </div>
+                        {cliente?.formularioInscripcion?.saludMedica?.otrasCondiciones && (
+                            <div className="p-3 bg-rojo/5 border border-rojo/20 rounded-xl">
+                                <span className="text-[0.55rem] font-bold text-rojo uppercase tracking-widest block mb-1">Nota Médica / Otras Condiciones</span>
+                                <p className="text-[0.75rem] text-gris-claro italic leading-relaxed">
+                                    &quot;{cliente.formularioInscripcion.saludMedica.otrasCondiciones}&quot;
+                                </p>
+                            </div>
+                        )}
                     </div>
                 )}
 
