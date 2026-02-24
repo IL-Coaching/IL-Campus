@@ -2,9 +2,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SemanaConDias } from "@/nucleo/tipos/planificacion.tipos";
-import { Calendar, Trash2, Zap, Plus, Activity, Info, BarChart3, HelpCircle, AlertTriangle, Layers } from "lucide-react";
+import { Calendar, Trash2, Zap, Plus, Activity, BarChart3, AlertTriangle, Layers } from "lucide-react";
 import { crearSesion, eliminarSesion, obtenerVolumenSemanal, actualizarSemana } from "@/nucleo/acciones/planificacion.accion";
-import { ModeloPeriodizacion, TipoCarga } from "@prisma/client";
+import { ModeloPeriodizacion } from "@prisma/client";
 
 interface VistaMicrocicloProps {
     semana: SemanaConDias;
@@ -109,13 +109,13 @@ export default function VistaMicrociclo({ semana, onSelectSesion }: VistaMicroci
                     {/* Switch de Check-in */}
                     <button
                         onClick={async () => {
-                            await actualizarSemana(semana.id, { checkinRequerido: !(semana as any).checkinRequerido });
+                            await actualizarSemana(semana.id, { checkinRequerido: !semana.checkinRequerido });
                             router.refresh();
                         }}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all ${(semana as any).checkinRequerido ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-marino-3/50 border-marino-4 text-gris hover:text-blanco'}`}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all ${semana.checkinRequerido ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-marino-3/50 border-marino-4 text-gris hover:text-blanco'}`}
                     >
-                        <Activity size={16} className={(semana as any).checkinRequerido ? 'animate-pulse' : ''} />
-                        <span className="text-[0.65rem] font-black uppercase tracking-widest">{(semana as any).checkinRequerido ? '✓ Check-in Pedido' : 'Pedir Check-in'}</span>
+                        <Activity size={16} className={semana.checkinRequerido ? 'animate-pulse' : ''} />
+                        <span className="text-[0.65rem] font-black uppercase tracking-widest">{semana.checkinRequerido ? '✓ Check-in Pedido' : 'Pedir Check-in'}</span>
                     </button>
 
                     <div className="flex gap-6 items-center bg-marino-2 p-3.5 rounded-2xl border border-marino-4 shadow-inner">
