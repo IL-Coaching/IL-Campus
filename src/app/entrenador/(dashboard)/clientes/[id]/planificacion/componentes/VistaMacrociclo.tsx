@@ -1,4 +1,5 @@
 "use client"
+import { useState } from "react";
 import { TrendingUp, Settings, Plus, ChevronRight, Target, Zap, Trash2 } from "lucide-react";
 import { MacrocicloCompleto, BloqueConSemanas } from "@/nucleo/tipos/planificacion.tipos";
 
@@ -6,6 +7,7 @@ interface VistaMacrocicloProps {
     macrociclo: MacrocicloCompleto;
     limiteSemanas: number;
     onSelectMeso: (mes: number) => void;
+    onSelectWeek: (mes: number, semana: number) => void;
     onConfigurar: () => void;
     onNuevoMesociclo: () => void;
 }
@@ -23,7 +25,7 @@ interface BloqueMapped {
     color: string;
 }
 
-export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMeso, onConfigurar, onNuevoMesociclo }: VistaMacrocicloProps) {
+export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMeso, onSelectWeek, onConfigurar, onNuevoMesociclo }: VistaMacrocicloProps) {
 
     // Mapeo dinámico con lógica de "Gualda Style" para los campos extras
     const bloques: BloqueMapped[] = macrociclo.bloquesMensuales.map((b: BloqueConSemanas, idx: number) => {
@@ -51,6 +53,8 @@ export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMes
                 (color === "border-rojo-500" ? "border-[#EF4444]" : "border-[#FF6B00]")
         };
     });
+
+    const [mesoExpandido, setMesoExpandido] = useState<string | null>(null);
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 pb-10">
@@ -105,8 +109,11 @@ export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMes
                 {bloques.map((b) => (
                     <div
                         key={b.id}
-                        onClick={() => onSelectMeso(b.n)}
-                        className={`group bg-marino-2 border-l-8 ${b.color} border border-y-marino-4 border-r-marino-4 rounded-xl cursor-pointer hover:bg-marino-3 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden flex flex-col h-full`}
+                        className={`group bg-marino-2 border-l-8 ${b.color} border border-y-marino-4 border-r-marino-4 rounded-xl transition-all duration-300 relative overflow-hidden flex flex-col h-full ${mesoExpandido === b.id ? 'ring-2 ring-naranja' : 'hover:bg-marino-3 hover:-translate-y-1 cursor-pointer'}`}
+                        onClick={() => {
+                            if (mesoExpandido === b.id) setMesoExpandido(null);
+                            else setMesoExpandido(b.id);
+                        }}
                     >
                         {/* Icono de fondo decorativo */}
                         <div className="absolute -bottom-4 -right-4 opacity-5 group-hover:scale-110 group-hover:opacity-10 transition-all grayscale contrast-200">
@@ -131,9 +138,16 @@ export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMes
                                     >
                                         <Trash2 size={16} />
                                     </button>
-                                    <div className="p-2 bg-marino-3 rounded-lg text-gris group-hover:text-blanco transition-colors">
-                                        <ChevronRight size={20} />
-                                    </div>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onSelectMeso(b.n);
+                                        }}
+                                        className="p-2 bg-marino-3 rounded-lg text-gris hover:text-blanco transition-colors group-hover:bg-marino-4 relative z-10"
+                                        title="Abrir Vista Detallada de Meso"
+                                    >
+                                        <ChevronRight size={20} className={mesoExpandido === b.id ? 'rotate-90 transition-transform' : 'transition-transform'} />
+                                    </button>
                                 </div>
                             </div>
 
@@ -141,13 +155,34 @@ export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMes
                             <div className="space-y-3 mt-6">
                                 <div className="bg-marino-3/50 p-4 rounded-xl border border-marino-4/50 group-hover:bg-marino-3 transition-colors">
                                     <label className="text-[0.6rem] font-black text-naranja uppercase tracking-widest mb-1.5 block opacity-50">Método de Trabajo</label>
-                                    <p className="text-[0.8rem] font-medium text-blanco leading-relaxed whitespace-pre-wrap">{b.metodo}</p>
-                                </div>
-                                <div className="bg-marino-3/50 p-4 rounded-xl border border-marino-4/50 group-hover:bg-marino-3 transition-colors">
-                                    <label className="text-[0.6rem] font-black text-naranja uppercase tracking-widest mb-1.5 block opacity-50">Rango & Dosificación</label>
-                                    <p className="text-[0.8rem] font-medium text-blanco leading-relaxed whitespace-pre-wrap">{b.rango}</p>
+                                    <p className="text-[0.8rem] font-medium text-blanco leading-relaxed whitespace-pre-wrap line-clamp-2">{b.metodo}</p>
                                 </div>
                             </div>
+
+                            {/* Vista Colapsable de Semanas Inline */}
+                            {mesoExpandido === b.id && (
+                                <div className="mt-6 pt-6 border-t border-marino-4/50 space-y-3 animate-in slide-in-from-top-4 duration-300">
+                                    <label className="text-[0.6rem] font-black text-gris-claro uppercase tracking-[0.2em] mb-2 block">Semanas del Bloque</label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {[1, 2, 3, 4].map((num) => {
+                                            const realNum = ((b.n - 1) * 4) + num;
+                                            return (
+                                                <button
+                                                    key={num}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onSelectWeek(b.n, realNum);
+                                                    }}
+                                                    className="p-3 bg-marino-3 hover:bg-naranja/10 border border-marino-4 rounded-xl text-left transition-all group/week"
+                                                >
+                                                    <span className="text-[0.55rem] font-black text-naranja uppercase block">Micro {realNum}</span>
+                                                    <span className="text-[0.7rem] font-bold text-blanco group-hover/week:text-naranja transition-colors">Fase {num}</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Footer con Progreso */}

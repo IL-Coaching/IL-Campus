@@ -85,6 +85,7 @@ model Cliente {
   genero                String?
   fechaAlta             DateTime               @default(now())
   activo                Boolean                @default(true)
+  enEstasis             Boolean                @default(false)
   notas                 String?
   forcePasswordChange   Boolean                @default(false)
   invitationExpires     DateTime?
@@ -191,6 +192,7 @@ model Semana {
   volumenEstimado     String
   esFaseDeload        Boolean                 @default(false)
   esSemanaTesteo      Boolean                 @default(false)
+  checkinRequerido    Boolean                 @default(false)
   tipoCarga           TipoCarga?
   modeloPeriodizacion ModeloPeriodizacion     @default(LINEAL)
   fasesCiclo          String?
@@ -237,6 +239,8 @@ model EjercicioPlanificado {
   esUltimaSerieAlFallo Boolean           @default(false)
   descansoSegundos     Int?
   pesoSugerido         Float?
+  esTesteo             Boolean           @default(false)
+  modalidadTesteo      ModalidadTesteo?
   zonaIntensidad       ZonaIntensidad?
   cadencia             String?
   duracionSerie        String?

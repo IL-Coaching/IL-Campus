@@ -76,8 +76,14 @@ export default function SelectorEjercicioCelda({
                         setIsOpen(true);
                     }}
                     onFocus={() => setIsOpen(true)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            setIsOpen(false);
+                            onSelect({ nombre: inputValue, ejercicioId: null, esBiblioteca: false });
+                        }
+                    }}
                     className="w-full bg-transparent border-none p-0 text-blanco font-black text-[0.9rem] uppercase tracking-tight focus:ring-0 placeholder:text-gris/20 group-hover:text-naranja transition-colors"
-                    placeholder="Nombre del ejercicio..."
+                    placeholder="Escribir o buscar..."
                 />
 
                 {esBiblioteca && ejercicioId && (

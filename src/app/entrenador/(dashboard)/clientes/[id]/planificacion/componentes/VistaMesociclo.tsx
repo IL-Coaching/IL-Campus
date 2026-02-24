@@ -1,7 +1,7 @@
-import { Layers, ChevronRight, Activity, Flame, MoveUp, Save, Loader2, FlaskConical, Target } from "lucide-react";
+import { Layers, ChevronRight, Activity, Flame, MoveUp, Save, Loader2, FlaskConical, Target, Copy } from "lucide-react";
 import { useState } from 'react';
 import { BloqueConSemanas, SemanaConDias, DiaConEjercicios } from "@/nucleo/tipos/planificacion.tipos";
-import { actualizarMesociclo, actualizarSemana } from '@/nucleo/acciones/planificacion.accion';
+import { actualizarMesociclo, actualizarSemana, clonarContenidoSemana } from '@/nucleo/acciones/planificacion.accion';
 import { TIPOS_CARGA_MESOCICLO } from '@/nucleo/planificacion/zonas.constantes';
 import { useRouter } from 'next/navigation';
 import { TipoCarga } from "@prisma/client";
@@ -178,6 +178,22 @@ export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSem
                             <div className="w-8 h-8 rounded-full bg-marino-4/50 flex items-center justify-center text-gris group-hover:text-blanco transition-colors shadow-inner">
                                 <span className="font-black text-sm">#{s.n}</span>
                             </div>
+                            {s.n > 1 && (
+                                <button
+                                    onClick={async (e) => {
+                                        e.stopPropagation();
+                                        const anteriorId = bloque.semanas.find(sem => sem.numeroSemana === s.n - 1)?.id;
+                                        if (anteriorId) {
+                                            const res = await clonarContenidoSemana(anteriorId, s.id);
+                                            if (res.exito) router.refresh();
+                                        }
+                                    }}
+                                    className="p-2 hover:text-naranja transition-colors text-gris"
+                                    title="Clonar de semana anterior"
+                                >
+                                    <Copy size={16} />
+                                </button>
+                            )}
                         </div>
 
                         <div className="mb-8">

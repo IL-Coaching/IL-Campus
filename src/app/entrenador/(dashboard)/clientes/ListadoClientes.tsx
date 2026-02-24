@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { Users, MoreVertical, Ban, CheckCircle2 } from "lucide-react";
+import { Users, MoreVertical, Ban, CheckCircle2, MessageCircle, CreditCard } from "lucide-react";
 import ModalAsignarPlan from "./ModalAsignarPlan";
 import { cambiarEstadoPagoPlan, alternarEstadoCliente } from "@/nucleo/acciones/cliente.accion";
 
@@ -125,23 +125,37 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                                 const whatsappNumber = formatPhone(cliente.telefono);
 
                                 return (
-                                    <tr key={cliente.id} className="block md:table-row hover:bg-[#1a233a] transition-all duration-300 group border-b border-[#1a233a] md:border-b-0 mb-4 md:mb-0 bg-marino-2 md:bg-transparent rounded-xl md:rounded-none p-4 md:p-0">
-                                        {/* NOMBRE & AVATAR */}
-                                        <td className="flex items-center gap-4 py-2 md:py-4 px-2 md:px-4 font-medium text-blanco min-w-[200px] border-b md:border-b-0 md:border-r border-[#1a233a]/50 md:h-full md:table-cell text-left md:text-center w-full md:w-auto">
-                                            <div className="flex items-center gap-4 w-full justify-between md:justify-center">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 rounded-full bg-blanco border-2 border-[#1a233a] flex items-center justify-center text-[0.5rem] text-marino font-black uppercase overflow-hidden shadow-lg shadow-blanco/5 shrink-0">
-                                                        FOTO<br />PERFIL
+                                    <tr key={cliente.id} className="block md:table-row hover:bg-marino-3/30 transition-all duration-300 md:border-b-0 border-b border-marino-4/50 md:p-0 p-4 relative mb-2 md:mb-0 bg-marino-2 md:bg-transparent rounded-2xl md:rounded-none">
+                                        {/* NOMBRE & AVATAR (Vista Card en Mobile) */}
+                                        <td className="block md:table-cell py-2 md:py-6 md:px-4">
+                                            <div className="flex items-center gap-4">
+                                                <div className="relative group shrink-0">
+                                                    <div className="absolute -inset-0.5 bg-gradient-to-tr from-naranja to-azul-claro rounded-full opacity-20 blur-sm group-hover:opacity-100 transition duration-500"></div>
+                                                    <div className="relative w-12 h-12 rounded-full bg-marino-3 border-2 border-marino-4 flex items-center justify-center text-[0.6rem] text-naranja font-black uppercase overflow-hidden">
+                                                        {cliente.nombre.substring(0, 2)}
                                                     </div>
-                                                    <span className="font-bold text-blanco whitespace-normal text-left break-words">{cliente.nombre}</span>
                                                 </div>
-                                                {/* En mobile agregamos las acciones resumidas al costado del nombre si es posible o un icono extra */}
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-barlow-condensed font-black text-blanco text-lg uppercase leading-tight truncate">{cliente.nombre}</p>
+                                                    <p className="text-[0.65rem] text-gris font-medium uppercase tracking-widest truncate">{cliente.email}</p>
+                                                </div>
+                                                {/* Acceso Rápido WPP en Mobile */}
+                                                {whatsappNumber && (
+                                                    <div className="md:hidden">
+                                                        <a
+                                                            href={`https://wa.me/${whatsappNumber}`}
+                                                            target="_blank"
+                                                            className="w-10 h-10 bg-verde/10 text-verde rounded-xl flex items-center justify-center border border-verde/20 active:scale-90 transition-all"
+                                                        >
+                                                            <MessageCircle size={18} />
+                                                        </a>
+                                                    </div>
+                                                )}
                                             </div>
                                         </td>
 
-                                        {/* CONTACTO */}
-                                        <td className="block md:table-cell py-2 md:py-4 px-2 md:px-4 md:border-r border-[#1a233a]/50 text-left md:text-center">
-                                            <span className="md:hidden text-xs font-bold text-gris uppercase tracking-widest block mb-1">Contacto</span>
+                                        {/* CONTACTO (Solo Desktop) */}
+                                        <td className="hidden md:table-cell py-4 px-4 border-l border-marino-4/30">
                                             {whatsappNumber ? (
                                                 <a
                                                     href={`https://wa.me/${whatsappNumber}`}
@@ -158,53 +172,45 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
 
                                         {/* CELDAS CENTRALES DINAMICAS */}
                                         {/* CELDAS CENTRALES DINAMICAS */}
+                                        {/* INFO DE PLAN (Flexible) */}
                                         {tabActual === "activos" && (
                                             <>
-                                                <td className="block md:table-cell py-2 md:py-4 px-2 md:px-4 md:border-r border-[#1a233a]/50 text-left md:text-center">
-                                                    <span className="md:hidden text-xs font-bold text-gris uppercase tracking-widest block mb-1">Inicio</span>
-                                                    <span className="text-xs font-bold text-gris-claro uppercase tracking-widest">
-                                                        {ultimoPlan?.fechaInicio ? new Date(ultimoPlan.fechaInicio).toLocaleDateString('es-AR') : '-'}
-                                                    </span>
-                                                </td>
-                                                <td className="block md:table-cell py-2 md:py-4 px-2 md:px-4 md:border-r border-[#1a233a]/50 text-left md:text-center">
-                                                    <span className="md:hidden text-xs font-bold text-gris uppercase tracking-widest block mb-1">Vencimiento</span>
-                                                    <span className="text-xs font-bold text-gris-claro uppercase tracking-widest">
-                                                        {ultimoPlan?.fechaVencimiento ? new Date(ultimoPlan.fechaVencimiento).toLocaleDateString('es-AR') : '-'}
-                                                    </span>
-                                                </td>
-                                                <td className="block md:table-cell py-2 md:py-4 px-2 md:px-4 md:border-r border-[#1a233a]/50 text-left md:text-center">
-                                                    <span className="md:hidden text-xs font-bold text-gris uppercase tracking-widest block mb-1">Plan</span>
-                                                    {ultimoPlan?.plan?.nombre ? (
-                                                        <span className="font-barlow-condensed font-black text-[#f5f5f5] uppercase tracking-widest text-sm">
-                                                            {ultimoPlan.plan.nombre}
+                                                <td className="block md:table-cell py-1 md:py-4 px-0 md:px-4 md:border-l border-marino-4/30">
+                                                    <div className="flex md:flex-col items-center justify-between gap-1">
+                                                        <span className="md:hidden text-[0.6rem] font-black text-gris uppercase tracking-[0.2em]">Vencimiento</span>
+                                                        <span className={`text-xs font-black uppercase tracking-widest ${ultimoPlan && new Date(ultimoPlan.fechaVencimiento) < new Date() ? 'text-rojo' : 'text-gris-claro'
+                                                            }`}>
+                                                            {ultimoPlan?.fechaVencimiento ? new Date(ultimoPlan.fechaVencimiento).toLocaleDateString('es-AR') : '-'}
                                                         </span>
-                                                    ) : (
-                                                        <span className="text-gris">-</span>
-                                                    )}
+                                                    </div>
                                                 </td>
-                                                <td className="block md:table-cell py-3 md:py-4 px-2 md:px-4 md:border-r border-[#1a233a]/50 text-left md:text-center">
-                                                    <span className="md:hidden text-xs font-bold text-gris uppercase tracking-widest block mb-1">Pago</span>
-                                                    <div className="relative inline-block w-full md:max-w-[150px]">
+                                                <td className="block md:table-cell py-1 md:py-4 px-0 md:px-4 md:border-l border-marino-4/30">
+                                                    <div className="flex md:flex-col items-center justify-between gap-1">
+                                                        <span className="md:hidden text-[0.6rem] font-black text-gris uppercase tracking-[0.2em]">Membresía</span>
+                                                        <span className="font-barlow-condensed font-black text-naranja uppercase tracking-widest text-sm text-right md:text-center">
+                                                            {ultimoPlan?.plan?.nombre || '-'}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="block md:table-cell py-3 md:py-4 px-0 md:px-4 md:border-l border-marino-4/30">
+                                                    <div className="flex md:flex-col items-center justify-between gap-3">
+                                                        <span className="md:hidden text-[0.6rem] font-black text-gris uppercase tracking-[0.2em]">Estado Pago</span>
                                                         {ultimoPlan && (
-                                                            <select
-                                                                className="appearance-none w-full bg-[#0a101f] border border-[#1a233a]  text-[#f5f5f5] text-[10px] md:text-[11px] font-bold uppercase tracking-widest rounded-lg py-3 md:py-2 pl-8 pr-8 cursor-pointer focus:outline-none focus:border-naranja shadow-inner"
-                                                                value={ultimoPlan.estado || "PENDIENTE"}
-                                                                onChange={(e) => handleUpdateEstadoPago(ultimoPlan.id, e.target.value)}
-                                                                disabled={isPending}
-                                                            >
-                                                                {ESTADOS_PAGO.map(est => (
-                                                                    <option key={est.value} value={est.value}>{est.label}</option>
-                                                                ))}
-                                                            </select>
+                                                            <div className="relative w-full max-w-[140px]">
+                                                                <select
+                                                                    className={`appearance-none w-full bg-marino-3 border border-marino-4 text-[0.65rem] font-black uppercase tracking-widest rounded-xl py-2.5 pl-8 pr-8 cursor-pointer focus:outline-none focus:border-naranja transition-all ${ultimoPlan.estado === 'ABONADO' ? 'text-verde' : 'text-blanco'
+                                                                        }`}
+                                                                    value={ultimoPlan.estado || "PENDIENTE"}
+                                                                    onChange={(e) => handleUpdateEstadoPago(ultimoPlan.id, e.target.value)}
+                                                                    disabled={isPending}
+                                                                >
+                                                                    {ESTADOS_PAGO.map(est => (
+                                                                        <option key={est.value} value={est.value}>{est.label}</option>
+                                                                    ))}
+                                                                </select>
+                                                                <div className={`absolute left-3 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full ${ESTADOS_PAGO.find(e => e.value === (ultimoPlan.estado || "PENDIENTE"))?.color}`} />
+                                                            </div>
                                                         )}
-                                                        {/* Icono indicador del estado actual superpuesto */}
-                                                        {ultimoPlan && (
-                                                            <div className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none w-2.5 h-2.5 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.5)] border border-[#0a101f] ${ESTADOS_PAGO.find(e => e.value === ultimoPlan.estado)?.color || 'bg-gris-claro'}`}
-                                                                style={{ backgroundColor: ESTADOS_PAGO.find(e => e.value === ultimoPlan.estado)?.value === "ABONADO" ? "#22c55e" : ESTADOS_PAGO.find(e => e.value === ultimoPlan.estado)?.value === "VENCIDO" ? "#ef4444" : ESTADOS_PAGO.find(e => e.value === ultimoPlan.estado)?.value === "PARCIAL" ? "#eab308" : "#9ca3af" }} />
-                                                        )}
-                                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-naranja">
-                                                            ⌄
-                                                        </div>
                                                     </div>
                                                 </td>
                                             </>
@@ -212,93 +218,96 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
 
                                         {tabActual === "inactivos" && (
                                             <>
-                                                <td className="block md:table-cell py-2 md:py-4 px-2 md:px-4 md:border-r border-[#1a233a]/50 text-left md:text-center text-gris">
-                                                    <span className="md:hidden text-xs font-bold text-gris/50 uppercase tracking-widest block mb-1">Último Plan</span>
-                                                    {ultimoPlan?.plan?.nombre
-                                                        ? <span className="font-barlow-condensed font-black tracking-widest text-[#f5f5f5]/70 uppercase">{ultimoPlan.plan.nombre}</span>
-                                                        : '-'}
+                                                <td className="block md:table-cell py-2 px-0 md:px-4 md:border-l border-marino-4/30">
+                                                    <div className="flex md:flex-col items-center justify-between">
+                                                        <span className="md:hidden text-[0.6rem] font-black text-gris uppercase tracking-[0.2em]">Último Plan</span>
+                                                        <span className="font-barlow-condensed font-black tracking-widest text-gris-claro uppercase">{ultimoPlan?.plan?.nombre || '-'}</span>
+                                                    </div>
                                                 </td>
-                                                <td className="block md:table-cell py-2 md:py-4 px-2 md:px-4 md:border-r border-[#1a233a]/50 text-left md:text-center text-xs font-bold text-gris-claro uppercase tracking-widest">
-                                                    <span className="md:hidden text-xs font-bold text-gris/50 uppercase tracking-widest block mb-1">Vencimiento</span>
-                                                    {ultimoPlan?.fechaVencimiento ? new Date(ultimoPlan.fechaVencimiento).toLocaleDateString('es-AR') : '-'}
+                                                <td className="block md:table-cell py-2 px-0 md:px-4 md:border-l border-marino-4/30 text-right md:text-center">
+                                                    <div className="flex md:flex-col items-center justify-between">
+                                                        <span className="md:hidden text-[0.6rem] font-black text-gris uppercase tracking-[0.2em]">Vencimiento</span>
+                                                        <span className="text-xs font-bold text-gris uppercase tracking-widest">
+                                                            {ultimoPlan?.fechaVencimiento ? new Date(ultimoPlan.fechaVencimiento).toLocaleDateString('es-AR') : '-'}
+                                                        </span>
+                                                    </div>
                                                 </td>
                                             </>
                                         )}
 
                                         {tabActual === "inscripciones" && (
                                             <>
-                                                <td className="block md:table-cell py-2 md:py-4 px-2 md:px-4 md:border-r border-[#1a233a]/50 text-left md:text-center">
-                                                    <span className="md:hidden text-xs font-bold text-gris uppercase tracking-widest block mb-1">Seleccionar Plan</span>
+                                                <td className="block md:table-cell py-2 px-0 md:px-4 md:border-l border-marino-4/30">
+                                                    <div className="flex md:flex-col items-center justify-between">
+                                                        <span className="md:hidden text-[0.6rem] font-black text-gris uppercase tracking-[0.2em]">Ingreso</span>
+                                                        <span className="text-xs font-bold text-gris-claro uppercase tracking-widest">
+                                                            {new Date(cliente.fechaAlta).toLocaleDateString()}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="block md:table-cell py-3 px-0 md:px-4 md:border-l border-marino-4/30">
                                                     <button
                                                         onClick={() => setClienteAsignando({ id: cliente.id, nombre: cliente.nombre })}
-                                                        className="text-xs font-bold uppercase tracking-widest text-naranja border border-naranja/30 bg-naranja/5 py-2 px-4 rounded-lg hover:bg-naranja hover:text-marino transition-all relative pr-8 w-full md:w-auto"
+                                                        className="w-full md:w-auto px-6 py-3 bg-naranja/10 text-naranja border border-naranja/20 rounded-xl text-[0.65rem] font-black uppercase tracking-widest active:scale-95 transition-all"
                                                     >
-                                                        Desplegar
-                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 opacity-70">⌄</span>
+                                                        Asignar Plan Inicial
                                                     </button>
-                                                </td>
-                                                <td className="block md:table-cell py-2 md:py-4 px-2 md:px-4 md:border-r border-[#1a233a]/50 text-left md:text-center text-xs font-bold text-gris-claro uppercase tracking-widest">
-                                                    <span className="md:hidden text-xs font-bold text-gris/50 uppercase tracking-widest block mb-1">Fecha Ingreso</span>
-                                                    {new Date(cliente.fechaAlta).toLocaleDateString('es-AR')}
                                                 </td>
                                             </>
                                         )}
 
                                         {/* ACCIONES FINALES */}
-                                        <td className="block md:table-cell py-4 px-2 md:px-4 border-t border-[#1a233a]/50 md:border-t-0 text-right h-full static md:relative min-w-[120px]">
-                                            <div className="flex flex-row md:flex-row items-center justify-end w-full gap-2">
+                                        <td className="block md:table-cell py-4 md:py-4 px-0 md:px-4 md:border-l border-marino-4/30">
+                                            <div className="flex items-center gap-2">
                                                 <Link
                                                     href={`/entrenador/clientes/${cliente.id}`}
-                                                    className="flex-1 md:flex-none text-center bg-[#e87717] hover:bg-[#ff8620] text-blanco px-5 py-2.5 md:py-2 rounded-lg md:rounded-full font-barlow-condensed font-black text-sm md:text-xs uppercase tracking-widest transition-all shadow-md shadow-naranja/20"
+                                                    className="flex-1 text-center bg-marino-4 hover:bg-marino-3 text-blanco py-4 md:py-2 px-4 rounded-xl md:rounded-full font-black text-[0.65rem] uppercase tracking-[0.2em] transition-all border border-marino shadow-sm active:scale-95"
                                                 >
-                                                    Perfil
+                                                    Abrir Perfil
                                                 </Link>
-
-                                                {/* Dropdown 3 dots solo para activos/inactivos */}
                                                 {(tabActual === "activos" || tabActual === "inactivos") && (
-                                                    <div className="relative static md:relative w-12 md:w-auto shrink-0 flex justify-end">
-                                                        <button
-                                                            onClick={(e) => { e.stopPropagation(); setMenuAbierto(menuAbierto === cliente.id ? null : cliente.id) }}
-                                                            className="p-2 text-gris hover:text-blanco bg-[#0a101f] border border-[#1a233a] rounded-lg transition-colors h-full flex items-center justify-center w-full md:w-auto"
-                                                        >
-                                                            <MoreVertical size={18} />
-                                                        </button>
-                                                        {menuAbierto === cliente.id && (
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); setMenuAbierto(menuAbierto === cliente.id ? null : cliente.id) }}
+                                                        className="p-4 md:p-2 bg-marino-3 border border-marino-4 rounded-xl text-gris hover:text-blanco transition-colors active:scale-90"
+                                                    >
+                                                        <MoreVertical size={20} />
+                                                    </button>
+                                                )}
+                                            </div>
+
+                                            {menuAbierto === cliente.id && (
+                                                <div className="fixed md:absolute inset-x-0 bottom-0 md:bottom-auto md:top-full z-[110] p-4 md:p-0 md:mt-2">
+                                                    <div className="fixed inset-0 bg-marino/80 backdrop-blur-sm md:hidden" onClick={() => setMenuAbierto(null)}></div>
+                                                    <div className="relative bg-marino-2 border border-marino-4 rounded-3xl md:rounded-xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-10 duration-300">
+                                                        <div className="w-12 h-1.5 bg-marino-4 rounded-full mx-auto my-4 md:hidden opacity-50"></div>
+                                                        {tabActual === "activos" ? (
+                                                            <button
+                                                                onClick={() => handleToggleStatus(cliente.id, false)}
+                                                                disabled={isPending}
+                                                                className="w-full text-left px-8 py-6 md:px-4 md:py-3 text-[0.65rem] font-black uppercase tracking-widest text-rojo hover:bg-rojo/10 flex items-center gap-4 transition-colors active:bg-rojo/20"
+                                                            >
+                                                                <Ban size={20} /> Suspender Acceso
+                                                            </button>
+                                                        ) : (
                                                             <>
-                                                                <div className="fixed md:hidden inset-0 z-40 bg-negro/50" onClick={() => setMenuAbierto(null)}></div>
-                                                                <div className="fixed md:absolute bottom-0 left-0 w-full md:max-w-max md:w-48 md:bottom-auto md:right-0 md:-left-auto md:top-full md:mt-2 bg-[#151c2e] border-t md:border border-[#2b3552] rounded-t-2xl md:rounded-xl shadow-[0_-10px_30px_rgba(0,0,0,0.8)] md:shadow-[0_10px_30px_rgba(0,0,0,0.8)] z-50 overflow-hidden fade-in duration-200">
-                                                                    <div className="w-12 h-1.5 bg-marino-4 rounded-full mx-auto my-3 md:hidden"></div>
-                                                                    {tabActual === "activos" ? (
-                                                                        <button
-                                                                            onClick={() => handleToggleStatus(cliente.id, false)}
-                                                                            disabled={isPending}
-                                                                            className="w-full text-left px-6 py-5 md:px-4 md:py-3 text-sm md:text-xs font-bold uppercase tracking-widest text-rojo hover:bg-[#0a101f] flex items-center gap-3 md:gap-2 active:bg-marino-4"
-                                                                        >
-                                                                            <Ban size={18} className="md:w-[14px] md:h-[14px]" /> Suspender Cliente
-                                                                        </button>
-                                                                    ) : (
-                                                                        <>
-                                                                            <button
-                                                                                onClick={() => handleToggleStatus(cliente.id, true)}
-                                                                                disabled={isPending}
-                                                                                className="w-full text-left px-6 py-5 md:px-4 md:py-3 text-sm md:text-xs font-bold uppercase tracking-widest text-verde hover:bg-[#0a101f] flex items-center gap-3 md:gap-2 active:bg-marino-4 border-b border-[#2b3552]"
-                                                                            >
-                                                                                <CheckCircle2 size={18} className="md:w-[14px] md:h-[14px]" /> Reactivar Acceso
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={() => { setMenuAbierto(null); setClienteAsignando({ id: cliente.id, nombre: cliente.nombre }) }}
-                                                                                className="w-full text-left px-6 py-5 md:px-4 md:py-3 text-sm md:text-xs font-bold uppercase tracking-widest text-naranja hover:bg-[#0a101f] flex items-center gap-3 md:gap-2 active:bg-marino-4 pb-8 md:pb-3"
-                                                                            >
-                                                                                Asignar Nuevo Plan
-                                                                            </button>
-                                                                        </>
-                                                                    )}
-                                                                </div>
+                                                                <button
+                                                                    onClick={() => handleToggleStatus(cliente.id, true)}
+                                                                    disabled={isPending}
+                                                                    className="w-full text-left px-8 py-6 md:px-4 md:py-3 text-[0.65rem] font-black uppercase tracking-widest text-verde hover:bg-verde/10 flex items-center gap-4 border-b border-marino-4 transition-colors active:bg-verde/20"
+                                                                >
+                                                                    <CheckCircle2 size={20} /> Reactivar Cliente
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => { setMenuAbierto(null); setClienteAsignando({ id: cliente.id, nombre: cliente.nombre }) }}
+                                                                    className="w-full text-left px-8 py-6 md:px-4 md:py-3 text-[0.65rem] font-black uppercase tracking-widest text-naranja hover:bg-naranja/10 flex items-center gap-4 transition-colors active:bg-naranja/20 md:pb-3 pb-12"
+                                                                >
+                                                                    <CreditCard size={20} /> Nueva Membresía
+                                                                </button>
                                                             </>
                                                         )}
                                                     </div>
-                                                )}
-                                            </div>
+                                                </div>
+                                            )}
                                         </td>
                                     </tr>
                                 );

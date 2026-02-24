@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { SemanaConDias } from "@/nucleo/tipos/planificacion.tipos";
 import { Calendar, Trash2, Zap, Plus, Activity, Info, BarChart3, HelpCircle, AlertTriangle, Layers } from "lucide-react";
 import { crearSesion, eliminarSesion, obtenerVolumenSemanal, actualizarSemana } from "@/nucleo/acciones/planificacion.accion";
-import { ModeloPeriodizacion } from "@prisma/client";
+import { ModeloPeriodizacion, TipoCarga } from "@prisma/client";
 
 interface VistaMicrocicloProps {
     semana: SemanaConDias;
@@ -78,7 +78,7 @@ export default function VistaMicrociclo({ semana, onSelectSesion }: VistaMicroci
                             Semana {semana.numeroSemana} <span className="text-gris/30 mx-2">—</span> {semana.objetivoSemana}
                         </h2>
                         {semana.esFaseDeload && (
-                            <span className="bg-naranja/20 text-naranja px-3 py-1.5 rounded-lg text-[0.65rem] font-black uppercase tracking-widest border border-naranja/30 animate-pulse">
+                            <span className="bg-blue-500/20 text-blue-400 px-3 py-1.5 rounded-lg text-[0.65rem] font-black uppercase tracking-widest border border-blue-500/30 animate-pulse">
                                 Fase de Deload
                             </span>
                         )}
@@ -104,17 +104,24 @@ export default function VistaMicrociclo({ semana, onSelectSesion }: VistaMicroci
                                 <option value="PERSONALIZADO" className="bg-marino-2 text-blanco">Personalizado</option>
                             </select>
                         </div>
-                        <div className="absolute top-full right-0 mt-2 w-64 p-4 bg-marino-4 border border-blanco/10 rounded-xl text-[0.65rem] text-blanco leading-relaxed invisible group-hover/sel:visible opacity-0 group-hover/sel:opacity-100 transition-all z-50 shadow-2xl">
-                            <span className="text-naranja font-black">Lineal:</span> Progresión de carga constante.<br />
-                            <span className="text-naranja font-black">Ondulante:</span> Variación diaria de volumen/intensidad.<br />
-                            <span className="text-naranja font-black">Conjugada:</span> Valla múltiples capacidades a la vez.
-                        </div>
                     </div>
+
+                    {/* Switch de Check-in */}
+                    <button
+                        onClick={async () => {
+                            await actualizarSemana(semana.id, { checkinRequerido: !(semana as any).checkinRequerido });
+                            router.refresh();
+                        }}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all ${(semana as any).checkinRequerido ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-marino-3/50 border-marino-4 text-gris hover:text-blanco'}`}
+                    >
+                        <Activity size={16} className={(semana as any).checkinRequerido ? 'animate-pulse' : ''} />
+                        <span className="text-[0.65rem] font-black uppercase tracking-widest">{(semana as any).checkinRequerido ? '✓ Check-in Pedido' : 'Pedir Check-in'}</span>
+                    </button>
 
                     <div className="flex gap-6 items-center bg-marino-2 p-3.5 rounded-2xl border border-marino-4 shadow-inner">
                         <div className="text-center px-6">
-                            <span className="text-[0.55rem] font-bold text-gris uppercase tracking-widest block mb-1">Sesiones Planificadas</span>
-                            <span className="text-xl font-black text-blanco group-hover:text-naranja transition-colors">{semana.diasSesion.length} Sesiones</span>
+                            <span className="text-[0.55rem] font-bold text-gris uppercase tracking-widest block mb-1">Sesiones</span>
+                            <span className="text-xl font-black text-blanco">{semana.diasSesion.length}</span>
                         </div>
                     </div>
                 </div>
@@ -135,10 +142,10 @@ export default function VistaMicrociclo({ semana, onSelectSesion }: VistaMicroci
                                         <div
                                             key={s.id}
                                             onClick={() => onSelectSesion(s.diaSemana)}
-                                            className="group relative bg-marino-2 border border-marino-4 rounded-2xl p-6 min-h-[160px] flex flex-col transition-all duration-300 cursor-pointer hover:border-naranja/50 hover:bg-marino-3 shadow-lg hover:shadow-naranja/5"
+                                            className={`group relative bg-marino-2 border rounded-2xl p-6 min-h-[160px] flex flex-col transition-all duration-300 cursor-pointer shadow-lg hover:shadow-naranja/5 ${semana.esFaseDeload ? 'border-blue-500/20 hover:border-blue-500/50 hover:bg-blue-500/10' : 'border-marino-4 hover:border-naranja/50 hover:bg-marino-3'}`}
                                         >
                                             <div className="flex justify-between items-start mb-4">
-                                                <div className="w-8 h-8 rounded-lg bg-naranja/10 flex items-center justify-center text-naranja group-hover:bg-naranja group-hover:text-marino transition-all">
+                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${semana.esFaseDeload ? 'bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-marino' : 'bg-naranja/10 text-naranja group-hover:bg-naranja group-hover:text-marino'}`}>
                                                     <Zap size={16} />
                                                 </div>
                                                 <button
@@ -186,12 +193,6 @@ export default function VistaMicrociclo({ semana, onSelectSesion }: VistaMicroci
                                 <span className="text-[0.55rem] font-bold text-naranja uppercase tracking-widest">Consenso IUSCA 2021</span>
                             </div>
                         </div>
-                        <div className="group/tip relative">
-                            <HelpCircle size={18} className="text-gris cursor-help hover:text-blanco transition-colors" />
-                            <div className="absolute right-0 top-full mt-2 w-64 p-4 bg-marino-4 border border-blanco/10 rounded-xl text-[0.7rem] text-blanco leading-relaxed invisible group-hover/tip:visible opacity-0 group-hover/tip:opacity-100 transition-all z-50 shadow-2xl backdrop-blur-md">
-                                &quot;Según el consenso de la IUSCA (Schoenfeld et al., 2021), el volumen mínimo efectivo es de 10 series semanales por grupo muscular para optimizar la hipertrofia. Más de 20 series puede superar el umbral de recuperación individual.&quot;
-                            </div>
-                        </div>
                     </div>
 
                     <div className="space-y-5 relative z-10">
@@ -199,18 +200,13 @@ export default function VistaMicrociclo({ semana, onSelectSesion }: VistaMicroci
                             <div className="py-20 flex justify-center"><div className="w-8 h-8 border-2 border-naranja border-t-transparent rounded-full animate-spin"></div></div>
                         ) : volumen.length === 0 ? (
                             <div className="py-10 text-center">
-                                <p className="text-gris text-xs font-medium italic">Sin datos de volumen.<br />Agrega ejercicios a las sesiones para calcular.</p>
+                                <p className="text-gris text-xs font-medium italic">Sin datos de volumen.</p>
                             </div>
                         ) : volumen.map((v) => (
                             <div key={v.grupoMuscular} className="space-y-2">
                                 <div className="flex justify-between items-end">
                                     <span className="text-[0.7rem] font-black text-blanco uppercase tracking-wider">{v.grupoMuscular}</span>
-                                    <div className="flex items-center gap-2">
-                                        <span className={`text-[0.6rem] font-black uppercase ${v.estado === 'BAJO' ? 'text-rojo' : v.estado === 'ELEVADO' ? 'text-naranja' : 'text-[#22C55E]'}`}>
-                                            {v.estado === 'BAJO' ? '⚠ Bajo mínimo' : v.estado === 'ELEVADO' ? '⚠ Elevado' : '✓ óptimo'}
-                                        </span>
-                                        <span className="text-sm font-black text-blanco">{v.seriesTotal}</span>
-                                    </div>
+                                    <span className="text-sm font-black text-blanco">{v.seriesTotal}</span>
                                 </div>
                                 <div className="h-2 w-full bg-marino-4 rounded-full overflow-hidden flex">
                                     {Array.from({ length: Math.min(v.seriesTotal, 20) }).map((_, i) => (
@@ -219,11 +215,6 @@ export default function VistaMicrociclo({ semana, onSelectSesion }: VistaMicroci
                                             className={`h-full flex-1 border-r border-marino-2 last:border-0 ${v.estado === 'BAJO' ? 'bg-rojo' : v.estado === 'ELEVADO' ? 'bg-naranja' : 'bg-[#22C55E]'}`}
                                         />
                                     ))}
-                                    {v.seriesTotal > 20 && (
-                                        <div className="h-full bg-rojo/50 w-4 flex items-center justify-center">
-                                            <span className="text-[0.5rem] font-bold text-blanco">+</span>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                         ))}
@@ -231,40 +222,13 @@ export default function VistaMicrociclo({ semana, onSelectSesion }: VistaMicroci
                 </div>
             </div>
 
-            {/* Alerta de Interferencia Cardio-Fuerza (Capa Científica) */}
+            {/* Alerta de Interferencia */}
             {interferencia && (
-                <div className="bg-naranja/10 border border-naranja/30 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6 animate-in slide-in-from-top-4 duration-500">
-                    <div className="p-3 bg-naranja/20 rounded-xl text-naranja">
-                        <AlertTriangle size={24} />
-                    </div>
-                    <div className="flex-1 text-center md:text-left">
-                        <h4 className="text-sm font-black text-blanco uppercase tracking-widest mb-1">¡Alerta de Interferencia Detectada!</h4>
-                        <p className="text-xs text-gris font-medium leading-relaxed">
-                            Detectada concurrencia de cardio y fuerza en el mismo día. <span className="text-naranja font-bold">IUSCA Position Stand:</span> Se recomienda separar las sesiones al menos <span className="text-blanco font-bold">6 horas</span> para minimizar la interferencia en las vías de señalización de mTOR y optimizar la hipertrofia.
-                        </p>
-                    </div>
-                    <button className="px-5 py-2.5 bg-naranja/10 hover:bg-naranja/20 border border-naranja/30 rounded-xl text-[0.6rem] font-black text-naranja uppercase tracking-widest transition-all">
-                        Ver Detalles Científicos
-                    </button>
+                <div className="bg-naranja/10 border border-naranja/30 rounded-2xl p-6 flex items-center gap-6">
+                    <AlertTriangle className="text-naranja" size={24} />
+                    <p className="text-xs text-gris font-medium">Interferencia detectada (Cardio + Fuerza). Recomendación IUSCA: +6h separación.</p>
                 </div>
             )}
-
-            {/* Leyenda Meta-data */}
-            <div className="bg-naranja/[0.03] border border-naranja/10 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="flex items-center gap-4">
-                    <div className="p-3 bg-naranja/10 rounded-xl">
-                        <Activity className="text-naranja" size={24} />
-                    </div>
-                    <div>
-                        <p className="text-blanco font-bold text-sm">Arquitectura Basada en Evidencia</p>
-                        <p className="text-gris text-xs font-medium">Planificación 100% personalizada ajustada a los umbrales de recuperación IUSCA.</p>
-                    </div>
-                </div>
-                <div className="flex items-center gap-3 px-6 py-3 bg-marino-3 rounded-xl border border-marino-4">
-                    <Info size={16} className="text-gris" />
-                    <span className="text-gris text-[0.65rem] font-bold uppercase tracking-widest">Recuperación completa sugerida en Out-Days</span>
-                </div>
-            </div>
         </div>
     );
 }

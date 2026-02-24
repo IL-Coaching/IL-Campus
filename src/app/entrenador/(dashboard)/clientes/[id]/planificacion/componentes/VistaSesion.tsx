@@ -1,9 +1,9 @@
 "use client"
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Copy, Save, Info, Loader2, Dumbbell, ClipboardList, Gauge, Scale, Activity, HelpCircle, ShieldAlert, ChevronDown, ChevronUp, ChevronRight, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Copy, Save, Info, Loader2, Dumbbell, ClipboardList, Gauge, Scale, Activity, ShieldAlert, ChevronDown, ChevronUp, ChevronRight, AlertCircle, GripVertical } from 'lucide-react';
 import BannerCicloMenstrual from './BannerCicloMenstrual';
-import { DiaConEjercicios, EjercicioConDetalle } from '@/nucleo/tipos/planificacion.tipos';
-import { guardarCambiosEjercicio, eliminarEjercicio } from '@/nucleo/acciones/planificacion.accion';
+import { DiaConEjercicios, EjercicioConDetalle, SemanaConDias } from '@/nucleo/tipos/planificacion.tipos';
+import { guardarCambiosEjercicio, eliminarEjercicio, reordenarEjercicios } from '@/nucleo/acciones/planificacion.accion';
 import { obtenerCondicionesClinicas } from '@/nucleo/acciones/cliente.accion';
 import { ZONAS_INTENSIDAD } from '@/nucleo/planificacion/zonas.constantes';
 import { useRouter, useParams } from 'next/navigation';
@@ -12,19 +12,44 @@ import SelectorEjercicioCelda from './SelectorEjercicioCelda';
 
 interface VistaSesionProps {
     diaObjeto: DiaConEjercicios;
+    semanaObjeto: SemanaConDias;
     semanaNombre: string;
     onOpenBuscador: () => void;
 }
 
-export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }: VistaSesionProps) {
+export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onOpenBuscador }: VistaSesionProps) {
     const [ejercicios, setEjercicios] = useState<EjercicioConDetalle[]>(diaObjeto.ejercicios);
     const [saving, setSaving] = useState(false);
+    const [draggingIdx, setDraggingIdx] = useState<number | null>(null);
+    const [showNotes, setShowNotes] = useState(false);
     const [condiciones, setCondiciones] = useState<string[]>([]);
     const [showClinical, setShowClinical] = useState(true);
     const [drawerZonasOpen, setDrawerZonasOpen] = useState(false);
     const router = useRouter();
     const params = useParams();
     const clienteId = params.id as string;
+
+    const handleDragStart = (idx: number) => {
+        setDraggingIdx(idx);
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+    };
+
+    const handleDrop = async (idx: number) => {
+        if (draggingIdx === null || draggingIdx === idx) return;
+
+        const newEjercicios = [...ejercicios];
+        const [draggedItem] = newEjercicios.splice(draggingIdx, 1);
+        newEjercicios.splice(idx, 0, draggedItem);
+
+        setEjercicios(newEjercicios);
+        setDraggingIdx(null);
+
+        // Persistir orden
+        await reordenarEjercicios(diaObjeto.id, newEjercicios.map(e => e.id));
+    };
 
     useEffect(() => {
         const fetchCondiciones = async () => {
@@ -97,7 +122,9 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                     notas: ej.notasTecnicas || undefined,
                     ejercicioId: ej.ejercicioId,
                     nombreLibre: ej.nombreLibre,
-                    esBiblioteca: ej.esBiblioteca
+                    esBiblioteca: ej.esBiblioteca,
+                    esTesteo: ej.esTesteo,
+                    modalidadTesteo: ej.modalidadTesteo
                 });
             }
             router.refresh();
@@ -177,117 +204,139 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                 </div>
             )}
 
-            {/* Header Sesion Profesional */}
+            {/* Header Sesion Profesional — Mobile Optimized */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-marino-4 pb-6">
                 <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 bg-naranja/10 border border-naranja/20 rounded-2xl flex items-center justify-center">
+                    <div className="w-14 h-14 bg-naranja/10 border border-naranja/20 rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-naranja/5">
                         <ClipboardList className="text-naranja" size={28} />
                     </div>
                     <div>
                         <div className="flex items-center gap-3 mb-1">
-                            <span className="px-2 py-0.5 bg-naranja/10 border border-naranja/20 rounded text-[0.6rem] font-bold text-naranja uppercase tracking-widest">
+                            <span className="px-2 py-0.5 bg-naranja/10 border border-naranja/20 rounded text-[0.6rem] font-black text-naranja uppercase tracking-widest leading-none">
                                 {semanaNombre}
                             </span>
                         </div>
-                        <h2 className="text-4xl font-barlow-condensed font-black uppercase text-blanco leading-none tracking-tight">
+                        <h2 className="text-2xl md:text-4xl font-barlow-condensed font-black uppercase text-blanco leading-none tracking-tight">
                             {diaObjeto.diaSemana} — <span className="text-naranja">{diaObjeto.focoMuscular}</span>
                         </h2>
                     </div>
                 </div>
 
-                <div className="flex flex-wrap gap-4 w-full lg:w-auto">
+                <div className="grid grid-cols-2 md:flex md:flex-wrap gap-3 w-full lg:w-auto">
                     <button
                         onClick={() => setDrawerZonasOpen(true)}
-                        className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-marino-3 border border-marino-4 rounded-xl text-[0.65rem] font-black uppercase tracking-widest text-naranja hover:bg-marino-4 transition-all shadow-lg shadow-black/20"
+                        className="flex items-center justify-center gap-2 px-4 py-3 bg-marino-3 border border-marino-4 rounded-xl text-[0.6rem] font-black uppercase tracking-widest text-naranja hover:bg-marino-4 transition-all shadow-lg active:scale-95"
                     >
-                        <Gauge size={16} /> Ver Zonas
+                        <Gauge size={16} /> <span className="hidden md:inline">Ver</span> Zonas
                     </button>
                     <button
                         onClick={() => alert("Copiando estructura...")}
-                        className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-marino-3 border border-marino-4 rounded-xl text-[0.65rem] font-black uppercase tracking-widest text-gris hover:text-blanco transition-all shadow-lg shadow-black/20"
+                        className="flex items-center justify-center gap-2 px-4 py-3 bg-marino-3 border border-marino-4 rounded-xl text-[0.6rem] font-black uppercase tracking-widest text-gris hover:text-blanco transition-all shadow-lg active:scale-95"
                     >
-                        <Copy size={16} /> Copiar estructura
+                        <Copy size={16} /> <span className="hidden md:inline">Copiar</span> Estructura
                     </button>
                     <button
                         onClick={handleGuardarTodo}
                         disabled={saving}
-                        className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-10 py-2.5 bg-naranja border border-naranja hover:bg-naranja-h transition-all text-marino font-black rounded-xl text-[0.65rem] uppercase tracking-widest shadow-xl shadow-naranja/20"
+                        className="col-span-2 md:col-span-1 md:flex-1 flex items-center justify-center gap-3 px-8 py-4 md:py-3 bg-gradient-to-r from-naranja to-orange-400 hover:from-orange-400 hover:to-naranja transition-all text-marino font-black rounded-xl text-[0.65rem] uppercase tracking-widest shadow-xl shadow-naranja/20 active:scale-95 border-none"
                     >
-                        {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                        {saving ? "Guardando..." : "Guardar Plan"}
+                        {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                        {saving ? "Guardando..." : "Guardar Sesión"}
                     </button>
                 </div>
             </div>
 
-            {/* Nota Metodológica Flexible */}
-            <div className="bg-marino-2/50 p-6 rounded-2xl border border-marino-4 shadow-inner flex flex-col md:flex-row gap-6">
-                <div className="flex-1 space-y-2">
-                    <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest flex items-center gap-2">
-                        <Activity size={14} /> Foco & Metodología de Sesión
-                    </label>
-                    <textarea
-                        defaultValue={`${diaObjeto.focoMuscular} — Intensidad moderada, foco en la fase excéntrica.`}
-                        className="w-full bg-marino-3/50 border border-marino-4/50 rounded-xl px-4 py-3 text-sm text-blanco focus:outline-none focus:border-naranja/50 transition-all font-medium h-20 resize-none"
-                    />
-                </div>
-                <div className="w-full md:w-64 space-y-2">
-                    <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest flex items-center gap-2">
-                        <Info size={14} /> Notas de Recuperación
-                    </label>
-                    <textarea
-                        defaultValue="Priorizar sueño e hidratación post-sesión."
-                        className="w-full bg-marino-3/50 border border-marino-4/50 rounded-xl px-4 py-3 text-sm text-blanco focus:outline-none focus:border-naranja/50 transition-all font-medium h-20 resize-none"
-                    />
-                </div>
+            {/* Foco & Metodología — Acordeón Inteligente */}
+            <div className="bg-marino-2 border border-marino-4 rounded-3xl shadow-2xl overflow-hidden group">
+                <button
+                    onClick={() => setShowNotes(!showNotes)}
+                    className="w-full p-5 flex items-center justify-between hover:bg-marino-3/30 transition-colors"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-naranja/10 rounded-lg group-hover:scale-110 transition-transform">
+                            <Activity size={16} className="text-naranja" />
+                        </div>
+                        <span className="text-[0.7rem] font-black text-blanco uppercase tracking-[0.2em]">Metodología de Sesión</span>
+                    </div>
+                    {showNotes ? <ChevronUp size={18} className="text-naranja" /> : <ChevronDown size={18} className="text-gris" />}
+                </button>
+
+                {showNotes && (
+                    <div className="p-5 pt-2 flex flex-col md:flex-row gap-5 animate-in slide-in-from-top-4 duration-500">
+                        <div className="flex-1 space-y-2">
+                            <label className="text-[0.6rem] font-black text-gris uppercase tracking-widest pl-1">Protocolo Principal</label>
+                            <textarea
+                                defaultValue={`${diaObjeto.focoMuscular} — Intensidad moderada, foco en la fase excéntrica.`}
+                                className="w-full bg-marino-3/50 border border-marino-4/50 rounded-2xl px-5 py-4 text-sm text-blanco focus:outline-none focus:border-naranja/50 transition-all font-medium h-24 resize-none shadow-inner"
+                            />
+                        </div>
+                        <div className="w-full md:w-72 space-y-2">
+                            <label className="text-[0.6rem] font-black text-gris uppercase tracking-widest pl-1">Variables de Bio-Feedback</label>
+                            <textarea
+                                defaultValue="Priorizar sueño e hidratación post-sesión."
+                                className="w-full bg-marino-3/50 border border-marino-4/50 rounded-2xl px-5 py-4 text-sm text-blanco focus:outline-none focus:border-naranja/50 transition-all font-medium h-24 resize-none shadow-inner"
+                            />
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {/* Widget Perfil de Intensidad IUSCA */}
+            {/* Perfil de Intensidad IUSCA — Grid Adaptativo */}
             {perfil && (
-                <div className="bg-marino-2 border border-marino-4 rounded-2xl p-6 shadow-xl">
-                    <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-naranja/10 rounded-lg">
-                                <Gauge size={18} className="text-naranja" />
+                <div className="bg-marino-2 border border-marino-4 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-8 opacity-5 -mr-10 -mt-10 group-hover:rotate-12 transition-transform duration-1000">
+                        <Gauge size={160} />
+                    </div>
+
+                    <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center gap-4">
+                            <div className="p-2.5 bg-naranja/10 rounded-xl border border-naranja/10 group-hover:scale-110 transition-transform">
+                                <Activity size={20} className="text-naranja" />
                             </div>
-                            <h4 className="text-[0.65rem] font-black text-blanco uppercase tracking-widest">Perfil de Intensidad RIR</h4>
+                            <div>
+                                <h4 className="text-sm font-black text-blanco uppercase tracking-widest">Capacidad de Carga Científica</h4>
+                                <p className="text-[0.6rem] font-bold text-gris uppercase tracking-widest opacity-60">Consenso IUSCA / Repeticiones en Reserva</p>
+                            </div>
                         </div>
-                        <HelpCircle size={16} className="text-gris cursor-help" />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div className="space-y-3">
-                            <div className="flex justify-between text-[0.6rem] font-black uppercase tracking-widest">
-                                <span className="text-rojo">RIR 0-1 (Fallo)</span>
-                                <span className="text-blanco">{perfil.rir_0_1} ej.</span>
+                        {/* RIR 0-1 */}
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-end">
+                                <span className="text-[0.65rem] font-black uppercase tracking-widest text-rojo">RIR 0-1 (Fallo)</span>
+                                <span className="text-2xl font-barlow-condensed font-black text-blanco italic leading-none">{perfil.rir_0_1} <span className="text-[0.6rem] opacity-30">EJ.</span></span>
                             </div>
-                            <div className="h-1.5 w-full bg-marino-4 rounded-full overflow-hidden">
-                                <div className="h-full bg-rojo" style={{ width: `${(perfil.rir_0_1 / perfil.total) * 100}%` }}></div>
-                            </div>
-                        </div>
-                        <div className="space-y-3">
-                            <div className="flex justify-between text-[0.6rem] font-black uppercase tracking-widest">
-                                <span className="text-[#22C55E]">RIR 2-3 (Productiva)</span>
-                                <span className="text-blanco">{perfil.rir_2_3} ej.</span>
-                            </div>
-                            <div className="h-1.5 w-full bg-marino-4 rounded-full overflow-hidden">
-                                <div className="h-full bg-[#22C55E]" style={{ width: `${(perfil.rir_2_3 / perfil.total) * 100}%` }}></div>
+                            <div className="h-2 w-full bg-marino-4 rounded-full overflow-hidden shadow-inner">
+                                <div className="h-full bg-gradient-to-r from-rojo/50 to-rojo shadow-[0_0_15px_rgba(239,68,68,0.3)] transition-all duration-1000" style={{ width: `${(perfil.rir_0_1 / perfil.total) * 100}%` }}></div>
                             </div>
                         </div>
-                        <div className="space-y-3">
-                            <div className="flex justify-between text-[0.6rem] font-black uppercase tracking-widest">
-                                <span className="text-gris">RIR 4+ (Técnica)</span>
-                                <span className="text-blanco">{perfil.rir_4_mas} ej.</span>
+                        {/* RIR 2-3 */}
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-end">
+                                <span className="text-[0.65rem] font-black uppercase tracking-widest text-[#22C55E]">RIR 2-3 (Optimus)</span>
+                                <span className="text-2xl font-barlow-condensed font-black text-blanco italic leading-none">{perfil.rir_2_3} <span className="text-[0.6rem] opacity-30">EJ.</span></span>
                             </div>
-                            <div className="h-1.5 w-full bg-marino-4 rounded-full overflow-hidden">
-                                <div className="h-full bg-gris" style={{ width: `${(perfil.rir_4_mas / perfil.total) * 100}%` }}></div>
+                            <div className="h-2 w-full bg-marino-4 rounded-full overflow-hidden shadow-inner">
+                                <div className="h-full bg-gradient-to-r from-verde/50 to-verde shadow-[0_0_15px_rgba(34,197,94,0.3)] transition-all duration-1000" style={{ width: `${(perfil.rir_2_3 / perfil.total) * 100}%` }}></div>
+                            </div>
+                        </div>
+                        {/* RIR 4+ */}
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-end">
+                                <span className="text-[0.65rem] font-black uppercase tracking-widest text-gris-claro">RIR 4+ (Técnica)</span>
+                                <span className="text-2xl font-barlow-condensed font-black text-blanco italic leading-none">{perfil.rir_4_mas} <span className="text-[0.6rem] opacity-30">EJ.</span></span>
+                            </div>
+                            <div className="h-2 w-full bg-marino-4 rounded-full overflow-hidden shadow-inner">
+                                <div className="h-full bg-gradient-to-r from-gris/50 to-gris transition-all duration-1000" style={{ width: `${(perfil.rir_4_mas / perfil.total) * 100}%` }}></div>
                             </div>
                         </div>
                     </div>
 
                     {!perfil.distribucionCorrecta && (
-                        <div className="mt-6 flex items-start gap-3 p-4 bg-rojo/5 border border-rojo/20 rounded-xl">
-                            <Info size={16} className="text-rojo shrink-0 mt-0.5" />
-                            <p className="text-[0.65rem] font-medium text-rojo leading-relaxed">
+                        <div className="mt-8 flex items-start gap-4 p-5 bg-rojo/5 border border-rojo/20 rounded-2xl animate-pulse">
+                            <ShieldAlert size={18} className="text-rojo shrink-0 mt-0.5" />
+                            <p className="text-[0.65rem] font-bold text-rojo leading-relaxed uppercase tracking-tighter">
                                 {perfil.mensaje}
                             </p>
                         </div>
@@ -295,12 +344,123 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                 </div>
             )}
 
-            {/* Tabla de Planificación con Feedback Técnico */}
-            <div className="bg-marino-2 border border-marino-4 rounded-2xl overflow-hidden shadow-2xl relative">
-                <div className="overflow-x-auto">
+            {/* Listado de Ejercicios — Vista Móvil (Cards) & Desktop (Tabla) */}
+            <div className={`bg-marino-2 border rounded-3xl overflow-hidden shadow-2xl relative transition-all duration-500 ${semanaObjeto.esFaseDeload ? 'border-blue-500/30 ring-1 ring-blue-500/10 shadow-blue-900/10' : 'border-marino-4'}`}>
+                {semanaObjeto.esFaseDeload && (
+                    <div className="bg-gradient-to-r from-blue-900/30 to-blue-800/20 border-b border-blue-500/20 px-6 py-3.5 flex items-center gap-3">
+                        <Activity size={16} className="text-blue-400 animate-pulse" />
+                        <span className="text-[0.65rem] font-black text-blue-200 uppercase tracking-widest">Fase de Descarga Crítica Activa — Volumen Científico Reducido</span>
+                    </div>
+                )}
+
+                {/* Vista MOBILE: Cards de Ejercicio */}
+                <div className="block md:hidden divide-y divide-marino-4">
+                    {ejercicios.length === 0 ? (
+                        <div className="p-20 text-center">
+                            <Dumbbell size={48} className="text-marino-4 mx-auto mb-4 opacity-20" />
+                            <p className="text-[0.65rem] font-black text-gris uppercase tracking-[0.2em] italic">Sin arsenal operativo.<br />Planifique la sesión inferiormente.</p>
+                        </div>
+                    ) : ejercicios.map((ej, idx) => (
+                        <div key={ej.id} className="p-5 active:bg-marino-3/50 transition-colors">
+                            <div className="flex items-start justify-between gap-4 mb-4">
+                                <div className="flex items-center gap-3">
+                                    <span className="w-8 h-8 rounded-lg bg-marino-3 border border-marino-4 flex items-center justify-center text-[0.65rem] font-black text-gris">{idx + 1}</span>
+                                    <div className="flex-1">
+                                        <SelectorEjercicioCelda
+                                            initialValue={ej.ejercicio?.nombre || ej.nombreLibre || ""}
+                                            ejercicioId={ej.ejercicioId}
+                                            esBiblioteca={ej.esBiblioteca}
+                                            onSelect={(data) => handleUpdateChange(ej.id, {
+                                                ejercicioId: data.ejercicioId,
+                                                nombreLibre: data.nombre,
+                                                esBiblioteca: data.esBiblioteca
+                                            })}
+                                        />
+                                    </div>
+                                </div>
+                                <button onClick={() => handleEliminar(ej.id)} className="p-2 text-rojo/30 active:text-rojo active:bg-rojo/10 rounded-lg">
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-3 mb-4">
+                                <div className="bg-marino-3 rounded-2xl p-3 border border-marino-4/30">
+                                    <label className="text-[0.55rem] font-black text-gris uppercase tracking-widest block mb-1">Series</label>
+                                    <input
+                                        type="number"
+                                        value={ej.series}
+                                        onChange={(e) => handleUpdateChange(ej.id, { series: parseInt(e.target.value) })}
+                                        className="w-full bg-transparent text-xl font-barlow-condensed font-black text-blanco focus:outline-none"
+                                    />
+                                </div>
+                                <div className="bg-marino-3 rounded-2xl p-3 border border-marino-4/30">
+                                    <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest block mb-1">RIR</label>
+                                    <input
+                                        type="number"
+                                        value={ej.RIR !== null ? ej.RIR : ''}
+                                        onChange={(e) => handleUpdateChange(ej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
+                                        className="w-full bg-transparent text-xl font-barlow-condensed font-black text-naranja focus:outline-none"
+                                    />
+                                </div>
+                                <div className="bg-marino-3 rounded-2xl p-3 border border-marino-4/30">
+                                    <label className="text-[0.55rem] font-black text-verde uppercase tracking-widest block mb-1">Peso</label>
+                                    <input
+                                        type="number"
+                                        step="0.5"
+                                        value={ej.pesoSugerido || ''}
+                                        onChange={(e) => handleUpdateChange(ej.id, { pesoSugerido: parseFloat(e.target.value) })}
+                                        className="w-full bg-transparent text-xl font-barlow-condensed font-black text-verde focus:outline-none"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3 mb-4">
+                                <div className="flex-1 bg-marino-3 rounded-2xl p-3 border border-marino-4/30">
+                                    <label className="text-[0.55rem] font-black text-gris uppercase tracking-widest block mb-1">Reps Escalonadas</label>
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="number"
+                                            value={ej.repsMin}
+                                            onChange={(e) => handleUpdateChange(ej.id, { repsMin: parseInt(e.target.value) })}
+                                            className="w-12 bg-transparent text-sm font-black text-blanco focus:outline-none text-center"
+                                        />
+                                        <span className="text-gris/40">—</span>
+                                        <input
+                                            type="number"
+                                            value={ej.repsMax}
+                                            onChange={(e) => handleUpdateChange(ej.id, { repsMax: parseInt(e.target.value) })}
+                                            className="w-12 bg-transparent text-sm font-black text-blanco focus:outline-none text-center"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex-1 bg-marino-3 rounded-2xl p-3 border border-marino-4/30">
+                                    <label className="text-[0.55rem] font-black text-gris uppercase tracking-widest block mb-1">Descanso (Seg)</label>
+                                    <input
+                                        type="number"
+                                        value={ej.descansoSegundos !== null ? ej.descansoSegundos : ''}
+                                        onChange={(e) => handleUpdateChange(ej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
+                                        className="w-full bg-transparent text-sm font-black text-blanco focus:outline-none"
+                                    />
+                                </div>
+                            </div>
+
+                            <textarea
+                                value={ej.notasTecnicas || ''}
+                                onChange={(e) => handleUpdateChange(ej.id, { notasTecnicas: e.target.value })}
+                                className="w-full bg-marino-3/30 border border-marino-4/40 rounded-xl p-3 text-xs text-gris-claro font-medium italic focus:border-naranja/40 transition-all resize-none mb-2"
+                                placeholder="Notas técnicas específicas..."
+                                rows={2}
+                            />
+                        </div>
+                    ))}
+                </div>
+
+                {/* Vista DESKTOP: Tabla Profesional */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left text-sm border-collapse min-w-[1000px]">
                         <thead>
-                            <tr className="border-b border-marino-4 bg-marino-3/80">
+                            <tr className={`border-b border-marino-4 ${semanaObjeto.esFaseDeload ? 'bg-blue-900/20' : 'bg-marino-3/80'}`}>
+                                <th className="p-5 w-10"></th>
                                 <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-12 text-center">#</th>
                                 <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem]">Ejercicio / Patrón</th>
                                 <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-28 text-center">Repeticiones</th>
@@ -308,7 +468,7 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                                 <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-24 text-center">RIR</th>
                                 <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-24 text-center">Descanso</th>
                                 <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-24 text-center">Peso Kg</th>
-                                <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-32 text-center">Técnica/Feedback</th>
+                                <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-40 text-center">Técnica/Feedback</th>
                                 <th className="p-5 text-right w-12"></th>
                             </tr>
                         </thead>
@@ -327,7 +487,17 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                                     </td>
                                 </tr>
                             ) : ejercicios.map((ej, idx) => (
-                                <tr key={ej.id} className="group hover:bg-marino-3/40 transition-all">
+                                <tr
+                                    key={ej.id}
+                                    draggable="true"
+                                    onDragStart={() => handleDragStart(idx)}
+                                    onDragOver={handleDragOver}
+                                    onDrop={() => handleDrop(idx)}
+                                    className={`group hover:bg-marino-3/40 transition-all ${draggingIdx === idx ? 'opacity-20' : ''}`}
+                                >
+                                    <td className="p-5 text-gris text-center cursor-grab active:cursor-grabbing">
+                                        <GripVertical size={16} className="opacity-0 group-hover:opacity-100 transition-opacity mx-auto" />
+                                    </td>
                                     <td className="p-5 text-gris font-black text-lg text-center opacity-30 group-hover:opacity-100 transition-opacity">{idx + 1}</td>
                                     <td className="p-5">
                                         <SelectorEjercicioCelda
@@ -340,6 +510,39 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                                                 esBiblioteca: data.esBiblioteca
                                             })}
                                         />
+                                        <div className="mt-2 text-left">
+                                            <button
+                                                onClick={() => {
+                                                    const newValue = !ej.esTesteo;
+                                                    handleUpdateChange(ej.id, {
+                                                        esTesteo: newValue,
+                                                        modalidadTesteo: newValue ? 'INDIRECTO' : null
+                                                    })
+                                                }}
+                                                className={`text-[0.6rem] font-bold uppercase tracking-wider px-2 py-1 rounded transition-colors ${ej.esTesteo ? 'bg-naranja text-marino' : 'bg-marino-4/50 text-gris hover:text-blanco'}`}
+                                            >
+                                                {ej.esTesteo ? '✓ Configuración de Testeo' : '+ Marcar como Testeo'}
+                                            </button>
+
+                                            {ej.esTesteo && (
+                                                <div className="mt-2 flex items-center gap-1 bg-marino-4/30 p-1 rounded-lg">
+                                                    <button
+                                                        onClick={() => handleUpdateChange(ej.id, { modalidadTesteo: 'INDIRECTO' })}
+                                                        className={`flex-1 text-[0.55rem] font-black uppercase tracking-tighter py-1 rounded ${ej.modalidadTesteo === 'INDIRECTO' ? 'bg-naranja-oscuro text-naranja border border-naranja/30' : 'text-gris hover:bg-marino-4 transition-colors'}`}
+                                                        title="Fórmula Brzycki (Recomendado)"
+                                                    >
+                                                        Indirecto
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleUpdateChange(ej.id, { modalidadTesteo: 'DIRECTO' })}
+                                                        className={`flex-1 text-[0.55rem] font-black uppercase tracking-tighter py-1 rounded ${ej.modalidadTesteo === 'DIRECTO' ? 'bg-rojo/20 text-rojo border border-rojo/30' : 'text-gris hover:bg-marino-4 transition-colors'}`}
+                                                        title="1RM Real MÁXIMO"
+                                                    >
+                                                        Directo
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="p-5">
                                         <div className="flex flex-col gap-2">
@@ -409,6 +612,7 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                                             type="number"
                                             value={ej.series}
                                             onChange={(e) => handleUpdateChange(ej.id, { series: parseInt(e.target.value) })}
+                                            placeholder={semanaObjeto.esFaseDeload ? "Sugerido: -1/2" : "Sets"}
                                             className="w-full bg-marino-3 border border-marino-4/30 p-2.5 rounded-xl text-center text-blanco focus:outline-none focus:border-naranja/50 transition-all font-black text-[0.9rem]"
                                         />
                                     </td>
@@ -417,6 +621,7 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                                             type="number"
                                             value={ej.RIR !== null ? ej.RIR : ''}
                                             onChange={(e) => handleUpdateChange(ej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
+                                            placeholder={semanaObjeto.esFaseDeload ? "RIR 4+" : "RIR"}
                                             className="w-full bg-marino-3 border border-marino-4/30 p-2.5 rounded-xl text-center text-naranja focus:outline-none focus:border-naranja/50 transition-all font-black text-[0.9rem]"
                                         />
                                     </td>
@@ -473,59 +678,60 @@ export default function VistaSesion({ diaObjeto, semanaNombre, onOpenBuscador }:
                 <div className="p-6 bg-marino-3/30 border-t border-marino-4">
                     <button
                         onClick={onOpenBuscador}
-                        className="w-full p-8 border-2 border-dashed border-marino-4 rounded-2xl flex flex-col items-center justify-center gap-3 text-gris group hover:border-naranja/40 hover:bg-naranja/[0.03] hover:text-naranja transition-all"
+                        className="w-full p-8 border-2 border-dashed border-marino-4 rounded-3xl flex flex-col items-center justify-center gap-4 text-gris group hover:border-naranja/40 hover:bg-naranja/[0.03] hover:text-naranja transition-all"
                     >
-                        <div className="p-4 bg-marino-3 border border-marino-4 rounded-2xl group-hover:bg-naranja group-hover:text-marino group-hover:border-naranja transition-all shadow-inner">
-                            <Plus size={24} />
+                        <div className="p-4 bg-marino-3 border border-marino-4 rounded-2xl group-hover:bg-naranja group-hover:text-marino group-hover:border-naranja transition-all shadow-xl">
+                            <Plus size={32} strokeWidth={3} />
                         </div>
-                        <span className="font-barlow-condensed font-black uppercase tracking-[0.3em] text-sm">Añadir ejercicio al arsenal</span>
+                        <span className="font-barlow-condensed font-black uppercase tracking-[0.3em] text-sm md:text-md">Añadir ejercicio al arsenal operativo</span>
                     </button>
 
                     {/* Metricas de Pie de Sesion - Gualda Training Style */}
-                    <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
-                        <div className="flex items-center gap-4 p-4 bg-marino-3 border border-marino-4 rounded-2xl">
-                            <div className="p-3 bg-[#EF4444]/10 rounded-xl"><Activity className="text-[#EF4444]" size={20} /></div>
-                            <div>
-                                <label className="text-[0.55rem] font-black text-gris uppercase tracking-widest block mb-0.5">DOMS / Agujetas</label>
-                                <input placeholder="Nivel 0-10" className="bg-transparent border-none p-0 text-blanco font-bold text-xs focus:ring-0 placeholder:text-gris/30" />
+                    <div className="mt-10 grid grid-cols-2 lg:grid-cols-4 gap-4 px-0 md:px-4">
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-3 p-4 bg-marino-3 border border-marino-4 rounded-2xl group hover:border-[#EF4444]/30 transition-colors">
+                            <div className="p-2.5 bg-[#EF4444]/10 rounded-xl"><Activity className="text-[#EF4444]" size={18} /></div>
+                            <div className="w-full">
+                                <label className="text-[0.5rem] font-black text-gris uppercase tracking-widest block mb-1">DOMS / Agujetas</label>
+                                <input placeholder="Nivel 0-10" className="w-full bg-transparent border-none p-0 text-blanco font-bold text-sm focus:ring-0 placeholder:text-gris/20" />
                             </div>
                         </div>
-                        <div className="flex items-center gap-4 p-4 bg-marino-3 border border-marino-4 rounded-2xl">
-                            <div className="p-3 bg-[#60A5FA]/10 rounded-xl"><Gauge className="text-[#60A5FA]" size={20} /></div>
-                            <div>
-                                <label className="text-[0.55rem] font-black text-gris uppercase tracking-widest block mb-0.5">Esfuerzo Gral.</label>
-                                <input placeholder="RPE Sesión" className="bg-transparent border-none p-0 text-blanco font-bold text-xs focus:ring-0 placeholder:text-gris/30" />
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-3 p-4 bg-marino-3 border border-marino-4 rounded-2xl group hover:border-[#60A5FA]/30 transition-colors">
+                            <div className="p-2.5 bg-[#60A5FA]/10 rounded-xl"><Gauge className="text-[#60A5FA]" size={18} /></div>
+                            <div className="w-full">
+                                <label className="text-[0.5rem] font-black text-gris uppercase tracking-widest block mb-1">Esfuerzo Gral.</label>
+                                <input placeholder="RPE Sesión" className="w-full bg-transparent border-none p-0 text-blanco font-bold text-sm focus:ring-0 placeholder:text-gris/20" />
                             </div>
                         </div>
-                        <div className="flex items-center gap-4 p-4 bg-marino-3 border border-marino-4 rounded-2xl">
-                            <div className="p-3 bg-[#22C55E]/10 rounded-xl"><Scale className="text-[#22C55E]" size={20} /></div>
-                            <div>
-                                <label className="text-[0.55rem] font-black text-gris uppercase tracking-widest block mb-0.5">Pesaje del Día</label>
-                                <input placeholder="--.- kg" className="bg-transparent border-none p-0 text-blanco font-bold text-xs focus:ring-0 placeholder:text-gris/30" />
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-3 p-4 bg-marino-3 border border-marino-4 rounded-2xl group hover:border-[#22C55E]/30 transition-colors">
+                            <div className="p-2.5 bg-[#22C55E]/10 rounded-xl"><Scale className="text-[#22C55E]" size={18} /></div>
+                            <div className="w-full">
+                                <label className="text-[0.5rem] font-black text-gris uppercase tracking-widest block mb-1">Pesaje del Día</label>
+                                <input placeholder="--.- kg" className="w-full bg-transparent border-none p-0 text-blanco font-bold text-sm focus:ring-0 placeholder:text-gris/20" />
                             </div>
                         </div>
-                        <div className="flex items-center gap-4 p-4 bg-marino-3 border border-naranja/20 rounded-2xl">
-                            <div className="p-3 bg-naranja/10 rounded-xl"><Dumbbell className="text-naranja" size={20} /></div>
-                            <div>
-                                <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest block mb-0.5">Tonelaje SESIÓN</label>
-                                <span className="text-blanco font-black text-xs uppercase tracking-tighter">
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-3 p-4 bg-marino-3 border border-naranja/20 rounded-2xl group hover:border-naranja/40 transition-colors">
+                            <div className="p-2.5 bg-naranja/10 rounded-xl"><Dumbbell className="text-naranja" size={18} /></div>
+                            <div className="w-full">
+                                <label className="text-[0.5rem] font-black text-naranja uppercase tracking-widest block mb-1 font-black">Tonelaje SESIÓN</label>
+                                <span className="text-blanco font-black text-sm uppercase tracking-tighter">
                                     {ejercicios.reduce((acc, ej) => acc + (ej.series * (ej.repsMax || 0) * (ej.pesoSugerido || 0)), 0).toLocaleString()} KG
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="mt-10 pt-6 border-t border-marino-4/50 flex flex-col md:flex-row justify-between items-center gap-4 text-gris text-[0.6rem] font-bold uppercase tracking-[0.2em]">
-                        <div className="flex items-center gap-2 px-4 py-2 bg-marino-3 rounded-full border border-marino-4">
+                    <div className="mt-10 pt-6 border-t border-marino-4/50 flex flex-col md:flex-row justify-between items-center gap-6 text-gris text-[0.6rem] font-bold uppercase tracking-[0.2em]">
+                        <div className="flex items-center gap-3 px-5 py-2.5 bg-marino-3 rounded-full border border-marino-4 shadow-inner">
                             <Info size={14} className="text-naranja" />
                             <span>Metodología de Alto Rendimiento — IL-CAMPUS Professional</span>
                         </div>
-                        <div className="flex gap-4">
-                            <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-naranja"></div> Sarcoplasmática</span>
-                            <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-[#EF4444]"></div> Neural / Fuerza</span>
+                        <div className="flex gap-6 opacity-60">
+                            <span className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-naranja shadow-[0_0_8px_rgba(232,119,23,0.3)]"></div> Sarcoplasmática</span>
+                            <span className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-[#EF4444] shadow-[0_0_8px_rgba(239,68,68,0.3)]"></div> Neural / Fuerza</span>
                         </div>
                     </div>
                 </div>
+
             </div>
 
             {/* Sidebar Drawer de Zonas (Referencia Científica) */}

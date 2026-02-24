@@ -29,15 +29,15 @@ export default function ClienteTabs({ cliente }: Props) {
 
     return (
         <div className="space-y-6">
-            {/* Nav Tabs */}
-            <div className="flex flex-wrap gap-2 border-b border-marino-4 pb-4">
+            {/* Nav Tabs — Navegación Táctica Scrollable */}
+            <div className="flex overflow-x-auto no-scrollbar gap-2 border-b border-marino-4 pb-4 -mx-4 px-4 md:mx-0 md:px-0">
                 {TABS.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setTabActiva(tab.id)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${tabActiva === tab.id
-                            ? "bg-naranja text-marino shadow-lg shadow-naranja/10"
-                            : "text-gris hover:text-blanco hover:bg-marino-3/50"
+                        className={`flex-none flex items-center gap-2 px-6 py-3 rounded-xl text-[0.65rem] font-black uppercase tracking-[0.2em] transition-all duration-300 ${tabActiva === tab.id
+                            ? "bg-naranja text-marino shadow-[0_10px_20px_rgba(232,119,23,0.2)] scale-105"
+                            : "text-gris-claro hover:text-blanco bg-marino-3/30 border border-marino-4/50"
                             }`}
                     >
                         {tab.icon} {tab.label}
@@ -50,7 +50,7 @@ export default function ClienteTabs({ cliente }: Props) {
                 {tabActiva === "resumen" && <TabResumen cliente={cliente} />}
                 {tabActiva === "metricas" && <TabMetricas clienteId={cliente.id} />}
                 {tabActiva === "expediente" && <TabExpediente cliente={cliente} />}
-                {tabActiva === "finanzas" && <TabFinanzas clienteId={cliente.id} />}
+                {tabActiva === "finanzas" && <TabFinanzas clienteId={cliente.id} clienteNombre={cliente.nombre} />}
             </div>
         </div>
     );

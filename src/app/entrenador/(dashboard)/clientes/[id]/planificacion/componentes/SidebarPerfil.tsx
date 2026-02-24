@@ -1,5 +1,5 @@
 "use client"
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     User,
     Target,
@@ -12,12 +12,17 @@ import {
     Info,
     ShieldAlert,
     Loader2,
-    Microscope
+    Microscope,
+    Snowflake,
+    CheckCircle2,
+    AlertCircle
 } from 'lucide-react';
 
 import { ClientePlanificacion } from '@/nucleo/tipos/planificacion.tipos';
 import { generarLinkRecuperacionManual } from '@/nucleo/acciones/password.accion';
 import { obtenerPorcentajesCalculados } from '@/nucleo/acciones/testeo.accion';
+import { alternarEstasisCliente } from '@/nucleo/acciones/cliente.accion';
+import { obtenerResumenFinanciero } from '@/nucleo/acciones/finanzas.accion';
 
 interface SidebarPerfilProps {
     cliente: ClientePlanificacion;
@@ -26,6 +31,18 @@ interface SidebarPerfilProps {
 export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
     const [colapsado, setColapsado] = useState(false);
     const [tabActiva, setTabActiva] = useState(0);
+
+    const [statusFin, setStatusFin] = useState<'AL_DIA' | 'VENCIDO' | 'SIN_PLAN' | null>(null);
+    const [loadingFin, setLoadingFin] = useState(true);
+
+    useEffect(() => {
+        const fetchFinanzas = async () => {
+            const res = await obtenerResumenFinanciero(cliente.id);
+            if (res) setStatusFin(res.estado);
+            setLoadingFin(false);
+        };
+        fetchFinanzas();
+    }, [cliente.id]);
 
     const TABS = [
         { id: 0, icon: Target, label: 'Objetivos' },
@@ -289,11 +306,51 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                 )}
 
                 {tabActiva === 6 && (
-                    <div className="space-y-5 animate-in fade-in slide-in-from-left-2">
+                    <div className="space-y-4 animate-in fade-in slide-in-from-left-2 pb-6">
+                        {/* Status de Pago */}
+                        <div className="p-4 bg-marino-3 border border-marino-4 rounded-2xl">
+                            <span className="text-[0.65rem] text-naranja font-black uppercase tracking-widest block mb-3">Situación Financiera</span>
+                            <div className="flex items-center gap-3">
+                                {loadingFin ? (
+                                    <Loader2 size={16} className="animate-spin text-gris" />
+                                ) : statusFin === 'AL_DIA' ? (
+                                    <div className="flex items-center gap-2 text-verde">
+                                        <CheckCircle2 size={16} />
+                                        <span className="text-[0.7rem] font-black uppercase tracking-widest">Al Día</span>
+                                    </div>
+                                ) : statusFin === 'VENCIDO' ? (
+                                    <div className="flex items-center gap-2 text-rojo">
+                                        <AlertCircle size={16} />
+                                        <span className="text-[0.7rem] font-black uppercase tracking-widest">Pago Pendiente</span>
+                                    </div>
+                                ) : (
+                                    <span className="text-[0.7rem] text-gris font-black uppercase">Sin Información</span>
+                                )}
+                            </div>
+                            <p className="mt-2 text-[0.6rem] text-gris font-medium italic">Gestioná los cobros desde la pestaña Finanzas del perfil principal.</p>
+                        </div>
+
+                        <div className="p-4 bg-marino-3 border border-marino-4 rounded-2xl">
+                            <span className="text-[0.65rem] text-naranja font-black uppercase tracking-widest block mb-3">Gestión de Membresía</span>
+                            <button
+                                onClick={async () => {
+                                    const res = await alternarEstasisCliente(cliente.id, !cliente.enEstasis);
+                                    if (res.exito) window.location.reload();
+                                }}
+                                className={`w-full flex items-center justify-center gap-2 py-3 border rounded-xl text-xs font-black uppercase tracking-widest transition-all ${cliente.enEstasis ? 'bg-blue-500 text-marino border-blue-400' : 'bg-marino-4 border-marino-4 text-blanco hover:border-blue-500/50'}`}
+                            >
+                                <Snowflake size={16} className={cliente.enEstasis ? 'animate-spin-slow' : ''} />
+                                {cliente.enEstasis ? '✓ En Éstasis' : 'Pausar (Éstasis)'}
+                            </button>
+                            <p className="mt-3 text-[0.6rem] text-gris font-medium leading-relaxed italic">
+                                La pausa congela el acceso del alumno pero mantiene su cupo y datos intactos.
+                            </p>
+                        </div>
+
                         <button
                             onClick={handleGenerarLink}
                             disabled={generandoLink}
-                            className="w-full flex items-center justify-center gap-2 py-3 bg-marino-3 border border-marino-4 hover:border-naranja/50 rounded-lg text-xs font-bold text-blanco uppercase tracking-widest transition-all disabled:opacity-50"
+                            className="w-full flex items-center justify-center gap-2 py-3 bg-marino-3 border border-marino-4 hover:border-naranja/50 rounded-xl text-xs font-bold text-blanco uppercase tracking-widest transition-all disabled:opacity-50"
                         >
                             {generandoLink ? <Loader2 size={16} className="animate-spin text-naranja" /> : <ShieldAlert size={16} className="text-gris" />}
                             Recuperar Cuenta

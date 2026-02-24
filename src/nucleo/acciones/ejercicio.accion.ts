@@ -3,6 +3,7 @@
 import { getEntrenadorSesion } from "../seguridad/sesion";
 import { EjercicioServicio } from "../servicios/ejercicio.servicio";
 import { GrupoMuscular, TipoArticulacion, PatronMovimiento, TipoEquipamiento, Lateralidad } from "@prisma/client";
+import { prisma } from "@/baseDatos/conexion";
 
 export async function buscarEjercicios(query: string = "", musculoFiltro?: string) {
     try {
@@ -21,13 +22,13 @@ export async function crearEjercicio(formData: Record<string, unknown>) {
 
         await EjercicioServicio.crear({
             nombre: (formData.nombre as string) || "Sin nombre",
-            musculoPrincipal: (formData.musculoPrincipal as GrupoMuscular) || "CUADRICEPS",
-            articulacion: (formData.articulacion as TipoArticulacion) || "MONOARTICULAR",
-            patron: (formData.patronMovimiento as PatronMovimiento) || "AISLAMIENTO",
-            equipamiento: formData.equipamiento ? [formData.equipamiento as TipoEquipamiento] : ["MAQUINA"],
+            musculoPrincipal: (formData.musculoPrincipal as GrupoMuscular),
+            articulacion: (formData.articulacion as TipoArticulacion),
+            patron: (formData.patronMovimiento as PatronMovimiento) || (formData.patron as PatronMovimiento) || "AISLAMIENTO",
+            equipamiento: (formData.equipamiento as TipoEquipamiento[]) || ["OTRO"],
             lateralidad: (formData.lateralidad as Lateralidad) || "BILATERAL",
             descripcion: formData.descripcion as string,
-            urlVideo: formData.videoUrl as string,
+            urlVideo: (formData.videoUrl as string) || (formData.urlVideo as string),
             entrenadorId: entrenador.id
         });
 
@@ -40,15 +41,23 @@ export async function crearEjercicio(formData: Record<string, unknown>) {
 
 export async function actualizarEjercicio(id: string, formData: Record<string, unknown>) {
     try {
+        const entrenador = await getEntrenadorSesion();
+
+        const ejercicioPropio = await prisma.ejercicio.findFirst({
+            where: { id, entrenadorId: entrenador.id }
+        });
+
+        if (!ejercicioPropio) throw new Error("Acceso denegado.");
+
         await EjercicioServicio.actualizar(id, {
             nombre: formData.nombre as string,
             musculoPrincipal: formData.musculoPrincipal as GrupoMuscular,
             articulacion: formData.articulacion as TipoArticulacion,
-            patron: formData.patron as PatronMovimiento,
+            patron: (formData.patronMovimiento as PatronMovimiento) || (formData.patron as PatronMovimiento),
             equipamiento: formData.equipamiento as TipoEquipamiento[],
             lateralidad: formData.lateralidad as Lateralidad,
             descripcion: formData.descripcion as string,
-            urlVideo: formData.urlVideo as string,
+            urlVideo: (formData.videoUrl as string) || (formData.urlVideo as string),
         });
         return { exito: true };
     } catch (error) {
@@ -59,6 +68,14 @@ export async function actualizarEjercicio(id: string, formData: Record<string, u
 
 export async function archivarEjercicio(id: string) {
     try {
+        const entrenador = await getEntrenadorSesion();
+
+        const ejercicioPropio = await prisma.ejercicio.findFirst({
+            where: { id, entrenadorId: entrenador.id }
+        });
+
+        if (!ejercicioPropio) throw new Error("Acceso denegado.");
+
         await EjercicioServicio.archivar(id);
         return { exito: true };
     } catch (error) {
@@ -69,6 +86,14 @@ export async function archivarEjercicio(id: string) {
 
 export async function duplicarEjercicio(id: string) {
     try {
+        const entrenador = await getEntrenadorSesion();
+
+        const original = await prisma.ejercicio.findFirst({
+            where: { id, entrenadorId: entrenador.id }
+        });
+
+        if (!original) throw new Error("Acceso denegado.");
+
         const nuevo = await EjercicioServicio.duplicar(id);
         return { exito: true, id: nuevo.id };
     } catch (error) {

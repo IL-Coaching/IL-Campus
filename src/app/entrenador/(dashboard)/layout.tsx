@@ -1,4 +1,5 @@
 import SidebarEntrenador from "@/compartido/componentes/SidebarEntrenador";
+import BottomNav from "@/compartido/componentes/BottomNav";
 import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";
 import { obtenerContadorMensajeria } from "@/nucleo/acciones/mensajeria.accion";
 
@@ -32,11 +33,14 @@ export default async function EntrenadorLayout({
             <SidebarEntrenador badgeMensajeria={countBadge} />
 
             {/* Contenido principal con padding superior de seguridad (Safe Area) */}
-            <main className="flex-1 md:ml-64 pt-28 md:pt-20 pb-16 min-h-screen relative z-10">
-                <div className="px-6 md:px-12 max-w-7xl mx-auto w-full">
+            <main className="flex-1 md:ml-64 pt-24 md:pt-20 pb-32 md:pb-16 min-h-screen relative z-10">
+                <div className="px-4 md:px-12 max-w-7xl mx-auto w-full">
                     {children}
                 </div>
             </main>
+
+            {/* Navegación Inferior — Movil Force */}
+            <BottomNav badgeMensajeria={countBadge} />
         </div>
     );
 }

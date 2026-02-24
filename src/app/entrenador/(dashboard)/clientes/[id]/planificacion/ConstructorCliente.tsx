@@ -122,6 +122,11 @@ export default function ConstructorCliente({ cliente, macrocicloInicial, limiteC
                                     macrociclo={macrocicloInicial}
                                     limiteSemanas={limiteComercialSemanas}
                                     onSelectMeso={(n) => { setMesActivo(n); irA('meso'); }}
+                                    onSelectWeek={(m, s) => {
+                                        setMesActivo(m);
+                                        setSemanaActiva(s);
+                                        irA('micro');
+                                    }}
                                     onConfigurar={() => setConfigurarMacroOpen(true)}
                                     onNuevoMesociclo={() => setNuevoMesoOpen(true)}
                                 />
@@ -143,9 +148,10 @@ export default function ConstructorCliente({ cliente, macrocicloInicial, limiteC
                                 />
                             )}
 
-                            {vistaActual === 'sesion' && diaObjetoActual && (
+                            {vistaActual === 'sesion' && diaObjetoActual && semanaActual && (
                                 <VistaSesion
                                     diaObjeto={diaObjetoActual}
+                                    semanaObjeto={semanaActual}
                                     semanaNombre={`Semana ${semanaActiva}`}
                                     onOpenBuscador={() => setBuscadorOpen(true)}
                                 />

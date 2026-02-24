@@ -183,6 +183,29 @@ export async function alternarEstadoCliente(clienteId: string, activo: boolean) 
     }
 }
 
+export async function alternarEstasisCliente(clienteId: string, enEstasis: boolean) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        const cliente = await prisma.cliente.findFirst({
+            where: { id: clienteId, entrenadorId: entrenador.id }
+        });
+
+        if (!cliente) return { error: "Cliente no encontrado o acceso denegado." };
+
+        await prisma.cliente.update({
+            where: { id: clienteId },
+            data: { enEstasis }
+        });
+
+        revalidatePath(`/entrenador/clientes/${clienteId}/planificacion`);
+        return { exito: true };
+    } catch (error) {
+        console.error("Error al alternar estasis cliente:", error);
+        return { error: "No se pudo cambiar el estado de éstasis." };
+    }
+}
+
 export async function actualizarNotasCliente(clienteId: string, notas: string) {
     try {
         const entrenador = await getEntrenadorSesion();

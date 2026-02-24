@@ -32,8 +32,9 @@ import {
     Lateralidad,
     OrigenEjercicio,
     NivelTecnico
-} from ".prisma/client";
+} from "@prisma/client";
 import { useRouter } from "next/navigation";
+import ModalEditarEjercicio from "./ModalEditarEjercicio";
 
 // Definición extendida para la UI
 interface Ejercicio {
@@ -71,6 +72,7 @@ export default function BibliotecaEjercicios({ iniciales }: { iniciales: Ejercic
 
     // Ejercicio seleccionado para modal de detalle
     const [selectedEjercicio, setSelectedEjercicio] = useState<Ejercicio | null>(null);
+    const [editingEjercicio, setEditingEjercicio] = useState<Ejercicio | null>(null);
 
     // Filtrado local combinado
     const ejerciciosFiltrados = useMemo(() => {
@@ -438,8 +440,8 @@ export default function BibliotecaEjercicios({ iniciales }: { iniciales: Ejercic
                                 <div className="p-3 bg-naranja/10 rounded-2xl">
                                     <Dumbbell className="text-naranja" size={24} />
                                 </div>
-                                <div>
-                                    <h3 className="text-2xl font-barlow-condensed font-black uppercase text-blanco leading-none mb-1">{selectedEjercicio.nombre}</h3>
+                                <div className="max-w-[calc(100%-100px)]">
+                                    <h3 className="text-2xl font-barlow-condensed font-black uppercase text-blanco leading-none mb-1 truncate">{selectedEjercicio.nombre}</h3>
                                     <span className="text-xs font-bold text-naranja uppercase tracking-widest">{selectedEjercicio.musculoPrincipal} · {selectedEjercicio.patron}</span>
                                 </div>
                             </div>
@@ -517,7 +519,13 @@ export default function BibliotecaEjercicios({ iniciales }: { iniciales: Ejercic
                                 </div>
 
                                 <div className="pt-6 flex gap-4">
-                                    <button className="flex-1 py-4 bg-naranja hover:bg-naranja-h transition-all text-marino font-black rounded-2xl text-[0.7rem] uppercase tracking-widest shadow-xl shadow-naranja/20 flex items-center justify-center gap-2">
+                                    <button
+                                        onClick={() => {
+                                            setEditingEjercicio(selectedEjercicio);
+                                            setSelectedEjercicio(null);
+                                        }}
+                                        className="flex-1 py-4 bg-naranja hover:bg-naranja-h transition-all text-marino font-black rounded-2xl text-[0.7rem] uppercase tracking-widest shadow-xl shadow-naranja/20 flex items-center justify-center gap-2"
+                                    >
                                         Editar Ejercicio
                                     </button>
                                     <button
@@ -531,6 +539,13 @@ export default function BibliotecaEjercicios({ iniciales }: { iniciales: Ejercic
                         </div>
                     </div>
                 </div>
+            )}
+
+            {editingEjercicio && (
+                <ModalEditarEjercicio
+                    ejercicio={editingEjercicio}
+                    onClose={() => setEditingEjercicio(null)}
+                />
             )}
         </div>
     );

@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { getEntrenadorSesion } from "../seguridad/sesion";
 import { PlanificacionServicio } from "../servicios/planificacion.servicio";
 import { prisma } from "@/baseDatos/conexion";
-import { EsquemaNuevoMacrociclo, EsquemaActualizarEjercicio } from "../validadores/planificacion.validador";
+import { TipoCarga, ModeloPeriodizacion } from "@prisma/client";
+import { EsquemaNuevoMacrociclo, EsquemaActualizarEjercicio, EsquemaActualizarSemana, EsquemaActualizarMesociclo, EsquemaActualizarMacrociclo, EsquemaNuevoMesociclo } from "../validadores/planificacion.validador";
 
 /**
  * Acciones de Planificación — ArchSecure AI
@@ -61,6 +62,8 @@ export async function guardarCambiosEjercicio(ejercicioPlanificadoId: string, da
     ejercicioId?: string | null;
     nombreLibre?: string | null;
     esBiblioteca?: boolean;
+    esTesteo?: boolean;
+    modalidadTesteo?: 'DIRECTO' | 'INDIRECTO' | null;
 }) {
     try {
         const entrenador = await getEntrenadorSesion();
@@ -104,7 +107,9 @@ export async function guardarCambiosEjercicio(ejercicioPlanificadoId: string, da
             notasTecnicas: validacion.data.notas,
             ejercicioId: validacion.data.ejercicioId,
             nombreLibre: validacion.data.nombreLibre,
-            esBiblioteca: validacion.data.esBiblioteca
+            esBiblioteca: validacion.data.esBiblioteca,
+            esTesteo: validacion.data.esTesteo,
+            modalidadTesteo: validacion.data.modalidadTesteo,
         });
 
         return { exito: true };
@@ -178,11 +183,39 @@ export async function eliminarEjercicio(id: string) {
     }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function actualizarSemana(id: string, data: any) {
+export async function actualizarSemana(id: string, data: {
+    objetivoSemana?: string;
+    RIRobjetivo?: number;
+    volumenEstimado?: string;
+    esFaseDeload?: boolean;
+    esSemanaTesteo?: boolean;
+    tipoCarga?: TipoCarga;
+    modeloPeriodizacion?: ModeloPeriodizacion;
+    checkinRequerido?: boolean;
+}) {
     try {
-        await getEntrenadorSesion();
-        await PlanificacionServicio.actualizarSemana(id, data);
+        const entrenador = await getEntrenadorSesion();
+
+        const validacion = EsquemaActualizarSemana.safeParse(data);
+        if (!validacion.success) {
+            return { error: validacion.error.issues[0].message };
+        }
+
+        // Mitigación BOLA
+        const semanaPropia = await prisma.semana.findFirst({
+            where: {
+                id,
+                bloqueMensual: {
+                    macrociclo: {
+                        cliente: { entrenadorId: entrenador.id }
+                    }
+                }
+            }
+        });
+
+        if (!semanaPropia) throw new Error("Acceso denegado.");
+
+        await PlanificacionServicio.actualizarSemana(id, validacion.data);
         revalidatePath(`/entrenador/clientes`);
         return { exito: true };
     } catch (error) {
@@ -197,8 +230,26 @@ export async function actualizarMesociclo(id: string, data: {
     rangoReferencia?: string;
 }) {
     try {
-        await getEntrenadorSesion();
-        await PlanificacionServicio.actualizarBloqueMensual(id, data);
+        const entrenador = await getEntrenadorSesion();
+
+        const validacion = EsquemaActualizarMesociclo.safeParse(data);
+        if (!validacion.success) {
+            return { error: validacion.error.issues[0].message };
+        }
+
+        // Mitigación BOLA
+        const bloquePropio = await prisma.bloqueMensual.findFirst({
+            where: {
+                id,
+                macrociclo: {
+                    cliente: { entrenadorId: entrenador.id }
+                }
+            }
+        });
+
+        if (!bloquePropio) throw new Error("Acceso denegado.");
+
+        await PlanificacionServicio.actualizarBloqueMensual(id, validacion.data);
         revalidatePath(`/entrenador/clientes`);
         return { exito: true };
     } catch (error) {
@@ -213,13 +264,95 @@ export async function actualizarMacrociclo(id: string, data: {
     notas?: string;
 }) {
     try {
-        await getEntrenadorSesion();
-        await PlanificacionServicio.actualizarMacrociclo(id, data);
+        const entrenador = await getEntrenadorSesion();
+
+        const validacion = EsquemaActualizarMacrociclo.safeParse(data);
+        if (!validacion.success) {
+            return { error: validacion.error.issues[0].message };
+        }
+
+        // Mitigación BOLA
+        const macroPropio = await prisma.macrociclo.findFirst({
+            where: {
+                id,
+                cliente: { entrenadorId: entrenador.id }
+            }
+        });
+        if (!macroPropio) throw new Error("Acceso denegado.");
+
+        await PlanificacionServicio.actualizarMacrociclo(id, validacion.data);
         revalidatePath(`/entrenador/clientes`);
         return { exito: true };
     } catch (error) {
         const mensaje = error instanceof Error ? error.message : "Error desconocido";
         return { error: mensaje };
+    }
+}
+
+export async function clonarContenidoSemana(idOrigen: string, idDestino: string) {
+    try {
+        await getEntrenadorSesion();
+
+        const origen = await prisma.semana.findUnique({
+            where: { id: idOrigen },
+            include: {
+                diasSesion: {
+                    include: {
+                        ejercicios: true
+                    }
+                }
+            }
+        });
+
+        if (!origen) throw new Error("Semana origen no encontrada.");
+
+        await prisma.$transaction(async (tx) => {
+            // Limpiar destino
+            const diasDestino = await tx.diaSesion.findMany({ where: { semanaId: idDestino } });
+            for (const dia of diasDestino) {
+                await tx.ejercicioPlanificado.deleteMany({ where: { diaId: dia.id } });
+            }
+            await tx.diaSesion.deleteMany({ where: { semanaId: idDestino } });
+
+            // Copiar
+            for (const dia of origen.diasSesion) {
+                const nuevoDia = await tx.diaSesion.create({
+                    data: {
+                        semanaId: idDestino,
+                        diaSemana: dia.diaSemana,
+                        focoMuscular: dia.focoMuscular,
+                    }
+                });
+
+                for (const ej of dia.ejercicios) {
+                    await tx.ejercicioPlanificado.create({
+                        data: {
+                            diaId: nuevoDia.id,
+                            ejercicioId: ej.ejercicioId,
+                            nombreLibre: ej.nombreLibre,
+                            esBiblioteca: ej.esBiblioteca,
+                            series: ej.series,
+                            repsMin: ej.repsMin,
+                            repsMax: ej.repsMax,
+                            RIR: ej.RIR,
+                            tempo: ej.tempo,
+                            descansoSegundos: ej.descansoSegundos,
+                            pesoSugerido: ej.pesoSugerido,
+                            notasTecnicas: ej.notasTecnicas,
+                            orden: ej.orden,
+                            esTesteo: ej.esTesteo,
+                            modalidadTesteo: ej.modalidadTesteo
+                        }
+                    });
+                }
+            }
+        });
+
+        revalidatePath(`/entrenador/clientes`);
+        return { exito: true };
+    } catch (error) {
+        console.error("Error al clonar semana:", error);
+        return { error: "No se pudo clonar el contenido." };
     }
 }
 
@@ -232,10 +365,26 @@ export async function agregarMesociclo(macrocicloId: string, data: {
     numSesiones?: number;
 }) {
     try {
-        await getEntrenadorSesion();
+        const entrenador = await getEntrenadorSesion();
+
+        const validacion = EsquemaNuevoMesociclo.safeParse(data);
+        if (!validacion.success) {
+            return { error: validacion.error.issues[0].message };
+        }
+
+        // Mitigación BOLA
+        const macroPropio = await prisma.macrociclo.findFirst({
+            where: {
+                id: macrocicloId,
+                cliente: { entrenadorId: entrenador.id }
+            }
+        });
+
+        if (!macroPropio) throw new Error("Acceso denegado.");
+
         await PlanificacionServicio.agregarMesociclo(macrocicloId, {
-            ...data,
-            numSesionesPorSemana: data.numSesiones
+            ...validacion.data,
+            numSesionesPorSemana: validacion.data.numSesiones
         });
         revalidatePath(`/entrenador/clientes`);
         return { exito: true };
@@ -325,11 +474,61 @@ export async function eliminarMesociclo(id: string) {
 
 export async function obtenerVolumenSemanal(semanaId: string) {
     try {
-        await getEntrenadorSesion();
+        const entrenador = await getEntrenadorSesion();
+
+        // Mitigación BOLA
+        const semanaPropia = await prisma.semana.findFirst({
+            where: {
+                id: semanaId,
+                bloqueMensual: {
+                    macrociclo: {
+                        cliente: { entrenadorId: entrenador.id }
+                    }
+                }
+            }
+        });
+
+        if (!semanaPropia) throw new Error("Acceso denegado.");
+
         const { VolumenServicio } = await import("../servicios/volumen.servicio");
         const volumen = await VolumenServicio.calcularVolumenSemanal(semanaId);
         return { exito: true, volumen };
     } catch (error) {
         return { error: error instanceof Error ? error.message : "Error" };
+    }
+}
+export async function reordenarEjercicios(diaId: string, ejercicioIds: string[]) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        // Mitigación BOLA
+        const diaPropio = await prisma.diaSesion.findFirst({
+            where: {
+                id: diaId,
+                semana: {
+                    bloqueMensual: {
+                        macrociclo: {
+                            cliente: { entrenadorId: entrenador.id }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!diaPropio) throw new Error("Acceso denegado.");
+
+        await prisma.$transaction(
+            ejercicioIds.map((id, index) =>
+                prisma.ejercicioPlanificado.update({
+                    where: { id },
+                    data: { orden: index + 1 }
+                })
+            )
+        );
+
+        revalidatePath(`/entrenador/clientes`);
+        return { exito: true };
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : "Error al reordenar" };
     }
 }

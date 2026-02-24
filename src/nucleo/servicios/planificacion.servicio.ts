@@ -1,6 +1,6 @@
 import { prisma } from "@/baseDatos/conexion";
 import { MacrocicloCompleto } from "../tipos/planificacion.tipos";
-import { TipoCarga, Prisma } from "@prisma/client";
+import { TipoCarga, Prisma, ModeloPeriodizacion } from "@prisma/client";
 
 /**
  * Servicio de Planificación — ArchSecure AI
@@ -94,6 +94,8 @@ export const PlanificacionServicio = {
         esFaseDeload?: boolean;
         esSemanaTesteo?: boolean;
         tipoCarga?: TipoCarga;
+        modeloPeriodizacion?: ModeloPeriodizacion;
+        checkinRequerido?: boolean;
     }) {
         const semanaActualizada = await prisma.semana.update({
             where: { id },
@@ -171,6 +173,8 @@ export const PlanificacionServicio = {
         ejercicioId?: string | null;
         nombreLibre?: string | null;
         esBiblioteca?: boolean;
+        esTesteo?: boolean;
+        modalidadTesteo?: 'DIRECTO' | 'INDIRECTO' | null;
     }) {
         return await prisma.ejercicioPlanificado.update({
             where: { id },

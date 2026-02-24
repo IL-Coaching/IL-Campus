@@ -104,7 +104,7 @@ export default function TabResumen({ cliente }: Props) {
                             onChange={(e) => setNotas(e.target.value)}
                             onBlur={handleGuardarNotas}
                             placeholder="Escribe aquí notas sobre el entrenado..."
-                            className="w-full h-full min-h-[300px] bg-marino p-4 rounded-xl border border-marino-4 text-sm text-gris-claro leading-relaxed resize-none focus:outline-none focus:border-naranja/50 transition-colors"
+                            className="w-full h-full min-h-[200px] md:min-h-[300px] bg-marino p-6 rounded-2xl border border-marino-4 text-sm text-gris-claro leading-relaxed resize-none focus:outline-none focus:border-naranja/50 transition-colors shadow-inner"
                         />
                         <button
                             onClick={handleGuardarNotas}
