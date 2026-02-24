@@ -3,7 +3,7 @@
 import { prisma } from "@/baseDatos/conexion";
 import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";
 
-import { dispararAlertasFinancieras } from "./notificacion.accion";
+import { dispararAlertasFinancieras, dispararAlertasFormularios } from "./notificacion.accion";
 
 /**
  * Obtiene todas las métricas del dashboard central del entrenador.
@@ -15,6 +15,7 @@ export async function obtenerMetricasDashboard() {
 
         // Disparar alertas automáticas
         await dispararAlertasFinancieras();
+        await dispararAlertasFormularios();
 
         const ahora = new Date();
 

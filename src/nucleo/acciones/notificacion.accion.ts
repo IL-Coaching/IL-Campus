@@ -161,3 +161,47 @@ export async function dispararAlertasFinancieras() {
         return { error: "Error procesando alertas" };
     }
 }
+
+/**
+ * Genera notificaciones para formularios que aún no han sido procesados.
+ */
+export async function dispararAlertasFormularios() {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        // Prospectos con formulario pero sin plan
+        const prospectosPendientes = await prisma.cliente.findMany({
+            where: {
+                entrenadorId: entrenador.id,
+                formularioInscripcion: { isNot: null },
+                planesAsignados: { none: {} }
+            }
+        });
+
+        for (const p of prospectosPendientes) {
+            const existeNotif = await prisma.notificacion.findFirst({
+                where: {
+                    entrenadorId: entrenador.id,
+                    tipo: "NUEVO_FORMULARIO",
+                    titulo: { contains: p.nombre }
+                }
+            });
+
+            if (!existeNotif) {
+                await prisma.notificacion.create({
+                    data: {
+                        entrenadorId: entrenador.id,
+                        tipo: "NUEVO_FORMULARIO",
+                        gravedad: "INFO",
+                        titulo: "Formulario Pendiente",
+                        cuerpo: `El prospecto ${p.nombre} envió su formulario y aún no tiene un plan asignado.`
+                    }
+                });
+            }
+        }
+        return { exito: true };
+    } catch (error) {
+        console.error("Error en dispararAlertasFormularios:", error);
+        return { error: "Error procesando alertas de formularios" };
+    }
+}
