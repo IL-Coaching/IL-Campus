@@ -70,7 +70,7 @@ export const EsquemaNuevoMesociclo = z.object({
     objetivo: z.string().min(1).max(2000),
     metodo: z.string().max(1000).optional(),
     rangoReferencia: z.string().max(1000).optional(),
-    numeroMes: z.number().min(1).max(12),
-    numSemanas: z.number().min(1).max(12).optional(),
-    numSesiones: z.number().min(1).max(7).optional(),
+    numeroMes: z.number().min(1).max(24),
+    numSemanas: z.number().min(1).max(52).optional(),
+    numSesiones: z.number().min(1).max(14).optional(),
 });

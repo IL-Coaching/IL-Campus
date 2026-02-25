@@ -31,17 +31,19 @@ model Entrenador {
 }
 
 model Plan {
-  id           String         @id @default(uuid())
-  entrenadorId String
-  nombre       String
-  precio       Float
-  duracionDias Int
-  descripcion  String?
-  beneficios   String[]
-  visible      Boolean        @default(true)
-  creadoEn     DateTime       @default(now())
-  entrenador   Entrenador     @relation(fields: [entrenadorId], references: [id])
-  asignaciones PlanAsignado[]
+  id                String         @id @default(uuid())
+  entrenadorId      String
+  nombre            String
+  precio            Float
+  precioPromocional Float?
+  mesesPromocion    Int?
+  duracionDias      Int
+  descripcion       String?
+  beneficios        String[]
+  visible           Boolean        @default(true)
+  creadoEn          DateTime       @default(now())
+  entrenador        Entrenador     @relation(fields: [entrenadorId], references: [id])
+  asignaciones      PlanAsignado[]
 }
 
 model Ejercicio {

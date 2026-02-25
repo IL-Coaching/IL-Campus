@@ -138,33 +138,44 @@ export default function VistaMicrociclo({ semana, onSelectSesion }: VistaMicroci
                                     {nombre}
                                 </div>
                                 {sesionesEnEsteDia.length > 0 ? (
-                                    sesionesEnEsteDia.map((s) => (
-                                        <div
-                                            key={s.id}
-                                            onClick={() => onSelectSesion(s.diaSemana)}
-                                            className={`group relative bg-marino-2 border rounded-2xl p-6 min-h-[160px] flex flex-col transition-all duration-300 cursor-pointer shadow-lg hover:shadow-naranja/5 ${semana.esFaseDeload ? 'border-blue-500/20 hover:border-blue-500/50 hover:bg-blue-500/10' : 'border-marino-4 hover:border-naranja/50 hover:bg-marino-3'}`}
-                                        >
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${semana.esFaseDeload ? 'bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-marino' : 'bg-naranja/10 text-naranja group-hover:bg-naranja group-hover:text-marino'}`}>
-                                                    <Zap size={16} />
+                                    <>
+                                        {sesionesEnEsteDia.map((s) => (
+                                            <div
+                                                key={s.id}
+                                                onClick={() => onSelectSesion(s.diaSemana)}
+                                                className={`group relative bg-marino-2 border rounded-2xl p-6 min-h-[160px] flex flex-col transition-all duration-300 cursor-pointer shadow-lg hover:shadow-naranja/5 mb-3 ${semana.esFaseDeload ? 'border-blue-500/20 hover:border-blue-500/50 hover:bg-blue-500/10' : 'border-marino-4 hover:border-naranja/50 hover:bg-marino-3'}`}
+                                            >
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${semana.esFaseDeload ? 'bg-blue-500/10 text-blue-400 group-hover:bg-blue-500 group-hover:text-marino' : 'bg-naranja/10 text-naranja group-hover:bg-naranja group-hover:text-marino'}`}>
+                                                        <Zap size={16} />
+                                                    </div>
+                                                    <button
+                                                        onClick={(e) => handleEliminarSesion(e, s.id)}
+                                                        className="opacity-0 group-hover:opacity-100 p-2 text-gris hover:text-[#EF4444] transition-all"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
                                                 </div>
-                                                <button
-                                                    onClick={(e) => handleEliminarSesion(e, s.id)}
-                                                    className="opacity-0 group-hover:opacity-100 p-2 text-gris hover:text-[#EF4444] transition-all"
-                                                >
-                                                    <Trash2 size={14} />
-                                                </button>
+                                                <div className="mb-auto">
+                                                    <h4 className="text-xl font-barlow-condensed font-black uppercase leading-tight text-blanco group-hover:text-naranja transition-colors">
+                                                        {s.focoMuscular}
+                                                    </h4>
+                                                    <span className="text-[0.6rem] text-gris font-bold uppercase tracking-widest">
+                                                        {s.ejercicios.length} Ejercicios
+                                                    </span>
+                                                </div>
                                             </div>
-                                            <div className="mb-auto">
-                                                <h4 className="text-xl font-barlow-condensed font-black uppercase leading-tight text-blanco group-hover:text-naranja transition-colors">
-                                                    {s.focoMuscular}
-                                                </h4>
-                                                <span className="text-[0.6rem] text-gris font-bold uppercase tracking-widest">
-                                                    {s.ejercicios.length} Ejercicios
-                                                </span>
+                                        ))}
+                                        <div
+                                            onClick={() => !isCreating && handleCrearSesion(nombre)}
+                                            className="group h-[60px] border-2 border-dashed border-marino-4 rounded-2xl flex items-center justify-center opacity-40 hover:opacity-100 hover:border-naranja/40 hover:bg-naranja/[0.02] transition-all cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-2 group-hover:text-naranja transition-all">
+                                                <Plus size={14} />
+                                                <span className="text-[0.6rem] font-black uppercase tracking-widest text-gris group-hover:text-naranja">Añadir Sesión</span>
                                             </div>
                                         </div>
-                                    ))
+                                    </>
                                 ) : (
                                     <div
                                         onClick={() => !isCreating && handleCrearSesion(nombre)}

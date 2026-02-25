@@ -4,6 +4,7 @@ import { getEntrenadorSesion } from "../seguridad/sesion";
 import { EjercicioServicio } from "../servicios/ejercicio.servicio";
 import { GrupoMuscular, TipoArticulacion, PatronMovimiento, TipoEquipamiento, Lateralidad, Prisma } from "@prisma/client";
 import { prisma } from "@/baseDatos/conexion";
+import { revalidatePath } from "next/cache";
 
 export async function buscarEjercicios(query: string = "", musculoFiltro?: string) {
     try {
@@ -36,6 +37,7 @@ export async function crearEjercicio(formData: Record<string, unknown>) {
         if (data.descripcion === "") data.descripcion = undefined;
 
         await EjercicioServicio.crear(data);
+        revalidatePath("/entrenador/biblioteca");
 
         return { exito: true };
     } catch (error) {
@@ -67,10 +69,11 @@ export async function actualizarEjercicio(id: string, formData: Record<string, u
             updateData.urlVideo = (formData.videoUrl as string) || (formData.urlVideo as string) || null;
 
         await EjercicioServicio.actualizar(id, updateData);
+        revalidatePath("/entrenador/biblioteca");
         return { exito: true };
     } catch (error) {
         console.error("Error al actualizar ejercicio:", error);
-        return { error: "No se pudo actualizar el ejercicio." };
+        return { error: `Error: ${error instanceof Error ? error.message : "Desconocido"}` };
     }
 }
 
@@ -85,6 +88,7 @@ export async function archivarEjercicio(id: string) {
         if (!ejercicioPropio) throw new Error("Acceso denegado.");
 
         await EjercicioServicio.archivar(id);
+        revalidatePath("/entrenador/biblioteca");
         return { exito: true };
     } catch (error) {
         console.error("Error al archivar ejercicio:", error);
@@ -103,6 +107,7 @@ export async function duplicarEjercicio(id: string) {
         if (!original) throw new Error("Acceso denegado.");
 
         const nuevo = await EjercicioServicio.duplicar(id);
+        revalidatePath("/entrenador/biblioteca");
         return { exito: true, id: nuevo.id };
     } catch (error) {
         console.error("Error al duplicar ejercicio:", error);

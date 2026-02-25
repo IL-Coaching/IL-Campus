@@ -31,6 +31,8 @@ export async function crearPlan(data: {
     nombre: string;
     precio: number;
     duracionDias: number;
+    precioPromocional?: number | null;
+    mesesPromocion?: number | null;
     descripcion?: string;
     beneficios: string[];
     visible: boolean;
@@ -43,6 +45,8 @@ export async function crearPlan(data: {
                 entrenadorId: entrenador.id,
                 nombre: data.nombre,
                 precio: data.precio,
+                precioPromocional: data.precioPromocional || null,
+                mesesPromocion: data.mesesPromocion || null,
                 duracionDias: data.duracionDias,
                 descripcion: data.descripcion || null,
                 beneficios: data.beneficios,
@@ -67,6 +71,8 @@ export async function actualizarPlan(id: string, data: {
     nombre: string;
     precio: number;
     duracionDias: number;
+    precioPromocional?: number | null;
+    mesesPromocion?: number | null;
     descripcion?: string;
     beneficios: string[];
     visible: boolean;
@@ -79,6 +85,8 @@ export async function actualizarPlan(id: string, data: {
             data: {
                 nombre: data.nombre,
                 precio: data.precio,
+                precioPromocional: data.precioPromocional || null,
+                mesesPromocion: data.mesesPromocion || null,
                 duracionDias: data.duracionDias,
                 descripcion: data.descripcion || null,
                 beneficios: data.beneficios,

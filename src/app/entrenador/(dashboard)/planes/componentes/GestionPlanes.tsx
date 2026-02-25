@@ -9,6 +9,8 @@ interface PlanItem {
     nombre: string;
     precio: number;
     duracionDias: number;
+    precioPromocional: number | null;
+    mesesPromocion: number | null;
     descripcion: string | null;
     beneficios: string[];
     visible: boolean;
@@ -26,6 +28,8 @@ export default function GestionPlanes({ planesIniciales }: { planesIniciales: Pl
     const [nombre, setNombre] = useState('');
     const [precio, setPrecio] = useState(0);
     const [duracionDias, setDuracionDias] = useState(30);
+    const [precioPromocional, setPrecioPromocional] = useState<number | ''>('');
+    const [mesesPromocion, setMesesPromocion] = useState<number | ''>('');
     const [descripcion, setDescripcion] = useState('');
     const [beneficios, setBeneficios] = useState<string[]>(['']);
     const [visible, setVisible] = useState(true);
@@ -35,6 +39,8 @@ export default function GestionPlanes({ planesIniciales }: { planesIniciales: Pl
         setPlanEditando(null);
         setNombre('');
         setPrecio(0);
+        setPrecioPromocional('');
+        setMesesPromocion('');
         setDuracionDias(30);
         setDescripcion('');
         setBeneficios(['']);
@@ -47,6 +53,8 @@ export default function GestionPlanes({ planesIniciales }: { planesIniciales: Pl
         setPlanEditando(plan.id);
         setNombre(plan.nombre);
         setPrecio(plan.precio);
+        setPrecioPromocional(plan.precioPromocional ?? '');
+        setMesesPromocion(plan.mesesPromocion ?? '');
         setDuracionDias(plan.duracionDias);
         setDescripcion(plan.descripcion || '');
         setBeneficios(plan.beneficios.length ? [...plan.beneficios] : ['']);
@@ -81,6 +89,8 @@ export default function GestionPlanes({ planesIniciales }: { planesIniciales: Pl
             const payload = {
                 nombre: nombre.trim(),
                 precio: Number(precio),
+                precioPromocional: precioPromocional === '' ? null : Number(precioPromocional),
+                mesesPromocion: mesesPromocion === '' ? null : Number(mesesPromocion),
                 duracionDias: Number(duracionDias),
                 descripcion: descripcion.trim(),
                 beneficios: beneficiosLimpio,
@@ -141,7 +151,14 @@ export default function GestionPlanes({ planesIniciales }: { planesIniciales: Pl
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <h3 className="text-xl font-bold text-blanco mb-1">{plan.nombre}</h3>
-                                <p className="text-naranja font-black text-lg">${plan.precio} <span className="text-xs text-gris font-normal">/ {plan.duracionDias} días</span></p>
+                                <p className="text-naranja font-black text-lg">
+                                    ${plan.precio} <span className="text-xs text-gris font-normal">/ {plan.duracionDias} días</span>
+                                </p>
+                                {plan.precioPromocional !== null && plan.mesesPromocion !== null && (
+                                    <p className="text-verde text-sm mt-1">
+                                        Promo: ${plan.precioPromocional} por {plan.mesesPromocion} mes{plan.mesesPromocion > 1 ? 'es' : ''}
+                                    </p>
+                                )}
                             </div>
                             <div className="flex items-center gap-2">
                                 <button onClick={() => abrirModalEdicion(plan)} className="p-2 text-gris hover:text-blanco bg-marino border border-marino-4 rounded-lg transition-colors">
@@ -205,6 +222,14 @@ export default function GestionPlanes({ planesIniciales }: { planesIniciales: Pl
                                 <div>
                                     <label className="text-[0.6rem] text-gris uppercase tracking-widest font-bold block mb-1">Precio (ARS) *</label>
                                     <input type="number" min="0" value={precio} onChange={e => setPrecio(Number(e.target.value))} className="w-full bg-marino border border-marino-4 rounded-xl py-2 px-3 text-sm text-blanco focus:outline-none focus:border-naranja/50" />
+                                </div>
+                                <div>
+                                    <label className="text-[0.6rem] text-gris uppercase tracking-widest font-bold block mb-1">Precio Promo (Opcional)</label>
+                                    <input type="number" min="0" value={precioPromocional} onChange={e => setPrecioPromocional(e.target.value ? Number(e.target.value) : '')} placeholder="Ej: 7000" className="w-full bg-marino border border-marino-4 rounded-xl py-2 px-3 text-sm text-blanco focus:outline-none focus:border-naranja/50" />
+                                </div>
+                                <div>
+                                    <label className="text-[0.6rem] text-gris uppercase tracking-widest font-bold block mb-1">Meses Promo</label>
+                                    <input type="number" min="1" value={mesesPromocion} onChange={e => setMesesPromocion(e.target.value ? Number(e.target.value) : '')} placeholder="Ej: 1" className="w-full bg-marino border border-marino-4 rounded-xl py-2 px-3 text-sm text-blanco focus:outline-none focus:border-naranja/50" />
                                 </div>
                                 <div>
                                     <label className="text-[0.6rem] text-gris uppercase tracking-widest font-bold block mb-1">Duración (Dias) *</label>

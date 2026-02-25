@@ -77,7 +77,7 @@ export default function ModalNuevoMesociclo({ macrociclo, onClose }: Props) {
                             <div className="flex items-center gap-3 bg-marino-3 border border-marino-4 rounded-xl p-2">
                                 <button type="button" onClick={() => setNumSemanas(Math.max(1, numSemanas - 1))} className="w-8 h-8 rounded-lg bg-marino-4 text-blanco font-bold">-</button>
                                 <span className="flex-1 text-center font-black text-naranja">{numSemanas}</span>
-                                <button type="button" onClick={() => setNumSemanas(Math.min(8, numSemanas + 1))} className="w-8 h-8 rounded-lg bg-marino-4 text-blanco font-bold">+</button>
+                                <button type="button" onClick={() => setNumSemanas(Math.min(52, numSemanas + 1))} className="w-8 h-8 rounded-lg bg-marino-4 text-blanco font-bold">+</button>
                             </div>
                         </div>
                         <div className="space-y-2">
@@ -85,7 +85,7 @@ export default function ModalNuevoMesociclo({ macrociclo, onClose }: Props) {
                             <div className="flex items-center gap-3 bg-marino-3 border border-marino-4 rounded-xl p-2">
                                 <button type="button" onClick={() => setNumSesiones(Math.max(1, numSesiones - 1))} className="w-8 h-8 rounded-lg bg-marino-4 text-blanco font-bold">-</button>
                                 <span className="flex-1 text-center font-black text-naranja">{numSesiones}</span>
-                                <button type="button" onClick={() => setNumSesiones(Math.min(7, numSesiones + 1))} className="w-8 h-8 rounded-lg bg-marino-4 text-blanco font-bold">+</button>
+                                <button type="button" onClick={() => setNumSesiones(Math.min(14, numSesiones + 1))} className="w-8 h-8 rounded-lg bg-marino-4 text-blanco font-bold">+</button>
                             </div>
                         </div>
                     </div>
