@@ -48,6 +48,7 @@ export default function InscripcionPage() {
                 actividad: '',
                 sueno: '',
                 alimentacion: '',
+                otraActividadFisica: '',
             },
             experiencia: {
                 entrenaActualmente: '',
@@ -60,7 +61,7 @@ export default function InscripcionPage() {
             disponibilidad: {
                 sesionesSemanales: '',
                 tiempoSesion: '',
-                lugar: '',
+                lugar: [] as string[],
                 equipamiento: [] as string[]
             },
             personalizacion: {
@@ -201,6 +202,17 @@ export default function InscripcionPage() {
                     ))}
                 </div>
             </div>
+
+            <div className="space-y-4">
+                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block tracking-[0.2em]">¿Realizas otra actividad física aparte?</label>
+                <input
+                    type="text"
+                    value={formData.respuestas.estiloDeVida.otraActividadFisica || ''}
+                    onChange={(e) => updateNested('respuestas.estiloDeVida.otraActividadFisica', e.target.value)}
+                    className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco text-sm focus:border-naranja/50 outline-none transition-all placeholder:text-gris/40 font-medium"
+                    placeholder="Ej: Fútbol los martes, boxeo dos veces por semana, etc."
+                />
+            </div>
         </div>
     );
 
@@ -209,7 +221,7 @@ export default function InscripcionPage() {
             <div className="space-y-4">
                 <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block">¿Tomas algún medicamento o tienes alguna condición?</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {['Asma', 'Diabetes', 'Hipertensión', 'Lesiones previas', 'Cirugías recientes', 'Ninguna'].map((opt) => (
+                    {['Asma', 'Diabetes', 'Hipertensión', 'Lesiones previas', 'Cirugías recientes', 'Escoliosis', 'Cifosis', 'Ninguna'].map((opt) => (
                         <button
                             key={opt}
                             onClick={() => toggleArray('respuestas.saludMedica.condiciones', opt)}
@@ -342,13 +354,13 @@ export default function InscripcionPage() {
             </div>
 
             <div className="space-y-4">
-                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block">¿Dónde entrenarás?</label>
+                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block">¿Dónde entrenarás? (Puedes elegir más de uno)</label>
                 <div className="grid grid-cols-2 gap-3">
                     {['Gimnasio', 'Casa', 'Parque', 'Sin Equipo'].map((opt) => (
                         <button
                             key={opt}
-                            onClick={() => updateNested('respuestas.disponibilidad.lugar', opt)}
-                            className={`p-3 rounded-xl border text-[0.65rem] font-black uppercase tracking-widest transition-all ${formData.respuestas.disponibilidad.lugar === opt ? 'bg-naranja border-naranja text-marino' : 'bg-marino-3 border-marino-4 text-gris'}`}
+                            onClick={() => toggleArray('respuestas.disponibilidad.lugar', opt)}
+                            className={`p-3 rounded-xl border text-[0.65rem] font-black uppercase tracking-widest transition-all ${formData.respuestas.disponibilidad.lugar.includes(opt) ? 'bg-naranja border-naranja text-marino' : 'bg-marino-3 border-marino-4 text-gris'}`}
                         >
                             {opt}
                         </button>
@@ -392,20 +404,20 @@ export default function InscripcionPage() {
 
             <div className="w-full max-w-3xl relative z-10">
                 {/* Header */}
-                <div className="flex flex-col items-center text-center mb-10">
-                    <div className="flex items-center gap-1 mb-4 scale-75 md:scale-100">
-                        <div className="w-1 h-5 bg-gris-claro rounded-sm"></div>
-                        <div className="w-2 h-7 bg-gris-claro rounded-sm"></div>
-                        <span className="text-4xl font-barlow-condensed font-black italic text-naranja leading-none tracking-tighter mx-2">IL</span>
-                        <div className="w-2 h-7 bg-gris-claro rounded-sm"></div>
-                        <div className="w-1 h-5 bg-gris-claro rounded-sm"></div>
+                <div className="flex flex-col items-center text-center mb-6 md:mb-10">
+                    <div className="flex items-center gap-1 mb-2 scale-75 md:scale-100">
+                        <div className="w-0.5 h-4 bg-gris-claro rounded-sm"></div>
+                        <div className="w-1.5 h-6 bg-gris-claro rounded-sm"></div>
+                        <span className="text-3xl md:text-4xl font-barlow-condensed font-black italic text-naranja leading-none tracking-tighter mx-2">IL</span>
+                        <div className="w-1.5 h-6 bg-gris-claro rounded-sm"></div>
+                        <div className="w-0.5 h-4 bg-gris-claro rounded-sm"></div>
                     </div>
-                    <h1 className="text-2xl md:text-3xl font-barlow-condensed font-black uppercase text-blanco tracking-tight">Formulario de Inscripción</h1>
-                    <p className="text-gris text-sm mt-2 max-w-lg italic font-medium">&quot;Más que entrenar: entender, adaptar, progresar&quot;</p>
+                    <h1 className="text-xl md:text-3xl font-barlow-condensed font-black uppercase text-blanco tracking-tight">Inscripción</h1>
+                    <p className="text-gris text-[0.7rem] md:text-sm mt-1 max-w-lg italic font-medium opacity-80 px-4">&quot;Más que entrenar: entender, adaptar, progresar&quot;</p>
                 </div>
 
-                {/* Progress Bar */}
-                <div className="mb-12 flex justify-between items-center relative px-2">
+                {/* Progress Bar - Optimized for Mobile */}
+                <div className="mb-8 md:mb-12 flex justify-between items-center relative px-2">
                     <div className="absolute h-[2px] bg-marino-4 left-0 right-0 top-1/2 -translate-y-1/2 -z-10"></div>
                     <div
                         className="absolute h-[2px] bg-naranja left-0 top-1/2 -translate-y-1/2 -z-10 transition-all duration-500"
@@ -414,9 +426,11 @@ export default function InscripcionPage() {
 
                     {steps.map((s, i) => (
                         <div key={i} className="flex flex-col items-center group">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${i <= step ? 'bg-marino border-naranja text-naranja shadow-lg shadow-naranja/10' : 'bg-marino border-marino-4 text-gris'
+                            <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${i <= step ? 'bg-marino border-naranja text-naranja shadow-lg shadow-naranja/10' : 'bg-marino border-marino-4 text-gris/40'
                                 }`}>
-                                {i < step ? <CheckCircle2 size={18} /> : s.icon}
+                                {i < step ? <CheckCircle2 size={16} /> : (
+                                    <span className="md:block scale-75 md:scale-100">{s.icon}</span>
+                                )}
                             </div>
                             <span className={`hidden md:block absolute -bottom-8 text-[0.6rem] font-bold uppercase tracking-widest whitespace-nowrap ${i <= step ? 'text-blanco' : 'text-gris/40'}`}>
                                 {s.title}
@@ -426,7 +440,7 @@ export default function InscripcionPage() {
                 </div>
 
                 {/* Form Content */}
-                <div className="bg-marino-2 border border-marino-4 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden min-h-[500px] flex flex-col">
+                <div className="bg-marino-2 border border-marino-4 rounded-[2rem] md:rounded-3xl p-5 md:p-10 shadow-2xl relative overflow-hidden min-h-[400px] md:min-h-[500px] flex flex-col mb-24 md:mb-0">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-naranja/30 to-transparent"></div>
 
                     {/* STEP 0: BIENVENIDA */}
@@ -623,7 +637,7 @@ export default function InscripcionPage() {
                                         <Target size={64} className="text-naranja" />
                                     </div>
                                     <h2 className="text-3xl font-barlow-condensed font-black uppercase text-blanco">¿Todo listo?</h2>
-                                    <p className="text-gris max-w-sm mx-auto font-medium">Al presionar &quot;Enviar&quot;, tus respuestas se guardarán en tu perfil de atleta para que tu coach pueda revisarlas.</p>
+                                    <p className="text-gris max-w-sm mx-auto font-medium">Al presionar &quot;Enviar&quot;, tus respuestas se guardarán en tu perfil de cliente para que tu coach pueda revisarlas.</p>
                                     {estadoEnviado === 'error' && (
                                         <p className="text-red-500 text-xs font-bold uppercase tracking-widest bg-red-500/10 p-3 rounded-lg border border-red-500/20 w-full mb-4">
                                             Hubo un error al enviar. Por favor, reintenta.
@@ -634,26 +648,28 @@ export default function InscripcionPage() {
                         </div>
                     )}
 
-                    {/* Navigation Buttons */}
-                    <div className="mt-auto pt-10 flex justify-between gap-4">
+                    {/* Navigation Buttons - Sticky on Mobile */}
+                    <div className="mt-auto pt-10 flex justify-between gap-4 fixed bottom-0 left-0 right-0 p-4 bg-marino-2/80 backdrop-blur-md border-t border-marino-4 md:relative md:bg-transparent md:border-none md:p-0 md:backdrop-blur-none z-50">
                         <button
                             onClick={prevStep}
                             disabled={step === 0 || enviando || estadoEnviado === 'exito'}
-                            className={`flex items-center gap-2 px-6 py-4 rounded-xl font-bold uppercase tracking-widest text-xs transition-all ${step === 0 || estadoEnviado === 'exito' ? 'opacity-0 pointer-events-none' : 'bg-marino-3 text-gris hover:text-blanco border border-marino-4 hover:border-gris'
+                            className={`flex items-center gap-2 px-5 py-3 md:px-6 md:py-4 rounded-xl font-bold uppercase tracking-widest text-[0.65rem] transition-all ${step === 0 || estadoEnviado === 'exito' ? 'opacity-0 pointer-events-none' : 'bg-marino-3 text-gris hover:text-blanco border border-marino-4 hover:border-gris shadow-lg'
                                 }`}
                         >
-                            <ChevronLeft size={16} /> Anterior
+                            <ChevronLeft size={16} /> <span className="hidden md:inline">Anterior</span>
                         </button>
 
                         <button
                             onClick={nextStep}
                             disabled={enviando || estadoEnviado === 'exito'}
-                            className="flex-1 md:flex-none md:min-w-[180px] bg-naranja hover:bg-naranja-h disabled:opacity-50 text-marino font-black py-4 px-8 rounded-xl flex items-center justify-center gap-3 uppercase tracking-widest font-barlow-condensed text-lg transition-all shadow-lg shadow-naranja/20 active:scale-95"
+                            className="flex-1 md:flex-none md:min-w-[200px] bg-naranja hover:bg-naranja-h disabled:opacity-50 text-marino font-black py-3 md:py-4 px-6 md:px-8 rounded-xl flex items-center justify-center gap-3 uppercase tracking-widest font-barlow-condensed text-base md:text-lg transition-all shadow-xl shadow-naranja/20 active:scale-95"
                         >
                             {enviando ? (
-                                <span className="flex items-center gap-2">Procesando...</span>
+                                <span className="flex items-center gap-2 animate-pulse">Procesando...</span>
                             ) : (
-                                step === steps.length - 2 ? 'Enviar Formulario' : (
+                                step === steps.length - 2 ? (
+                                    <>Enviar <ChevronRight size={20} className="hidden md:block" /></>
+                                ) : (
                                     <>Siguiente <ChevronRight size={20} /></>
                                 )
                             )}

@@ -11,6 +11,7 @@ import ModalCobrosHistorial from "@/app/entrenador/(dashboard)/finanzas/ModalCob
 export interface Vencimiento {
     id: string;
     fechaVencimiento: Date;
+    estado: string;
     cliente: {
         id: string,
         nombre: string,
@@ -44,7 +45,7 @@ export default function ListaVencimientos({ vencimientos }: Props) {
             <table className="w-full text-left text-sm whitespace-nowrap">
                 <thead>
                     <tr className="border-b border-marino-4 bg-marino-3/30">
-                        <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs">Atleta</th>
+                        <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs">Cliente</th>
                         <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs">Suscripción gestionada</th>
                         <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs">Vencimiento</th>
                         <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs text-center">Estado Pago</th>
@@ -63,14 +64,11 @@ export default function ListaVencimientos({ vencimientos }: Props) {
                             const diasParaVencer = Math.ceil((new Date(item.fechaVencimiento).getTime() - hoy.getTime()) / (1000 * 3600 * 24));
                             const estaVencido = diasParaVencer < 0;
 
-                            // Lógica de Pagos Parciales: Buscar cobros que cubren el periodo en cuestión
+                            const estadoPago = item.estado === "ABONADO" ? "PAGADO" : item.estado || "PENDIENTE";
+
                             const cobrosDelCiclo = item.cobros.filter(c => new Date(c.periodoHasta) >= new Date(item.fechaVencimiento));
                             const totalPagado = cobrosDelCiclo.reduce((sum, c) => sum + c.montoArs, 0);
                             const metaPago = item.plan.precio;
-
-                            let estadoPago = "PENDIENTE";
-                            if (totalPagado >= metaPago) estadoPago = "PAGADO";
-                            else if (totalPagado > 0) estadoPago = "PARCIAL";
 
                             // 🚨 DETECCIÓN DE DESCALCE (Plan Cobro vs Plan Acceso)
                             const planAcceso = item.cliente.planesAsignados[0]?.plan.nombre;

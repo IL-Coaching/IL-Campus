@@ -119,7 +119,7 @@ export async function guardarCambiosEjercicio(ejercicioPlanificadoId: string, da
     }
 }
 
-export async function agregarEjercicio(diaId: string, ejercicioId: string, orden: number) {
+export async function agregarEjercicio(diaId: string, ejercicioId: string | null, orden: number, nombreLibre?: string) {
     try {
         const entrenador = await getEntrenadorSesion();
 
@@ -142,7 +142,7 @@ export async function agregarEjercicio(diaId: string, ejercicioId: string, orden
 
         if (!diaPropio) throw new Error("Acceso denegado al recurso.");
 
-        await PlanificacionServicio.agregarEjercicioASesion(diaId, ejercicioId, orden);
+        await PlanificacionServicio.agregarEjercicioASesion(diaId, ejercicioId, orden, nombreLibre);
         revalidatePath(`/entrenador/clientes/${diaPropio.semana.bloqueMensual.macrociclo.clienteId}/planificacion`);
         return { exito: true };
     } catch (error) {

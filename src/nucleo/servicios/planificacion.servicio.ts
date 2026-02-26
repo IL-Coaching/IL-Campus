@@ -239,11 +239,12 @@ export const PlanificacionServicio = {
     /**
      * Agrega un ejercicio a una sesión.
      */
-    async agregarEjercicioASesion(diaId: string, ejercicioId: string, orden: number) {
+    async agregarEjercicioASesion(diaId: string, ejercicioId: string | null, orden: number, nombreLibre?: string) {
         return await prisma.ejercicioPlanificado.create({
             data: {
                 diaId,
                 ejercicioId,
+                nombreLibre,
                 series: 3, // Defaults
                 repsMin: 8,
                 repsMax: 12,

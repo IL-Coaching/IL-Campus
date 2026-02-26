@@ -7,7 +7,7 @@ import type { Ejercicio } from '@prisma/client';
 
 interface BuscadorEjerciciosProps {
     onClose: () => void;
-    onSelect?: (ejercicio: Ejercicio) => void;
+    onSelect?: (ejercicio: Ejercicio | { id: string | null, nombreLibre: string }) => void;
 }
 
 export default function BuscadorEjercicios({ onClose, onSelect }: BuscadorEjerciciosProps) {
@@ -68,8 +68,8 @@ export default function BuscadorEjercicios({ onClose, onSelect }: BuscadorEjerci
                                 key={m}
                                 onClick={() => setMusculoFiltro(m === 'TODOS' ? 'Todos' : m)}
                                 className={`px-4 py-2 rounded-full text-[0.65rem] font-bold uppercase tracking-widest transition-all ${(musculoFiltro === m || (m === 'TODOS' && musculoFiltro === 'Todos'))
-                                        ? 'bg-naranja text-marino shadow-lg shadow-naranja/20'
-                                        : 'bg-marino-3 border border-marino-4 text-gris hover:text-blanco hover:border-gris'
+                                    ? 'bg-naranja text-marino shadow-lg shadow-naranja/20'
+                                    : 'bg-marino-3 border border-marino-4 text-gris hover:text-blanco hover:border-gris'
                                     }`}
                             >
                                 {m}
@@ -81,6 +81,22 @@ export default function BuscadorEjercicios({ onClose, onSelect }: BuscadorEjerci
                 {/* List Results */}
                 <div className="max-h-[400px] min-h-[100px] overflow-y-auto px-6 pb-6 space-y-2">
 
+                    {query && (
+                        <div
+                            className="flex items-center justify-between p-4 bg-marino-3/50 border border-naranja/40 rounded-xl hover:bg-naranja/10 group transition-all cursor-pointer mb-4"
+                            onClick={() => onSelect && onSelect({ id: null, nombreLibre: query })}
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-naranja/20 flex items-center justify-center text-naranja">
+                                    <span className="font-black text-xl">+</span>
+                                </div>
+                                <div>
+                                    <p className="text-naranja font-black text-[0.9rem] uppercase tracking-tight">Agregar Actividad Libre</p>
+                                    <p className="text-[0.65rem] text-gris font-medium tracking-widest">&quot;{query}&quot;</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {resultados.map((ej: Ejercicio) => (
                         <div

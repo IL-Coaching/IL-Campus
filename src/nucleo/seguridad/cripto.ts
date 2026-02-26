@@ -25,11 +25,26 @@ export const CriptoServicio = {
      * Genera un token aleatorio para invitaciones o resets.
      */
     generateRandomToken(length = 32): string {
+        // SEGURIDAD: crypto.getRandomValues() es criptográficamente seguro (CSPRNG)
+        // Math.random() NO es seguro para tokens de acceso — reemplazado globalmente
         const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let token = '';
-        for (let i = 0; i < length; i++) {
-            token += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return token;
+        const randomValues = new Uint32Array(length);
+        crypto.getRandomValues(randomValues);
+        return Array.from(randomValues)
+            .map(val => chars[val % chars.length])
+            .join('');
+    },
+
+    /**
+     * Genera un código de activación seguro con formato IL-XXXX-XXX.
+     * Usa CSPRNG para garantizar imprevisibilidad del código temporal de acceso.
+     */
+    generarCodigoActivacion(): string {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const bytes = new Uint32Array(7);
+        crypto.getRandomValues(bytes);
+        const parte1 = Array.from(bytes.slice(0, 4)).map(v => chars[v % chars.length]).join('');
+        const parte2 = Array.from(bytes.slice(4, 7)).map(v => chars[v % chars.length]).join('');
+        return `IL-${parte1}-${parte2}`;
     }
 };

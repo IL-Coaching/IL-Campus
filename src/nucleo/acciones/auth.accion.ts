@@ -9,6 +9,10 @@ const otp = new OTP({ strategy: 'totp' });
 import { prisma } from "@/baseDatos/conexion";
 import { CriptoServicio } from "@/nucleo/seguridad/cripto";
 import { establecerSesion, cerrarSesion } from "@/nucleo/seguridad/sesion";
+import { EsquemaLoginEntrenador, EsquemaLoginAlumno } from "../validadores/auth.validador";
+
+// Función auxiliar para mitigar ataques de tiempo y fuerza bruta básica
+const delayFallo = () => new Promise(resolve => setTimeout(resolve, 1000));
 
 // Tipado para Prisma dinámico sin 'any'
 type PrismaUpdateRaw = {
@@ -41,12 +45,19 @@ export async function loginEntrenador(formData: FormData) {
         return { error: "Por favor, completa todos los campos." };
     }
 
+    // 1. Validar esquema
+    const validacion = EsquemaLoginEntrenador.safeParse({ email, password });
+    if (!validacion.success) {
+        return { error: validacion.error.issues[0].message };
+    }
+
     try {
         const entrenadorRaw = await prisma.entrenador.findUnique({
             where: { email }
         });
 
         if (!entrenadorRaw) {
+            await delayFallo();
             return { error: "Credenciales no válidas." };
         }
 
@@ -56,6 +67,7 @@ export async function loginEntrenador(formData: FormData) {
         const passwordValida = await CriptoServicio.comparePassword(password, entrenador.password);
 
         if (!passwordValida) {
+            await delayFallo();
             return { error: "Credenciales no válidas." };
         }
 
@@ -112,12 +124,19 @@ export async function loginAlumno(formData: FormData) {
         return { error: "Por favor, completa todos los campos." };
     }
 
+    // 1. Validar esquema
+    const validacion = EsquemaLoginAlumno.safeParse({ email, password });
+    if (!validacion.success) {
+        return { error: validacion.error.issues[0].message };
+    }
+
     try {
         const clienteRaw = await prisma.cliente.findUnique({
             where: { email }
         });
 
         if (!clienteRaw || !clienteRaw.password) {
+            await delayFallo();
             return { error: "Email o contraseña incorrectos." };
         }
 
@@ -127,6 +146,7 @@ export async function loginAlumno(formData: FormData) {
         const passwordValida = await CriptoServicio.comparePassword(password, cliente.password || "");
 
         if (!passwordValida) {
+            await delayFallo();
             return { error: "Email o contraseña incorrectos." };
         }
 

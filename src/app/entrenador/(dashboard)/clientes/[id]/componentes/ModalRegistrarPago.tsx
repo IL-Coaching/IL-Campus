@@ -68,7 +68,7 @@ export default function ModalRegistrarPago({ clienteId, clienteNombre, planesAsi
                             Registrar Cobro Manual
                         </h2>
                         <p className="text-xs font-bold uppercase tracking-widest text-gris">
-                            Atleta: <span className="text-blanco">{clienteNombre}</span>
+                            Cliente: <span className="text-blanco">{clienteNombre}</span>
                         </p>
                     </div>
                     <button onClick={onClose} className="text-gris hover:text-blanco p-1 transition-colors">

@@ -108,7 +108,7 @@ export default function TabMetricas({ clienteId }: Props) {
                                 Esperando Datos
                             </h4>
                             <p className="text-[0.7rem] text-gris font-medium leading-relaxed">
-                                Aún no hay sesiones completadas para calcular la adherencia del atleta.
+                                Aún no hay sesiones completadas para calcular la adherencia del cliente.
                             </p>
                         </div>
                     </div>
@@ -121,7 +121,7 @@ export default function TabMetricas({ clienteId }: Props) {
                             </h4>
                             <p className="text-[0.7rem] text-gris font-medium leading-relaxed">
                                 {highAdherence
-                                    ? "El atleta mantiene un cumplimiento óptimo. Listo para incrementar intensidad o volumen en el próximo bloque."
+                                    ? "El cliente mantiene un cumplimiento óptimo. Listo para incrementar intensidad o volumen en el próximo bloque."
                                     : "Se detectan desvíos en el cumplimiento. Revisar si el volumen actual es sostenible para el estilo de vida del cliente."}
                             </p>
                         </div>

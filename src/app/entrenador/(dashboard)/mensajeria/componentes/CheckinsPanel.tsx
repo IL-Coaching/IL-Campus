@@ -5,6 +5,7 @@ import { ClipboardCheck, Eye, Camera, Scale, Ruler, Dumbbell, ChevronRight, Arro
 import { obtenerCheckinsNoVistos, obtenerHistorialCheckins, marcarCheckinVisto } from '@/nucleo/acciones/checkin.accion';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import Image from 'next/image';
 
 interface CheckinItem {
     id: string;
@@ -183,9 +184,8 @@ export default function CheckinsPanel() {
                             <h4 className="text-[0.6rem] text-naranja font-black uppercase tracking-widest mb-3">Fotos</h4>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                 {seleccionado.fotosUrls.map((url, i) => (
-                                    <div key={i} className="rounded-xl overflow-hidden border border-marino-4 aspect-square">
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
+                                    <div key={i} className="relative rounded-xl overflow-hidden border border-marino-4 aspect-square">
+                                        <Image src={url} alt={`Foto ${i + 1}`} fill className="object-cover" />
                                     </div>
                                 ))}
                             </div>

@@ -95,7 +95,7 @@ export default function GestionAvatarAdmin({ avatarUrl, nombre }: Props) {
                 <p className="text-[0.6rem] font-black text-naranja uppercase tracking-[0.3em]">Marca Personal</p>
                 <h2 className="text-2xl font-barlow-condensed font-black text-blanco uppercase italic">{nombre}</h2>
                 <p className="text-xs text-gris leading-relaxed max-w-xs">
-                    Tu avatar es lo que los atletas verán en su app. Se recomienda una imagen cuadrada y nítida.
+                    Tu avatar es lo que los clientes verán en su app. Se recomienda una imagen cuadrada y nítida.
                 </p>
             </div>
         </div>

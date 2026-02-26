@@ -198,7 +198,7 @@ export default function TabFinanzas({ clienteId, clienteNombre }: Props) {
                                 <tr>
                                     <td colSpan={5} className="p-20 text-center">
                                         <Info size={40} className="mx-auto text-marino-4 mb-4" />
-                                        <p className="text-[0.65rem] font-black text-gris uppercase tracking-[0.2em] italic">Aún no se han registrado cobros para este atleta.</p>
+                                        <p className="text-[0.65rem] font-black text-gris uppercase tracking-[0.2em] italic">Aún no se han registrado cobros para este cliente.</p>
                                     </td>
                                 </tr>
                             ) : resumen?.cobros.map((cobro: CobroConPlan) => (

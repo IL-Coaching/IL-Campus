@@ -166,7 +166,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                             </div>
                             <div>
                                 <h4 className="text-sm font-black text-blanco uppercase tracking-widest">Alerta Clínica: Protocolo de Seguridad</h4>
-                                <p className="text-[0.65rem] font-bold text-rojo/80 uppercase tracking-tighter">Atleta con {condiciones.length} condiciones específicas registradas</p>
+                                <p className="text-[0.65rem] font-bold text-rojo/80 uppercase tracking-tighter">Cliente con {condiciones.length} condiciones específicas registradas</p>
                             </div>
                         </div>
                         {showClinical ? <ChevronUp className="text-rojo" /> : <ChevronDown className="text-rojo" />}
@@ -383,9 +383,9 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                 </button>
                             </div>
 
-                            <div className="grid grid-cols-3 gap-3 mb-4">
+                            <div className="grid grid-cols-2 gap-3 mb-4">
                                 <div className="bg-marino-3 rounded-2xl p-3 border border-marino-4/30">
-                                    <label className="text-[0.55rem] font-black text-gris uppercase tracking-widest block mb-1">Series</label>
+                                    <label className="text-[0.55rem] font-black text-gris uppercase tracking-widest block mb-1">Sets</label>
                                     <input
                                         type="number"
                                         value={ej.series}
@@ -402,16 +402,18 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                         className="w-full bg-transparent text-xl font-barlow-condensed font-black text-naranja focus:outline-none"
                                     />
                                 </div>
-                                <div className="bg-marino-3 rounded-2xl p-3 border border-marino-4/30">
-                                    <label className="text-[0.55rem] font-black text-verde uppercase tracking-widest block mb-1">Peso</label>
-                                    <input
-                                        type="number"
-                                        step="0.5"
-                                        value={ej.pesoSugerido || ''}
-                                        onChange={(e) => handleUpdateChange(ej.id, { pesoSugerido: parseFloat(e.target.value) })}
-                                        className="w-full bg-transparent text-xl font-barlow-condensed font-black text-verde focus:outline-none"
-                                    />
-                                </div>
+                            </div>
+
+                            <div className="bg-marino-3 rounded-2xl p-3 border border-marino-4/30 mb-4">
+                                <label className="text-[0.55rem] font-black text-verde uppercase tracking-widest block mb-1">Carga Sugerida (kg)</label>
+                                <input
+                                    type="number"
+                                    step="0.5"
+                                    value={ej.pesoSugerido || ''}
+                                    onChange={(e) => handleUpdateChange(ej.id, { pesoSugerido: parseFloat(e.target.value) })}
+                                    className="w-full bg-transparent text-2xl font-barlow-condensed font-black text-verde focus:outline-none"
+                                    placeholder="0.0"
+                                />
                             </div>
 
                             <div className="flex gap-3 mb-4">
@@ -447,10 +449,18 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                             <textarea
                                 value={ej.notasTecnicas || ''}
                                 onChange={(e) => handleUpdateChange(ej.id, { notasTecnicas: e.target.value })}
-                                className="w-full bg-marino-3/30 border border-marino-4/40 rounded-xl p-3 text-xs text-gris-claro font-medium italic focus:border-naranja/40 transition-all resize-none mb-2"
-                                placeholder="Notas técnicas específicas..."
-                                rows={2}
+                                className="w-full bg-marino-3/50 border border-marino-4/40 rounded-xl p-4 text-xs text-blanco font-medium focus:border-naranja/40 transition-all resize-none mb-3 shadow-inner"
+                                placeholder="Pautas técnicas y feedback..."
+                                rows={3}
                             />
+                            <div className="flex justify-between items-center px-1">
+                                <span className="text-[0.5rem] font-black text-gris uppercase tracking-widest">
+                                    Tonelaje: {(ej.series * (ej.repsMax || 0) * (ej.pesoSugerido || 0)).toFixed(1)} kg
+                                </span>
+                                {ej.esBiblioteca && (
+                                    <span className="text-[0.5rem] font-black text-naranja uppercase tracking-tighter bg-naranja/10 px-1.5 py-0.5 rounded">IUSCA Verified</span>
+                                )}
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -622,7 +632,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                             value={ej.RIR !== null ? ej.RIR : ''}
                                             onChange={(e) => handleUpdateChange(ej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
                                             placeholder={semanaObjeto.esFaseDeload ? "RIR 4+" : "RIR"}
-                                            className="w-full bg-marino-3 border border-marino-4/30 p-2.5 rounded-xl text-center text-naranja focus:outline-none focus:border-naranja/50 transition-all font-black text-[0.9rem]"
+                                            className="w-full bg-marino-3 border border-marino-4/30 p-2.5 rounded-xl text-center text-naranja focus:outline-none focus:border-naranja/50 transition-all font-black text-[1rem]"
                                         />
                                     </td>
                                     <td className="p-5">
@@ -644,10 +654,10 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                 value={ej.pesoSugerido || ''}
                                                 onChange={(e) => handleUpdateChange(ej.id, { pesoSugerido: parseFloat(e.target.value) })}
                                                 placeholder="0.0"
-                                                className="w-full bg-marino-3 border border-marino-4/30 py-2.5 rounded-xl text-center text-naranja focus:outline-none text-[0.85rem] font-black"
+                                                className="w-full bg-marino-3 border border-marino-4/30 py-2.5 rounded-xl text-center text-verde focus:outline-none focus:border-verde/50 text-[1rem] font-black"
                                             />
-                                            <p className="text-[0.5rem] font-black text-gris text-center uppercase tracking-tighter">
-                                                Tonelaje: {(ej.series * (ej.repsMax || 0) * (ej.pesoSugerido || 0)).toFixed(1)} kg
+                                            <p className="text-[0.55rem] font-black text-gris text-center uppercase tracking-tighter opacity-60">
+                                                Vol: {(ej.series * (ej.repsMax || 0) * (ej.pesoSugerido || 0)).toLocaleString()} kg
                                             </p>
                                         </div>
                                     </td>
@@ -655,9 +665,9 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                         <textarea
                                             value={ej.notasTecnicas || ''}
                                             onChange={(e) => handleUpdateChange(ej.id, { notasTecnicas: e.target.value })}
-                                            rows={3}
-                                            className="w-full bg-marino-3/50 border border-marino-4/50 p-2 rounded-lg text-gris-claro text-[0.65rem] focus:outline-none focus:border-naranja/40 transition-all resize-none font-medium italic"
-                                            placeholder="Feedback..."
+                                            rows={2}
+                                            className="w-full bg-marino-3/30 border border-marino-4/50 p-3 rounded-xl text-blanco text-[0.7rem] focus:outline-none focus:border-naranja/40 transition-all resize-none font-medium shadow-inner"
+                                            placeholder="Pautas..."
                                         />
                                     </td>
                                     <td className="p-5 text-right">

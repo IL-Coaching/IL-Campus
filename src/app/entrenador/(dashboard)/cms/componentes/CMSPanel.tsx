@@ -11,6 +11,7 @@ import {
     togglePlanVisibilidad,
     actualizarImagenCMS
 } from "@/nucleo/acciones/cms.accion";
+import Image from "next/image";
 
 interface ConfigLanding {
     id: string;
@@ -238,8 +239,7 @@ export default function CMSPanel({ config, planes }: Props) {
                 <h4 className="text-[0.6rem] text-gris uppercase tracking-widest font-bold mb-3">Imagen Hero</h4>
                 {config.heroImagenUrl ? (
                     <div className="relative group w-full max-w-sm rounded-xl overflow-hidden border border-marino-4 aspect-video">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={config.heroImagenUrl} alt="Hero" className="w-full h-full object-cover" />
+                        <Image src={config.heroImagenUrl} alt="Hero" fill className="object-cover" />
                         <div className="absolute inset-0 bg-marino/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <button onClick={() => fileInputHero.current?.click()} className="flex items-center gap-2 px-4 py-2 bg-blanco text-marino text-xs uppercase font-black tracking-widest rounded-xl">
                                 <Upload size={14} /> Cambiar Imagen
@@ -274,8 +274,7 @@ export default function CMSPanel({ config, planes }: Props) {
                 <h4 className="text-[0.6rem] text-gris uppercase tracking-widest font-bold mb-3">Foto Biografía</h4>
                 {config.bioImagenUrl ? (
                     <div className="relative group w-32 h-32 rounded-xl overflow-hidden border border-marino-4">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={config.bioImagenUrl} alt="Bio" className="w-full h-full object-cover" />
+                        <Image src={config.bioImagenUrl} alt="Bio" fill className="object-cover" />
                         <div className="absolute inset-0 bg-marino/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <button onClick={() => fileInputBio.current?.click()} className="p-2 bg-blanco text-marino rounded-full">
                                 <Upload size={14} />

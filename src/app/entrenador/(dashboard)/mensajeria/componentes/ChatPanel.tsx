@@ -5,6 +5,7 @@ import { Search, Send, Paperclip, User, MessageCircle } from 'lucide-react';
 import { obtenerConversaciones, obtenerMensajesCliente, enviarMensaje, enviarMensajeConMedia } from '@/nucleo/acciones/mensajeria.accion';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import Image from 'next/image';
 
 interface Conversacion {
     clienteId: string;
@@ -207,9 +208,8 @@ export default function ChatPanel() {
                                                 }`}>
                                                 {/* Media */}
                                                 {msg.mediaUrl && msg.tipo === 'imagen' && (
-                                                    <div className="mb-2 rounded-xl overflow-hidden">
-                                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                        <img src={msg.mediaUrl} alt="Imagen" className="max-w-full max-h-64 object-cover rounded-xl" />
+                                                    <div className="relative mb-2 rounded-xl overflow-hidden w-64 h-64">
+                                                        <Image src={msg.mediaUrl} alt="Imagen" fill className="object-cover" />
                                                     </div>
                                                 )}
                                                 {msg.mediaUrl && msg.tipo === 'video' && (

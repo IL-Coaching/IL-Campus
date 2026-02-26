@@ -86,7 +86,7 @@ export default function ModalRegistrarPago({ vencimiento, onClose }: Props) {
                             Registrar Cobro
                         </h2>
                         <p className="text-naranja text-[10px] font-black uppercase tracking-[0.2em]">
-                            Atleta: {vencimiento.cliente.nombre}
+                            Cliente: {vencimiento.cliente.nombre}
                         </p>
                     </div>
                     <button onClick={onClose} className="text-gris hover:text-blanco transition-colors p-1">

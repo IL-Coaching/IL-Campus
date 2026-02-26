@@ -18,8 +18,11 @@ interface RespuestasInscripcion {
         aptoMedico?: string;
     };
     estiloDeVida?: {
+        ocupacion?: string;
         actividad?: string;
         sueno?: string;
+        alimentacion?: string;
+        otraActividadFisica?: string;
     };
     experiencia?: {
         entrenaActualmente?: string;
@@ -32,7 +35,7 @@ interface RespuestasInscripcion {
     disponibilidad?: {
         sesionesSemanales?: string;
         tiempoSesion?: string;
-        lugar?: string;
+        lugar?: string[];
         equipamiento?: string[];
     };
     personalizacion?: {
@@ -52,9 +55,16 @@ export async function enviarFormularioInscripcion(datos: {
     respuestas: RespuestasInscripcion;
 }) {
     try {
-        // 1. Buscamos al entrenador principal (Iñaki)
+        // 1. Buscamos al entrenador principal
+        const emailEntrenador = process.env.ENTRENADOR_EMAIL;
+
+        if (!emailEntrenador) {
+            console.error("CRÍTICO: ENTRENADOR_EMAIL no configurado en variables de entorno.");
+            return { error: "El sistema no está configurado para recibir inscripciones." };
+        }
+
         const entrenador = await prisma.entrenador.findUnique({
-            where: { email: 'legarretatraining@gmail.com' }
+            where: { email: emailEntrenador }
         });
 
         if (!entrenador) {

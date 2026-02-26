@@ -48,7 +48,7 @@ export default function ModalCobrosHistorial({ clienteNombre, cobros, onClose }:
                             Historial de Pagos
                         </h2>
                         <p className="text-naranja text-[10px] font-black uppercase tracking-[0.2em]">
-                            Atleta: {clienteNombre}
+                            Cliente: {clienteNombre}
                         </p>
                     </div>
                     <button onClick={onClose} className="text-gris hover:text-blanco transition-colors p-1">

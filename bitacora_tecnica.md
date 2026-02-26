@@ -1,20 +1,88 @@
 # 📓 BITÁCORA TÉCNICA — IL-CAMPUS
 
-## Versión 2.0 — Reconstrucción de Eficiencia
+## Versión 2.1 — Pipeline ArchSecure AI activo
 
-Este archivo registra las decisiones arquitectónicas, cambios realizados y tareas pendientes siguiendo el protocolo de la **Tool Box (ArchSecure AI)**.
+Este archivo registra las decisiones arquitectónicas, cambios realizados y tareas pendientes siguiendo el protocolo de la **Tool Box (ArchSecure AI v4.0)**.
 
 ---
 
 ### 🚀 ESTADO ACTUAL
 
-- **Fase:** 1 - El Arsenal y la Base (En curso)
-- **Estado del Pipeline:** ARQUITECTO activo.
-- **Objetivo:** Recuperar la operatividad de la biblioteca de ejercicios y habilitar la planificación flexible.
+- **Fase:** 4 — Adaptación Móvil (Pendiente de inicio)
+- **Estado del Pipeline:** ARQUITECTO completado → GUARDIÁN DE SEGURIDAD próximo
+- **Entorno de Deploy:** Vercel (Next.js 14 + Prisma + Supabase)
+- **Node.js:** 20.x (declarado en package.json ✅)
 
 ---
 
 ### 🛠️ LOG DE INTERVENCIONES
+
+#### [2026-02-26] — Intervención del ARQUITECTO (ArchSecure AI v4.0)
+
+**Agente:** Arquitecto  
+**Tipo:** Limpieza Nivel 1 (sin aprobación requerida)
+
+- **Cambios realizados:**
+  - [x] Eliminados archivos de debug y output sueltos en raíz: `eslint.json`, `eslint2.json`, `l.json`, `lint_output.txt`, `errors.txt`, `eslint_errors.txt`, `eslint_output.txt`
+  - [x] Movido `MIGRACION.md` → `docs/MIGRACION.md`
+  - [x] Creada carpeta `scripts/` y movidos scripts sueltos: `count.js`, `check-owner.js`, `test-ejercicio.js`, `test-update.js`
+  - [x] Actualizado `.gitignore` con `/scripts` y `*.txt`
+  - [x] `skipLibCheck: true` evaluado — **JUSTIFICADO** para Next.js (tipos generados en `.next/types/`)
+  - [x] Bitácora actualizada al estado real
+
+**Deuda técnica identificada (no bloqueante):**
+
+- Tests declarados en `package.json` pero sin implementación real → pendiente de Centinela de Calidad
+- `scripts/` contiene scripts de debug sin documentar → limpiar o formalizar en futuro sprint
+
+**Gate de calidad:** ✅ Listo para el Guardián de Seguridad
+
+---
+
+#### [2026-02-26] — Intervención del GUARDIÁN DE SEGURIDAD (ArchSecure AI v4.0)
+
+**Agente:** Guardián de Seguridad  
+**Tipo:** Auditoría completa (OWASP Top 10 + API Security)
+
+**Resultados:**
+
+| Severidad | Total | Parchados | Pendiente |
+|---|---|---|---|
+| 🔴 Crítica | 0 | — | 0 |
+| 🟠 Alta | 2 | 2 | 0 |
+| 🟡 Media | 2 | 0 | 2 (doc.) |
+| 🟢 Baja | 3 | 0 | 3 (doc.) |
+
+**Parches aplicados (Alta):**
+
+- [x] **HALLAZGO #1** — `Math.random()` para códigos de activación de acceso → reemplazado por `crypto.getRandomValues()` (CSPRNG) en `cripto.ts` y `cliente.servicio.ts`. Nuevo método `generarCodigoActivacion()` centraliza la generación.
+- [x] **HALLAZGO #2** — Middleware decodificaba JWT sin verificar firma (solo `JSON.parse` del payload base64) → reemplazado por `jwtVerify` de `jose` (compatible Edge Runtime). Un atacante podía forjar tokens con `role='entrenador'`.
+
+**Hallazgos documentados (no bloqueantes):**
+
+- 🟡 **CSP con `'unsafe-inline'` y `'unsafe-eval'`**: Requeridos por Next.js/Tailwind actualmente. Reducir en futura iteración con nonces.
+- 🟡 **`console.error()` expone detalles internos en logs de servidor**: Aceptable en server-side (no llega al cliente), pero en el futuro considerar logger estructurado.
+- 🟢 **Sin rate limiting en endpoints de auth**: Bcrypt limita velocidad de brute force. Agregar rate limiting en `/ingresar` es mejora recomendada para escalar.
+- 🟢 **Email hardcodeado en `inscripcion.accion.ts`**: `legarretatraining@gmail.com` está fijo en código. Pasar a variable de entorno como `ENTRENADOR_EMAIL`.
+- 🟢 **`supabase.ts` usa `SUPABASE_SERVICE_ROLE_KEY`**: Solo se usa server-side ✅. Sin riesgo de exposición cliente.
+
+**Gate de calidad:** ✅ Listo para Fase 4 — Sin críticas ni altas pendientes
+
+---
+
+### 🔒 NORMAS DE SEGURIDAD PARA FASE 4 (Adaptación Móvil)
+
+Estas reglas deben respetarse en todo código nuevo de la Fase 4:
+
+1. **Nunca validar solo en cliente** — Toda validación de negocio se hace en Server Actions
+2. **Tokens con CSPRNG** — Usar `CriptoServicio.generarCodigoActivacion()` o `generateRandomToken()` para cualquier token nuevo. Nunca `Math.random()`
+3. **No exponer datos sensibles en URL** — IDs de recursos internos van por cookie/sesión, no por query string en rutas públicas
+4. **Server Actions con verificación de sesión** — Toda acción destructiva o de escritura llama primero a `getEntrenadorSesion()` o `getAlumnoSesion()`
+5. **Inputs sanitizados con Zod** — Todo input de usuario pasa por validador Zod antes de llegar a la DB
+6. **Imágenes en Supabase Storage** — Validar tipo MIME en servidor antes de subir (no confiar en extensión del archivo)
+7. **No incluir contraseñas ni tokens en logs** — `console.error(error)` sí, `console.error('token:', token)` nunca
+
+---
 
 #### [2026-02-24] — Inicio de Refactorización Fase 1
 
@@ -32,14 +100,34 @@ Este archivo registra las decisiones arquitectónicas, cambios realizados y tare
 
 ---
 
-### 📋 TAREAS PENDIENTES
+### 📋 ROADMAP DEL PIPELINE
 
-- [x] Fase 1: Reparar Biblioteca de Ejercicios.
-- [x] Fase 1: Habilitar Texto Libre en Planificación.
-- [x] Fase 1: Limpieza de errores de TypeScript (Guardian Deploy).
-- [x] Fase 2: UX del Constructor (Vistas colapsables, Drag & Drop).
-- [x] Fase 3: Vínculo Cliente-Finanzas (Cobro automático/Manual).
-- [ ] Fase 4: Adaptación Móvil (Legibilidad y Mensajería WPP Style).
+| Fase | Agente | Estado |
+|---|---|---|
+| Fase 1: Reparar Biblioteca de Ejercicios | Arquitecto | ✅ Completo |
+| Fase 1: Habilitar Texto Libre en Planificación | Arquitecto | ✅ Completo |
+| Fase 1: Limpieza TypeScript (Guardian Deploy) | Guardián Deploy | ✅ Completo |
+| Fase 2: UX del Constructor (Colapsables, D&D) | Arquitecto | ✅ Completo |
+| Fase 3: Vínculo Cliente-Finanzas | Arquitecto | ✅ Completo |
+| Limpieza de raíz y estructura del repo | Arquitecto | ✅ 2026-02-26 |
+| **Fase 4: Adaptación Móvil** | Por definir | 🔲 Pendiente |
+| Auditoría de seguridad | Guardián de Seguridad | 🔲 Pendiente |
+| Suite de tests críticos | Centinela de Calidad | 🔲 Pendiente |
+
+---
+
+### 📢 ADRs (Decisiones Arquitectónicas Registradas)
+
+#### ADR-001: skipLibCheck: true en tsconfig
+
+- **Decisión:** Mantener `skipLibCheck: true`
+- **Razón:** Next.js genera tipos en `.next/types/` que pueden tener conflictos con versiones de TypeScript. Es la configuración recomendada por el equipo de Next.js.
+- **Impacto:** Bajo. El código propio sí es verificado con `strict: true`.
+
+#### ADR-002: Módulo nucleo/ como capa de lógica de negocio
+
+- **Decisión:** Toda la lógica de negocio vive en `src/nucleo/` separada de las pages de Next.js.
+- **Razón:** Separación clara entre infraestructura (Next.js/Prisma) y dominio.
 
 ---
 
@@ -48,3 +136,4 @@ Este archivo registra las decisiones arquitectónicas, cambios realizados y tare
 - Se prioriza la **estabilidad del build** para evitar fallos en Vercel.
 - Se mantiene el campo de **video** como opcional pero accesible.
 - Se implementará **Soft Delete** (archivar) en lugar de borrado físico.
+- La carpeta `scripts/` es de uso local — no forma parte del proyecto en producción.

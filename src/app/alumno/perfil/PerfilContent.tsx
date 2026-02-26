@@ -9,8 +9,10 @@ import {
     Key,
     CheckCircle2,
     AlertCircle,
-    Loader2
+    Loader2,
+    LogOut
 } from 'lucide-react';
+import { logout } from '@/nucleo/acciones/auth.accion';
 import { Cliente, CicloMenstrual } from '@prisma/client';
 import { actualizarPerfilAlumno, cambiarPasswordAlumno, guardarConfiguracionCiclo } from '@/nucleo/acciones/alumno.accion';
 
@@ -175,6 +177,17 @@ export default function PerfilContent({ alumno, ciclo }: { alumno: Cliente, cicl
                     </div>
                 </form>
             )}
+
+            {/* Logout Button explicitly for Mobile/UX */}
+            <div className="pt-4 pb-10">
+                <button
+                    onClick={() => logout()}
+                    className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 font-black uppercase tracking-widest text-xs hover:bg-red-500/20 transition-all shadow-lg shadow-red-500/5 group"
+                >
+                    <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
+                    Cerrar Sesión Activa
+                </button>
+            </div>
         </div>
     );
 }

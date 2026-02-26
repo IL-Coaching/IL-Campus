@@ -105,7 +105,7 @@ export default function ConstructorCliente({ cliente, macrocicloInicial, limiteC
                             </div>
                             <div>
                                 <h3 className="text-2xl font-barlow-condensed font-black uppercase text-blanco">Módulo de Planificación Vacío</h3>
-                                <p className="text-gris max-w-sm mt-2 font-medium">Este atleta aún no tiene un macrociclo de entrenamiento. ¿Deseas inicializar una estructura base de 12 semanas?</p>
+                                <p className="text-gris max-w-sm mt-2 font-medium">Este cliente aún no tiene un macrociclo de entrenamiento. ¿Deseas inicializar una estructura base de 12 semanas?</p>
                             </div>
                             <button
                                 onClick={handleCrearPlan}
@@ -176,7 +176,11 @@ export default function ConstructorCliente({ cliente, macrocicloInicial, limiteC
                     onClose={() => setBuscadorOpen(false)}
                     onSelect={async (ej) => {
                         if (diaObjetoActual) {
-                            const res = await agregarEjercicio(diaObjetoActual.id, ej.id, diaObjetoActual.ejercicios.length + 1);
+                            // Si es actividad libre, ej.id vendrá como null y ej.nombreLibre tendrá valor.
+                            const id = ('id' in ej) ? ej.id : null;
+                            const nombreLibre = ('nombreLibre' in ej) ? ej.nombreLibre : undefined;
+
+                            const res = await agregarEjercicio(diaObjetoActual.id, id, diaObjetoActual.ejercicios.length + 1, nombreLibre);
                             if (res.exito) {
                                 router.refresh();
                                 setBuscadorOpen(false);

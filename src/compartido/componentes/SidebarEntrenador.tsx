@@ -35,20 +35,32 @@ export default function SidebarEntrenador({ badgeMensajeria = 0 }: { badgeMensaj
     return (
         <>
             {/* Botón Mobile */}
-            <div className="md:hidden fixed top-0 w-full flex items-center justify-between p-4 bg-marino-2 border-b border-marino-4 z-50">
-                <span className="text-xl font-barlow-condensed font-black italic text-naranja leading-none">IL</span>
-                <button className="text-blanco" onClick={() => setMobileOpen(!mobileOpen)}>
-                    {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-                </button>
+            <div className="md:hidden fixed top-0 w-full flex items-center justify-between p-4 bg-marino-2 border-b border-marino-4 z-[120] h-16">
+                <div className="flex items-center gap-1">
+                    <div className="w-1 h-4 bg-naranja rounded-full"></div>
+                    <span className="text-xl font-barlow-condensed font-black italic text-naranja leading-none">IL</span>
+                </div>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => logout()}
+                        className="p-2 text-gris hover:text-rojo transition-colors"
+                        title="Cerrar Sesión"
+                    >
+                        <LogOut size={20} />
+                    </button>
+                    <button className="p-2 text-blanco" onClick={() => setMobileOpen(!mobileOpen)}>
+                        {mobileOpen ? <X size={26} /> : <Menu size={26} />}
+                    </button>
+                </div>
             </div>
 
             {/* Sidebar Desktop & Mobile */}
             <aside
-                className={`fixed inset-y-0 left-0 z-40 w-64 bg-marino-2 border-r border-marino-4 transform transition-transform duration-300 ease-in-out md:translate-x-0 flex flex-col ${mobileOpen ? 'translate-x-0' : '-translate-x-full'
-                    } pt-16 md:pt-0`}
+                className={`fixed inset-y-0 left-0 z-[110] w-72 bg-marino-2 border-r border-marino-4 transform transition-transform duration-300 ease-in-out md:translate-x-0 flex flex-col ${mobileOpen ? 'translate-x-0' : '-translate-x-full'
+                    } pt-16 md:pt-0 shadow-2xl overflow-hidden`}
             >
                 {/* Header Logo */}
-                <div className="hidden md:flex flex-col h-24 pt-4 items-center justify-center border-b border-marino-4">
+                <div className="hidden md:flex flex-col h-24 pt-4 items-center justify-center border-b border-marino-4 mb-4">
                     {/* Logo IL */}
                     <div className="flex items-center gap-1 text-gris-claro">
                         <div className="w-1.5 h-6 bg-gris-claro rounded-sm"></div>
@@ -62,7 +74,7 @@ export default function SidebarEntrenador({ badgeMensajeria = 0 }: { badgeMensaj
                 </div>
 
                 {/* Menu Nav */}
-                <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+                <nav className="flex-1 overflow-y-auto px-4 space-y-2 pb-6 pt-4 md:pt-0">
                     {MENU_ITEMS.map((item) => {
                         const isActive = pathname.startsWith(item.href);
                         return (
@@ -70,15 +82,15 @@ export default function SidebarEntrenador({ badgeMensajeria = 0 }: { badgeMensaj
                                 key={item.href}
                                 href={item.href}
                                 onClick={() => setMobileOpen(false)}
-                                className={`flex items-center justify-center md:justify-start gap-4 px-6 py-3.5 rounded-full font-bold uppercase tracking-widest transition-all duration-300 ${isActive
-                                    ? "bg-[#e87717] text-blanco shadow-lg shadow-naranja/20"
-                                    : "text-gris hover:text-blanco hover:bg-[#1a233a]"
+                                className={`flex items-center gap-4 px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-[0.7rem] transition-all duration-300 ${isActive
+                                    ? "bg-gradient-to-r from-naranja to-orange-500 text-marino shadow-xl shadow-naranja/20"
+                                    : "text-gris hover:text-blanco hover:bg-marino-3/50"
                                     }`}
                             >
-                                <item.icon size={20} />
-                                <span className="tracking-wide text-sm">{item.name}</span>
+                                <item.icon size={18} strokeWidth={isActive ? 3 : 2} />
+                                <span className="tracking-[0.1em]">{item.name}</span>
                                 {item.name === 'Mensajería' && badgeMensajeria > 0 && (
-                                    <div className="ml-auto bg-rojo text-blanco text-[0.6rem] font-black w-5 h-5 flex items-center justify-center rounded-full shadow-lg shadow-rojo/20">
+                                    <div className={`ml-auto border w-6 h-6 flex items-center justify-center rounded-full text-[0.65rem] font-black ${isActive ? 'bg-marino border-marino/20 text-naranja' : 'bg-rojo border-rojo/20 text-blanco shadow-lg shadow-rojo/20'}`}>
                                         {badgeMensajeria > 99 ? '+99' : badgeMensajeria}
                                     </div>
                                 )}
@@ -88,13 +100,13 @@ export default function SidebarEntrenador({ badgeMensajeria = 0 }: { badgeMensaj
                 </nav>
 
                 {/* Footer Sidebar */}
-                <div className="p-4 border-t border-marino-4">
+                <div className="p-4 border-t border-marino-4 bg-marino-3/30">
                     <button
                         onClick={() => logout()}
-                        className="flex items-center justify-center md:justify-start gap-4 px-6 py-3.5 rounded-full text-gris hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors duration-300 w-full font-bold uppercase tracking-widest"
+                        className="flex items-center gap-4 px-6 py-4 rounded-2xl text-gris hover:text-rojo hover:bg-rojo/10 transition-all duration-300 w-full font-black uppercase tracking-[0.15em] text-[0.7rem] shadow-sm"
                     >
-                        <LogOut size={20} />
-                        <span className="tracking-wide text-sm">Cerrar Sesión</span>
+                        <LogOut size={18} />
+                        <span>Cerrar Sesión</span>
                     </button>
                 </div>
             </aside>
@@ -102,7 +114,7 @@ export default function SidebarEntrenador({ badgeMensajeria = 0 }: { badgeMensaj
             {/* Overlay Mobile */}
             {mobileOpen && (
                 <div
-                    className="fixed inset-0 bg-marino/80 backdrop-blur-sm z-30 md:hidden"
+                    className="fixed inset-0 bg-marino-1/80 backdrop-blur-md z-[105] md:hidden animate-in fade-in duration-300"
                     onClick={() => setMobileOpen(false)}
                 ></div>
             )}

@@ -22,7 +22,7 @@ export default function StatsFinanzas({ stats }: Props) {
             label: "Ticket Promedio",
             value: `$${ticketPromedio.toLocaleString()}`,
             icon: <PieChart className="text-naranja" />,
-            desc: "Ingreso medio por atleta"
+            desc: "Ingreso medio por cliente"
         },
         {
             label: "Cobros Realizados",

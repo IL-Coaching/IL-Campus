@@ -95,7 +95,7 @@ export default function ModalAsignarPlan({ clienteId, clienteNombre, ultimoPlanV
                             {successCode ? "¡Plan Asignado!" : "Asignar Membresía"}
                         </h2>
                         <p className="text-naranja text-xs font-bold uppercase tracking-widest flex items-center gap-1">
-                            Atleta: <span className="text-blanco">{clienteNombre}</span>
+                            Cliente: <span className="text-blanco">{clienteNombre}</span>
                         </p>
                     </div>
                     <button
@@ -114,7 +114,7 @@ export default function ModalAsignarPlan({ clienteId, clienteNombre, ultimoPlanV
                             </div>
                             <div className="space-y-1">
                                 <p className="text-blanco font-bold text-sm uppercase tracking-widest">Código de Activación</p>
-                                <p className="text-gris text-[10px] uppercase font-bold tracking-tighter">Enviá este código al atleta para que pueda ingresar por primera vez</p>
+                                <p className="text-gris text-[10px] uppercase font-bold tracking-tighter">Enviá este código al cliente para que pueda ingresar por primera vez</p>
                             </div>
                         </div>
 
@@ -135,7 +135,7 @@ export default function ModalAsignarPlan({ clienteId, clienteNombre, ultimoPlanV
 
                         <div className="space-y-3 pt-4 border-t border-marino-4">
                             <p className="text-[10px] text-gris text-center italic">
-                                El atleta deberá ingresar este código junto con su email en la pantalla de acceso.
+                                El cliente deberá ingresar este código junto con su email en la pantalla de acceso.
                             </p>
                             <button
                                 onClick={onClose}
@@ -154,7 +154,7 @@ export default function ModalAsignarPlan({ clienteId, clienteNombre, ultimoPlanV
                                     <Shield className="text-naranja" size={20} />
                                     <div className="flex-1">
                                         <p className="text-[0.65rem] font-black uppercase text-naranja tracking-widest">Atención: Plan Vigente</p>
-                                        <p className="text-[0.6rem] text-gris font-medium">El atleta tiene un plan activo hasta el {vencimientoActual?.toLocaleDateString()}.</p>
+                                        <p className="text-[0.6rem] text-gris font-medium">El cliente tiene un plan activo hasta el {vencimientoActual?.toLocaleDateString()}.</p>
                                     </div>
                                 </div>
                                 <button

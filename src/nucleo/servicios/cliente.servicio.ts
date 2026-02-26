@@ -65,13 +65,11 @@ export const ClienteServicio = {
             throw new Error("Ya existe un cliente registrado con este correo electrónico.");
         }
 
-        // 1. Generar Código Único de Activación Seguro
-        const randomStr1 = Math.random().toString(36).substring(2, 6).toUpperCase();
-        const randomStr2 = Math.random().toString(36).substring(2, 5).toUpperCase();
-        const codigoActivacion = `IL-${randomStr1}-${randomStr2}`;
-
-        // 2. Importar el CriptoServicio para hashearlo
+        // 1. Generar Código Único de Activación Seguro (CSPRNG)
         const { CriptoServicio } = await import('@/nucleo/seguridad/cripto');
+        const codigoActivacion = CriptoServicio.generarCodigoActivacion();
+
+        // 2. Hashearlo antes de guardarlo
         const hash = await CriptoServicio.hashPassword(codigoActivacion);
 
         const cliente = await prisma.cliente.create({
@@ -201,12 +199,9 @@ export const ClienteServicio = {
 
         // Si no tiene password, generamos la temporal (Protocolo IL-Campus)
         if (!cliente.password) {
-            const randomStr1 = Math.random().toString(36).substring(2, 6).toUpperCase();
-            const randomStr2 = Math.random().toString(36).substring(2, 5).toUpperCase();
-            codigoActivacion = `IL-${randomStr1}-${randomStr2}`;
-
-            const { CriptoServicio } = await import('@/nucleo/seguridad/cripto');
-            updates.password = await CriptoServicio.hashPassword(codigoActivacion);
+            const { CriptoServicio: Cripto } = await import('@/nucleo/seguridad/cripto');
+            codigoActivacion = Cripto.generarCodigoActivacion();
+            updates.password = await Cripto.hashPassword(codigoActivacion);
             updates.forcePasswordChange = true;
         }
 

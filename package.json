@@ -14,10 +14,11 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "echo 'No tests configured yet'",
-    "test:unit": "echo 'No unit tests configured yet'",
-    "test:integracion": "echo 'No integration tests configured yet'",
-    "test:seguridad": "echo 'No security tests configured yet'",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unitarios",
+    "test:integracion": "vitest run tests/integracion",
+    "test:seguridad": "vitest run tests/seguridad",
+    "test:watch": "vitest",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -45,17 +46,22 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@vitejs/plugin-react": "^5.1.4",
     "eslint": "^8",
     "eslint-config-next": "14.2.35",
     "husky": "^9.1.7",
+    "jsdom": "^28.1.0",
     "lint-staged": "^16.2.7",
     "postcss": "^8",
     "prisma": "^5.22.0",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.0.18"
   }
 }

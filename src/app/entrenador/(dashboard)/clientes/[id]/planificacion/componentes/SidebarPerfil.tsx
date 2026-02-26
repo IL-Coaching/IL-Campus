@@ -111,17 +111,19 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                 </button>
             </div>
 
-            {/* TABS ICONS */}
-            <div className="flex border-b border-marino-4 bg-marino-3/30">
+            {/* TABS ICONS - Optimized size */}
+            <div className="flex border-b border-marino-4 bg-marino-3/30 p-1 gap-1">
                 {TABS.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setTabActiva(tab.id)}
-                        className={`flex-1 py-3 flex justify-center transition-colors ${tabActiva === tab.id ? 'bg-marino-2 text-naranja border-b-2 border-naranja' : 'text-gris hover:text-blanco'
+                        className={`flex-1 py-3.5 flex justify-center rounded-xl transition-all duration-300 ${tabActiva === tab.id
+                            ? 'bg-marino-4 text-naranja shadow-lg shadow-black/20'
+                            : 'text-gris hover:text-blanco hover:bg-marino-4/30'
                             }`}
                         title={tab.label}
                     >
-                        <tab.icon size={18} />
+                        <tab.icon size={20} strokeWidth={tabActiva === tab.id ? 2.5 : 2} />
                     </button>
                 ))}
             </div>
@@ -247,8 +249,8 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                                     </p>
                                 </div>
                                 <div className="p-4 bg-marino-3 border border-marino-4 rounded-xl">
-                                    <p className="text-[0.7rem] text-gris leading-relaxed">
-                                        El seguimiento de ciclo está activo para esta atleta. El sistema sincronizará las cargas según la fase del mes para optimizar el rendimiento y la recuperación.
+                                    <p className="text-[0.7rem] text-gris leading-relaxed font-medium">
+                                        El seguimiento de ciclo está activo para este cliente. El sistema sincronizará las cargas según la fase del mes para optimizar el rendimiento y la recuperación.
                                     </p>
                                 </div>
                             </>
@@ -408,7 +410,7 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                                 {cliente.enEstasis ? '✓ En Éstasis' : 'Pausar (Éstasis)'}
                             </button>
                             <p className="mt-3 text-[0.6rem] text-gris font-medium leading-relaxed italic">
-                                La pausa congela el acceso del alumno pero mantiene su cupo y datos intactos.
+                                La pausa congela el acceso del cliente pero mantiene su cupo y datos intactos.
                             </p>
                         </div>
 
