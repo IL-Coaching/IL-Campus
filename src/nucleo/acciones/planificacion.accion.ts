@@ -328,7 +328,20 @@ export async function clonarContenidoSemana(idOrigen: string, idDestino: string)
                     }
                 });
 
+                const groupMap = new Map<string, string>(); // viejo_grupo_id -> nuevo_grupo_id
+
                 for (const ej of dia.ejercicios) {
+                    let nuevoGrupoId = null;
+                    if (ej.grupoId) {
+                        if (groupMap.has(ej.grupoId)) {
+                            nuevoGrupoId = groupMap.get(ej.grupoId);
+                        } else {
+                            const newGuid = require('crypto').randomUUID();
+                            groupMap.set(ej.grupoId, newGuid);
+                            nuevoGrupoId = newGuid;
+                        }
+                    }
+
                     await tx.ejercicioPlanificado.create({
                         data: {
                             diaId: nuevoDia.id,
@@ -345,7 +358,9 @@ export async function clonarContenidoSemana(idOrigen: string, idDestino: string)
                             notasTecnicas: ej.notasTecnicas,
                             orden: ej.orden,
                             esTesteo: ej.esTesteo,
-                            modalidadTesteo: ej.modalidadTesteo
+                            modalidadTesteo: ej.modalidadTesteo,
+                            grupoId: nuevoGrupoId,
+                            nombreGrupo: ej.nombreGrupo
                         }
                     });
                 }
@@ -356,6 +371,69 @@ export async function clonarContenidoSemana(idOrigen: string, idDestino: string)
         return { exito: true };
     } catch (error) {
         console.error("Error al clonar semana:", error);
+        return { error: "No se pudo clonar el contenido." };
+    }
+}
+
+export async function clonarContenidoSesion(idOrigen: string, idDestino: string) {
+    try {
+        await getEntrenadorSesion();
+
+        const origen = await prisma.diaSesion.findUnique({
+            where: { id: idOrigen },
+            include: {
+                ejercicios: true
+            }
+        });
+
+        if (!origen) throw new Error("Sesión origen no encontrada.");
+
+        await prisma.$transaction(async (tx) => {
+            // Limpiar destino
+            await tx.ejercicioPlanificado.deleteMany({ where: { diaId: idDestino } });
+
+            const groupMap = new Map<string, string>(); // viejo_grupo_id -> nuevo_grupo_id
+
+            for (const ej of origen.ejercicios) {
+                let nuevoGrupoId = null;
+                if (ej.grupoId) {
+                    if (groupMap.has(ej.grupoId)) {
+                        nuevoGrupoId = groupMap.get(ej.grupoId);
+                    } else {
+                        const newGuid = require('crypto').randomUUID();
+                        groupMap.set(ej.grupoId, newGuid);
+                        nuevoGrupoId = newGuid;
+                    }
+                }
+
+                await tx.ejercicioPlanificado.create({
+                    data: {
+                        diaId: idDestino,
+                        ejercicioId: ej.ejercicioId,
+                        nombreLibre: ej.nombreLibre,
+                        esBiblioteca: ej.esBiblioteca,
+                        series: ej.series,
+                        repsMin: ej.repsMin,
+                        repsMax: ej.repsMax,
+                        RIR: ej.RIR,
+                        tempo: ej.tempo,
+                        descansoSegundos: ej.descansoSegundos,
+                        pesoSugerido: ej.pesoSugerido,
+                        notasTecnicas: ej.notasTecnicas,
+                        orden: ej.orden,
+                        esTesteo: ej.esTesteo,
+                        modalidadTesteo: ej.modalidadTesteo,
+                        grupoId: nuevoGrupoId,
+                        nombreGrupo: ej.nombreGrupo
+                    }
+                });
+            }
+        });
+
+        revalidatePath(`/entrenador/clientes`);
+        return { exito: true };
+    } catch (error) {
+        console.error("Error al clonar sesión:", error);
         return { error: "No se pudo clonar el contenido." };
     }
 }

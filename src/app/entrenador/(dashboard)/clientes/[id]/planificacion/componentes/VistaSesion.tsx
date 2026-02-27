@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Copy, Save, Info, Loader2, Dumbbell, ClipboardList, Gauge, Scale, Activity, ShieldAlert, ChevronDown, ChevronUp, GripVertical } from 'lucide-react';
 import { DiaConEjercicios, EjercicioConDetalle, SemanaConDias } from '@/nucleo/tipos/planificacion.tipos';
-import { guardarCambiosEjercicio, eliminarEjercicio, reordenarEjercicios, agruparEjercicios, desagruparEjercicios, actualizarNombreGrupo } from '@/nucleo/acciones/planificacion.accion';
+import { guardarCambiosEjercicio, eliminarEjercicio, reordenarEjercicios, agruparEjercicios, desagruparEjercicios, actualizarNombreGrupo, clonarContenidoSesion } from '@/nucleo/acciones/planificacion.accion';
 import { obtenerCondicionesClinicas } from '@/nucleo/acciones/cliente.accion';
 import { useRouter, useParams } from 'next/navigation';
 import SelectorEjercicioCelda from './SelectorEjercicioCelda';
@@ -23,6 +23,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
     const [showClinical, setShowClinical] = useState(true);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [isSelectionMode, setIsSelectionMode] = useState(false);
+    const [copiedSesionId, setCopiedSesionId] = useState<string | null>(null);
     const router = useRouter();
     const params = useParams();
     const clienteId = params.id as string;
@@ -57,6 +58,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
             }
         };
         fetchCondiciones();
+
+        setCopiedSesionId(localStorage.getItem('copied_sesion_id'));
     }, [clienteId]);
 
 
@@ -144,6 +147,28 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
             const res = await actualizarNombreGrupo(diaObjeto.id, grupoId, nuevoNombre);
             if (res.exito) router.refresh();
         }
+    };
+
+    const handleCopiarEstructura = () => {
+        localStorage.setItem('copied_sesion_id', diaObjeto.id);
+        setCopiedSesionId(diaObjeto.id);
+        alert("Estructura de la sesión copiada.");
+    };
+
+    const handlePegarEstructura = async () => {
+        const idOrigen = localStorage.getItem('copied_sesion_id');
+        if (!idOrigen) return;
+        if (!confirm("Esto reemplazará todos los ejercicios actuales con la estructura copiada. ¿Seguro?")) return;
+
+        setSaving(true);
+        const res = await clonarContenidoSesion(idOrigen, diaObjeto.id);
+        if (res.exito) {
+            router.refresh();
+            alert("Estructura clonada con éxito.");
+        } else {
+            alert("Error al pegar: " + res.error);
+        }
+        setSaving(false);
     };
 
 
@@ -240,12 +265,23 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                     )}
 
                     {!isSelectionMode && (
-                        <button
-                            onClick={() => alert("Copiando estructura...")}
-                            className="flex items-center justify-center gap-2 px-5 py-3.5 bg-marino-2 border border-marino-4 rounded-2xl text-[0.65rem] font-black uppercase tracking-widest text-gris hover:border-blanco/20 hover:text-blanco transition-all"
-                        >
-                            <Copy size={16} /> <span className="hidden md:inline">Clonar</span> Estructura
-                        </button>
+                        <>
+                            <button
+                                onClick={handleCopiarEstructura}
+                                className="flex items-center justify-center gap-2 px-5 py-3.5 bg-marino-2 border border-marino-4 rounded-2xl text-[0.65rem] font-black uppercase tracking-widest text-gris hover:border-blanco/20 hover:text-blanco transition-all"
+                            >
+                                <Copy size={16} /> <span className="hidden md:inline">Clonar</span> Estructura
+                            </button>
+                            {copiedSesionId && copiedSesionId !== diaObjeto.id && (
+                                <button
+                                    onClick={handlePegarEstructura}
+                                    className="flex items-center justify-center gap-2 px-5 py-3.5 bg-marino-2/50 border border-naranja/40 rounded-2xl text-[0.65rem] font-black uppercase tracking-widest text-naranja hover:bg-naranja hover:text-marino transition-all font-barlow-condensed"
+                                    title="Reemplazar sesión actual con la copiada"
+                                >
+                                    Pegar Estructura
+                                </button>
+                            )}
+                        </>
                     )}
                     <button
                         onClick={handleGuardarTodo}
@@ -622,7 +658,11 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                 {groupMembers.map((gej, gidx) => (
                                                     <tr
                                                         key={gej.id}
-                                                        className={`group hover:bg-white/[0.02] transition-all border-l-4 border-l-naranja/20`}
+                                                        draggable={!isSelectionMode}
+                                                        onDragStart={() => handleDragStart(ejercicios.findIndex(e => e.id === gej.id))}
+                                                        onDragOver={handleDragOver}
+                                                        onDrop={() => handleDrop(ejercicios.findIndex(e => e.id === gej.id))}
+                                                        className={`group hover:bg-white/[0.02] transition-all border-l-4 border-l-naranja/20 ${draggingIdx === ejercicios.findIndex(e => e.id === gej.id) ? 'opacity-20' : ''}`}
                                                     >
                                                         <td className="p-5 text-center">
                                                             {isSelectionMode ? (

@@ -198,7 +198,7 @@ export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSem
                                         id="duracion-meso"
                                         type="number"
                                         min={1}
-                                        max={12}
+                                        max={104}
                                         value={isNaN(duracion) ? '' : duracion}
                                         onChange={(e) => {
                                             const val = parseInt(e.target.value);
