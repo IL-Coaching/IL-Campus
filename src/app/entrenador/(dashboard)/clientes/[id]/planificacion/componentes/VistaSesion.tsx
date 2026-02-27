@@ -1,11 +1,9 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Copy, Save, Info, Loader2, Dumbbell, ClipboardList, Gauge, Scale, Activity, ShieldAlert, ChevronDown, ChevronUp, ChevronRight, AlertCircle, GripVertical } from 'lucide-react';
-import BannerCicloMenstrual from './BannerCicloMenstrual';
+import { Plus, Trash2, Copy, Save, Info, Loader2, Dumbbell, ClipboardList, Gauge, Scale, Activity, ShieldAlert, ChevronDown, ChevronUp, GripVertical } from 'lucide-react';
 import { DiaConEjercicios, EjercicioConDetalle, SemanaConDias } from '@/nucleo/tipos/planificacion.tipos';
 import { guardarCambiosEjercicio, eliminarEjercicio, reordenarEjercicios, agruparEjercicios, desagruparEjercicios, actualizarNombreGrupo } from '@/nucleo/acciones/planificacion.accion';
 import { obtenerCondicionesClinicas } from '@/nucleo/acciones/cliente.accion';
-import { ZONAS_INTENSIDAD } from '@/nucleo/planificacion/zonas.constantes';
 import { useRouter, useParams } from 'next/navigation';
 import SelectorEjercicioCelda from './SelectorEjercicioCelda';
 

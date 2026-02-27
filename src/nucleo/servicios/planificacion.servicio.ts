@@ -440,21 +440,24 @@ export const PlanificacionServicio = {
      */
     async agruparEjercicios(ejercicioIds: string[], nombreGrupo: string) {
         const grupoId = Math.random().toString(36).substring(2, 11); // ID corto para el grupo
-        return await (prisma.ejercicioPlanificado as any).updateMany({
+        // @ts-ignore - Campos nuevos en proceso de sincronización
+        return await prisma.ejercicioPlanificado.updateMany({
             where: { id: { in: ejercicioIds } },
             data: { grupoId, nombreGrupo }
         });
     },
 
     async desagruparEjercicios(grupoId: string) {
-        return await (prisma.ejercicioPlanificado as any).updateMany({
+        // @ts-ignore - Campos nuevos en proceso de sincronización
+        return await prisma.ejercicioPlanificado.updateMany({
             where: { grupoId },
             data: { grupoId: null, nombreGrupo: null }
         });
     },
 
     async actualizarNombreGrupo(grupoId: string, nuevoNombre: string) {
-        return await (prisma.ejercicioPlanificado as any).updateMany({
+        // @ts-ignore - Campos nuevos en proceso de sincronización
+        return await prisma.ejercicioPlanificado.updateMany({
             where: { grupoId },
             data: { nombreGrupo: nuevoNombre }
         });
