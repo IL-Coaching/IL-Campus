@@ -22,7 +22,7 @@ export default async function Page({ params }: { params: { id: string } }) {
         const planAsignado = cliente.planesAsignados[0];
         const diasTotales = planAsignado.plan?.duracionDias || 0;
         if (diasTotales > 0) {
-            limiteComercialSemanas = Math.ceil(diasTotales / 7) + 1;
+            limiteComercialSemanas = Math.ceil(diasTotales / 7) + 8; // +8 semanas de margen (2 meses aprox)
         }
     }
 

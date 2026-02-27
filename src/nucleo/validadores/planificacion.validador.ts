@@ -4,7 +4,7 @@ import { z } from "zod";
  * Esquema para la creación de un nuevo macrociclo.
  */
 export const EsquemaNuevoMacrociclo = z.object({
-    duracion: z.preprocess((val) => Number(val), z.number().min(1).max(52)),
+    duracion: z.preprocess((val) => Number(val), z.number().min(1).max(104)),
     fechaInicio: z.preprocess((val) => new Date(val as string), z.date()),
 });
 
@@ -57,7 +57,7 @@ export const EsquemaActualizarMesociclo = z.object({
  * Esquema para actualizar un macrociclo.
  */
 export const EsquemaActualizarMacrociclo = z.object({
-    duracionSemanas: z.number().min(1).max(52).optional(),
+    duracionSemanas: z.number().min(1).max(104).optional(),
     fechaInicio: z.date().optional(),
     notas: z.string().max(1000).optional(),
 });
@@ -71,6 +71,6 @@ export const EsquemaNuevoMesociclo = z.object({
     metodo: z.string().max(1000).optional(),
     rangoReferencia: z.string().max(1000).optional(),
     numeroMes: z.number().min(1).max(24),
-    numSemanas: z.number().min(1).max(52).optional(),
+    numSemanas: z.number().min(1).max(104).optional(),
     numSesiones: z.number().min(1).max(14).optional(),
 });
