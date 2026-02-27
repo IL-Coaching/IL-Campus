@@ -6,6 +6,7 @@ import { PlanificacionServicio } from "../servicios/planificacion.servicio";
 import { prisma } from "@/baseDatos/conexion";
 import { TipoCarga, ModeloPeriodizacion } from "@prisma/client";
 import { EsquemaNuevoMacrociclo, EsquemaActualizarEjercicio, EsquemaActualizarSemana, EsquemaActualizarMesociclo, EsquemaActualizarMacrociclo, EsquemaNuevoMesociclo } from "../validadores/planificacion.validador";
+import { randomUUID } from "crypto";
 
 /**
  * Acciones de Planificación — ArchSecure AI
@@ -336,7 +337,7 @@ export async function clonarContenidoSemana(idOrigen: string, idDestino: string)
                         if (groupMap.has(ej.grupoId)) {
                             nuevoGrupoId = groupMap.get(ej.grupoId);
                         } else {
-                            const newGuid = require('crypto').randomUUID();
+                            const newGuid = randomUUID();
                             groupMap.set(ej.grupoId, newGuid);
                             nuevoGrupoId = newGuid;
                         }
@@ -400,7 +401,7 @@ export async function clonarContenidoSesion(idOrigen: string, idDestino: string)
                     if (groupMap.has(ej.grupoId)) {
                         nuevoGrupoId = groupMap.get(ej.grupoId);
                     } else {
-                        const newGuid = require('crypto').randomUUID();
+                        const newGuid = randomUUID();
                         groupMap.set(ej.grupoId, newGuid);
                         nuevoGrupoId = newGuid;
                     }
