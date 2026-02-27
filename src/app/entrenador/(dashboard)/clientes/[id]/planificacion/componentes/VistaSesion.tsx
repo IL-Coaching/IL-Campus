@@ -279,14 +279,14 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                             <label className="text-[0.6rem] font-black text-gris uppercase tracking-widest pl-1">Protocolo Principal</label>
                             <textarea
                                 defaultValue={`${diaObjeto.focoMuscular} — Intensidad moderada, foco en la fase excéntrica.`}
-                                className="w-full bg-marino-3/50 border border-marino-4/50 rounded-2xl px-5 py-4 text-sm text-blanco focus:outline-none focus:border-naranja/50 transition-all font-medium h-24 resize-none shadow-inner"
+                                className="w-full bg-marino border border-marino-4 rounded-2xl px-5 py-4 text-base text-blanco focus:outline-none focus:border-naranja transition-all font-medium h-28 resize-none shadow-2xl"
                             />
                         </div>
                         <div className="w-full md:w-72 space-y-2">
                             <label className="text-[0.6rem] font-black text-gris uppercase tracking-widest pl-1">Variables de Bio-Feedback</label>
                             <textarea
                                 defaultValue="Priorizar sueño e hidratación post-sesión."
-                                className="w-full bg-marino-3/50 border border-marino-4/50 rounded-2xl px-5 py-4 text-sm text-blanco focus:outline-none focus:border-naranja/50 transition-all font-medium h-24 resize-none shadow-inner"
+                                className="w-full bg-marino border border-marino-4 rounded-2xl px-5 py-4 text-base text-blanco focus:outline-none focus:border-naranja transition-all font-medium h-28 resize-none shadow-2xl"
                             />
                         </div>
                     </div>
@@ -372,7 +372,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                 type="number"
                                                                 value={gej.series}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { series: parseInt(e.target.value) })}
-                                                                className="w-full bg-transparent text-xl font-barlow-condensed font-black text-blanco focus:outline-none"
+                                                                className="w-full bg-marino-4/20 rounded-lg py-1 px-2 text-2xl font-barlow-condensed font-black text-blanco focus:outline-none border border-marino-4/50"
                                                             />
                                                         </div>
                                                         <div className="bg-marino-3 rounded-2xl p-3 border border-marino-4/30">
@@ -381,7 +381,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                 type="number"
                                                                 value={gej.RIR !== null ? gej.RIR : ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                                className="w-full bg-transparent text-xl font-barlow-condensed font-black text-naranja focus:outline-none"
+                                                                className="w-full bg-marino-4/20 rounded-lg py-1 px-2 text-2xl font-barlow-condensed font-black text-naranja focus:outline-none border border-marino-4/50"
                                                             />
                                                         </div>
                                                     </div>
@@ -393,7 +393,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                             step="0.5"
                                                             value={gej.pesoSugerido || ''}
                                                             onChange={(e) => handleUpdateChange(gej.id, { pesoSugerido: parseFloat(e.target.value) })}
-                                                            className="w-full bg-transparent text-2xl font-barlow-condensed font-black text-verde focus:outline-none"
+                                                            className="w-full bg-marino-4/20 rounded-lg py-1.5 px-3 text-3xl font-barlow-condensed font-black text-verde focus:outline-none border border-verde/20"
                                                             placeholder="0.0"
                                                         />
                                                     </div>
@@ -406,14 +406,14 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                     type="number"
                                                                     value={gej.repsMin}
                                                                     onChange={(e) => handleUpdateChange(gej.id, { repsMin: parseInt(e.target.value) })}
-                                                                    className="w-12 bg-transparent text-sm font-black text-blanco focus:outline-none text-center"
+                                                                    className="w-14 bg-marino-4/30 border border-marino-4 rounded-lg py-2 text-base font-black text-blanco focus:outline-none text-center"
                                                                 />
                                                                 <span className="text-gris/40">—</span>
                                                                 <input
                                                                     type="number"
                                                                     value={gej.repsMax}
                                                                     onChange={(e) => handleUpdateChange(gej.id, { repsMax: parseInt(e.target.value) })}
-                                                                    className="w-12 bg-transparent text-sm font-black text-blanco focus:outline-none text-center"
+                                                                    className="w-14 bg-marino-4/30 border border-marino-4 rounded-lg py-2 text-base font-black text-blanco focus:outline-none text-center"
                                                                 />
                                                             </div>
                                                         </div>
@@ -423,7 +423,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                 type="number"
                                                                 value={gej.descansoSegundos !== null ? gej.descansoSegundos : ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                                className="w-full bg-transparent text-sm font-black text-blanco focus:outline-none"
+                                                                className="w-full bg-marino-4/30 border border-marino-4 rounded-lg py-2 text-center text-base font-black text-blanco focus:outline-none"
                                                             />
                                                         </div>
                                                     </div>
@@ -488,7 +488,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                 type="number"
                                                 value={ej.series}
                                                 onChange={(e) => handleUpdateChange(ej.id, { series: parseInt(e.target.value) })}
-                                                className="w-full bg-transparent text-xl font-barlow-condensed font-black text-blanco focus:outline-none"
+                                                className="w-full bg-marino-4/20 rounded-lg py-1 px-2 text-2xl font-barlow-condensed font-black text-blanco focus:outline-none border border-marino-4/50"
                                             />
                                         </div>
                                         <div className="bg-marino-3 rounded-2xl p-3 border border-marino-4/30">
@@ -497,7 +497,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                 type="number"
                                                 value={ej.RIR !== null ? ej.RIR : ''}
                                                 onChange={(e) => handleUpdateChange(ej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                className="w-full bg-transparent text-xl font-barlow-condensed font-black text-naranja focus:outline-none"
+                                                className="w-full bg-marino-4/20 rounded-lg py-1 px-2 text-2xl font-barlow-condensed font-black text-naranja focus:outline-none border border-marino-4/50"
                                             />
                                         </div>
                                     </div>
@@ -509,7 +509,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                             step="0.5"
                                             value={ej.pesoSugerido || ''}
                                             onChange={(e) => handleUpdateChange(ej.id, { pesoSugerido: parseFloat(e.target.value) })}
-                                            className="w-full bg-transparent text-2xl font-barlow-condensed font-black text-verde focus:outline-none"
+                                            className="w-full bg-marino-4/20 rounded-lg py-1.5 px-3 text-3xl font-barlow-condensed font-black text-verde focus:outline-none border border-verde/20"
                                             placeholder="0.0"
                                         />
                                     </div>
@@ -522,14 +522,14 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                     type="number"
                                                     value={ej.repsMin}
                                                     onChange={(e) => handleUpdateChange(ej.id, { repsMin: parseInt(e.target.value) })}
-                                                    className="w-12 bg-transparent text-sm font-black text-blanco focus:outline-none text-center"
+                                                    className="w-14 bg-marino-4/30 border border-marino-4 rounded-lg py-2 text-base font-black text-blanco focus:outline-none text-center"
                                                 />
                                                 <span className="text-gris/40">—</span>
                                                 <input
                                                     type="number"
                                                     value={ej.repsMax}
                                                     onChange={(e) => handleUpdateChange(ej.id, { repsMax: parseInt(e.target.value) })}
-                                                    className="w-12 bg-transparent text-sm font-black text-blanco focus:outline-none text-center"
+                                                    className="w-14 bg-marino-4/30 border border-marino-4 rounded-lg py-2 text-base font-black text-blanco focus:outline-none text-center"
                                                 />
                                             </div>
                                         </div>
@@ -539,7 +539,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                 type="number"
                                                 value={ej.descansoSegundos !== null ? ej.descansoSegundos : ''}
                                                 onChange={(e) => handleUpdateChange(ej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                className="w-full bg-transparent text-sm font-black text-blanco focus:outline-none"
+                                                className="w-full bg-marino-4/30 border border-marino-4 rounded-lg py-2 text-center text-base font-black text-blanco focus:outline-none"
                                             />
                                         </div>
                                     </div>
@@ -657,14 +657,14 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                     type="number"
                                                                     value={gej.repsMin}
                                                                     onChange={(e) => handleUpdateChange(gej.id, { repsMin: parseInt(e.target.value) })}
-                                                                    className="w-full bg-transparent py-2.5 text-center text-blanco focus:outline-none text-[0.8rem] font-bold"
+                                                                    className="w-full bg-marino-4/20 border-r border-marino-4/50 py-2.5 text-center text-blanco focus:outline-none text-base font-bold"
                                                                 />
                                                                 <span className="text-gris/40">—</span>
                                                                 <input
                                                                     type="number"
                                                                     value={gej.repsMax}
                                                                     onChange={(e) => handleUpdateChange(gej.id, { repsMax: parseInt(e.target.value) })}
-                                                                    className="w-full bg-transparent py-2.5 text-center text-blanco focus:outline-none text-[0.8rem] font-bold"
+                                                                    className="w-full bg-marino-4/20 border-l border-marino-4/50 py-2.5 text-center text-blanco focus:outline-none text-base font-bold"
                                                                 />
                                                             </div>
                                                         </td>
@@ -673,7 +673,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                 type="number"
                                                                 value={gej.series}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { series: parseInt(e.target.value) })}
-                                                                className="w-16 bg-marino-3 border border-marino-4/30 p-2.5 rounded-xl text-center text-blanco transition-all font-black text-[0.9rem]"
+                                                                className="w-20 bg-marino-3 border border-marino-4 p-2.5 rounded-xl text-center text-blanco transition-all font-black text-base shadow-lg"
                                                             />
                                                         </td>
                                                         <td className="p-5 text-center">
@@ -681,7 +681,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                 type="number"
                                                                 value={gej.RIR !== null ? gej.RIR : ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                                className="w-16 bg-marino-3 border border-marino-4/30 p-2.5 rounded-xl text-center text-naranja transition-all font-black"
+                                                                className="w-20 bg-marino-3 border border-marino-4 p-2.5 rounded-xl text-center text-naranja transition-all font-black text-base shadow-lg"
                                                             />
                                                         </td>
                                                         <td className="p-5 text-center">
@@ -690,7 +690,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                     type="number"
                                                                     value={gej.descansoSegundos !== null ? gej.descansoSegundos : ''}
                                                                     onChange={(e) => handleUpdateChange(gej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                                    className="w-full bg-transparent py-2.5 text-center text-blanco focus:outline-none text-[0.75rem] font-bold"
+                                                                    className="w-full bg-transparent py-2.5 text-center text-blanco focus:outline-none text-base font-bold"
                                                                 />
                                                                 <span className="text-gris text-[0.5rem] font-black uppercase tracking-widest px-1">Seg</span>
                                                             </div>
@@ -701,7 +701,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                 step="0.5"
                                                                 value={gej.pesoSugerido || ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { pesoSugerido: parseFloat(e.target.value) })}
-                                                                className="w-20 bg-marino-3 border border-marino-4/30 py-2.5 rounded-xl text-center text-verde transition-all font-black"
+                                                                className="w-24 bg-marino-3 border border-marino-4 py-2.5 rounded-xl text-center text-verde transition-all font-black text-base shadow-lg"
                                                             />
                                                         </td>
                                                         <td className="p-5">
@@ -709,7 +709,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                 value={gej.notasTecnicas || ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { notasTecnicas: e.target.value })}
                                                                 rows={1}
-                                                                className="w-full bg-marino-3/30 border border-marino-4/50 p-3 rounded-xl text-blanco text-[0.7rem] focus:outline-none focus:border-naranja/40 transition-all resize-none font-medium shadow-inner"
+                                                                className="w-full bg-marino-4/20 border border-marino-4 p-3 rounded-xl text-blanco text-sm focus:outline-none focus:border-naranja/40 transition-all resize-none font-medium shadow-inner"
                                                             />
                                                         </td>
                                                         <td className="p-5 text-right">
@@ -763,14 +763,14 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                         type="number"
                                                         value={ej.repsMin}
                                                         onChange={(e) => handleUpdateChange(ej.id, { repsMin: parseInt(e.target.value) })}
-                                                        className="w-full bg-transparent py-2.5 text-center text-blanco focus:outline-none text-[0.8rem] font-bold"
+                                                        className="w-full bg-marino-4/20 border-r border-marino-4/50 py-2.5 text-center text-blanco focus:outline-none text-base font-bold"
                                                     />
                                                     <span className="text-gris/40">—</span>
                                                     <input
                                                         type="number"
                                                         value={ej.repsMax}
                                                         onChange={(e) => handleUpdateChange(ej.id, { repsMax: parseInt(e.target.value) })}
-                                                        className="w-full bg-transparent py-2.5 text-center text-blanco focus:outline-none text-[0.8rem] font-bold"
+                                                        className="w-full bg-marino-4/20 border-l border-marino-4/50 py-2.5 text-center text-blanco focus:outline-none text-base font-bold"
                                                     />
                                                 </div>
                                             </td>
@@ -779,7 +779,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                     type="number"
                                                     value={ej.series}
                                                     onChange={(e) => handleUpdateChange(ej.id, { series: parseInt(e.target.value) })}
-                                                    className="w-16 bg-marino-3 border border-marino-4/30 p-2.5 rounded-xl text-center text-blanco transition-all font-black text-[0.9rem]"
+                                                    className="w-20 bg-marino-3 border border-marino-4 p-2.5 rounded-xl text-center text-blanco transition-all font-black text-base shadow-lg"
                                                 />
                                             </td>
                                             <td className="p-5 text-center">
@@ -787,7 +787,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                     type="number"
                                                     value={ej.RIR !== null ? ej.RIR : ''}
                                                     onChange={(e) => handleUpdateChange(ej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                    className="w-16 bg-marino-3 border border-marino-4/30 p-2.5 rounded-xl text-center text-naranja transition-all font-black"
+                                                    className="w-20 bg-marino-3 border border-marino-4 p-2.5 rounded-xl text-center text-naranja transition-all font-black text-base shadow-lg"
                                                 />
                                             </td>
                                             <td className="p-5 text-center">
@@ -796,7 +796,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                         type="number"
                                                         value={ej.descansoSegundos !== null ? ej.descansoSegundos : ''}
                                                         onChange={(e) => handleUpdateChange(ej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                        className="w-full bg-transparent py-2.5 text-center text-blanco focus:outline-none text-[0.75rem] font-bold"
+                                                        className="w-full bg-transparent py-2.5 text-center text-blanco focus:outline-none text-base font-bold"
                                                     />
                                                     <span className="text-gris text-[0.5rem] font-black uppercase tracking-widest px-1">Seg</span>
                                                 </div>
@@ -807,7 +807,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                     step="0.5"
                                                     value={ej.pesoSugerido || ''}
                                                     onChange={(e) => handleUpdateChange(ej.id, { pesoSugerido: parseFloat(e.target.value) })}
-                                                    className="w-20 bg-marino-3 border border-marino-4/30 py-2.5 rounded-xl text-center text-verde transition-all font-black"
+                                                    className="w-24 bg-marino-3 border border-marino-4 py-2.5 rounded-xl text-center text-verde transition-all font-black text-base shadow-lg"
                                                 />
                                             </td>
                                             <td className="p-5">
@@ -815,7 +815,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                     value={ej.notasTecnicas || ''}
                                                     onChange={(e) => handleUpdateChange(ej.id, { notasTecnicas: e.target.value })}
                                                     rows={1}
-                                                    className="w-full bg-marino-3/30 border border-marino-4/50 p-3 rounded-xl text-blanco text-[0.7rem] focus:outline-none focus:border-naranja/40 transition-all resize-none font-medium shadow-inner"
+                                                    className="w-full bg-marino-4/20 border border-marino-4 p-3 rounded-xl text-blanco text-sm focus:outline-none focus:border-naranja/40 transition-all resize-none font-medium shadow-inner"
                                                 />
                                             </td>
                                             <td className="p-5 text-right">
@@ -849,21 +849,21 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                             <div className="p-2.5 bg-[#EF4444]/10 rounded-xl"><Activity className="text-[#EF4444]" size={18} /></div>
                             <div className="w-full">
                                 <label className="text-[0.5rem] font-black text-gris uppercase tracking-widest block mb-1">DOMS / Agujetas</label>
-                                <input placeholder="Nivel 0-10" className="w-full bg-transparent border-none p-0 text-blanco font-bold text-sm focus:ring-0 placeholder:text-gris/20" />
+                                <input placeholder="Nivel 0-10" className="w-full bg-marino-4/20 border border-marino-4/50 rounded-lg px-2 py-1 text-blanco font-bold text-base focus:ring-1 focus:ring-naranja/50 placeholder:text-gris/20" />
                             </div>
                         </div>
                         <div className="flex flex-col md:flex-row items-start md:items-center gap-3 p-4 bg-marino-3 border border-marino-4 rounded-2xl group hover:border-[#60A5FA]/30 transition-colors">
                             <div className="p-2.5 bg-[#60A5FA]/10 rounded-xl"><Gauge className="text-[#60A5FA]" size={18} /></div>
                             <div className="w-full">
                                 <label className="text-[0.5rem] font-black text-gris uppercase tracking-widest block mb-1">Esfuerzo Gral.</label>
-                                <input placeholder="RPE Sesión" className="w-full bg-transparent border-none p-0 text-blanco font-bold text-sm focus:ring-0 placeholder:text-gris/20" />
+                                <input placeholder="RPE Sesión" className="w-full bg-marino-4/20 border border-marino-4/50 rounded-lg px-2 py-1 text-blanco font-bold text-base focus:ring-1 focus:ring-naranja/50 placeholder:text-gris/20" />
                             </div>
                         </div>
                         <div className="flex flex-col md:flex-row items-start md:items-center gap-3 p-4 bg-marino-3 border border-marino-4 rounded-2xl group hover:border-[#22C55E]/30 transition-colors">
                             <div className="p-2.5 bg-[#22C55E]/10 rounded-xl"><Scale className="text-[#22C55E]" size={18} /></div>
                             <div className="w-full">
                                 <label className="text-[0.5rem] font-black text-gris uppercase tracking-widest block mb-1">Pesaje del Día</label>
-                                <input placeholder="--.- kg" className="w-full bg-transparent border-none p-0 text-blanco font-bold text-sm focus:ring-0 placeholder:text-gris/20" />
+                                <input placeholder="--.- kg" className="w-full bg-marino-4/20 border border-marino-4/50 rounded-lg px-2 py-1 text-blanco font-bold text-base focus:ring-1 focus:ring-naranja/50 placeholder:text-gris/20" />
                             </div>
                         </div>
                         <div className="flex flex-col md:flex-row items-start md:items-center gap-3 p-4 bg-marino-3 border border-naranja/20 rounded-2xl group hover:border-naranja/40 transition-colors">
