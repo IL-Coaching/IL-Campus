@@ -151,49 +151,49 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
         <div className="space-y-6 animate-in fade-in duration-500 pb-20">
 
 
-            {/* Banner de Alerta Clínica - Capa Científica */}
+            {/* Banner de Alerta Clínica - Rediseñado para Cohesión */}
             {condiciones.length > 0 && (
-                <div className="bg-rojo/10 border border-rojo/30 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-left-4 duration-700">
+                <div className="bg-marino-2 border border-rojo/20 rounded-3xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-left-4 duration-700">
                     <div
-                        className="p-5 flex items-center justify-between cursor-pointer hover:bg-rojo/5 transition-colors"
+                        className="p-6 flex items-center justify-between cursor-pointer hover:bg-rojo/5 transition-colors"
                         onClick={() => setShowClinical(!showClinical)}
                     >
-                        <div className="flex items-center gap-4">
-                            <div className="p-2.5 bg-rojo/20 rounded-xl text-rojo">
+                        <div className="flex items-center gap-5">
+                            <div className="p-3 bg-rojo/10 rounded-2xl text-rojo">
                                 <ShieldAlert size={24} />
                             </div>
                             <div>
-                                <h4 className="text-sm font-black text-blanco uppercase tracking-widest">Alerta Clínica: Protocolo de Seguridad</h4>
-                                <p className="text-[0.65rem] font-bold text-rojo/80 uppercase tracking-tighter">Cliente con {condiciones.length} condiciones específicas registradas</p>
+                                <h4 className="text-sm font-black text-blanco uppercase tracking-[0.2em]">Protocolo de Seguridad Clínica</h4>
+                                <p className="text-[0.65rem] font-bold text-rojo/80 uppercase tracking-tighter">Condiciones médicas activas detectadas ({condiciones.length})</p>
                             </div>
                         </div>
                         {showClinical ? <ChevronUp className="text-rojo" /> : <ChevronDown className="text-rojo" />}
                     </div>
 
                     {showClinical && (
-                        <div className="px-6 pb-6 pt-2 space-y-4 border-t border-rojo/20 bg-marino-3/30">
+                        <div className="px-6 pb-6 pt-2 space-y-6 bg-rojo/[0.02]">
                             <div className="flex flex-wrap gap-2 py-2">
                                 {condiciones.map(c => (
-                                    <span key={c} className="bg-rojo/20 text-rojo px-3 py-1 rounded-lg text-[0.65rem] font-black uppercase border border-rojo/30">{c}</span>
+                                    <span key={c} className="bg-rojo/10 text-rojo px-4 py-1.5 rounded-xl text-[0.65rem] font-black uppercase border border-rojo/20 shadow-sm">{c}</span>
                                 ))}
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <h5 className="text-[0.6rem] font-black text-blanco uppercase tracking-widest flex items-center gap-2">
-                                        <Activity size={12} className="text-rojo" /> Precauciones ACSM
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-2">
+                                <div className="space-y-3">
+                                    <h5 className="text-[0.65rem] font-black text-blanco uppercase tracking-widest flex items-center gap-2">
+                                        <Activity size={14} className="text-rojo" /> Directrices ACSM
                                     </h5>
-                                    <p className="text-[0.7rem] text-gris leading-relaxed font-medium">
-                                        Evitar maniobra de Valsalva intensa. Controlar frecuencia cardíaca y sensaciones de disnea. En caso de mareo o fatiga extrema, detener sesión inmediatamente.
+                                    <p className="text-[0.75rem] text-gris leading-relaxed font-medium">
+                                        Monitorizar fatiga subjetiva y descartar maniobras hipopresivas extremas. Control riguroso de la hemodinámica durante la sesión.
                                     </p>
                                 </div>
-                                <div className="space-y-2">
-                                    <h5 className="text-[0.6rem] font-black text-blanco uppercase tracking-widest flex items-center gap-2">
-                                        <Scale size={12} className="text-rojo" /> Variables Críticas
+                                <div className="space-y-3">
+                                    <h5 className="text-[0.65rem] font-black text-blanco uppercase tracking-widest flex items-center gap-2">
+                                        <Scale size={14} className="text-rojo" /> Variables de Control
                                     </h5>
-                                    <ul className="text-[0.7rem] text-gris list-disc pl-4 space-y-1 font-medium">
-                                        <li>RPE de sesión no debe superar 8/10.</li>
-                                        <li>Descansos prolongados (&gt;2 min) para asegurar repolarización.</li>
-                                        <li>Hidratación constante obligatoria.</li>
+                                    <ul className="text-[0.75rem] text-gris list-disc pl-5 space-y-1.5 font-medium">
+                                        <li>Carga interna (RPE) ≤ 8/10.</li>
+                                        <li>Recuperación completa entre series metabólicas.</li>
+                                        <li>Hidratación prioritaria ante clima extremo.</li>
                                     </ul>
                                 </div>
                             </div>
@@ -202,55 +202,55 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                 </div>
             )}
 
-            {/* Header Sesion Profesional — Mobile Optimized */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-marino-4 pb-6">
-                <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 bg-naranja/10 border border-naranja/20 rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-naranja/5">
+            {/* Header Sesion Profesional — Unificado */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-white/5 pb-8">
+                <div className="flex items-center gap-5">
+                    <div className="w-14 h-14 bg-marino-2 border border-marino-4 rounded-3xl flex items-center justify-center shrink-0 shadow-2xl">
                         <ClipboardList className="text-naranja" size={28} />
                     </div>
                     <div>
-                        <div className="flex items-center gap-3 mb-1">
-                            <span className="px-2 py-0.5 bg-naranja/10 border border-naranja/20 rounded text-[0.6rem] font-black text-naranja uppercase tracking-widest leading-none">
+                        <div className="flex items-center gap-3 mb-1.5">
+                            <span className="px-2.5 py-1 bg-naranja/10 rounded-lg text-[0.65rem] font-black text-naranja uppercase tracking-[0.15em] leading-none">
                                 {semanaNombre}
                             </span>
                         </div>
-                        <h2 className="text-2xl md:text-4xl font-barlow-condensed font-black uppercase text-blanco leading-none tracking-tight">
+                        <h2 className="text-3xl md:text-4xl font-barlow-condensed font-black uppercase text-blanco leading-none tracking-tight">
                             {diaObjeto.diaSemana} — <span className="text-naranja">{diaObjeto.focoMuscular}</span>
                         </h2>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:flex md:flex-wrap gap-3 w-full lg:w-auto">
+                <div className="grid grid-cols-2 md:flex md:flex-wrap gap-4 w-full lg:w-auto">
                     <button
                         onClick={() => setIsSelectionMode(!isSelectionMode)}
-                        className={`flex items-center justify-center gap-2 px-4 py-3 border rounded-xl text-[0.6rem] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 ${isSelectionMode ? 'bg-naranja text-marino border-naranja' : 'bg-marino-3 border-marino-4 text-gris hover:text-blanco'}`}
+                        className={`flex items-center justify-center gap-2 px-5 py-3.5 border rounded-2xl text-[0.65rem] font-black uppercase tracking-widest transition-all ${isSelectionMode ? 'bg-naranja text-marino border-naranja' : 'bg-marino-2 border-marino-4 text-gris hover:border-naranja/40 hover:text-blanco'}`}
                     >
-                        <Plus size={16} className={isSelectionMode ? 'rotate-45 transition-transform' : 'transition-transform'} />
-                        {isSelectionMode ? 'Cancelar Grupo' : 'Modo Grupo'}
+                        <Plus size={16} className={isSelectionMode ? 'rotate-45' : ''} />
+                        {isSelectionMode ? 'Cancelar' : 'Agrupar'}
                     </button>
 
                     {isSelectionMode && (
                         <button
                             onClick={handleAgrupar}
                             disabled={selectedIds.length < 2}
-                            className={`flex items-center justify-center gap-2 px-4 py-3 bg-verde text-marino border border-verde rounded-xl text-[0.6rem] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 ${selectedIds.length < 2 ? 'opacity-30 grayscale' : ''}`}
+                            className={`flex items-center justify-center gap-2 px-5 py-3.5 bg-verde text-marino border border-verde rounded-2xl text-[0.65rem] font-black uppercase tracking-widest transition-all ${selectedIds.length < 2 ? 'opacity-30' : 'hover:scale-105 shadow-xl shadow-verde/20'}`}
                         >
-                            <Save size={16} /> Confirmar Grupo ({selectedIds.length})
+                            <Save size={16} /> Crear Vínculo ({selectedIds.length})
                         </button>
                     )}
 
                     {!isSelectionMode && (
                         <button
                             onClick={() => alert("Copiando estructura...")}
-                            className="flex items-center justify-center gap-2 px-4 py-3 bg-marino-3 border border-marino-4 rounded-xl text-[0.6rem] font-black uppercase tracking-widest text-gris hover:text-blanco transition-all shadow-lg active:scale-95"
+                            className="flex items-center justify-center gap-2 px-5 py-3.5 bg-marino-2 border border-marino-4 rounded-2xl text-[0.65rem] font-black uppercase tracking-widest text-gris hover:border-blanco/20 hover:text-blanco transition-all"
                         >
-                            <Copy size={16} /> <span className="hidden md:inline">Copiar</span> Estructura
+                            <Copy size={16} /> <span className="hidden md:inline">Clonar</span> Estructura
                         </button>
                     )}
                     <button
                         onClick={handleGuardarTodo}
                         disabled={saving}
-                        className="col-span-2 md:col-span-1 md:flex-1 flex items-center justify-center gap-3 px-8 py-4 md:py-3 bg-gradient-to-r from-naranja to-orange-400 hover:from-orange-400 hover:to-naranja transition-all text-marino font-black rounded-xl text-[0.65rem] uppercase tracking-widest shadow-xl shadow-naranja/20 active:scale-95 border-none"
+                        className="col-span-2 md:col-span-1 md:flex-1 flex items-center justify-center gap-3 px-8 py-4 md:py-3.5 bg-naranja hover:bg-naranja-h transition-all text-marino font-black rounded-2xl text-[0.7rem] uppercase tracking-widest shadow-2xl shadow-naranja/30 active:scale-95 border-none"
                     >
                         {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
                         {saving ? "Guardando..." : "Guardar Sesión"}
@@ -258,35 +258,35 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                 </div>
             </div>
 
-            {/* Foco & Metodología — Acordeón Inteligente */}
-            <div className="bg-marino-2 border border-marino-4 rounded-3xl shadow-2xl overflow-hidden group">
+            {/* Metodología — Acordeón Rediseñado */}
+            <div className="bg-marino-2 border border-marino-4/30 rounded-3xl shadow-xl overflow-hidden">
                 <button
                     onClick={() => setShowNotes(!showNotes)}
-                    className="w-full p-5 flex items-center justify-between hover:bg-marino-3/30 transition-colors"
+                    className="w-full p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
                 >
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-naranja/10 rounded-lg group-hover:scale-110 transition-transform">
-                            <Activity size={16} className="text-naranja" />
+                    <div className="flex items-center gap-4">
+                        <div className="p-2.5 bg-naranja/5 rounded-2xl text-naranja border border-naranja/10">
+                            <Activity size={20} />
                         </div>
-                        <span className="text-[0.7rem] font-black text-blanco uppercase tracking-[0.2em]">Metodología de Sesión</span>
+                        <span className="text-[0.75rem] font-black text-blanco uppercase tracking-[0.25em]">Metodología Operativa</span>
                     </div>
-                    {showNotes ? <ChevronUp size={18} className="text-naranja" /> : <ChevronDown size={18} className="text-gris" />}
+                    {showNotes ? <ChevronUp size={20} className="text-naranja" /> : <ChevronDown size={20} className="text-gris/40" />}
                 </button>
 
                 {showNotes && (
-                    <div className="p-5 pt-2 flex flex-col md:flex-row gap-5 animate-in slide-in-from-top-4 duration-500">
-                        <div className="flex-1 space-y-2">
-                            <label className="text-[0.6rem] font-black text-gris uppercase tracking-widest pl-1">Protocolo Principal</label>
+                    <div className="p-6 pt-0 flex flex-col md:flex-row gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div className="flex-1 space-y-3">
+                            <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest pl-1">Protocolo de Carga</label>
                             <textarea
-                                defaultValue={`${diaObjeto.focoMuscular} — Intensidad moderada, foco en la fase excéntrica.`}
-                                className="w-full bg-marino border border-marino-4 rounded-2xl px-5 py-4 text-base text-blanco focus:outline-none focus:border-naranja transition-all font-medium h-28 resize-none shadow-2xl"
+                                defaultValue={`${diaObjeto.focoMuscular} — Basado en perfil de resistencia y estiramiento.`}
+                                className="w-full bg-marino-3/30 border border-marino-4/40 rounded-2xl px-5 py-4 text-sm text-blanco focus:outline-none focus:border-naranja/30 transition-all font-medium h-32 resize-none shadow-inner"
                             />
                         </div>
-                        <div className="w-full md:w-72 space-y-2">
-                            <label className="text-[0.6rem] font-black text-gris uppercase tracking-widest pl-1">Variables de Bio-Feedback</label>
+                        <div className="w-full md:w-80 space-y-3">
+                            <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest pl-1">Bio-Feedback Requerido</label>
                             <textarea
-                                defaultValue="Priorizar sueño e hidratación post-sesión."
-                                className="w-full bg-marino border border-marino-4 rounded-2xl px-5 py-4 text-base text-blanco focus:outline-none focus:border-naranja transition-all font-medium h-28 resize-none shadow-2xl"
+                                defaultValue="Control de hidratación y fatiga periférica."
+                                className="w-full bg-marino-3/30 border border-marino-4/40 rounded-2xl px-5 py-4 text-sm text-blanco focus:outline-none focus:border-naranja/30 transition-all font-medium h-32 resize-none shadow-inner"
                             />
                         </div>
                     </div>
@@ -297,9 +297,9 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
             {/* Listado de Ejercicios — Vista Móvil (Cards) & Desktop (Tabla) */}
             <div className={`bg-marino-2 border rounded-3xl overflow-hidden shadow-2xl relative transition-all duration-500 ${semanaObjeto.esFaseDeload ? 'border-blue-500/30 ring-1 ring-blue-500/10 shadow-blue-900/10' : 'border-marino-4'}`}>
                 {semanaObjeto.esFaseDeload && (
-                    <div className="bg-gradient-to-r from-blue-900/30 to-blue-800/20 border-b border-blue-500/20 px-6 py-3.5 flex items-center gap-3">
-                        <Activity size={16} className="text-blue-400 animate-pulse" />
-                        <span className="text-[0.65rem] font-black text-blue-200 uppercase tracking-widest">Fase de Descarga Crítica Activa — Volumen Científico Reducido</span>
+                    <div className="bg-blue-500/10 border-b border-blue-500/10 px-8 py-4 flex items-center gap-4">
+                        <Activity size={18} className="text-blue-400 animate-pulse" />
+                        <span className="text-[0.7rem] font-black text-blue-100 uppercase tracking-[0.2em]">Fase de Descarga Crítica — Reducción de Fatiga Sistémica</span>
                     </div>
                 )}
 
@@ -557,21 +557,21 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                     })()}
                 </div>
 
-                {/* Vista DESKTOP: Tabla Profesional */}
-                <div className="hidden md:block overflow-x-auto">
-                    <table className="w-full text-left text-sm border-collapse min-w-[1000px]">
+                {/* Vista DESKTOP: Tabla Profesional Adaptive */}
+                <div className="hidden md:block w-full overflow-hidden">
+                    <table className="w-full text-left text-sm border-collapse table-fixed">
                         <thead>
-                            <tr className={`border-b border-marino-4 ${semanaObjeto.esFaseDeload ? 'bg-blue-900/20' : 'bg-marino-3/80'}`}>
-                                <th className="p-5 w-10"></th>
-                                <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-12 text-center">#</th>
-                                <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem]">Ejercicio / Patrón</th>
-                                <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-28 text-center">Repeticiones</th>
-                                <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-20 text-center">Sets</th>
-                                <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-24 text-center">RIR</th>
-                                <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-24 text-center">Descanso</th>
-                                <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-24 text-center">Peso Kg</th>
-                                <th className="p-5 font-barlow-condensed font-black uppercase tracking-[0.2em] text-gris text-[0.65rem] w-40 text-center">Técnica/Feedback</th>
-                                <th className="p-5 text-right w-12"></th>
+                            <tr className={`border-b border-white/5 ${semanaObjeto.esFaseDeload ? 'bg-blue-500/5' : 'bg-marino-3/40'}`}>
+                                <th className="p-4 w-[40px]"></th>
+                                <th className="p-4 w-[40px] font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] text-center">#</th>
+                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[25%]">Ejercicio / Patrón</th>
+                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[110px] text-center">Reps</th>
+                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[80px] text-center">Sets</th>
+                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[80px] text-center">RIR</th>
+                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[95px] text-center">Rest</th>
+                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[90px] text-center">Kg</th>
+                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem]">Técnica / Feedback</th>
+                                <th className="p-4 text-right w-[50px]"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-marino-4">
@@ -598,23 +598,23 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                         const groupMembers = ejercicios.filter(e => e.grupoId === ej.grupoId);
                                         return (
                                             <React.Fragment key={ej.grupoId}>
-                                                <tr className="bg-naranja/5 border-l-4 border-l-naranja/40">
-                                                    <td colSpan={10} className="px-5 py-2 group/header">
+                                                <tr className="bg-marino-3/20">
+                                                    <td colSpan={10} className="px-8 py-3 group/header">
                                                         <div className="flex items-center justify-between">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-1.5 h-1.5 bg-naranja rounded-full animate-pulse"></div>
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="w-2 h-2 bg-naranja rounded-full"></div>
                                                                 <button
-                                                                    onClick={() => handleCambiarNombreGrupo(ej.grupoId!, ej.nombreGrupo || "Superserie")}
-                                                                    className="text-[0.65rem] font-black text-blanco uppercase tracking-widest hover:text-naranja transition-colors flex items-center gap-2"
+                                                                    onClick={() => handleCambiarNombreGrupo(ej.id, ej.nombreGrupo || "Bloque")}
+                                                                    className="text-[0.7rem] font-black text-blanco uppercase tracking-[0.2em] hover:text-naranja transition-colors flex items-center gap-2"
                                                                 >
-                                                                    {ej.nombreGrupo || "Bloque de Trabajo"} <Info size={10} className="opacity-30" />
+                                                                    {ej.nombreGrupo || "Bloque Vinculado"}
                                                                 </button>
                                                             </div>
                                                             <button
                                                                 onClick={() => handleDesagrupar(ej.grupoId!)}
-                                                                className="text-[0.5rem] font-black text-gris/40 hover:text-rojo uppercase tracking-[0.2em] px-3 py-1 border border-marino-4 rounded-lg hover:bg-rojo/10 transition-all opacity-0 group-hover/header:opacity-100"
+                                                                className="text-[0.6rem] font-black text-gris/30 hover:text-rojo uppercase tracking-widest px-4 py-1.5 border border-marino-4 rounded-xl hover:bg-rojo/5 transition-all"
                                                             >
-                                                                Desvincular
+                                                                Disolver Bloque
                                                             </button>
                                                         </div>
                                                     </td>
@@ -622,7 +622,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                 {groupMembers.map((gej, gidx) => (
                                                     <tr
                                                         key={gej.id}
-                                                        className={`group hover:bg-marino-3/40 transition-all border-l-4 ${idx % 2 === 0 ? 'bg-marino-2/50' : 'bg-marino-2'} border-l-naranja/30`}
+                                                        className={`group hover:bg-white/[0.02] transition-all border-l-4 border-l-naranja/20`}
                                                     >
                                                         <td className="p-5 text-center">
                                                             {isSelectionMode ? (
@@ -652,19 +652,19 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                             />
                                                         </td>
                                                         <td className="p-5">
-                                                            <div className="flex items-center gap-1 bg-marino-3 border border-marino-4/30 rounded-xl overflow-hidden">
+                                                            <div className="flex items-center gap-1 bg-marino border border-white/5 rounded-xl overflow-hidden shadow-inner">
                                                                 <input
                                                                     type="number"
                                                                     value={gej.repsMin}
                                                                     onChange={(e) => handleUpdateChange(gej.id, { repsMin: parseInt(e.target.value) })}
-                                                                    className="w-full bg-marino-4/20 border-r border-marino-4/50 py-2.5 text-center text-blanco focus:outline-none text-base font-bold"
+                                                                    className="w-full bg-marino-3 py-2 text-center text-blanco focus:outline-none text-sm font-black"
                                                                 />
-                                                                <span className="text-gris/40">—</span>
+                                                                <span className="text-gris/20">—</span>
                                                                 <input
                                                                     type="number"
                                                                     value={gej.repsMax}
                                                                     onChange={(e) => handleUpdateChange(gej.id, { repsMax: parseInt(e.target.value) })}
-                                                                    className="w-full bg-marino-4/20 border-l border-marino-4/50 py-2.5 text-center text-blanco focus:outline-none text-base font-bold"
+                                                                    className="w-full bg-marino-3 py-2 text-center text-blanco focus:outline-none text-sm font-black"
                                                                 />
                                                             </div>
                                                         </td>
@@ -673,7 +673,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                 type="number"
                                                                 value={gej.series}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { series: parseInt(e.target.value) })}
-                                                                className="w-20 bg-marino-3 border border-marino-4 p-2.5 rounded-xl text-center text-blanco transition-all font-black text-base shadow-lg"
+                                                                className="w-full bg-marino-3 border border-white/5 py-2 rounded-xl text-center text-blanco transition-all font-black text-sm"
                                                             />
                                                         </td>
                                                         <td className="p-5 text-center">
@@ -681,18 +681,18 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                 type="number"
                                                                 value={gej.RIR !== null ? gej.RIR : ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                                className="w-20 bg-marino-3 border border-marino-4 p-2.5 rounded-xl text-center text-naranja transition-all font-black text-base shadow-lg"
+                                                                className="w-full bg-marino-3 border border-white/5 py-2 rounded-xl text-center text-naranja transition-all font-black text-sm"
                                                             />
                                                         </td>
                                                         <td className="p-5 text-center">
-                                                            <div className="flex items-center gap-1 bg-marino-3 px-2 rounded-lg border border-marino-4/30">
+                                                            <div className="flex items-center gap-1 bg-marino-3 px-1 rounded-xl border border-white/5">
                                                                 <input
                                                                     type="number"
                                                                     value={gej.descansoSegundos !== null ? gej.descansoSegundos : ''}
                                                                     onChange={(e) => handleUpdateChange(gej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                                    className="w-full bg-transparent py-2.5 text-center text-blanco focus:outline-none text-base font-bold"
+                                                                    className="w-full bg-transparent py-2 text-center text-blanco focus:outline-none text-sm font-black"
                                                                 />
-                                                                <span className="text-gris text-[0.5rem] font-black uppercase tracking-widest px-1">Seg</span>
+                                                                <span className="text-[0.4rem] font-black text-gris/40 pr-1">S</span>
                                                             </div>
                                                         </td>
                                                         <td className="p-5 text-center">
@@ -701,7 +701,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                 step="0.5"
                                                                 value={gej.pesoSugerido || ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { pesoSugerido: parseFloat(e.target.value) })}
-                                                                className="w-24 bg-marino-3 border border-marino-4 py-2.5 rounded-xl text-center text-verde transition-all font-black text-base shadow-lg"
+                                                                className="w-full bg-marino-3 border border-white/5 py-2 rounded-xl text-center text-verde transition-all font-black text-sm"
                                                             />
                                                         </td>
                                                         <td className="p-5">
@@ -709,7 +709,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                 value={gej.notasTecnicas || ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { notasTecnicas: e.target.value })}
                                                                 rows={1}
-                                                                className="w-full bg-marino-4/20 border border-marino-4 p-3 rounded-xl text-blanco text-sm focus:outline-none focus:border-naranja/40 transition-all resize-none font-medium shadow-inner"
+                                                                className="w-full bg-marino-3/50 border border-white/5 p-3 rounded-xl text-blanco text-xs focus:outline-none focus:border-naranja/20 transition-all resize-none h-10 overflow-hidden hover:h-20"
                                                             />
                                                         </td>
                                                         <td className="p-5 text-right">
@@ -730,7 +730,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                             onDragStart={() => handleDragStart(idx)}
                                             onDragOver={handleDragOver}
                                             onDrop={() => handleDrop(idx)}
-                                            className={`group hover:bg-marino-3/40 transition-all ${draggingIdx === idx ? 'opacity-20' : ''}`}
+                                            className={`group hover:bg-white/[0.02] transition-all ${draggingIdx === idx ? 'opacity-20' : ''}`}
                                         >
                                             <td className="p-5 text-center">
                                                 {isSelectionMode ? (
@@ -758,19 +758,19 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                 />
                                             </td>
                                             <td className="p-5">
-                                                <div className="flex items-center gap-1 bg-marino-3 border border-marino-4/30 rounded-xl overflow-hidden">
+                                                <div className="flex items-center gap-1 bg-marino border border-white/5 rounded-xl overflow-hidden shadow-inner">
                                                     <input
                                                         type="number"
                                                         value={ej.repsMin}
                                                         onChange={(e) => handleUpdateChange(ej.id, { repsMin: parseInt(e.target.value) })}
-                                                        className="w-full bg-marino-4/20 border-r border-marino-4/50 py-2.5 text-center text-blanco focus:outline-none text-base font-bold"
+                                                        className="w-full bg-marino-3 py-2 text-center text-blanco focus:outline-none text-sm font-black"
                                                     />
-                                                    <span className="text-gris/40">—</span>
+                                                    <span className="text-gris/20">—</span>
                                                     <input
                                                         type="number"
                                                         value={ej.repsMax}
                                                         onChange={(e) => handleUpdateChange(ej.id, { repsMax: parseInt(e.target.value) })}
-                                                        className="w-full bg-marino-4/20 border-l border-marino-4/50 py-2.5 text-center text-blanco focus:outline-none text-base font-bold"
+                                                        className="w-full bg-marino-3 py-2 text-center text-blanco focus:outline-none text-sm font-black"
                                                     />
                                                 </div>
                                             </td>
@@ -779,7 +779,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                     type="number"
                                                     value={ej.series}
                                                     onChange={(e) => handleUpdateChange(ej.id, { series: parseInt(e.target.value) })}
-                                                    className="w-20 bg-marino-3 border border-marino-4 p-2.5 rounded-xl text-center text-blanco transition-all font-black text-base shadow-lg"
+                                                    className="w-full bg-marino-3 border border-white/5 py-2 rounded-xl text-center text-blanco transition-all font-black text-sm"
                                                 />
                                             </td>
                                             <td className="p-5 text-center">
@@ -787,18 +787,18 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                     type="number"
                                                     value={ej.RIR !== null ? ej.RIR : ''}
                                                     onChange={(e) => handleUpdateChange(ej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                    className="w-20 bg-marino-3 border border-marino-4 p-2.5 rounded-xl text-center text-naranja transition-all font-black text-base shadow-lg"
+                                                    className="w-full bg-marino-3 border border-white/5 py-2 rounded-xl text-center text-naranja transition-all font-black text-sm"
                                                 />
                                             </td>
                                             <td className="p-5 text-center">
-                                                <div className="flex items-center gap-1 bg-marino-3 px-2 rounded-lg border border-marino-4/30">
+                                                <div className="flex items-center gap-1 bg-marino-3 px-1 rounded-xl border border-white/5">
                                                     <input
                                                         type="number"
                                                         value={ej.descansoSegundos !== null ? ej.descansoSegundos : ''}
                                                         onChange={(e) => handleUpdateChange(ej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                        className="w-full bg-transparent py-2.5 text-center text-blanco focus:outline-none text-base font-bold"
+                                                        className="w-full bg-transparent py-2 text-center text-blanco focus:outline-none text-sm font-black"
                                                     />
-                                                    <span className="text-gris text-[0.5rem] font-black uppercase tracking-widest px-1">Seg</span>
+                                                    <span className="text-[0.4rem] font-black text-gris/40 pr-1">S</span>
                                                 </div>
                                             </td>
                                             <td className="p-5 text-center">
@@ -807,15 +807,14 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                     step="0.5"
                                                     value={ej.pesoSugerido || ''}
                                                     onChange={(e) => handleUpdateChange(ej.id, { pesoSugerido: parseFloat(e.target.value) })}
-                                                    className="w-24 bg-marino-3 border border-marino-4 py-2.5 rounded-xl text-center text-verde transition-all font-black text-base shadow-lg"
+                                                    className="w-full bg-marino-3 border border-white/5 py-2 rounded-xl text-center text-verde transition-all font-black text-sm"
                                                 />
                                             </td>
                                             <td className="p-5">
                                                 <textarea
                                                     value={ej.notasTecnicas || ''}
                                                     onChange={(e) => handleUpdateChange(ej.id, { notasTecnicas: e.target.value })}
-                                                    rows={1}
-                                                    className="w-full bg-marino-4/20 border border-marino-4 p-3 rounded-xl text-blanco text-sm focus:outline-none focus:border-naranja/40 transition-all resize-none font-medium shadow-inner"
+                                                    className="w-full bg-marino-3/50 border border-white/5 p-3 rounded-xl text-blanco text-xs focus:outline-none focus:border-naranja/20 transition-all resize-none h-10 overflow-hidden hover:h-20"
                                                 />
                                             </td>
                                             <td className="p-5 text-right">
@@ -835,43 +834,43 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                 <div className="p-6 bg-marino-3/30 border-t border-marino-4">
                     <button
                         onClick={onOpenBuscador}
-                        className="w-full p-8 border-2 border-dashed border-marino-4 rounded-3xl flex flex-col items-center justify-center gap-4 text-gris group hover:border-naranja/40 hover:bg-naranja/[0.03] hover:text-naranja transition-all"
+                        className="w-full p-10 border-2 border-dashed border-marino-4/40 rounded-[2.5rem] flex flex-col items-center justify-center gap-5 text-gris/60 group hover:border-naranja/40 hover:bg-naranja/[0.02] hover:text-naranja transition-all"
                     >
-                        <div className="p-4 bg-marino-3 border border-marino-4 rounded-2xl group-hover:bg-naranja group-hover:text-marino group-hover:border-naranja transition-all shadow-xl">
-                            <Plus size={32} strokeWidth={3} />
+                        <div className="p-5 bg-marino-3 border border-marino-4 rounded-[1.5rem] group-hover:bg-naranja group-hover:text-marino group-hover:border-naranja transition-all shadow-2xl">
+                            <Plus size={36} strokeWidth={2.5} />
                         </div>
-                        <span className="font-barlow-condensed font-black uppercase tracking-[0.3em] text-sm md:text-md">Agregar elemento a la planificación</span>
+                        <span className="font-barlow-condensed font-black uppercase tracking-[0.4em] text-sm">Expandir Arsenal de Sesión</span>
                     </button>
 
-                    {/* Metricas de Pie de Sesion - Gualda Training Style */}
-                    <div className="mt-10 grid grid-cols-2 lg:grid-cols-4 gap-4 px-0 md:px-4">
-                        <div className="flex flex-col md:flex-row items-start md:items-center gap-3 p-4 bg-marino-3 border border-marino-4 rounded-2xl group hover:border-[#EF4444]/30 transition-colors">
-                            <div className="p-2.5 bg-[#EF4444]/10 rounded-xl"><Activity className="text-[#EF4444]" size={18} /></div>
-                            <div className="w-full">
-                                <label className="text-[0.5rem] font-black text-gris uppercase tracking-widest block mb-1">DOMS / Agujetas</label>
-                                <input placeholder="Nivel 0-10" className="w-full bg-marino-4/20 border border-marino-4/50 rounded-lg px-2 py-1 text-blanco font-bold text-base focus:ring-1 focus:ring-naranja/50 placeholder:text-gris/20" />
+                    {/* Metricas de Pie — Rediseño Cohesivo */}
+                    <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-2">
+                        <div className="flex items-center gap-5 p-5 bg-marino-2 border border-marino-4/30 rounded-3xl hover:border-rojo/20 transition-all group">
+                            <div className="p-3 bg-rojo/5 rounded-2xl text-rojo group-hover:bg-rojo/10 transition-colors"><Activity size={24} /></div>
+                            <div className="flex-1">
+                                <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest block mb-1.5">DOMS / Carga</label>
+                                <input placeholder="Nivel 0-10" className="w-full bg-marino-3/30 border border-marino-4/50 rounded-xl px-3 py-2 text-blanco font-bold text-base focus:ring-1 focus:ring-rojo/20 placeholder:text-gris/20" />
                             </div>
                         </div>
-                        <div className="flex flex-col md:flex-row items-start md:items-center gap-3 p-4 bg-marino-3 border border-marino-4 rounded-2xl group hover:border-[#60A5FA]/30 transition-colors">
-                            <div className="p-2.5 bg-[#60A5FA]/10 rounded-xl"><Gauge className="text-[#60A5FA]" size={18} /></div>
-                            <div className="w-full">
-                                <label className="text-[0.5rem] font-black text-gris uppercase tracking-widest block mb-1">Esfuerzo Gral.</label>
-                                <input placeholder="RPE Sesión" className="w-full bg-marino-4/20 border border-marino-4/50 rounded-lg px-2 py-1 text-blanco font-bold text-base focus:ring-1 focus:ring-naranja/50 placeholder:text-gris/20" />
+                        <div className="flex items-center gap-5 p-5 bg-marino-2 border border-marino-4/30 rounded-3xl hover:border-blue-400/20 transition-all group">
+                            <div className="p-3 bg-blue-400/5 rounded-2xl text-blue-400 group-hover:bg-blue-400/10 transition-colors"><Gauge size={24} /></div>
+                            <div className="flex-1">
+                                <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest block mb-1.5">Esfuerzo Percibido</label>
+                                <input placeholder="RPE 0-10" className="w-full bg-marino-3/30 border border-marino-4/50 rounded-xl px-3 py-2 text-blanco font-bold text-base focus:ring-1 focus:ring-blue-400/20 placeholder:text-gris/20" />
                             </div>
                         </div>
-                        <div className="flex flex-col md:flex-row items-start md:items-center gap-3 p-4 bg-marino-3 border border-marino-4 rounded-2xl group hover:border-[#22C55E]/30 transition-colors">
-                            <div className="p-2.5 bg-[#22C55E]/10 rounded-xl"><Scale className="text-[#22C55E]" size={18} /></div>
-                            <div className="w-full">
-                                <label className="text-[0.5rem] font-black text-gris uppercase tracking-widest block mb-1">Pesaje del Día</label>
-                                <input placeholder="--.- kg" className="w-full bg-marino-4/20 border border-marino-4/50 rounded-lg px-2 py-1 text-blanco font-bold text-base focus:ring-1 focus:ring-naranja/50 placeholder:text-gris/20" />
+                        <div className="flex items-center gap-5 p-5 bg-marino-2 border border-marino-4/30 rounded-3xl hover:border-verde/20 transition-all group">
+                            <div className="p-3 bg-verde/5 rounded-2xl text-verde group-hover:bg-verde/10 transition-colors"><Scale size={24} /></div>
+                            <div className="flex-1">
+                                <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest block mb-1.5">Masa Corporal</label>
+                                <input placeholder="Kg" className="w-full bg-marino-3/30 border border-marino-4/50 rounded-xl px-3 py-2 text-blanco font-bold text-base focus:ring-1 focus:ring-verde/20 placeholder:text-gris/20" />
                             </div>
                         </div>
-                        <div className="flex flex-col md:flex-row items-start md:items-center gap-3 p-4 bg-marino-3 border border-naranja/20 rounded-2xl group hover:border-naranja/40 transition-colors">
-                            <div className="p-2.5 bg-naranja/10 rounded-xl"><Dumbbell className="text-naranja" size={18} /></div>
-                            <div className="w-full">
-                                <label className="text-[0.5rem] font-black text-naranja uppercase tracking-widest block mb-1 font-black">Tonelaje SESIÓN</label>
-                                <span className="text-blanco font-black text-sm uppercase tracking-tighter">
-                                    {ejercicios.reduce((acc, ej) => acc + (ej.series * (ej.repsMax || 0) * (ej.pesoSugerido || 0)), 0).toLocaleString()} KG
+                        <div className="flex items-center gap-5 p-5 bg-marino-2 border border-naranja/20 rounded-3xl hover:border-naranja/40 transition-all group">
+                            <div className="p-3 bg-naranja/5 rounded-2xl text-naranja group-hover:bg-naranja/10 transition-colors"><Dumbbell size={24} /></div>
+                            <div className="flex-1">
+                                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-[0.2em] block mb-1.5">Tonelaje Total</label>
+                                <span className="text-blanco font-black text-lg uppercase tracking-tighter">
+                                    {ejercicios.reduce((acc, ej) => acc + (ej.series * (ej.repsMax || 0) * (ej.pesoSugerido || 0)), 0).toLocaleString()} <span className="text-[0.6rem] text-gris font-medium">KG</span>
                                 </span>
                             </div>
                         </div>
