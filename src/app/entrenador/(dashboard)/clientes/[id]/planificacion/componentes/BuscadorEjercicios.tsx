@@ -141,7 +141,7 @@ export default function BuscadorEjercicios({ onClose, onSelect }: BuscadorEjerci
                             </div>
                             <button
                                 onClick={() => onSelect && onSelect(ej)}
-                                className="bg-marino-4 hover:bg-naranja hover:text-marino text-naranja font-black py-2.5 px-6 rounded-xl text-[0.65rem] uppercase tracking-widest transition-all border border-marino-4 hover:border-naranja shadow-lg"
+                                className="bg-marino-4 hover:bg-naranja hover:text-marino text-naranja font-black py-2.5 px-3 sm:px-6 rounded-xl text-[0.65rem] uppercase tracking-widest transition-all border border-marino-4 hover:border-naranja shadow-lg shrink-0"
                             >
                                 + Agregar
                             </button>

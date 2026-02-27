@@ -7,6 +7,8 @@ import { Cliente, Macrociclo, Semana, DiaSesion, EjercicioPlanificado, Ejercicio
 
 export type EjercicioConDetalle = EjercicioPlanificado & {
     ejercicio: Ejercicio | null;
+    grupoId?: string | null;
+    nombreGrupo?: string | null;
 };
 
 export type DiaConEjercicios = DiaSesion & {
@@ -21,7 +23,18 @@ export type SemanaConDias = Semana & {
 
 // Bloque Mensual (Mesociclo) con sus semanas
 export type BloqueConSemanas = Prisma.BloqueMensualGetPayload<{
-    include: { semanas: { include: { diasSesion: { include: { ejercicios: { include: { ejercicio: true } } } } } } }
+    include: {
+        semanas: {
+            include: {
+                diasSesion: {
+                    include: {
+                        ejercicios: { include: { ejercicio: true } },
+                        sesionesReales: true
+                    }
+                }
+            }
+        }
+    }
 }>;
 
 export type MacrocicloCompleto = Macrociclo & {

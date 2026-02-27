@@ -173,50 +173,51 @@ export default function BibliotecaEjercicios({ iniciales }: { iniciales: Ejercic
                     </div>
 
                     {/* Botones de Control */}
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap md:flex-nowrap gap-2">
                         <button
                             onClick={() => setShowFilters(!showFilters)}
-                            className={`px-4 py-3 rounded-xl border transition-all flex items-center gap-2 text-xs font-black uppercase tracking-widest ${showFilters ? 'bg-naranja text-marino border-naranja' : 'bg-marino-3 border-marino-4 text-gris hover:text-blanco'
+                            className={`flex-1 md:flex-none px-4 py-3 rounded-xl border transition-all flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest ${showFilters ? 'bg-naranja text-marino border-naranja' : 'bg-marino-3 border-marino-4 text-gris hover:text-blanco'
                                 }`}
                         >
-                            <Filter size={16} /> Filtros {showFilters ? 'Activos' : ''}
+                            <Filter size={16} /> <span className="hidden sm:inline">Filtros</span> {showFilters ? '✓' : ''}
                         </button>
 
                         <button
                             onClick={handleCargarOficial}
                             disabled={loading}
-                            className="px-4 py-3 rounded-xl border bg-marino-3 border-marino-4 text-gris hover:text-naranja transition-all flex items-center gap-2 text-[0.6rem] font-black uppercase tracking-widest disabled:opacity-50"
+                            className="flex-1 md:flex-none px-4 py-3 rounded-xl border bg-marino-3 border-marino-4 text-gris hover:text-naranja transition-all flex items-center justify-center gap-2 text-[0.6rem] font-black uppercase tracking-widest disabled:opacity-50"
                         >
                             {loading ? <Loader2 size={16} className="animate-spin" /> : <Dumbbell size={16} />}
-                            Cargar Biblioteca IL
+                            <span className="hidden sm:inline">Biblioteca IL</span>
+                            <span className="sm:hidden">IL</span>
                         </button>
 
                         <button
                             onClick={handlePurgar}
                             disabled={loading}
-                            className="px-4 py-3 rounded-xl border bg-marino-3 border-marino-4 text-gris hover:text-rojo transition-all flex items-center gap-2 text-[0.6rem] font-black uppercase tracking-widest disabled:opacity-50"
+                            className="flex-1 md:flex-none px-4 py-3 rounded-xl border bg-marino-3 border-marino-4 text-gris hover:text-rojo transition-all flex items-center justify-center gap-2 text-[0.6rem] font-black uppercase tracking-widest disabled:opacity-50"
                             title="Eliminar ejercicios pre-cargados"
                         >
                             <Trash2 size={16} />
-                            Limpiar
+                            <span className="hidden sm:inline">Limpiar</span>
                         </button>
 
-                        <div className="bg-marino-3 border border-marino-4 rounded-xl p-1 flex gap-1">
+                        <div className="bg-marino-3 border border-marino-4 rounded-xl p-1 flex gap-1 w-full md:w-auto justify-around sm:justify-start">
                             <button
                                 onClick={() => setViewMode('grid')}
-                                className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-naranja text-marino shadow-lg' : 'text-gris hover:text-blanco'}`}
+                                className={`flex-1 md:flex-none p-2 rounded-lg transition-all flex items-center justify-center ${viewMode === 'grid' ? 'bg-naranja text-marino shadow-lg' : 'text-gris hover:text-blanco'}`}
                             >
                                 <Grid size={18} />
                             </button>
                             <button
                                 onClick={() => setViewMode('list')}
-                                className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-naranja text-marino shadow-lg' : 'text-gris hover:text-blanco'}`}
+                                className={`flex-1 md:flex-none p-2 rounded-lg transition-all flex items-center justify-center ${viewMode === 'list' ? 'bg-naranja text-marino shadow-lg' : 'text-gris hover:text-blanco'}`}
                             >
                                 <List size={18} />
                             </button>
                             <button
                                 onClick={() => setViewMode('muscle')}
-                                className={`p-2 rounded-lg transition-all ${viewMode === 'muscle' ? 'bg-naranja text-marino shadow-lg' : 'text-gris hover:text-blanco'}`}
+                                className={`flex-1 md:flex-none p-2 rounded-lg transition-all flex items-center justify-center ${viewMode === 'muscle' ? 'bg-naranja text-marino shadow-lg' : 'text-gris hover:text-blanco'}`}
                             >
                                 <Columns size={18} />
                             </button>

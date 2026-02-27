@@ -22,19 +22,22 @@ export default function TopbarPlanificacion({ items, cliente, onNavigate, onVolv
         <header className="h-[56px] border-b border-marino-4 bg-marino-2 flex items-center justify-between px-0 shrink-0 z-50">
             <div className="flex items-center gap-6 pl-2">
                 {/* Breadcrumb */}
-                <nav className="flex items-center text-sm font-medium">
-                    {items.map((item, idx) => (
-                        <div key={idx} className="flex items-center">
-                            {idx > 0 && <span className="mx-2 text-gris font-light">/</span>}
-                            <button
-                                onClick={() => onNavigate(item.nivel)}
-                                className={`transition-colors uppercase tracking-tight font-barlow-condensed font-bold ${idx === items.length - 1 ? 'text-blanco' : 'text-gris hover:text-naranja'
-                                    }`}
-                            >
-                                {item.label}
-                            </button>
-                        </div>
-                    ))}
+                {/* Breadcrumb - Scrollable on mobile */}
+                <nav className="flex items-center text-sm font-medium overflow-x-auto no-scrollbar max-w-[calc(100vw-180px)] sm:max-w-none pb-1 sm:pb-0">
+                    <div className="flex items-center flex-nowrap whitespace-nowrap">
+                        {items.map((item, idx) => (
+                            <div key={idx} className="flex items-center shrink-0">
+                                {idx > 0 && <span className="mx-1.5 text-gris/40 font-light">/</span>}
+                                <button
+                                    onClick={() => onNavigate(item.nivel)}
+                                    className={`transition-colors uppercase tracking-tight font-barlow-condensed font-black text-[0.75rem] sm:text-sm ${idx === items.length - 1 ? 'text-blanco' : 'text-gris hover:text-naranja'
+                                        }`}
+                                >
+                                    {item.label}
+                                </button>
+                            </div>
+                        ))}
+                    </div>
                 </nav>
             </div>
 

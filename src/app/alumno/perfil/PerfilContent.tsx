@@ -180,13 +180,15 @@ export default function PerfilContent({ alumno, ciclo }: { alumno: Cliente, cicl
 
             {/* Logout Button explicitly for Mobile/UX */}
             <div className="pt-4 pb-10">
-                <button
-                    onClick={() => logout()}
-                    className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 font-black uppercase tracking-widest text-xs hover:bg-red-500/20 transition-all shadow-lg shadow-red-500/5 group"
-                >
-                    <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
-                    Cerrar Sesión Activa
-                </button>
+                <form action={logout}>
+                    <button
+                        type="submit"
+                        className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 font-black uppercase tracking-widest text-xs hover:bg-red-500/20 transition-all shadow-lg shadow-red-500/5 group"
+                    >
+                        <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
+                        Cerrar Sesión Activa
+                    </button>
+                </form>
             </div>
         </div>
     );

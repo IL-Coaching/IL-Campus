@@ -128,19 +128,19 @@ export default function ModalRegistrarPago({ vencimiento, onClose }: Props) {
                         <label className="text-[10px] font-black text-gris uppercase tracking-widest flex items-center gap-2">
                             <Calendar size={12} className="text-naranja" /> Periodo que Cubre
                         </label>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                             <input
                                 type="date"
                                 value={desde}
                                 onChange={(e) => setDesde(e.target.value)}
-                                className="flex-1 bg-marino border border-marino-4 rounded-xl p-3 text-blanco text-xs focus:border-naranja/50 outline-none"
+                                className="w-full sm:flex-1 bg-marino border border-marino-4 rounded-xl p-3 text-blanco text-xs focus:border-naranja/50 outline-none"
                             />
-                            <span className="text-gris">→</span>
+                            <span className="text-gris text-center hidden sm:inline">→</span>
                             <input
                                 type="date"
                                 value={hasta}
                                 onChange={(e) => setHasta(e.target.value)}
-                                className="flex-1 bg-marino border border-marino-4 rounded-xl p-3 text-blanco text-xs focus:border-naranja/50 outline-none"
+                                className="w-full sm:flex-1 bg-marino border border-marino-4 rounded-xl p-3 text-blanco text-xs focus:border-naranja/50 outline-none"
                             />
                         </div>
                         <p className="text-[10px] text-gris italic">Se recomienda cubrir desde el último vencimiento.</p>

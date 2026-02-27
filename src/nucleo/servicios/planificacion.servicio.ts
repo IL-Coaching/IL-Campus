@@ -24,6 +24,10 @@ export const PlanificacionServicio = {
                                             include: {
                                                 ejercicio: true
                                             }
+                                        },
+                                        sesionesReales: {
+                                            where: { completada: true },
+                                            select: { id: true, completada: true }
                                         }
                                     }
                                 }
@@ -428,7 +432,31 @@ export const PlanificacionServicio = {
                 data: { duracionSemanas: nuevaDuracionTotal }
             });
 
-            return bloqueEliminado;
+        });
+    },
+
+    /**
+     * Agrupa varios ejercicios en un bloque (superserie, circuito, etc).
+     */
+    async agruparEjercicios(ejercicioIds: string[], nombreGrupo: string) {
+        const grupoId = Math.random().toString(36).substring(2, 11); // ID corto para el grupo
+        return await (prisma.ejercicioPlanificado as any).updateMany({
+            where: { id: { in: ejercicioIds } },
+            data: { grupoId, nombreGrupo }
+        });
+    },
+
+    async desagruparEjercicios(grupoId: string) {
+        return await (prisma.ejercicioPlanificado as any).updateMany({
+            where: { grupoId },
+            data: { grupoId: null, nombreGrupo: null }
+        });
+    },
+
+    async actualizarNombreGrupo(grupoId: string, nuevoNombre: string) {
+        return await (prisma.ejercicioPlanificado as any).updateMany({
+            where: { grupoId },
+            data: { nombreGrupo: nuevoNombre }
         });
     }
 };

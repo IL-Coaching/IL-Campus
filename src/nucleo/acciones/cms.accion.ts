@@ -26,7 +26,7 @@ export async function obtenerCMSDatos() {
         const planes = await prisma.plan.findMany({
             where: { entrenadorId: entrenador.id },
             orderBy: { creadoEn: 'desc' },
-            select: { id: true, nombre: true, visible: true, precio: true }
+            select: { id: true, nombre: true, visible: true, precio: true, precioPromocional: true, mesesPromocion: true }
         });
 
         return { exito: true, config, planes };

@@ -41,129 +41,214 @@ export default function ListaVencimientos({ vencimientos }: Props) {
     const hoy = new Date();
 
     return (
-        <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm whitespace-nowrap">
-                <thead>
-                    <tr className="border-b border-marino-4 bg-marino-3/30">
-                        <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs">Cliente</th>
-                        <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs">Suscripción gestionada</th>
-                        <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs">Vencimiento</th>
-                        <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs text-center">Estado Pago</th>
-                        <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs text-right">Acción</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-marino-4">
-                    {vencimientos.length === 0 ? (
-                        <tr>
-                            <td colSpan={5} className="p-12 text-center text-gris italic">
-                                No se encontraron vencimientos próximos. ¡Todo al día!
-                            </td>
-                        </tr>
-                    ) : (
-                        vencimientos.map((item) => {
-                            const diasParaVencer = Math.ceil((new Date(item.fechaVencimiento).getTime() - hoy.getTime()) / (1000 * 3600 * 24));
-                            const estaVencido = diasParaVencer < 0;
+        <div className="bg-marino-2 border border-marino-4 rounded-xl overflow-hidden shadow-lg">
+            {/* VISTA MOBILE: Cards de Vencimiento */}
+            <div className="block md:hidden divide-y divide-marino-4">
+                {vencimientos.length === 0 ? (
+                    <div className="p-12 text-center text-gris italic">
+                        No se encontraron vencimientos próximos.
+                    </div>
+                ) : (
+                    vencimientos.map((item) => {
+                        const diasParaVencer = Math.ceil((new Date(item.fechaVencimiento).getTime() - hoy.getTime()) / (1000 * 3600 * 24));
+                        const estaVencido = diasParaVencer < 0;
+                        const estadoPago = item.estado === "ABONADO" ? "PAGADO" : item.estado || "PENDIENTE";
+                        const totalPagado = item.cobros.filter(c => new Date(c.periodoHasta) >= new Date(item.fechaVencimiento)).reduce((sum, c) => sum + c.montoArs, 0);
+                        const metaPago = item.plan.precio;
 
-                            const estadoPago = item.estado === "ABONADO" ? "PAGADO" : item.estado || "PENDIENTE";
-
-                            const cobrosDelCiclo = item.cobros.filter(c => new Date(c.periodoHasta) >= new Date(item.fechaVencimiento));
-                            const totalPagado = cobrosDelCiclo.reduce((sum, c) => sum + c.montoArs, 0);
-                            const metaPago = item.plan.precio;
-
-                            // 🚨 DETECCIÓN DE DESCALCE (Plan Cobro vs Plan Acceso)
-                            const planAcceso = item.cliente.planesAsignados[0]?.plan.nombre;
-                            const hayDescalce = planAcceso && planAcceso !== item.plan.nombre;
-
-                            return (
-                                <tr key={item.id} className="hover:bg-marino-3/50 transition-all group">
-                                    <td className="p-4">
-                                        <div className="flex flex-col">
-                                            <span className="font-bold text-blanco flex items-center gap-2 text-sm">
-                                                {item.cliente.nombre}
-                                                <Link href={`/entrenador/clientes/${item.cliente.id}`} title="Ver Perfil">
-                                                    <ExternalLink size={12} className="text-gris group-hover:text-naranja transition-colors" />
-                                                </Link>
-                                            </span>
-                                            <span className="text-[10px] text-gris uppercase font-bold tracking-tight">{item.cliente.email}</span>
-                                        </div>
-                                    </td>
-                                    <td className="p-4">
-                                        <div className="flex flex-col gap-1">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-naranja font-black tracking-tighter text-sm uppercase italic">
-                                                    {item.plan.nombre}
-                                                </span>
-                                                {hayDescalce && (
-                                                    <span className="bg-rojo/10 text-rojo border border-rojo/30 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter animate-pulse" title={`El cliente tiene acceso a ${planAcceso}, pero se le está gestionando un cobro por ${item.plan.nombre}`}>
-                                                        ⚠️ DESCALCE
-                                                    </span>
-                                                )}
-                                            </div>
-                                            {hayDescalce && (
-                                                <span className="text-[9px] text-gris font-bold uppercase italic">
-                                                    Acceso Actual: <span className="text-blanco">{planAcceso}</span>
-                                                </span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="p-4">
-                                        <div className="flex flex-col">
-                                            <span className={`font-bold ${estaVencido ? 'text-rojo' : 'text-blanco'}`}>
+                        return (
+                            <div key={item.id} className="p-5 active:bg-marino-3/50 transition-all space-y-4">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex flex-col">
+                                        <Link href={`/entrenador/clientes/${item.cliente.id}`} className="font-bold text-blanco flex items-center gap-2 text-base">
+                                            {item.cliente.nombre}
+                                            <ExternalLink size={14} className="text-naranja" />
+                                        </Link>
+                                        <span className="text-[10px] text-gris uppercase font-bold tracking-tight">{item.cliente.email}</span>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="text-naranja font-black tracking-tighter text-sm uppercase italic block">
+                                            {item.plan.nombre}
+                                        </span>
+                                        <div className="flex flex-col mt-1">
+                                            <span className={`font-bold text-sm ${estaVencido ? 'text-rojo' : 'text-blanco'}`}>
                                                 {format(new Date(item.fechaVencimiento), "dd 'de' MMM", { locale: es })}
                                             </span>
-                                            <span className={`text-[10px] uppercase font-black tracking-widest ${estaVencido ? 'text-rojo/70' : diasParaVencer <= 3 ? 'text-naranja' : 'text-gris'
-                                                }`}>
+                                            <span className={`text-[10px] uppercase font-black tracking-widest ${estaVencido ? 'text-rojo/70' : 'text-gris'}`}>
                                                 {estaVencido ? "VENCIDO" : `FALTAN ${diasParaVencer} DÍAS`}
                                             </span>
                                         </div>
-                                    </td>
-                                    <td className="p-4 text-center">
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between pt-2">
+                                    <div>
                                         {estadoPago === "PAGADO" ? (
-                                            <span className="bg-verde/10 text-verde border border-verde/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1 w-fit mx-auto shadow-[0_0_10px_rgba(34,197,94,0.1)]">
+                                            <span className="bg-verde/10 text-verde border border-verde/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-[0_0_10px_rgba(34,197,94,0.1)]">
                                                 <CheckCircle2 size={12} /> AL DÍA
                                             </span>
                                         ) : estadoPago === "PARCIAL" ? (
-                                            <div className="flex flex-col items-center">
-                                                <span className="bg-[#EAB308]/10 text-[#EAB308] border border-[#EAB308]/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1 w-fit mx-auto cursor-pointer" onClick={() => setHistorialSeleccionado(item)}>
+                                            <div className="flex flex-col">
+                                                <span className="bg-[#EAB308]/10 text-[#EAB308] border border-[#EAB308]/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1 w-fit">
                                                     PAGO PARCIAL
                                                 </span>
-                                                <span className="text-[10px] text-naranja font-black uppercase tracking-tighter mt-1 hover:underline cursor-pointer" onClick={() => setHistorialSeleccionado(item)}>
+                                                <span className="text-[10px] text-naranja font-black uppercase tracking-tighter mt-1">
                                                     Falta ${(metaPago - totalPagado).toLocaleString('es-AR')}
                                                 </span>
                                             </div>
                                         ) : (
-                                            <span className={`${estaVencido ? 'bg-rojo/10 text-rojo border-rojo/20 animate-pulse' : 'bg-marino-4 text-gris border-marino-3'} px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1 w-fit mx-auto`}>
+                                            <span className={`${estaVencido ? 'bg-rojo/10 text-rojo border-rojo/20' : 'bg-marino-4 text-gris border-marino-3'} px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1 w-fit`}>
                                                 <AlertCircle size={12} /> IMPAGO
                                             </span>
                                         )}
-                                    </td>
-                                    <td className="p-4 text-right flex items-center justify-end gap-2">
+                                    </div>
+
+                                    <div className="flex gap-2">
                                         <button
                                             onClick={() => setHistorialSeleccionado(item)}
-                                            className="text-gris hover:text-blanco border border-marino-4 bg-marino-3 hover:bg-marino-4 px-3 py-2 rounded text-xs uppercase font-bold tracking-widest transition-all"
-                                            title="Ver Historial"
+                                            className="p-2.5 bg-marino-3 border border-marino-4 text-gris rounded-xl active:bg-marino-4 transition-all"
                                         >
-                                            Ver Hist.
+                                            <AlertCircle size={18} />
                                         </button>
                                         <button
                                             onClick={() => setCobroSeleccionado(item)}
-                                            className={`${estadoPago === "PAGADO"
-                                                ? 'bg-verde/20 hover:bg-verde/30 text-verde'
-                                                : 'bg-naranja hover:bg-naranja-h text-marino shadow-lg shadow-naranja/10 hover:shadow-naranja/20'
-                                                } px-4 py-2 rounded font-barlow-condensed font-bold text-xs uppercase tracking-widest transition-all min-w-32 justify-center flex`}
+                                            className="px-5 py-2.5 bg-naranja text-marino font-black rounded-xl text-[0.65rem] uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-naranja/20"
                                         >
-                                            <div className="flex items-center gap-2">
-                                                <DollarSign size={14} />
-                                                {estadoPago === "PAGADO" ? "ADELANTAR PAGO" : "SUMAR PAGO"}
-                                            </div>
+                                            Pagar
                                         </button>
-                                    </td>
-                                </tr>
-                            );
-                        })
-                    )}
-                </tbody>
-            </table>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })
+                )}
+            </div>
+
+            {/* VISTA DESKTOP: Tabla Tradicional */}
+            <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-left text-sm whitespace-nowrap">
+                    <thead>
+                        <tr className="border-b border-marino-4 bg-marino-3/30">
+                            <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs">Cliente</th>
+                            <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs">Suscripción gestionada</th>
+                            <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs">Vencimiento</th>
+                            <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs text-center">Estado Pago</th>
+                            <th className="p-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs text-right">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-marino-4">
+                        {vencimientos.length === 0 ? (
+                            <tr>
+                                <td colSpan={5} className="p-12 text-center text-gris italic">
+                                    No se encontraron vencimientos próximos. ¡Todo al día!
+                                </td>
+                            </tr>
+                        ) : (
+                            vencimientos.map((item) => {
+                                const diasParaVencer = Math.ceil((new Date(item.fechaVencimiento).getTime() - hoy.getTime()) / (1000 * 3600 * 24));
+                                const estaVencido = diasParaVencer < 0;
+
+                                const estadoPago = item.estado === "ABONADO" ? "PAGADO" : item.estado || "PENDIENTE";
+
+                                const cobrosDelCiclo = item.cobros.filter(c => new Date(c.periodoHasta) >= new Date(item.fechaVencimiento));
+                                const totalPagado = cobrosDelCiclo.reduce((sum, c) => sum + c.montoArs, 0);
+                                const metaPago = item.plan.precio;
+
+                                // 🚨 DETECCIÓN DE DESCALCE (Plan Cobro vs Plan Acceso)
+                                const planAcceso = item.cliente.planesAsignados[0]?.plan.nombre;
+                                const hayDescalce = planAcceso && planAcceso !== item.plan.nombre;
+
+                                return (
+                                    <tr key={item.id} className="hover:bg-marino-3/50 transition-all group">
+                                        <td className="p-4">
+                                            <div className="flex flex-col">
+                                                <span className="font-bold text-blanco flex items-center gap-2 text-sm">
+                                                    {item.cliente.nombre}
+                                                    <Link href={`/entrenador/clientes/${item.cliente.id}`} title="Ver Perfil">
+                                                        <ExternalLink size={12} className="text-gris group-hover:text-naranja transition-colors" />
+                                                    </Link>
+                                                </span>
+                                                <span className="text-[10px] text-gris uppercase font-bold tracking-tight">{item.cliente.email}</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-4">
+                                            <div className="flex flex-col gap-1">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-naranja font-black tracking-tighter text-sm uppercase italic">
+                                                        {item.plan.nombre}
+                                                    </span>
+                                                    {hayDescalce && (
+                                                        <span className="bg-rojo/10 text-rojo border border-rojo/30 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter animate-pulse" title={`El cliente tiene acceso a ${planAcceso}, pero se le está gestionando un cobro por ${item.plan.nombre}`}>
+                                                            ⚠️ DESCALCE
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                {hayDescalce && (
+                                                    <span className="text-[9px] text-gris font-bold uppercase italic">
+                                                        Acceso Actual: <span className="text-blanco">{planAcceso}</span>
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="p-4">
+                                            <div className="flex flex-col">
+                                                <span className={`font-bold ${estaVencido ? 'text-rojo' : 'text-blanco'}`}>
+                                                    {format(new Date(item.fechaVencimiento), "dd 'de' MMM", { locale: es })}
+                                                </span>
+                                                <span className={`text-[10px] uppercase font-black tracking-widest ${estaVencido ? 'text-rojo/70' : diasParaVencer <= 3 ? 'text-naranja' : 'text-gris'
+                                                    }`}>
+                                                    {estaVencido ? "VENCIDO" : `FALTAN ${diasParaVencer} DÍAS`}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="p-4 text-center">
+                                            {estadoPago === "PAGADO" ? (
+                                                <span className="bg-verde/10 text-verde border border-verde/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1 w-fit mx-auto shadow-[0_0_10px_rgba(34,197,94,0.1)]">
+                                                    <CheckCircle2 size={12} /> AL DÍA
+                                                </span>
+                                            ) : estadoPago === "PARCIAL" ? (
+                                                <div className="flex flex-col items-center">
+                                                    <span className="bg-[#EAB308]/10 text-[#EAB308] border border-[#EAB308]/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1 w-fit mx-auto cursor-pointer" onClick={() => setHistorialSeleccionado(item)}>
+                                                        PAGO PARCIAL
+                                                    </span>
+                                                    <span className="text-[10px] text-naranja font-black uppercase tracking-tighter mt-1 hover:underline cursor-pointer" onClick={() => setHistorialSeleccionado(item)}>
+                                                        Falta ${(metaPago - totalPagado).toLocaleString('es-AR')}
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span className={`${estaVencido ? 'bg-rojo/10 text-rojo border-rojo/20 animate-pulse' : 'bg-marino-4 text-gris border-marino-3'} px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1 w-fit mx-auto`}>
+                                                    <AlertCircle size={12} /> IMPAGO
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="p-4 text-right flex items-center justify-end gap-2">
+                                            <button
+                                                onClick={() => setHistorialSeleccionado(item)}
+                                                className="text-gris hover:text-blanco border border-marino-4 bg-marino-3 hover:bg-marino-4 px-3 py-2 rounded text-xs uppercase font-bold tracking-widest transition-all"
+                                                title="Ver Historial"
+                                            >
+                                                Ver Hist.
+                                            </button>
+                                            <button
+                                                onClick={() => setCobroSeleccionado(item)}
+                                                className={`${estadoPago === "PAGADO"
+                                                    ? 'bg-verde/20 hover:bg-verde/30 text-verde'
+                                                    : 'bg-naranja hover:bg-naranja-h text-marino shadow-lg shadow-naranja/10 hover:shadow-naranja/20'
+                                                    } px-4 py-2 rounded font-barlow-condensed font-bold text-xs uppercase tracking-widest transition-all min-w-32 justify-center flex`}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <DollarSign size={14} />
+                                                    {estadoPago === "PAGADO" ? "ADELANTAR PAGO" : "SUMAR PAGO"}
+                                                </div>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })
+                        )}
+                    </tbody>
+                </table>
+            </div>
 
             {cobroSeleccionado && (
                 <ModalRegistrarPago

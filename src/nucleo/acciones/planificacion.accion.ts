@@ -541,3 +541,52 @@ export async function reordenarEjercicios(diaId: string, ejercicioIds: string[])
         return { error: error instanceof Error ? error.message : "Error al reordenar" };
     }
 }
+
+export async function agruparEjercicios(diaId: string, ejercicioIds: string[], nombreGrupo: string) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+        // Mitigación BOLA básica
+        const diaPropio = await prisma.diaSesion.findFirst({
+            where: { id: diaId, semana: { bloqueMensual: { macrociclo: { cliente: { entrenadorId: entrenador.id } } } } }
+        });
+        if (!diaPropio) throw new Error("Acceso denegado.");
+
+        await PlanificacionServicio.agruparEjercicios(ejercicioIds, nombreGrupo);
+        revalidatePath(`/entrenador/clientes`);
+        return { exito: true };
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : "Error al agrupar" };
+    }
+}
+
+export async function desagruparEjercicios(diaId: string, grupoId: string) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+        const diaPropio = await prisma.diaSesion.findFirst({
+            where: { id: diaId, semana: { bloqueMensual: { macrociclo: { cliente: { entrenadorId: entrenador.id } } } } }
+        });
+        if (!diaPropio) throw new Error("Acceso denegado.");
+
+        await PlanificacionServicio.desagruparEjercicios(grupoId);
+        revalidatePath(`/entrenador/clientes`);
+        return { exito: true };
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : "Error al desagrupar" };
+    }
+}
+
+export async function actualizarNombreGrupo(diaId: string, grupoId: string, nombre: string) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+        const diaPropio = await prisma.diaSesion.findFirst({
+            where: { id: diaId, semana: { bloqueMensual: { macrociclo: { cliente: { entrenadorId: entrenador.id } } } } }
+        });
+        if (!diaPropio) throw new Error("Acceso denegado.");
+
+        await PlanificacionServicio.actualizarNombreGrupo(grupoId, nombre);
+        revalidatePath(`/entrenador/clientes`);
+        return { exito: true };
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : "Error al actualizar nombre del grupo" };
+    }
+}

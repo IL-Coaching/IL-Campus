@@ -72,7 +72,7 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
             {/* Solo aplicamos overflow en mobile para evitar que se escapan las cards, 
                 pero NO en desktop para que el dropdown flote libremente */}
             <div className="w-full">
-                <table className="w-full text-center text-sm whitespace-nowrap md:whitespace-normal">
+                <table className="w-full text-center text-sm md:whitespace-nowrap">
                     <thead className="hidden md:table-header-group">
                         <tr className="border-b-2 border-[#1a233a] bg-[#1a233a]/50">
                             <th className="py-5 px-4 font-barlow-condensed font-black uppercase tracking-widest text-[#f5f5f5] text-[0.8rem] text-left md:text-center w-full md:w-auto">Nombre</th>

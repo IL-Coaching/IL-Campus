@@ -33,7 +33,7 @@ export default async function EntrenadorLayout({
             <SidebarEntrenador badgeMensajeria={countBadge} />
 
             {/* Contenido principal con padding superior de seguridad (Safe Area) */}
-            <main className="flex-1 md:ml-64 pt-24 md:pt-20 pb-32 md:pb-16 min-h-screen relative z-10">
+            <main className="flex-1 md:ml-72 pt-24 md:pt-20 pb-32 md:pb-16 min-h-screen relative z-10">
                 <div className="px-4 md:px-12 max-w-7xl mx-auto w-full">
                     {children}
                 </div>

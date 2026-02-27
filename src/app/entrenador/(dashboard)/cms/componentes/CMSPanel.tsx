@@ -33,6 +33,8 @@ interface PlanCMS {
     nombre: string;
     visible: boolean;
     precio: number;
+    precioPromocional: number | null;
+    mesesPromocion: number | null;
 }
 
 interface Props {
@@ -298,8 +300,15 @@ export default function CMSPanel({ config, planes }: Props) {
                 {planes.map(p => (
                     <div key={p.id} className="bg-marino-3/50 border border-marino-4 rounded-xl p-4 flex flex-col justify-between h-full min-h-[120px]">
                         <div>
-                            <p className="font-bold text-blanco">{p.nombre}</p>
-                            <p className="text-xs text-gris mt-1">${p.precio} ARS</p>
+                            <p className="font-bold text-blanco leading-tight">{p.nombre}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                                <p className="text-xs text-gris">${p.precio}</p>
+                                {p.precioPromocional && (
+                                    <span className="text-[0.6rem] bg-verde/10 text-verde px-1.5 py-0.5 rounded font-bold uppercase tracking-tighter">
+                                        Promo: ${p.precioPromocional}
+                                    </span>
+                                )}
+                            </div>
                         </div>
                         <div className="mt-4 flex justify-end">
                             <button

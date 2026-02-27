@@ -249,6 +249,8 @@ model EjercicioPlanificado {
   orden                Int
   esTesteo             Boolean           @default(false)
   modalidadTesteo      ModalidadTesteo?
+  grupoId              String?
+  nombreGrupo          String?
   diaSesion            DiaSesion         @relation(fields: [diaId], references: [id])
   ejercicio            Ejercicio?        @relation(fields: [ejercicioId], references: [id])
   seriesRegistradas    SerieRegistrada[]

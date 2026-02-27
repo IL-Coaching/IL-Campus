@@ -43,6 +43,13 @@ export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMes
         const finSemana = inicioSemana + numSemanas - 1;
         semanaGlobalActual += numSemanas;
 
+        // Cálculo de Adherencia Real
+        const totalSesiones = b.semanas.reduce((acc, sem) => acc + sem.diasSesion.length, 0);
+        const completadas = b.semanas.reduce((acc, sem) =>
+            acc + sem.diasSesion.filter(dia => dia.sesionesReales.length > 0).length, 0
+        );
+        const prog = totalSesiones > 0 ? Math.round((completadas / totalSesiones) * 100) : 0;
+
         return {
             id: b.id,
             n: idx + 1,
@@ -56,7 +63,7 @@ export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMes
                 id: sem.id
             })),
             metodo,
-            prog: idx === 0 ? 100 : 0, // Simplificación temporal
+            prog,
             color: color === "border-azul-claro" ? "border-[#60A5FA]" :
                 (color === "border-rojo-500" ? "border-[#EF4444]" : "border-[#FF6B00]")
         };
@@ -80,7 +87,7 @@ export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMes
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 pb-10">
-            {/* Header Macrociclo Profundo */}
+            {/* Resumen de Planificación */}
             <div className="relative bg-marino-2 border border-marino-4 p-8 rounded-2xl shadow-2xl overflow-hidden group">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-naranja/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl group-hover:bg-naranja/10 transition-all"></div>
 
@@ -89,19 +96,18 @@ export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMes
                         <div className="w-16 h-16 bg-marino-3 border border-naranja/20 rounded-2xl flex items-center justify-center shadow-inner">
                             <TrendingUp size={32} className="text-naranja" />
                         </div>
-                        <div>
-                            <div className="flex items-center gap-3 mb-1">
-                                <span className="text-[0.65rem] font-black text-naranja uppercase tracking-[0.3em] block">Arquitectura de Entrenamiento</span>
-                                <span className="px-2 py-0.5 bg-marino-3 border border-marino-4 rounded text-[0.55rem] font-bold text-gris uppercase tracking-widest">v2.0 Beta</span>
+                        <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className="px-2 py-0.5 bg-naranja/10 border border-naranja/20 rounded text-[0.6rem] font-bold text-naranja uppercase tracking-widest">Planificación Activa</span>
                             </div>
-                            <h3 className="text-3xl font-barlow-condensed font-black text-blanco uppercase tracking-tight leading-none">
-                                {macrociclo.duracionSemanas} Semanas <span className="text-gris/40 mx-2">/</span>
-                                <span className="text-naranja">
-                                    {macrociclo.notas ? macrociclo.notas.split('\n')[0] : "Distribución Personalizada IL-Coaching"}
+                            <h3 className="text-xl sm:text-3xl font-barlow-condensed font-black text-blanco uppercase tracking-tight leading-tight sm:leading-none">
+                                {macrociclo.duracionSemanas} Semanas <span className="text-gris/40 mx-1 sm:mx-2">/</span>
+                                <span className="text-naranja break-words">
+                                    {macrociclo.notas ? macrociclo.notas.split('\n')[0].toUpperCase() : "PERSONALIZADA"}
                                 </span>
                             </h3>
-                            <p className="text-gris font-medium text-xs mt-2 uppercase tracking-[0.1em] flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-naranja animate-pulse"></span>
+                            <p className="text-gris font-medium text-[0.65rem] mt-2 uppercase tracking-[0.1em] flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-naranja animate-pulse"></span>
                                 Inicio: {new Date(macrociclo.fechaInicio).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}
                             </p>
                         </div>
@@ -169,7 +175,7 @@ export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMes
                                 </div>
                             </div>
 
-                            {/* Detalle Metodológico - Guía Gualda Style */}
+                            {/* Especificaciones del Entrenamiento */}
                             <div className="space-y-3 mt-6">
                                 <div className="bg-marino-3/50 p-4 rounded-xl border border-marino-4/50 group-hover:bg-marino-3 transition-colors">
                                     <label className="text-[0.6rem] font-black text-naranja uppercase tracking-widest mb-1.5 block opacity-50">Método de Trabajo</label>

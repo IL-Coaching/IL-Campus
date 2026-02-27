@@ -6,6 +6,8 @@ interface Plan {
     id: string;
     nombre: string;
     precio: number;
+    precioPromocional: number | null;
+    mesesPromocion: number | null;
     duracionDias: number;
     descripcion: string | null;
     beneficios: string[];
@@ -62,10 +64,25 @@ export default function Planes({ planes }: Props) {
                                 <p className="text-gris text-sm mb-6 border-b border-marino-4 pb-6 font-medium">Ciclo de {plan.duracionDias} días</p>
 
                                 <div className="mb-6">
-                                    <div className="flex items-baseline gap-2">
-                                        <span className="text-4xl font-barlow-condensed font-black text-naranja tracking-tight">${plan.precio.toLocaleString('es-AR')}</span>
-                                        <span className="text-naranja text-xs font-bold uppercase tracking-wider">final</span>
-                                    </div>
+                                    {plan.precioPromocional ? (
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xl text-gris line-through opacity-50 decoration-rojo/50 decoration-2">${plan.precio.toLocaleString('es-AR')}</span>
+                                                <span className="bg-verde/10 text-verde text-[0.6rem] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter">Oferta</span>
+                                            </div>
+                                            <div className="flex items-baseline gap-2">
+                                                <span className="text-4xl font-barlow-condensed font-black text-naranja tracking-tight">${plan.precioPromocional.toLocaleString('es-AR')}</span>
+                                                <span className="text-naranja text-[0.65rem] font-black uppercase tracking-widest">
+                                                    x {plan.mesesPromocion} mes{plan.mesesPromocion !== 1 ? 'es' : ''}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-baseline gap-2">
+                                            <span className="text-4xl font-barlow-condensed font-black text-naranja tracking-tight">${plan.precio.toLocaleString('es-AR')}</span>
+                                            <span className="text-naranja text-xs font-bold uppercase tracking-wider">final</span>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {plan.descripcion && (

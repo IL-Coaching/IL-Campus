@@ -41,13 +41,15 @@ export default function SidebarEntrenador({ badgeMensajeria = 0 }: { badgeMensaj
                     <span className="text-xl font-barlow-condensed font-black italic text-naranja leading-none">IL</span>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button
-                        onClick={() => logout()}
-                        className="p-2 text-gris hover:text-rojo transition-colors"
-                        title="Cerrar Sesión"
-                    >
-                        <LogOut size={20} />
-                    </button>
+                    <form action={logout}>
+                        <button
+                            type="submit"
+                            className="p-2 text-gris hover:text-rojo transition-colors"
+                            title="Cerrar Sesión"
+                        >
+                            <LogOut size={20} />
+                        </button>
+                    </form>
                     <button className="p-2 text-blanco" onClick={() => setMobileOpen(!mobileOpen)}>
                         {mobileOpen ? <X size={26} /> : <Menu size={26} />}
                     </button>
@@ -101,13 +103,15 @@ export default function SidebarEntrenador({ badgeMensajeria = 0 }: { badgeMensaj
 
                 {/* Footer Sidebar */}
                 <div className="p-4 border-t border-marino-4 bg-marino-3/30">
-                    <button
-                        onClick={() => logout()}
-                        className="flex items-center gap-4 px-6 py-4 rounded-2xl text-gris hover:text-rojo hover:bg-rojo/10 transition-all duration-300 w-full font-black uppercase tracking-[0.15em] text-[0.7rem] shadow-sm"
-                    >
-                        <LogOut size={18} />
-                        <span>Cerrar Sesión</span>
-                    </button>
+                    <form action={logout} className="w-full">
+                        <button
+                            type="submit"
+                            className="flex items-center gap-4 px-6 py-4 rounded-2xl text-gris hover:text-rojo hover:bg-rojo/10 transition-all duration-300 w-full font-black uppercase tracking-[0.15em] text-[0.7rem] shadow-sm"
+                        >
+                            <LogOut size={18} />
+                            <span>Cerrar Sesión</span>
+                        </button>
+                    </form>
                 </div>
             </aside>
 
