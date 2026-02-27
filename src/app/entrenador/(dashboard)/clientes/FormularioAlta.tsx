@@ -104,7 +104,7 @@ export default function FormularioAlta({ onClose }: FormularioAltaProps) {
                                 type="text"
                                 name="nombre"
                                 required
-                                className="w-full bg-marino border border-marino-4 rounded px-3 py-2 text-blanco focus:outline-none focus:border-naranja/50 transition-colors"
+                                className="w-full bg-marino border border-white/10 rounded-xl px-4 py-3 text-blanco focus:outline-none focus:border-naranja/50 transition-all font-bold"
                                 placeholder="Ej. Lucas Rossi"
                             />
                         </div>
@@ -115,7 +115,7 @@ export default function FormularioAlta({ onClose }: FormularioAltaProps) {
                                 type="email"
                                 name="email"
                                 required
-                                className="w-full bg-marino border border-marino-4 rounded px-3 py-2 text-blanco focus:outline-none focus:border-naranja/50 transition-colors"
+                                className="w-full bg-marino border border-white/10 rounded-xl px-4 py-3 text-blanco focus:outline-none focus:border-naranja/50 transition-all font-bold"
                                 placeholder="lucas@ejemplo.com"
                             />
                         </div>
@@ -125,7 +125,7 @@ export default function FormularioAlta({ onClose }: FormularioAltaProps) {
                             <input
                                 type="tel"
                                 name="telefono"
-                                className="w-full bg-marino border border-marino-4 rounded px-3 py-2 text-blanco focus:outline-none focus:border-naranja/50 transition-colors"
+                                className="w-full bg-marino border border-white/10 rounded-xl px-4 py-3 text-blanco focus:outline-none focus:border-naranja/50 transition-all font-bold"
                                 placeholder="+54 9 342..."
                             />
                         </div>
@@ -135,7 +135,7 @@ export default function FormularioAlta({ onClose }: FormularioAltaProps) {
                             <select
                                 name="plan"
                                 required
-                                className="w-full bg-marino border border-marino-4 rounded px-3 py-2 text-blanco focus:outline-none focus:border-naranja/50 transition-colors appearance-none"
+                                className="w-full bg-marino border border-white/10 rounded-xl px-4 py-3 text-blanco focus:outline-none focus:border-naranja/50 transition-all font-bold appearance-none cursor-pointer"
                             >
                                 <option value="Start">Nivel 1 - Start</option>
                                 <option value="GymRat">Nivel 2 - GymRat</option>

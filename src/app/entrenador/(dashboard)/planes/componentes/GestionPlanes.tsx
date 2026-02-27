@@ -246,7 +246,13 @@ export default function GestionPlanes({ planesIniciales }: { planesIniciales: Pl
                                 <div className="space-y-2">
                                     {beneficios.map((b, i) => (
                                         <div key={i} className="flex gap-2">
-                                            <input type="text" value={b} onChange={e => handleBeneficioChange(i, e.target.value)} placeholder="Ej: Soporte 24/7" className="flex-1 bg-marino-3/50 border border-marino-4 rounded-lg py-1.5 px-3 text-sm text-blanco focus:outline-none focus:border-naranja/50" />
+                                            <input
+                                                type="text"
+                                                value={b}
+                                                onChange={e => handleBeneficioChange(i, e.target.value)}
+                                                placeholder="Ej: Soporte 24/7"
+                                                className="w-full bg-marino border border-white/10 rounded-lg px-3 py-2 text-blanco font-black text-base uppercase tracking-tight focus:ring-1 focus:ring-naranja/50 focus:border-naranja/50 focus:bg-marino-3 placeholder:text-gris/20 group-hover:text-naranja transition-all shadow-inner"
+                                            />
                                             <button onClick={() => removeBeneficio(i)} className="text-gris hover:text-rojo transition-colors px-2">
                                                 <Trash2 size={16} />
                                             </button>

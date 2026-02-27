@@ -25,6 +25,34 @@ body {
   padding: 0;
 }
 
+/* Prevenir fondos blancos en toda la aplicación */
+input, textarea, select {
+  background-color: var(--marino-2) !important;
+  color: var(--blanco) !important;
+  border-color: var(--marino-4);
+}
+
+/* Inputs específicos dentro de tablas o componentes que necesitan ser un poco más claros/oscuros */
+input:focus, textarea:focus {
+  background-color: var(--marino-3) !important;
+  outline: none;
+}
+
+/* Autocomplete de navegadores */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--blanco) !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--marino-2) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
