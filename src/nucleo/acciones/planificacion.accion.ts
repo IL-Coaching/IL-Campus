@@ -294,100 +294,28 @@ export async function actualizarMacrociclo(id: string, data: {
     }
 }
 
-export async function clonarContenidoSemana(idOrigen: string, idDestino: string) {
-    try {
-        await getEntrenadorSesion();
 
-        const origen = await prisma.semana.findUnique({
-            where: { id: idOrigen },
-            include: {
-                diasSesion: {
-                    include: {
-                        ejercicios: true
-                    }
-                }
-            }
-        });
-
-        if (!origen) throw new Error("Semana origen no encontrada.");
-
-        await prisma.$transaction(async (tx) => {
-            // Limpiar destino
-            const diasDestino = await tx.diaSesion.findMany({ where: { semanaId: idDestino } });
-            for (const dia of diasDestino) {
-                await tx.ejercicioPlanificado.deleteMany({ where: { diaId: dia.id } });
-            }
-            await tx.diaSesion.deleteMany({ where: { semanaId: idDestino } });
-
-            // Copiar
-            for (const dia of origen.diasSesion) {
-                const nuevoDia = await tx.diaSesion.create({
-                    data: {
-                        semanaId: idDestino,
-                        diaSemana: dia.diaSemana,
-                        focoMuscular: dia.focoMuscular,
-                    }
-                });
-
-                const groupMap = new Map<string, string>(); // viejo_grupo_id -> nuevo_grupo_id
-
-                for (const ej of dia.ejercicios) {
-                    let nuevoGrupoId = null;
-                    if (ej.grupoId) {
-                        if (groupMap.has(ej.grupoId)) {
-                            nuevoGrupoId = groupMap.get(ej.grupoId);
-                        } else {
-                            const newGuid = randomUUID();
-                            groupMap.set(ej.grupoId, newGuid);
-                            nuevoGrupoId = newGuid;
-                        }
-                    }
-
-                    await tx.ejercicioPlanificado.create({
-                        data: {
-                            diaId: nuevoDia.id,
-                            ejercicioId: ej.ejercicioId,
-                            nombreLibre: ej.nombreLibre,
-                            esBiblioteca: ej.esBiblioteca,
-                            series: ej.series,
-                            repsMin: ej.repsMin,
-                            repsMax: ej.repsMax,
-                            RIR: ej.RIR,
-                            tempo: ej.tempo,
-                            descansoSegundos: ej.descansoSegundos,
-                            pesoSugerido: ej.pesoSugerido,
-                            notasTecnicas: ej.notasTecnicas,
-                            orden: ej.orden,
-                            esTesteo: ej.esTesteo,
-                            modalidadTesteo: ej.modalidadTesteo,
-                            grupoId: nuevoGrupoId,
-                            nombreGrupo: ej.nombreGrupo
-                        }
-                    });
-                }
-            }
-        });
-
-        revalidatePath(`/entrenador/clientes`);
-        return { exito: true };
-    } catch (error) {
-        console.error("Error al clonar semana:", error);
-        return { error: "No se pudo clonar el contenido." };
-    }
-}
 
 export async function clonarContenidoSesion(idOrigen: string, idDestino: string) {
     try {
-        await getEntrenadorSesion();
+        const entrenador = await getEntrenadorSesion();
 
-        const origen = await prisma.diaSesion.findUnique({
-            where: { id: idOrigen },
-            include: {
-                ejercicios: true
-            }
-        });
+        // BOLA: Validar propiedad de ambas sesiones
+        const [origen, destino] = await Promise.all([
+            prisma.diaSesion.findFirst({
+                where: { id: idOrigen, semana: { bloqueMensual: { macrociclo: { cliente: { entrenadorId: entrenador.id } } } } },
+                include: { ejercicios: true }
+            }),
+            prisma.diaSesion.findFirst({
+                where: { id: idDestino, semana: { bloqueMensual: { macrociclo: { cliente: { entrenadorId: entrenador.id } } } } },
+                include: { semana: { include: { bloqueMensual: { include: { macrociclo: true } } } } }
+            })
+        ]);
 
-        if (!origen) throw new Error("Sesión origen no encontrada.");
+        if (!origen) throw new Error("Sesión origen no encontrada o acceso denegado.");
+        if (!destino) throw new Error("Sesión destino no encontrada o acceso denegado.");
+
+        const clienteId = destino.semana.bloqueMensual.macrociclo.clienteId;
 
         await prisma.$transaction(async (tx) => {
             // Limpiar destino
@@ -431,11 +359,11 @@ export async function clonarContenidoSesion(idOrigen: string, idDestino: string)
             }
         });
 
-        revalidatePath(`/entrenador/clientes`);
+        revalidatePath(`/entrenador/clientes/${clienteId}/planificacion`);
         return { exito: true };
     } catch (error) {
         console.error("Error al clonar sesión:", error);
-        return { error: "No se pudo clonar el contenido." };
+        return { error: error instanceof Error ? error.message : "No se pudo clonar el contenido." };
     }
 }
 
@@ -672,5 +600,109 @@ export async function actualizarNombreGrupo(diaId: string, grupoId: string, nomb
         return { exito: true };
     } catch (error) {
         return { error: error instanceof Error ? error.message : "Error al actualizar nombre del grupo" };
+    }
+}
+
+/**
+ * Clona el contenido completo de una semana (microciclo) a otra semana destino.
+ * Copia todas las sesiones con sus ejercicios, parámetros y agrupaciones.
+ * @security Valida que el entrenador sea propietario de ambas semanas (BOLA).
+ */
+export async function clonarSemana(semanaOrigenId: string, semanaDestinoId: string) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        // BOLA: verificar propiedad de ambas semanas
+        const [semanaOrigen, semanaDestino] = await Promise.all([
+            prisma.semana.findFirst({
+                where: {
+                    id: semanaOrigenId,
+                    bloqueMensual: { macrociclo: { cliente: { entrenadorId: entrenador.id } } }
+                },
+                include: {
+                    diasSesion: {
+                        include: { ejercicios: true }
+                    }
+                }
+            }),
+            prisma.semana.findFirst({
+                where: {
+                    id: semanaDestinoId,
+                    bloqueMensual: { macrociclo: { cliente: { entrenadorId: entrenador.id } } }
+                },
+                include: {
+                    diasSesion: true,
+                    bloqueMensual: { include: { macrociclo: true } }
+                }
+            })
+        ]);
+
+        if (!semanaOrigen) throw new Error("Semana origen no encontrada o acceso denegado.");
+        if (!semanaDestino) throw new Error("Semana destino no encontrada o acceso denegado.");
+
+        const clienteId = semanaDestino.bloqueMensual.macrociclo.clienteId;
+
+        await prisma.$transaction(async (tx) => {
+            // 1. Eliminar ejercicios de las sesiones destino y luego las sesiones
+            for (const dia of semanaDestino.diasSesion) {
+                await tx.ejercicioPlanificado.deleteMany({ where: { diaId: dia.id } });
+            }
+            await tx.diaSesion.deleteMany({ where: { semanaId: semanaDestinoId } });
+
+            // 2. Recrear las sesiones y ejercicios del origen en el destino
+            for (const diaOrigen of semanaOrigen.diasSesion) {
+                const nuevoDia = await tx.diaSesion.create({
+                    data: {
+                        semanaId: semanaDestinoId,
+                        diaSemana: diaOrigen.diaSemana,
+                        focoMuscular: diaOrigen.focoMuscular,
+                    }
+                });
+
+                // Re-mapear grupoIds para evitar colisiones
+                const groupMap = new Map<string, string>();
+
+                for (const ej of diaOrigen.ejercicios) {
+                    let nuevoGrupoId: string | null = null;
+                    if (ej.grupoId) {
+                        if (groupMap.has(ej.grupoId)) {
+                            nuevoGrupoId = groupMap.get(ej.grupoId)!;
+                        } else {
+                            const newId = randomUUID();
+                            groupMap.set(ej.grupoId, newId);
+                            nuevoGrupoId = newId;
+                        }
+                    }
+
+                    await tx.ejercicioPlanificado.create({
+                        data: {
+                            diaId: nuevoDia.id,
+                            ejercicioId: ej.ejercicioId,
+                            nombreLibre: ej.nombreLibre,
+                            esBiblioteca: ej.esBiblioteca,
+                            series: ej.series,
+                            repsMin: ej.repsMin,
+                            repsMax: ej.repsMax,
+                            RIR: ej.RIR,
+                            tempo: ej.tempo,
+                            descansoSegundos: ej.descansoSegundos,
+                            pesoSugerido: ej.pesoSugerido,
+                            notasTecnicas: ej.notasTecnicas,
+                            orden: ej.orden,
+                            esTesteo: ej.esTesteo,
+                            modalidadTesteo: ej.modalidadTesteo,
+                            grupoId: nuevoGrupoId,
+                            nombreGrupo: ej.nombreGrupo,
+                        }
+                    });
+                }
+            }
+        });
+
+        revalidatePath(`/entrenador/clientes/${clienteId}/planificacion`);
+        return { exito: true };
+    } catch (error) {
+        console.error("Error al clonar semana:", error);
+        return { error: error instanceof Error ? error.message : "No se pudo clonar la semana." };
     }
 }

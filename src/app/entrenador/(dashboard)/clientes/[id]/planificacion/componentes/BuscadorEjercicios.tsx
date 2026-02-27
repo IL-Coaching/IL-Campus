@@ -81,23 +81,36 @@ export default function BuscadorEjercicios({ onClose, onSelect }: BuscadorEjerci
                 {/* List Results */}
                 <div className="max-h-[400px] min-h-[100px] overflow-y-auto px-6 pb-6 space-y-2">
 
+                    {/* Opción texto libre — siempre visible cuando hay query */}
                     {query && (
                         <div
-                            className="flex items-center justify-between p-4 bg-marino-3/50 border border-naranja/40 rounded-xl hover:bg-naranja/10 group transition-all cursor-pointer mb-4"
+                            className="flex items-center justify-between p-4 bg-naranja/10 border border-naranja/50 rounded-xl hover:bg-naranja/20 group transition-all cursor-pointer mb-3"
                             onClick={() => onSelect && onSelect({ id: null, nombreLibre: query })}
                         >
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-naranja/20 flex items-center justify-center text-naranja">
-                                    <span className="font-black text-xl">+</span>
+                                <div className="w-12 h-12 rounded-xl bg-naranja/20 flex items-center justify-center text-naranja font-black text-2xl shrink-0">
+                                    +
                                 </div>
                                 <div>
-                                    <p className="text-naranja font-black text-[0.9rem] uppercase tracking-tight">Agregar Actividad Libre</p>
-                                    <p className="text-[0.65rem] text-gris font-medium tracking-widest">&quot;{query}&quot;</p>
+                                    <p className="text-naranja font-black text-[0.85rem] uppercase tracking-tight">Agregar como Actividad Libre</p>
+                                    <p className="text-[0.6rem] text-naranja/70 font-medium tracking-widest">&quot;{query}&quot; — Movilidad, estiramiento, cardio, etc.</p>
+                                    <p className="text-[0.55rem] text-gris/60 font-medium mt-0.5">No necesita estar en tu biblioteca para agregarlo</p>
                                 </div>
                             </div>
+                            <span className="text-[0.6rem] font-black text-naranja uppercase tracking-widest bg-naranja/20 px-3 py-1.5 rounded-lg shrink-0">
+                                Agregar →
+                            </span>
                         </div>
                     )}
 
+                    {/* Separador si hay resultados de biblioteca */}
+                    {query && resultados.length > 0 && (
+                        <p className="text-[0.55rem] text-gris/50 font-black uppercase tracking-widest text-center py-1">
+                            — o elegí de tu biblioteca —
+                        </p>
+                    )}
+
+                    {/* Resultados de biblioteca */}
                     {resultados.map((ej: Ejercicio) => (
                         <div
                             key={ej.id}
@@ -147,6 +160,19 @@ export default function BuscadorEjercicios({ onClose, onSelect }: BuscadorEjerci
                             </button>
                         </div>
                     ))}
+
+                    {/* Estado vacío sin query */}
+                    {!query && !loading && (
+                        <div className="text-center py-8">
+                            <Dumbbell size={32} className="mx-auto text-marino-4 mb-3 opacity-40" />
+                            <p className="text-[0.65rem] text-gris font-bold uppercase tracking-widest">
+                                Buscá un ejercicio de tu biblioteca
+                            </p>
+                            <p className="text-[0.55rem] text-gris/50 font-medium mt-1">
+                                O escribí cualquier nombre para agregar como actividad libre
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

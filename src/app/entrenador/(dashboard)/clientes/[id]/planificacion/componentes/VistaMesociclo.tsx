@@ -1,7 +1,7 @@
 import { Layers, ChevronRight, Activity, MoveUp, Save, Loader2, FlaskConical, Target, Copy, Trash2, CalendarDays } from "lucide-react";
 import { useState } from 'react';
 import { BloqueConSemanas } from "@/nucleo/tipos/planificacion.tipos";
-import { actualizarMesociclo, actualizarSemana, clonarContenidoSemana, eliminarMesociclo } from '@/nucleo/acciones/planificacion.accion';
+import { actualizarMesociclo, actualizarSemana, clonarSemana, eliminarMesociclo } from '@/nucleo/acciones/planificacion.accion';
 import { TIPOS_CARGA_MESOCICLO } from '@/nucleo/planificacion/zonas.constantes';
 import { useRouter } from 'next/navigation';
 import { TipoCarga } from "@prisma/client";
@@ -276,7 +276,7 @@ export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSem
                                         e.stopPropagation();
                                         const anteriorId = bloque.semanas.find(sem => sem.numeroSemana === s.n - 1)?.id;
                                         if (anteriorId) {
-                                            const res = await clonarContenidoSemana(anteriorId, s.id);
+                                            const res = await clonarSemana(anteriorId, s.id);
                                             if (res.exito) router.refresh();
                                         }
                                     }}

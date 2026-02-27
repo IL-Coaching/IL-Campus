@@ -60,7 +60,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
         fetchCondiciones();
 
         setCopiedSesionId(localStorage.getItem('copied_sesion_id'));
-    }, [clienteId]);
+    }, [diaObjeto.id]);
 
 
     // Sincronizar state si cambia el objeto de prop (ej. cambio de día)
@@ -479,15 +479,17 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                             }
 
                             return (
-                                <div key={ej.id} className="p-5 active:bg-marino-3/50 transition-colors relative">
+                                <div
+                                    key={ej.id}
+                                    className={`p-5 transition-colors relative cursor-pointer ${isSelectionMode ? (selectedIds.includes(ej.id) ? 'bg-naranja/10 border-b border-naranja/20' : 'hover:bg-naranja/5 border-b border-marino-4/40') : 'active:bg-marino-3/50'}`}
+                                    onClick={() => { if (isSelectionMode) handleToggleSelection(ej.id); }}
+                                >
+                                    {/* Overlay en modo selección para bloquear inputs */}
                                     {isSelectionMode && (
-                                        <div className="absolute right-5 top-5 z-10">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedIds.includes(ej.id)}
-                                                onChange={() => handleToggleSelection(ej.id)}
-                                                className="w-6 h-6 rounded-lg border-marino-4 bg-marino-3 text-naranja focus:ring-naranja shadow-xl"
-                                            />
+                                        <div className="absolute inset-0 z-10 flex items-center justify-end pr-5">
+                                            <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all ${selectedIds.includes(ej.id) ? 'bg-naranja border-naranja' : 'bg-marino-3 border-marino-4'}`}>
+                                                {selectedIds.includes(ej.id) && <span className="text-marino font-black text-sm">✓</span>}
+                                            </div>
                                         </div>
                                     )}
                                     <div className="flex items-start justify-between gap-4 mb-4">
@@ -640,7 +642,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                             <div className="flex items-center gap-4">
                                                                 <div className="w-2 h-2 bg-naranja rounded-full"></div>
                                                                 <button
-                                                                    onClick={() => handleCambiarNombreGrupo(ej.id, ej.nombreGrupo || "Bloque")}
+                                                                    onClick={() => handleCambiarNombreGrupo(ej.grupoId!, ej.nombreGrupo || "Bloque")}
                                                                     className="text-[0.7rem] font-black text-blanco uppercase tracking-[0.2em] hover:text-naranja transition-colors flex items-center gap-2"
                                                                 >
                                                                     {ej.nombreGrupo || "Bloque Vinculado"}
@@ -662,16 +664,21 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                         onDragStart={() => handleDragStart(ejercicios.findIndex(e => e.id === gej.id))}
                                                         onDragOver={handleDragOver}
                                                         onDrop={() => handleDrop(ejercicios.findIndex(e => e.id === gej.id))}
-                                                        className={`group hover:bg-white/[0.02] transition-all border-l-4 border-l-naranja/20 ${draggingIdx === ejercicios.findIndex(e => e.id === gej.id) ? 'opacity-20' : ''}`}
+                                                        onClick={() => { if (isSelectionMode) handleToggleSelection(gej.id); }}
+                                                        className={`group transition-all border-l-4 border-l-naranja/20 ${isSelectionMode
+                                                            ? (selectedIds.includes(gej.id) ? 'bg-naranja/10 cursor-pointer' : 'hover:bg-naranja/5 cursor-pointer')
+                                                            : `hover:bg-white/[0.02] ${draggingIdx === ejercicios.findIndex(e => e.id === gej.id) ? 'opacity-20' : ''}`
+                                                            }`}
                                                     >
                                                         <td className="p-5 text-center">
                                                             {isSelectionMode ? (
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={selectedIds.includes(gej.id)}
-                                                                    onChange={() => handleToggleSelection(gej.id)}
-                                                                    className="w-5 h-5 rounded-lg border-marino-4 bg-marino-3 text-naranja focus:ring-naranja"
-                                                                />
+                                                                <div
+                                                                    onClick={(e) => { e.stopPropagation(); handleToggleSelection(gej.id); }}
+                                                                    className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center mx-auto cursor-pointer transition-all ${selectedIds.includes(gej.id) ? 'bg-naranja border-naranja' : 'bg-marino-3 border-marino-4 hover:border-naranja/60'
+                                                                        }`}
+                                                                >
+                                                                    {selectedIds.includes(gej.id) && <span className="text-marino font-black text-xs">✓</span>}
+                                                                </div>
                                                             ) : (
                                                                 <GripVertical size={16} className="opacity-0 group-hover:opacity-100 transition-opacity mx-auto text-gris cursor-grab" />
                                                             )}
@@ -680,16 +687,22 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                             {String.fromCharCode(65 + gidx)}
                                                         </td>
                                                         <td className="p-5">
-                                                            <SelectorEjercicioCelda
-                                                                initialValue={gej.ejercicio?.nombre || gej.nombreLibre || ""}
-                                                                ejercicioId={gej.ejercicioId}
-                                                                esBiblioteca={gej.esBiblioteca}
-                                                                onSelect={(data) => handleUpdateChange(gej.id, {
-                                                                    ejercicioId: data.ejercicioId,
-                                                                    nombreLibre: data.nombre,
-                                                                    esBiblioteca: data.esBiblioteca
-                                                                })}
-                                                            />
+                                                            {isSelectionMode ? (
+                                                                <span className="text-blanco font-black text-sm uppercase tracking-tight">
+                                                                    {gej.ejercicio?.nombre || gej.nombreLibre || '—'}
+                                                                </span>
+                                                            ) : (
+                                                                <SelectorEjercicioCelda
+                                                                    initialValue={gej.ejercicio?.nombre || gej.nombreLibre || ""}
+                                                                    ejercicioId={gej.ejercicioId}
+                                                                    esBiblioteca={gej.esBiblioteca}
+                                                                    onSelect={(data) => handleUpdateChange(gej.id, {
+                                                                        ejercicioId: data.ejercicioId,
+                                                                        nombreLibre: data.nombre,
+                                                                        esBiblioteca: data.esBiblioteca
+                                                                    })}
+                                                                />
+                                                            )}
                                                         </td>
                                                         <td className="p-5">
                                                             <div className="flex items-center gap-1 bg-marino border border-white/5 rounded-xl overflow-hidden shadow-inner">
@@ -770,32 +783,43 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                             onDragStart={() => handleDragStart(idx)}
                                             onDragOver={handleDragOver}
                                             onDrop={() => handleDrop(idx)}
-                                            className={`group hover:bg-white/[0.02] transition-all ${draggingIdx === idx ? 'opacity-20' : ''}`}
+                                            onClick={() => { if (isSelectionMode) handleToggleSelection(ej.id); }}
+                                            className={`group transition-all relative ${isSelectionMode
+                                                ? (selectedIds.includes(ej.id) ? 'bg-naranja/10 cursor-pointer' : 'hover:bg-naranja/5 cursor-pointer')
+                                                : `hover:bg-white/[0.02] ${draggingIdx === idx ? 'opacity-20' : ''}`
+                                                }`}
                                         >
-                                            <td className="p-5 text-center">
+                                            <td className="p-5 text-center" onClick={(e) => e.stopPropagation()}>
                                                 {isSelectionMode ? (
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedIds.includes(ej.id)}
-                                                        onChange={() => handleToggleSelection(ej.id)}
-                                                        className="w-5 h-5 rounded-lg border-marino-4 bg-marino-3 text-naranja focus:ring-naranja"
-                                                    />
+                                                    <div
+                                                        onClick={(e) => { e.stopPropagation(); handleToggleSelection(ej.id); }}
+                                                        className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center mx-auto cursor-pointer transition-all ${selectedIds.includes(ej.id) ? 'bg-naranja border-naranja' : 'bg-marino-3 border-marino-4 hover:border-naranja/60'
+                                                            }`}
+                                                    >
+                                                        {selectedIds.includes(ej.id) && <span className="text-marino font-black text-xs">✓</span>}
+                                                    </div>
                                                 ) : (
                                                     <GripVertical size={16} className="opacity-0 group-hover:opacity-100 transition-opacity mx-auto text-gris cursor-grab" />
                                                 )}
                                             </td>
                                             <td className="p-5 text-gris font-black text-lg text-center opacity-30 group-hover:opacity-100 transition-opacity">{idx + 1}</td>
-                                            <td className="p-5">
-                                                <SelectorEjercicioCelda
-                                                    initialValue={ej.ejercicio?.nombre || ej.nombreLibre || ""}
-                                                    ejercicioId={ej.ejercicioId}
-                                                    esBiblioteca={ej.esBiblioteca}
-                                                    onSelect={(data) => handleUpdateChange(ej.id, {
-                                                        ejercicioId: data.ejercicioId,
-                                                        nombreLibre: data.nombre,
-                                                        esBiblioteca: data.esBiblioteca
-                                                    })}
-                                                />
+                                            <td className="p-5" onClick={(e) => { if (isSelectionMode) e.stopPropagation(); }}>
+                                                {isSelectionMode ? (
+                                                    <span className="text-blanco font-black text-sm uppercase tracking-tight">
+                                                        {ej.ejercicio?.nombre || ej.nombreLibre || '—'}
+                                                    </span>
+                                                ) : (
+                                                    <SelectorEjercicioCelda
+                                                        initialValue={ej.ejercicio?.nombre || ej.nombreLibre || ""}
+                                                        ejercicioId={ej.ejercicioId}
+                                                        esBiblioteca={ej.esBiblioteca}
+                                                        onSelect={(data) => handleUpdateChange(ej.id, {
+                                                            ejercicioId: data.ejercicioId,
+                                                            nombreLibre: data.nombre,
+                                                            esBiblioteca: data.esBiblioteca
+                                                        })}
+                                                    />
+                                                )}
                                             </td>
                                             <td className="p-5">
                                                 <div className="flex items-center gap-1 bg-marino border border-white/5 rounded-xl overflow-hidden shadow-inner">

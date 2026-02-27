@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useTransition } from 'react';
-import { Plus, Trash2, Copy, ChevronDown, ChevronUp, Dumbbell, X, GripVertical } from 'lucide-react';
+import { useState, useEffect, useTransition, useRef, useCallback } from 'react';
+import { Plus, Trash2, Copy, ChevronDown, ChevronUp, Dumbbell, X, GripVertical, PenLine, Check } from 'lucide-react';
 import { obtenerRutinas, crearRutina, eliminarRutina, duplicarRutina } from '@/nucleo/acciones/rutina.accion';
 import { buscarEjercicios } from '@/nucleo/acciones/ejercicio.accion';
 
@@ -61,6 +61,22 @@ export default function BibliotecaRutinas() {
     // Buscador de ejercicios
     const [resultadosBusqueda, setResultadosBusqueda] = useState<EjercicioBusqueda[]>([]);
     const [buscandoIdx, setBuscandoIdx] = useState<number | null>(null);
+    const dropdownRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+    // Cierra el dropdown al hacer click fuera
+    const handleClickOutside = useCallback((e: MouseEvent) => {
+        if (buscandoIdx === null) return;
+        const ref = dropdownRefs.current[buscandoIdx];
+        if (ref && !ref.contains(e.target as Node)) {
+            setBuscandoIdx(null);
+            setResultadosBusqueda([]);
+        }
+    }, [buscandoIdx]);
+
+    useEffect(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [handleClickOutside]);
 
     useEffect(() => {
         cargarRutinas();
@@ -234,23 +250,50 @@ export default function BibliotecaRutinas() {
                                     <span className="text-[0.55rem] text-naranja font-black uppercase tracking-widest">#{idx + 1}</span>
 
                                     {/* Buscador de ejercicio */}
-                                    <div className="flex-1 relative">
+                                    <div
+                                        className="flex-1 relative"
+                                        ref={(el) => { dropdownRefs.current[idx] = el; }}
+                                    >
                                         <input
                                             type="text"
                                             value={ej.nombreLibre}
+                                            onFocus={() => {
+                                                setBuscandoIdx(idx);
+                                                if (ej.nombreLibre.length >= 2) buscarEj(ej.nombreLibre, idx);
+                                            }}
                                             onChange={(e) => {
                                                 actualizarEjercicioForm(idx, 'nombreLibre', e.target.value);
                                                 actualizarEjercicioForm(idx, 'ejercicioId', null);
                                                 buscarEj(e.target.value, idx);
                                             }}
-                                            placeholder="Buscar ejercicio o escribir nombre libre..."
-                                            className="w-full bg-marino border border-marino-4 rounded-lg py-2 px-3 text-xs text-blanco placeholder:text-gris focus:outline-none focus:border-naranja/50"
+                                            placeholder="Buscar en biblioteca o escribir nombre libre..."
+                                            className={`w-full bg-marino border rounded-lg py-2 px-3 text-xs text-blanco placeholder:text-gris focus:outline-none transition-colors ${ej.ejercicioId
+                                                    ? 'border-naranja/60 focus:border-naranja'
+                                                    : ej.nombreLibre.trim()
+                                                        ? 'border-blue-500/50 focus:border-blue-400'
+                                                        : 'border-marino-4 focus:border-naranja/50'
+                                                }`}
                                         />
+                                        {/* Indicador: biblioteca vs texto libre */}
+                                        {ej.nombreLibre.trim() && (
+                                            <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                                                {ej.ejercicioId ? (
+                                                    <span className="flex items-center gap-1 text-[0.5rem] font-black text-naranja uppercase tracking-widest">
+                                                        <Check size={10} strokeWidth={3} /> Biblioteca
+                                                    </span>
+                                                ) : (
+                                                    <span className="flex items-center gap-1 text-[0.5rem] font-black text-blue-400 uppercase tracking-widest">
+                                                        <PenLine size={10} /> Libre
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
                                         {buscandoIdx === idx && resultadosBusqueda.length > 0 && (
                                             <div className="absolute top-full left-0 right-0 z-20 mt-1 bg-marino-2 border border-marino-4 rounded-lg max-h-40 overflow-y-auto shadow-xl">
                                                 {resultadosBusqueda.map((r) => (
                                                     <button
                                                         key={r.id}
+                                                        onMouseDown={(e) => e.preventDefault()} // evita blur antes del click
                                                         onClick={() => seleccionarEjBuscado(idx, r)}
                                                         className="w-full text-left px-3 py-2 text-xs text-blanco hover:bg-naranja/10 border-b border-marino-4/50 last:border-b-0"
                                                     >
@@ -258,6 +301,18 @@ export default function BibliotecaRutinas() {
                                                         <span className="text-gris ml-2 text-[0.5rem] uppercase">{r.musculoPrincipal}</span>
                                                     </button>
                                                 ))}
+                                            </div>
+                                        )}
+                                        {/* Sugerencia texto libre cuando no hay resultados */}
+                                        {buscandoIdx === idx && ej.nombreLibre.trim().length >= 2 && resultadosBusqueda.length === 0 && (
+                                            <div className="absolute top-full left-0 right-0 z-20 mt-1 bg-marino-2 border border-blue-500/30 rounded-lg shadow-xl">
+                                                <div className="px-3 py-2.5 flex items-center gap-2">
+                                                    <PenLine size={12} className="text-blue-400 shrink-0" />
+                                                    <div>
+                                                        <p className="text-[0.65rem] font-black text-blue-300">&quot;{ej.nombreLibre}&quot; se guardará como texto libre</p>
+                                                        <p className="text-[0.55rem] text-gris/70">No está en tu biblioteca. Igualmente se agrega a la rutina.</p>
+                                                    </div>
+                                                </div>
                                             </div>
                                         )}
                                     </div>

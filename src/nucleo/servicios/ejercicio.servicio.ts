@@ -57,6 +57,7 @@ export const EjercicioServicio = {
         return await prisma.ejercicio.findMany({
             where: {
                 entrenadorId,
+                archivado: false,
                 ...(query ? {
                     OR: [
                         { nombre: { contains: query, mode: 'insensitive' } },
