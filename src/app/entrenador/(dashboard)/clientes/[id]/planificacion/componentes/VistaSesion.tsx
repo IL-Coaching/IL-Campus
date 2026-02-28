@@ -61,7 +61,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
         fetchCondiciones();
 
         setCopiedSesionId(localStorage.getItem('copied_sesion_id'));
-    }, [diaObjeto.id]);
+    }, [diaObjeto.id, clienteId]);
 
 
     // Sincronizar state si cambia el objeto de prop (ej. cambio de día)
@@ -599,16 +599,16 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                     <table className="w-full text-left text-sm border-collapse table-fixed">
                         <thead>
                             <tr className={`border-b border-white/5 ${semanaObjeto.esFaseDeload ? 'bg-blue-500/5' : 'bg-marino-3/40'}`}>
-                                <th className="p-4 w-[40px]"></th>
-                                <th className="p-4 w-[40px] font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] text-center">#</th>
-                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[25%]">Ejercicio / Patrón</th>
-                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[110px] text-center">Reps</th>
-                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[80px] text-center">Sets</th>
-                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[80px] text-center">RIR</th>
-                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[95px] text-center">Rest</th>
-                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[90px] text-center">Kg</th>
-                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem]">Técnica / Feedback</th>
-                                <th className="p-4 text-right w-[50px]"></th>
+                                <th className="p-4 w-[50px]"></th>
+                                <th className="p-4 w-[50px] font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.65rem] text-center">#</th>
+                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.65rem] w-[22%]">Ejercicio / Patrón</th>
+                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.65rem] w-[150px] text-center">Reps</th>
+                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.65rem] w-[100px] text-center">Sets</th>
+                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.65rem] w-[100px] text-center">RIR</th>
+                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.65rem] w-[120px] text-center">Rest</th>
+                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.65rem] w-[120px] text-center">Kg</th>
+                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.65rem]">Técnica / Feedback</th>
+                                <th className="p-4 text-right w-[60px]"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-marino-4">
@@ -704,19 +704,19 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                             )}
                                                         </td>
                                                         <td className="p-5">
-                                                            <div className="flex items-center gap-1 bg-marino border border-white/5 rounded-xl overflow-hidden shadow-inner">
+                                                            <div className="flex items-center gap-1 bg-marino border border-white/10 rounded-xl overflow-hidden shadow-inner">
                                                                 <input
                                                                     type="number"
                                                                     value={gej.repsMin}
                                                                     onChange={(e) => handleUpdateChange(gej.id, { repsMin: parseInt(e.target.value) })}
-                                                                    className="w-full bg-marino-3 py-2 text-center text-blanco focus:outline-none text-sm font-black"
+                                                                    className="w-full bg-marino-3 py-3 text-center text-blanco focus:outline-none text-base font-black"
                                                                 />
                                                                 <span className="text-gris/20">—</span>
                                                                 <input
                                                                     type="number"
                                                                     value={gej.repsMax}
                                                                     onChange={(e) => handleUpdateChange(gej.id, { repsMax: parseInt(e.target.value) })}
-                                                                    className="w-full bg-marino-3 py-2 text-center text-blanco focus:outline-none text-sm font-black"
+                                                                    className="w-full bg-marino-3 py-3 text-center text-blanco focus:outline-none text-base font-black"
                                                                 />
                                                             </div>
                                                         </td>
@@ -725,7 +725,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                 type="number"
                                                                 value={gej.series}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { series: parseInt(e.target.value) })}
-                                                                className="w-full bg-marino-3 border border-white/5 py-2 rounded-xl text-center text-blanco transition-all font-black text-sm"
+                                                                className="w-full bg-marino-3 border border-white/10 py-3 rounded-xl text-center text-blanco transition-all font-black text-base shadow-inner"
                                                             />
                                                         </td>
                                                         <td className="p-5 text-center">
@@ -733,18 +733,18 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                 type="number"
                                                                 value={gej.RIR !== null ? gej.RIR : ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                                className="w-full bg-marino-3 border border-white/5 py-2 rounded-xl text-center text-naranja transition-all font-black text-sm"
+                                                                className="w-full bg-marino-3 border border-white/10 py-3 rounded-xl text-center text-naranja transition-all font-black text-base shadow-inner"
                                                             />
                                                         </td>
                                                         <td className="p-5 text-center">
-                                                            <div className="flex items-center gap-1 bg-marino-3 px-1 rounded-xl border border-white/5">
+                                                            <div className="flex items-center gap-1 bg-marino-3 px-1 rounded-xl border border-white/10 shadow-inner">
                                                                 <input
                                                                     type="number"
                                                                     value={gej.descansoSegundos !== null ? gej.descansoSegundos : ''}
                                                                     onChange={(e) => handleUpdateChange(gej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                                    className="w-full bg-transparent py-2 text-center text-blanco focus:outline-none text-sm font-black"
+                                                                    className="w-full bg-transparent py-3 text-center text-blanco focus:outline-none text-base font-black"
                                                                 />
-                                                                <span className="text-[0.4rem] font-black text-gris/40 pr-1">S</span>
+                                                                <span className="text-[0.45rem] font-black text-gris/40 pr-1 lowercase">s</span>
                                                             </div>
                                                         </td>
                                                         <td className="p-5 text-center">
@@ -753,7 +753,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                 step="0.5"
                                                                 value={gej.pesoSugerido || ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { pesoSugerido: parseFloat(e.target.value) })}
-                                                                className="w-full bg-marino-3 border border-white/5 py-2 rounded-xl text-center text-verde transition-all font-black text-sm"
+                                                                className="w-full bg-marino-3 border border-verde/20 py-3 rounded-xl text-center text-verde transition-all font-black text-base shadow-inner shadow-verde/5"
                                                             />
                                                         </td>
                                                         <td className="p-5">
@@ -761,7 +761,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                 value={gej.notasTecnicas || ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { notasTecnicas: e.target.value })}
                                                                 rows={1}
-                                                                className="w-full bg-marino-3/50 border border-white/5 p-3 rounded-xl text-blanco text-xs focus:outline-none focus:border-naranja/20 transition-all resize-none h-10 overflow-hidden hover:h-20"
+                                                                className="w-full bg-marino-3/50 border border-white/10 p-3 rounded-xl text-blanco text-xs focus:outline-none focus:border-naranja/20 transition-all resize-none h-12 overflow-hidden hover:h-24 shadow-inner"
                                                             />
                                                         </td>
                                                         <td className="p-5 text-right">
@@ -821,19 +821,19 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                 )}
                                             </td>
                                             <td className="p-5">
-                                                <div className="flex items-center gap-1 bg-marino border border-white/5 rounded-xl overflow-hidden shadow-inner">
+                                                <div className="flex items-center gap-1 bg-marino border border-white/10 rounded-xl overflow-hidden shadow-inner">
                                                     <input
                                                         type="number"
                                                         value={ej.repsMin}
                                                         onChange={(e) => handleUpdateChange(ej.id, { repsMin: parseInt(e.target.value) })}
-                                                        className="w-full bg-marino-3 py-2 text-center text-blanco focus:outline-none text-sm font-black"
+                                                        className="w-full bg-marino-3 py-3 text-center text-blanco focus:outline-none text-base font-black"
                                                     />
                                                     <span className="text-gris/20">—</span>
                                                     <input
                                                         type="number"
                                                         value={ej.repsMax}
                                                         onChange={(e) => handleUpdateChange(ej.id, { repsMax: parseInt(e.target.value) })}
-                                                        className="w-full bg-marino-3 py-2 text-center text-blanco focus:outline-none text-sm font-black"
+                                                        className="w-full bg-marino-3 py-3 text-center text-blanco focus:outline-none text-base font-black"
                                                     />
                                                 </div>
                                             </td>
@@ -842,7 +842,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                     type="number"
                                                     value={ej.series}
                                                     onChange={(e) => handleUpdateChange(ej.id, { series: parseInt(e.target.value) })}
-                                                    className="w-full bg-marino-3 border border-white/5 py-2 rounded-xl text-center text-blanco transition-all font-black text-sm"
+                                                    className="w-full bg-marino-3 border border-white/10 py-3 rounded-xl text-center text-blanco transition-all font-black text-base shadow-inner"
                                                 />
                                             </td>
                                             <td className="p-5 text-center">
@@ -850,18 +850,18 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                     type="number"
                                                     value={ej.RIR !== null ? ej.RIR : ''}
                                                     onChange={(e) => handleUpdateChange(ej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                    className="w-full bg-marino-3 border border-white/5 py-2 rounded-xl text-center text-naranja transition-all font-black text-sm"
+                                                    className="w-full bg-marino-3 border border-white/10 py-3 rounded-xl text-center text-naranja transition-all font-black text-base shadow-inner"
                                                 />
                                             </td>
                                             <td className="p-5 text-center">
-                                                <div className="flex items-center gap-1 bg-marino-3 px-1 rounded-xl border border-white/5">
+                                                <div className="flex items-center gap-1 bg-marino-3 px-1 rounded-xl border border-white/10 shadow-inner">
                                                     <input
                                                         type="number"
                                                         value={ej.descansoSegundos !== null ? ej.descansoSegundos : ''}
                                                         onChange={(e) => handleUpdateChange(ej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                        className="w-full bg-transparent py-2 text-center text-blanco focus:outline-none text-sm font-black"
+                                                        className="w-full bg-transparent py-3 text-center text-blanco focus:outline-none text-base font-black"
                                                     />
-                                                    <span className="text-[0.4rem] font-black text-gris/40 pr-1">S</span>
+                                                    <span className="text-[0.45rem] font-black text-gris/40 pr-1 lowercase">s</span>
                                                 </div>
                                             </td>
                                             <td className="p-5 text-center">
@@ -870,14 +870,14 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                     step="0.5"
                                                     value={ej.pesoSugerido || ''}
                                                     onChange={(e) => handleUpdateChange(ej.id, { pesoSugerido: parseFloat(e.target.value) })}
-                                                    className="w-full bg-marino-3 border border-white/5 py-2 rounded-xl text-center text-verde transition-all font-black text-sm"
+                                                    className="w-full bg-marino-3 border border-verde/20 py-3 rounded-xl text-center text-verde transition-all font-black text-base shadow-inner shadow-verde/5"
                                                 />
                                             </td>
                                             <td className="p-5">
                                                 <textarea
                                                     value={ej.notasTecnicas || ''}
                                                     onChange={(e) => handleUpdateChange(ej.id, { notasTecnicas: e.target.value })}
-                                                    className="w-full bg-marino-3/50 border border-white/5 p-3 rounded-xl text-blanco text-xs focus:outline-none focus:border-naranja/20 transition-all resize-none h-10 overflow-hidden hover:h-20"
+                                                    className="w-full bg-marino-3/50 border border-white/10 p-3 rounded-xl text-blanco text-xs focus:outline-none focus:border-naranja/20 transition-all resize-none h-12 overflow-hidden hover:h-24 shadow-inner"
                                                 />
                                             </td>
                                             <td className="p-5 text-right">

@@ -82,7 +82,7 @@ export default function SelectorEjercicioCelda({
                             onSelect({ nombre: inputValue, ejercicioId: null, esBiblioteca: false });
                         }
                     }}
-                    className="w-full bg-marino border border-white/10 rounded-lg px-3 py-2 text-blanco font-black text-base uppercase tracking-tight focus:ring-1 focus:ring-naranja/50 focus:border-naranja/50 focus:bg-marino-3 placeholder:text-gris/20 group-hover:text-naranja transition-all shadow-inner"
+                    className="w-full bg-marino border border-white/10 rounded-lg px-3 py-3 text-blanco font-black text-base uppercase tracking-tight focus:ring-1 focus:ring-naranja/50 focus:border-naranja/50 focus:bg-marino-3 placeholder:text-gris/20 group-hover:text-naranja transition-all shadow-inner"
                     placeholder="Escribir o buscar..."
                 />
 
