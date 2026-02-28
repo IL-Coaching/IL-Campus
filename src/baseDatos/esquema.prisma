@@ -95,6 +95,7 @@ model Cliente {
   passwordResetExpires  DateTime?
   passwordResetToken    String?                @unique
   enEstasis             Boolean                @default(false)
+  esVIP                 Boolean                @default(false)
   alertasEstancamiento  AlertaEstancamiento[]
   auditorias            AuditoriaCliente[]
   checkins              Checkin[]
@@ -219,6 +220,7 @@ model DiaSesion {
   semanaId       String
   diaSemana      String
   focoMuscular   String
+  notas          String?
   semana         Semana                 @relation(fields: [semanaId], references: [id])
   ejercicios     EjercicioPlanificado[]
   sesionesReales SesionRegistrada[]

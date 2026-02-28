@@ -656,6 +656,7 @@ export async function clonarSemana(semanaOrigenId: string, semanaDestinoId: stri
                         semanaId: semanaDestinoId,
                         diaSemana: diaOrigen.diaSemana,
                         focoMuscular: diaOrigen.focoMuscular,
+                        notas: diaOrigen.notas,
                     }
                 });
 
@@ -704,5 +705,31 @@ export async function clonarSemana(semanaOrigenId: string, semanaDestinoId: stri
     } catch (error) {
         console.error("Error al clonar semana:", error);
         return { error: error instanceof Error ? error.message : "No se pudo clonar la semana." };
+    }
+}
+
+export async function actualizarDiaSesion(id: string, data: { notas?: string }) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        const diaPropio = await prisma.diaSesion.findFirst({
+            where: {
+                id,
+                semana: { bloqueMensual: { macrociclo: { cliente: { entrenadorId: entrenador.id } } } }
+            },
+            include: { semana: { include: { bloqueMensual: { include: { macrociclo: true } } } } }
+        });
+
+        if (!diaPropio) throw new Error("Acceso denegado.");
+
+        await prisma.diaSesion.update({
+            where: { id },
+            data
+        });
+
+        revalidatePath(`/entrenador/clientes/${diaPropio.semana.bloqueMensual.macrociclo.clienteId}/planificacion`);
+        return { exito: true };
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : "Error al actualizar sesión." };
     }
 }

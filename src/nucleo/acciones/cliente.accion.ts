@@ -228,3 +228,28 @@ export async function actualizarNotasCliente(clienteId: string, notas: string) {
         return { error: "No se pudo actualizar las notas." };
     }
 }
+
+export async function toggleVIPCliente(clienteId: string, esVIP: boolean) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        const cliente = await prisma.cliente.findFirst({
+            where: { id: clienteId, entrenadorId: entrenador.id }
+        });
+
+        if (!cliente) return { error: "Cliente no encontrado o acceso denegado." };
+
+        await prisma.cliente.update({
+            where: { id: clienteId },
+            data: { esVIP }
+        });
+
+        revalidatePath(`/entrenador/clientes/${clienteId}`);
+        revalidatePath("/entrenador/clientes");
+        revalidatePath("/entrenador/finanzas");
+        return { exito: true };
+    } catch (error) {
+        console.error("Error al alternar estado VIP del cliente:", error);
+        return { error: "No se pudo cambiar el estado VIP." };
+    }
+}

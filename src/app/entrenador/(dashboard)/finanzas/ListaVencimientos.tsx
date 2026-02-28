@@ -10,13 +10,20 @@ import ModalCobrosHistorial from "@/app/entrenador/(dashboard)/finanzas/ModalCob
 
 export interface Vencimiento {
     id: string;
+    fechaInicio: Date;
     fechaVencimiento: Date;
     estado: string;
     cliente: {
         id: string,
         nombre: string,
         email: string,
-        planesAsignados: { plan: { nombre: string } }[],
+        planesAsignados: {
+            id: string;
+            fechaInicio: Date;
+            fechaVencimiento: Date;
+            estado: string;
+            plan: { nombre: string }
+        }[],
         // Todos los cobros del cliente (independientemente del planAsignadoId)
         cobros: {
             id: string;
@@ -49,18 +56,43 @@ export default function ListaVencimientos({ vencimientos }: Props) {
     const [cobroSeleccionado, setCobroSeleccionado] = useState<Vencimiento | null>(null);
     const [historialSeleccionado, setHistorialSeleccionado] = useState<Vencimiento | null>(null);
 
+    const [tabActual, setTabActual] = useState<"actual" | "futuro">("actual");
     const hoy = new Date();
+
+    const vencimientosOrdenados = [...vencimientos].sort((a, b) => new Date(a.fechaVencimiento).getTime() - new Date(b.fechaVencimiento).getTime());
+
+    // Filtrar por tabs
+    const vencimientosActuales = vencimientosOrdenados.filter(v => new Date(v.fechaInicio) <= hoy);
+    const vencimientosFuturos = vencimientosOrdenados.filter(v => new Date(v.fechaInicio) > hoy);
+
+    const listaMostrar = tabActual === "actual" ? vencimientosActuales : vencimientosFuturos;
 
     return (
         <div className="bg-marino-2 border border-marino-4 rounded-xl overflow-hidden shadow-lg">
+            {/* Tabs de Navegación Financiera */}
+            <div className="flex border-b border-marino-4 bg-marino-3/50 p-2 gap-2">
+                <button
+                    onClick={() => setTabActual("actual")}
+                    className={`flex-1 py-2 text-[0.65rem] font-black uppercase tracking-widest rounded-lg transition-all ${tabActual === "actual" ? "bg-naranja text-marino shadow-md" : "text-gris hover:text-blanco hover:bg-marino-4"}`}
+                >
+                    Ciclo Actual ({vencimientosActuales.length})
+                </button>
+                <button
+                    onClick={() => setTabActual("futuro")}
+                    className={`flex-1 py-2 text-[0.65rem] font-black uppercase tracking-widest rounded-lg transition-all ${tabActual === "futuro" ? "bg-naranja text-marino shadow-md" : "text-gris hover:text-blanco hover:bg-marino-4"}`}
+                >
+                    Próximos Inicios ({vencimientosFuturos.length})
+                </button>
+            </div>
+
             {/* VISTA MOBILE: Cards de Vencimiento */}
             <div className="block md:hidden divide-y divide-marino-4">
-                {vencimientos.length === 0 ? (
+                {listaMostrar.length === 0 ? (
                     <div className="p-12 text-center text-gris italic">
-                        No se encontraron vencimientos próximos.
+                        {tabActual === "actual" ? "No hay clientes en ciclo actual." : "No hay clientes con inicio futuro."}
                     </div>
                 ) : (
-                    vencimientos.map((item) => {
+                    listaMostrar.map((item) => {
                         const diasParaVencer = Math.ceil((new Date(item.fechaVencimiento).getTime() - hoy.getTime()) / (1000 * 3600 * 24));
                         const estaVencido = diasParaVencer < 0;
                         const estadoPago = item.estado === "ABONADO" ? "PAGADO" : item.estado || "PENDIENTE";
@@ -148,14 +180,14 @@ export default function ListaVencimientos({ vencimientos }: Props) {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-marino-4">
-                        {vencimientos.length === 0 ? (
+                        {listaMostrar.length === 0 ? (
                             <tr>
                                 <td colSpan={5} className="p-12 text-center text-gris italic">
-                                    No se encontraron vencimientos próximos. ¡Todo al día!
+                                    {tabActual === "actual" ? "No hay clientes en ciclo actual. ¡Todo al día!" : "No hay planes con inicio en el futuro."}
                                 </td>
                             </tr>
                         ) : (
-                            vencimientos.map((item) => {
+                            listaMostrar.map((item) => {
                                 const diasParaVencer = Math.ceil((new Date(item.fechaVencimiento).getTime() - hoy.getTime()) / (1000 * 3600 * 24));
                                 const estaVencido = diasParaVencer < 0;
 
@@ -164,10 +196,6 @@ export default function ListaVencimientos({ vencimientos }: Props) {
                                 const cobrosDelCiclo = item.cobros.filter(c => new Date(c.periodoHasta) >= new Date(item.fechaVencimiento));
                                 const totalPagado = cobrosDelCiclo.reduce((sum, c) => sum + c.montoArs, 0);
                                 const metaPago = item.plan.precio;
-
-                                // 🚨 DETECCIÓN DE DESCALCE (Plan Cobro vs Plan Acceso)
-                                const planAcceso = item.cliente.planesAsignados[0]?.plan.nombre;
-                                const hayDescalce = planAcceso && planAcceso !== item.plan.nombre;
 
                                 return (
                                     <tr key={item.id} className="hover:bg-marino-3/50 transition-all group">
@@ -188,17 +216,7 @@ export default function ListaVencimientos({ vencimientos }: Props) {
                                                     <span className="text-naranja font-black tracking-tighter text-sm uppercase italic">
                                                         {item.plan.nombre}
                                                     </span>
-                                                    {hayDescalce && (
-                                                        <span className="bg-rojo/10 text-rojo border border-rojo/30 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter animate-pulse" title={`El cliente tiene acceso a ${planAcceso}, pero se le está gestionando un cobro por ${item.plan.nombre}`}>
-                                                            ⚠️ DESCALCE
-                                                        </span>
-                                                    )}
                                                 </div>
-                                                {hayDescalce && (
-                                                    <span className="text-[9px] text-gris font-bold uppercase italic">
-                                                        Acceso Actual: <span className="text-blanco">{planAcceso}</span>
-                                                    </span>
-                                                )}
                                             </div>
                                         </td>
                                         <td className="p-4">
@@ -236,9 +254,9 @@ export default function ListaVencimientos({ vencimientos }: Props) {
                                             <button
                                                 onClick={() => setHistorialSeleccionado(item)}
                                                 className="text-gris hover:text-blanco border border-marino-4 bg-marino-3 hover:bg-marino-4 px-3 py-2 rounded text-xs uppercase font-bold tracking-widest transition-all"
-                                                title="Ver Historial"
+                                                title="Ver Estado de Cuenta"
                                             >
-                                                Ver Hist.
+                                                Estado de Cuenta
                                             </button>
                                             <button
                                                 onClick={() => setCobroSeleccionado(item)}
@@ -282,8 +300,7 @@ export default function ListaVencimientos({ vencimientos }: Props) {
             {historialSeleccionado && (
                 <ModalCobrosHistorial
                     clienteNombre={historialSeleccionado.cliente.nombre}
-                    // Usamos todos los cobros del cliente para no perder cobros
-                    // donde planAsignadoId sea null o no coincida con el plan activo
+                    planes={historialSeleccionado.cliente.planesAsignados}
                     cobros={historialSeleccionado.cliente.cobros}
                     onClose={() => setHistorialSeleccionado(null)}
                 />

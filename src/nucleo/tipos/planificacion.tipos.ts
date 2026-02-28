@@ -44,6 +44,7 @@ export type MacrocicloCompleto = Macrociclo & {
 export type ClientePlanificacion = Cliente & {
     plan?: string;
     enEstasis: boolean;
+    esVIP: boolean;
     planesAsignados?: { plan: { duracionDias: number } }[] | null;
     formularioInscripcion?: {
         datosPersonales?: {

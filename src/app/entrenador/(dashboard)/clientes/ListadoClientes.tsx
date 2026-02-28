@@ -20,6 +20,7 @@ interface Cliente {
     nombre: string;
     email: string;
     telefono: string | null;
+    esVIP: boolean;
     activo: boolean;
     fechaAlta: string | Date;
     planesAsignados: PlanAsignado[];
@@ -184,7 +185,11 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                                                 </span>
                                             </td>
                                             <td className="py-4 px-4">
-                                                {ultimoPlan && (
+                                                {cliente.esVIP ? (
+                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-[0.65rem] font-black uppercase tracking-widest bg-[#EAB308]/20 border-[#EAB308]/40 text-[#EAB308]">
+                                                        🌟 VIP
+                                                    </span>
+                                                ) : ultimoPlan && (
                                                     <button
                                                         onClick={() => setClientePago({
                                                             clienteId: cliente.id,
@@ -372,18 +377,24 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                                         <span className={`text-xs font-bold ${vencido ? 'text-rojo' : 'text-gris'}`}>
                                             Vence {new Date(ultimoPlan.fechaVencimiento).toLocaleDateString('es-AR')}
                                         </span>
-                                        <button
-                                            onClick={() => setClientePago({
-                                                clienteId: cliente.id,
-                                                planAsignadoId: ultimoPlan.id,
-                                                nombre: cliente.nombre,
-                                                estado: ultimoPlan.estado
-                                            })}
-                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[0.6rem] font-black uppercase tracking-widest ${estadoCfg.cls}`}
-                                        >
-                                            <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                                            {estadoCfg.label}
-                                        </button>
+                                        {cliente.esVIP ? (
+                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[0.6rem] font-black uppercase tracking-widest bg-[#EAB308]/20 border-[#EAB308]/40 text-[#EAB308]">
+                                                🌟 VIP
+                                            </span>
+                                        ) : (
+                                            <button
+                                                onClick={() => setClientePago({
+                                                    clienteId: cliente.id,
+                                                    planAsignadoId: ultimoPlan.id,
+                                                    nombre: cliente.nombre,
+                                                    estado: ultimoPlan.estado
+                                                })}
+                                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[0.6rem] font-black uppercase tracking-widest ${estadoCfg.cls}`}
+                                            >
+                                                <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                                                {estadoCfg.label}
+                                            </button>
+                                        )}
                                     </div>
                                 )}
 

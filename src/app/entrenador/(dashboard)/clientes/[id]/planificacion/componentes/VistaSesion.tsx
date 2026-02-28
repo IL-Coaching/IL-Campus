@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Copy, Save, Info, Loader2, Dumbbell, ClipboardList, Gauge, Scale, Activity, ShieldAlert, ChevronDown, ChevronUp, GripVertical } from 'lucide-react';
 import { DiaConEjercicios, EjercicioConDetalle, SemanaConDias } from '@/nucleo/tipos/planificacion.tipos';
-import { guardarCambiosEjercicio, eliminarEjercicio, reordenarEjercicios, agruparEjercicios, desagruparEjercicios, actualizarNombreGrupo, clonarContenidoSesion } from '@/nucleo/acciones/planificacion.accion';
+import { guardarCambiosEjercicio, eliminarEjercicio, reordenarEjercicios, agruparEjercicios, desagruparEjercicios, actualizarNombreGrupo, clonarContenidoSesion, actualizarDiaSesion } from '@/nucleo/acciones/planificacion.accion';
 import { obtenerCondicionesClinicas } from '@/nucleo/acciones/cliente.accion';
 import { useRouter, useParams } from 'next/navigation';
 import SelectorEjercicioCelda from './SelectorEjercicioCelda';
@@ -16,6 +16,7 @@ interface VistaSesionProps {
 }
 export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onOpenBuscador }: VistaSesionProps) {
     const [ejercicios, setEjercicios] = useState<EjercicioConDetalle[]>(diaObjeto.ejercicios);
+    const [notasGrales, setNotasGrales] = useState<string>(diaObjeto.notas || '');
     const [saving, setSaving] = useState(false);
     const [draggingIdx, setDraggingIdx] = useState<number | null>(null);
     const [showNotes, setShowNotes] = useState(false);
@@ -66,6 +67,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
     // Sincronizar state si cambia el objeto de prop (ej. cambio de día)
     useEffect(() => {
         setEjercicios(diaObjeto.ejercicios);
+        setNotasGrales(diaObjeto.notas || '');
     }, [diaObjeto]);
 
     const handleEliminar = async (id: string) => {
@@ -89,6 +91,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
     const handleGuardarTodo = async () => {
         setSaving(true);
         try {
+            await actualizarDiaSesion(diaObjeto.id, { notas: notasGrales });
+
             for (const ej of ejercicios) {
                 await guardarCambiosEjercicio(ej.id, {
                     series: ej.series,
@@ -304,7 +308,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                         <div className="p-2.5 bg-naranja/5 rounded-2xl text-naranja border border-naranja/10">
                             <Activity size={20} />
                         </div>
-                        <span className="text-[0.75rem] font-black text-blanco uppercase tracking-[0.25em]">Metodología Operativa</span>
+                        <span className="text-[0.75rem] font-black text-blanco uppercase tracking-[0.25em]">Notas y Activación / Movilidad</span>
                     </div>
                     {showNotes ? <ChevronUp size={20} className="text-naranja" /> : <ChevronDown size={20} className="text-gris/40" />}
                 </button>
@@ -312,17 +316,12 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                 {showNotes && (
                     <div className="p-6 pt-0 flex flex-col md:flex-row gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="flex-1 space-y-3">
-                            <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest pl-1">Protocolo de Carga</label>
+                            <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest pl-1">Instrucciones Generales y Bloque de Movilidad</label>
                             <textarea
-                                defaultValue={`${diaObjeto.focoMuscular} — Basado en perfil de resistencia y estiramiento.`}
-                                className="w-full bg-marino-3/30 border border-marino-4/40 rounded-2xl px-5 py-4 text-sm text-blanco focus:outline-none focus:border-naranja/30 transition-all font-medium h-32 resize-none shadow-inner"
-                            />
-                        </div>
-                        <div className="w-full md:w-80 space-y-3">
-                            <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest pl-1">Bio-Feedback Requerido</label>
-                            <textarea
-                                defaultValue="Control de hidratación y fatiga periférica."
-                                className="w-full bg-marino-3/30 border border-marino-4/40 rounded-2xl px-5 py-4 text-sm text-blanco focus:outline-none focus:border-naranja/30 transition-all font-medium h-32 resize-none shadow-inner"
+                                value={notasGrales}
+                                onChange={(e) => setNotasGrales(e.target.value)}
+                                placeholder="Ej: Arrancar cada ejercicio con 3 series de aproximación...&#10;Bloque de movilidad y activación muscular..."
+                                className="w-full bg-marino-3/30 border border-marino-4/40 rounded-2xl px-5 py-4 text-sm text-blanco focus:outline-none focus:border-naranja/30 transition-all font-medium h-48 resize-none shadow-inner"
                             />
                         </div>
                     </div>

@@ -21,7 +21,7 @@ import {
 import { ClientePlanificacion } from '@/nucleo/tipos/planificacion.tipos';
 import { generarLinkRecuperacionManual } from '@/nucleo/acciones/password.accion';
 import { obtenerPorcentajesCalculados } from '@/nucleo/acciones/testeo.accion';
-import { alternarEstasisCliente } from '@/nucleo/acciones/cliente.accion';
+import { alternarEstasisCliente, toggleVIPCliente } from '@/nucleo/acciones/cliente.accion';
 import { obtenerResumenFinanciero } from '@/nucleo/acciones/finanzas.accion';
 
 interface SidebarPerfilProps {
@@ -412,6 +412,29 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                             <p className="mt-3 text-[0.6rem] text-gris font-medium leading-relaxed italic">
                                 La pausa congela el acceso del cliente pero mantiene su cupo y datos intactos.
                             </p>
+                        </div>
+
+                        <div className="p-4 bg-marino-3 border border-[#EAB308]/20 rounded-2xl relative overflow-hidden group hover:border-[#EAB308]/50 transition-all">
+                            <span className="text-[0.65rem] text-[#EAB308] font-black uppercase tracking-widest block mb-3 relative z-10 flex items-center gap-2">
+                                🌟 Programa Becado / VIP
+                            </span>
+                            <button
+                                onClick={async () => {
+                                    if (confirm(`¿Estás seguro de ${cliente.esVIP ? 'quitar' : 'otorgar'} el estado VIP a este cliente?`)) {
+                                        const res = await toggleVIPCliente(cliente.id, !cliente.esVIP);
+                                        if (res.exito) window.location.reload();
+                                    }
+                                }}
+                                className={`w-full flex items-center justify-center gap-2 py-3 border rounded-xl text-xs font-black uppercase tracking-widest transition-all relative z-10 ${cliente.esVIP ? 'bg-[#EAB308]/20 text-[#EAB308] border-[#EAB308]/40 hover:bg-[#EAB308]/30' : 'bg-marino-4 border-marino-4 text-blanco hover:border-[#EAB308]/50 hover:text-[#EAB308]'}`}
+                            >
+                                {cliente.esVIP ? '✓ Revocar Privilegio' : 'Otorgar Privilegio'}
+                            </button>
+                            <p className="mt-3 text-[0.6rem] text-gris font-medium leading-relaxed italic relative z-10">
+                                Los clientes VIP cuentan con acceso total sin afectar los reportes financieros ni generar deuda.
+                            </p>
+                            <div className="absolute -bottom-8 -right-8 opacity-[0.03] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+                                <ShieldAlert size={140} />
+                            </div>
                         </div>
 
                         <button
