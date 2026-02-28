@@ -44,6 +44,11 @@ export const CobroServicio = {
                             orderBy: { fechaInicio: 'desc' },
                             take: 1,
                             include: { plan: true }
+                        },
+                        // Incluir TODOS los cobros del cliente (no solo los del planAsignado)
+                        // para que el historial no quede vacío cuando planAsignadoId es null
+                        cobros: {
+                            orderBy: { fecha: 'desc' }
                         }
                     }
                 },

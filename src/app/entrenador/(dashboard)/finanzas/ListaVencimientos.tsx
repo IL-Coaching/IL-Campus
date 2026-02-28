@@ -16,9 +16,20 @@ export interface Vencimiento {
         id: string,
         nombre: string,
         email: string,
-        planesAsignados: { plan: { nombre: string } }[]
+        planesAsignados: { plan: { nombre: string } }[],
+        // Todos los cobros del cliente (independientemente del planAsignadoId)
+        cobros: {
+            id: string;
+            fecha: Date;
+            montoArs: number;
+            metodo: string;
+            periodoDesde: Date;
+            periodoHasta: Date;
+            comprobanteUrl: string | null;
+        }[];
     };
     plan: { nombre: string, precio: number };
+    // Cobros vinculados específicamente a este planAsignado
     cobros: {
         id: string;
         fecha: Date;
@@ -271,7 +282,9 @@ export default function ListaVencimientos({ vencimientos }: Props) {
             {historialSeleccionado && (
                 <ModalCobrosHistorial
                     clienteNombre={historialSeleccionado.cliente.nombre}
-                    cobros={historialSeleccionado.cobros}
+                    // Usamos todos los cobros del cliente para no perder cobros
+                    // donde planAsignadoId sea null o no coincida con el plan activo
+                    cobros={historialSeleccionado.cliente.cobros}
                     onClose={() => setHistorialSeleccionado(null)}
                 />
             )}

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { Users, MoreVertical, Ban, CheckCircle2, MessageCircle, CreditCard } from "lucide-react";
+import { Users, MoreVertical, Ban, CheckCircle2, MessageCircle, CreditCard, ChevronRight } from "lucide-react";
 import ModalAsignarPlan from "./ModalAsignarPlan";
 import ModalGestionPago from "./ModalGestionPago";
 import { alternarEstadoCliente } from "@/nucleo/acciones/cliente.accion";
@@ -11,8 +11,8 @@ interface PlanAsignado {
     id: string;
     plan: { nombre: string };
     fechaVencimiento: string | Date;
-    fechaInicio: string | Date; // agregado
-    estado: string; // "ABONADO", "PENDIENTE", "PARCIAL", "VENCIDO"
+    fechaInicio: string | Date;
+    estado: string;
 }
 
 interface Cliente {
@@ -39,12 +39,24 @@ interface Props {
     tabActual: "activos" | "inactivos" | "inscripciones";
 }
 
-const ESTADOS_PAGO = [
-    { value: "ABONADO", label: "Abonado", color: "bg-verde" },
-    { value: "PARCIAL", label: "Parcial", color: "bg-[#eab308]" },
-    { value: "PENDIENTE", label: "Pendiente", color: "bg-gris-claro" },
-    { value: "VENCIDO", label: "Vencido", color: "bg-rojo" }
-];
+const ESTADO_CONFIG: Record<string, { label: string; cls: string }> = {
+    ABONADO: { label: "Abonado", cls: "text-verde  bg-verde/10  border-verde/20" },
+    PARCIAL: { label: "Parcial", cls: "text-[#eab308] bg-[#eab308]/10 border-[#eab308]/20" },
+    PENDIENTE: { label: "Pendiente", cls: "text-gris   bg-marino-3  border-marino-4" },
+    VENCIDO: { label: "Vencido", cls: "text-rojo   bg-rojo/10   border-rojo/20" },
+};
+
+function Iniciales({ nombre }: { nombre: string }) {
+    const partes = nombre.trim().split(" ");
+    const ini = partes.length >= 2
+        ? (partes[0][0] + partes[1][0]).toUpperCase()
+        : nombre.substring(0, 2).toUpperCase();
+    return (
+        <div className="w-9 h-9 rounded-lg bg-naranja/10 border border-naranja/20 flex items-center justify-center text-[0.6rem] text-naranja font-black shrink-0">
+            {ini}
+        </div>
+    );
+}
 
 export default function ListadoClientes({ clientes, planes, tabActual }: Props) {
     const [clienteAsignando, setClienteAsignando] = useState<{ id: string, nombre: string, ultimoPlanVencimiento?: string | Date } | null>(null);
@@ -58,7 +70,6 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
         return cleaned.length > 5 ? cleaned : null;
     }
 
-    // Handlers
     function handleToggleStatus(id: string, activo: boolean) {
         startTransition(async () => {
             setMenuAbierto(null);
@@ -67,50 +78,48 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
         });
     }
 
+    const thCls = "py-3 px-4 font-barlow-condensed font-bold uppercase tracking-widest text-gris text-xs text-left";
+
     return (
-        <div className="bg-[#12182b] border border-[#1a233a] rounded-xl shadow-2xl">
-            {/* Solo aplicamos overflow en mobile para evitar que se escapan las cards, 
-                pero NO en desktop para que el dropdown flote libremente */}
-            <div className="w-full">
-                <table className="w-full text-center text-sm md:whitespace-nowrap">
-                    <thead className="hidden md:table-header-group">
-                        <tr className="border-b-2 border-[#1a233a] bg-[#1a233a]/50">
-                            <th className="py-5 px-4 font-barlow-condensed font-black uppercase tracking-widest text-[#f5f5f5] text-[0.8rem] text-left md:text-center w-full md:w-auto">Nombre</th>
-                            <th className="py-5 px-4 font-barlow-condensed font-black uppercase tracking-widest text-[#f5f5f5] text-[0.8rem]">Contacto</th>
+        <div className="bg-marino-2 border border-marino-4 rounded-xl overflow-hidden shadow-lg">
 
-                            {tabActual === "activos" && (
-                                <>
-                                    <th className="py-5 px-4 font-barlow-condensed font-black uppercase tracking-widest text-[#f5f5f5] text-[0.8rem]">Inicio</th>
-                                    <th className="py-5 px-4 font-barlow-condensed font-black uppercase tracking-widest text-[#f5f5f5] text-[0.8rem]">Vencimiento</th>
-                                    <th className="py-5 px-4 font-barlow-condensed font-black uppercase tracking-widest text-[#f5f5f5] text-[0.8rem]">Plan Vigente</th>
-                                    <th className="py-5 px-4 font-barlow-condensed font-black uppercase tracking-widest text-[#f5f5f5] text-[0.8rem]">Pago</th>
-                                </>
-                            )}
+            {/* ── VISTA DESKTOP: Tabla ── */}
+            <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm">
+                    <thead>
+                        <tr className="border-b border-marino-4 bg-marino-3/30">
+                            <th className={thCls}>Cliente</th>
+                            <th className={thCls}>Contacto</th>
 
-                            {tabActual === "inactivos" && (
-                                <>
-                                    <th className="py-5 px-4 font-barlow-condensed font-black uppercase tracking-widest text-[#f5f5f5] text-[0.8rem]">Último Plan</th>
-                                    <th className="py-5 px-4 font-barlow-condensed font-black uppercase tracking-widest text-[#f5f5f5] text-[0.8rem]">Vencimiento</th>
-                                </>
-                            )}
+                            {tabActual === "activos" && (<>
+                                <th className={thCls}>Inicio</th>
+                                <th className={thCls}>Vencimiento</th>
+                                <th className={thCls}>Plan Vigente</th>
+                                <th className={thCls}>Estado</th>
+                            </>)}
 
-                            {tabActual === "inscripciones" && (
-                                <>
-                                    <th className="py-5 px-4 font-barlow-condensed font-black uppercase tracking-widest text-[#f5f5f5] text-[0.8rem]">Seleccionar Plan</th>
-                                    <th className="py-5 px-4 font-barlow-condensed font-black uppercase tracking-widest text-[#f5f5f5] text-[0.8rem]">Fecha de Ingreso</th>
-                                </>
-                            )}
+                            {tabActual === "inactivos" && (<>
+                                <th className={thCls}>Último Plan</th>
+                                <th className={thCls}>Venció</th>
+                            </>)}
 
-                            <th className="py-5 px-4 font-barlow-condensed font-black uppercase tracking-widest text-[#f5f5f5] text-[0.8rem] text-right">Perfil</th>
+                            {tabActual === "inscripciones" && (<>
+                                <th className={thCls}>Ingreso</th>
+                                <th className={thCls}>Acción</th>
+                            </>)}
+
+                            <th className={`${thCls} text-right`}>Perfil</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y-2 divide-[#1a233a] bg-[#12182b]">
+                    <tbody className="divide-y divide-marino-4/50">
                         {clientes.length === 0 ? (
                             <tr>
-                                <td colSpan={5} className="py-24 text-center text-gris italic">
-                                    <div className="flex flex-col items-center gap-3 opacity-40">
-                                        <Users size={40} />
-                                        <p className="font-bold tracking-widest uppercase">No hay clientes ({tabActual})</p>
+                                <td colSpan={8} className="py-20 text-center">
+                                    <div className="flex flex-col items-center gap-3 opacity-30">
+                                        <Users size={36} />
+                                        <p className="font-bold tracking-widest uppercase text-xs text-gris">
+                                            Sin clientes en esta sección
+                                        </p>
                                     </div>
                                 </td>
                             </tr>
@@ -118,205 +127,185 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                             clientes.map((cliente) => {
                                 const ultimoPlan = cliente.planesAsignados?.[0];
                                 const whatsappNumber = formatPhone(cliente.telefono);
+                                const estadoCfg = ESTADO_CONFIG[ultimoPlan?.estado || "PENDIENTE"] ?? ESTADO_CONFIG.PENDIENTE;
+                                const vencido = ultimoPlan && new Date(ultimoPlan.fechaVencimiento) < new Date();
 
                                 return (
-                                    <tr key={cliente.id} className="block md:table-row hover:bg-marino-3/30 transition-all duration-300 md:border-b-0 border-b border-marino-4/50 md:p-0 p-4 relative mb-2 md:mb-0 bg-marino-2 md:bg-transparent rounded-2xl md:rounded-none">
-                                        {/* NOMBRE & AVATAR (Vista Card en Mobile) */}
-                                        <td className="block md:table-cell py-2 md:py-6 md:px-4">
-                                            <div className="flex items-center gap-4">
-                                                <div className="relative group shrink-0">
-                                                    <div className="absolute -inset-0.5 bg-gradient-to-tr from-naranja to-azul-claro rounded-full opacity-20 blur-sm group-hover:opacity-100 transition duration-500"></div>
-                                                    <div className="relative w-12 h-12 rounded-full bg-marino-3 border-2 border-marino-4 flex items-center justify-center text-[0.6rem] text-naranja font-black uppercase overflow-hidden">
-                                                        {cliente.nombre.substring(0, 2)}
-                                                    </div>
+                                    <tr key={cliente.id} className="hover:bg-marino-3/20 transition-colors group">
+
+                                        {/* Cliente */}
+                                        <td className="py-4 px-4">
+                                            <div className="flex items-center gap-3">
+                                                <Iniciales nombre={cliente.nombre} />
+                                                <div className="min-w-0">
+                                                    <p className="font-barlow-condensed font-black text-blanco text-base uppercase leading-tight truncate">
+                                                        {cliente.nombre}
+                                                    </p>
+                                                    <p className="text-[0.65rem] text-gris truncate">{cliente.email}</p>
                                                 </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="font-barlow-condensed font-black text-blanco text-lg uppercase leading-tight truncate">{cliente.nombre}</p>
-                                                    <p className="text-[0.65rem] text-gris font-medium uppercase tracking-widest truncate">{cliente.email}</p>
-                                                </div>
-                                                {/* Acceso Rápido WPP en Mobile */}
-                                                {whatsappNumber && (
-                                                    <div className="md:hidden">
-                                                        <a
-                                                            href={`https://wa.me/${whatsappNumber}`}
-                                                            target="_blank"
-                                                            className="w-10 h-10 bg-verde/10 text-verde rounded-xl flex items-center justify-center border border-verde/20 active:scale-90 transition-all"
-                                                        >
-                                                            <MessageCircle size={18} />
-                                                        </a>
-                                                    </div>
-                                                )}
                                             </div>
                                         </td>
 
-                                        {/* CONTACTO (Solo Desktop) */}
-                                        <td className="hidden md:table-cell py-4 px-4 border-l border-marino-4/30">
+                                        {/* Contacto */}
+                                        <td className="py-4 px-4">
                                             {whatsappNumber ? (
                                                 <a
                                                     href={`https://wa.me/${whatsappNumber}`}
                                                     target="_blank"
                                                     rel="noreferrer"
-                                                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 transition-all border border-[#25D366]/20"
+                                                    className="text-xs font-bold text-gris-claro hover:text-verde transition-colors"
                                                 >
                                                     {cliente.telefono}
                                                 </a>
                                             ) : (
-                                                <span className="text-sm text-gris-claro/50">{cliente.telefono || '-'}</span>
+                                                <span className="text-xs text-gris/40">—</span>
                                             )}
                                         </td>
 
-                                        {/* CELDAS CENTRALES DINAMICAS */}
-                                        {/* CELDAS CENTRALES DINAMICAS */}
-                                        {/* INFO DE PLAN (Flexible) */}
-                                        {tabActual === "activos" && (
-                                            <>
-                                                <td className="block md:table-cell py-1 md:py-4 px-0 md:px-4 md:border-l border-marino-4/30">
-                                                    <div className="flex md:flex-col items-center justify-between gap-1">
-                                                        <span className="md:hidden text-[0.6rem] font-black text-gris uppercase tracking-[0.2em]">Inicio</span>
-                                                        <span className="text-xs font-black text-gris-claro uppercase tracking-widest">
-                                                            {ultimoPlan?.fechaInicio ? new Date(ultimoPlan.fechaInicio).toLocaleDateString('es-AR') : '-'}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="block md:table-cell py-1 md:py-4 px-0 md:px-4 md:border-l border-marino-4/30">
-                                                    <div className="flex md:flex-col items-center justify-between gap-1">
-                                                        <span className="md:hidden text-[0.6rem] font-black text-gris uppercase tracking-[0.2em]">Vencimiento</span>
-                                                        <span className={`text-xs font-black uppercase tracking-widest ${ultimoPlan && new Date(ultimoPlan.fechaVencimiento) < new Date() ? 'text-rojo' : 'text-gris-claro'
-                                                            }`}>
-                                                            {ultimoPlan?.fechaVencimiento ? new Date(ultimoPlan.fechaVencimiento).toLocaleDateString('es-AR') : '-'}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="block md:table-cell py-1 md:py-4 px-0 md:px-4 md:border-l border-marino-4/30">
-                                                    <div className="flex md:flex-col items-center justify-between gap-1">
-                                                        <span className="md:hidden text-[0.6rem] font-black text-gris uppercase tracking-[0.2em]">Membresía</span>
-                                                        <span className="font-barlow-condensed font-black text-naranja uppercase tracking-widest text-sm text-right md:text-center">
-                                                            {ultimoPlan?.plan?.nombre || '-'}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="block md:table-cell py-3 md:py-4 px-0 md:px-4 md:border-l border-marino-4/30">
-                                                    <div className="flex md:flex-col items-center justify-between gap-3">
-                                                        <span className="md:hidden text-[0.6rem] font-black text-gris uppercase tracking-[0.2em]">Estado Pago</span>
-                                                        {ultimoPlan && (
-                                                            <button
-                                                                onClick={() => setClientePago({ clienteId: cliente.id, planAsignadoId: ultimoPlan.id, nombre: cliente.nombre, estado: ultimoPlan.estado })}
-                                                                className={`w-full max-w-[140px] flex items-center justify-center gap-2 bg-marino-3 border border-marino-4 text-[0.65rem] font-black uppercase tracking-widest rounded-xl py-2.5 transition-all hover:border-naranja active:scale-95 ${ultimoPlan.estado === 'ABONADO' ? 'text-verde' : 'text-blanco'
-                                                                    }`}
-                                                            >
-                                                                <div className={`w-2.5 h-2.5 rounded-full ${ESTADOS_PAGO.find(e => e.value === (ultimoPlan.estado || "PENDIENTE"))?.color} shadow-[0_0_8px_currentColor]`} />
-                                                                {ESTADOS_PAGO.find(e => e.value === (ultimoPlan.estado || "PENDIENTE"))?.label}
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            </>
-                                        )}
-
-                                        {tabActual === "inactivos" && (
-                                            <>
-                                                <td className="block md:table-cell py-2 px-0 md:px-4 md:border-l border-marino-4/30">
-                                                    <div className="flex md:flex-col items-center justify-between">
-                                                        <span className="md:hidden text-[0.6rem] font-black text-gris uppercase tracking-[0.2em]">Último Plan</span>
-                                                        <span className="font-barlow-condensed font-black tracking-widest text-gris-claro uppercase">{ultimoPlan?.plan?.nombre || '-'}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="block md:table-cell py-2 px-0 md:px-4 md:border-l border-marino-4/30 text-right md:text-center">
-                                                    <div className="flex md:flex-col items-center justify-between">
-                                                        <span className="md:hidden text-[0.6rem] font-black text-gris uppercase tracking-[0.2em]">Vencimiento</span>
-                                                        <span className="text-xs font-bold text-gris uppercase tracking-widest">
-                                                            {ultimoPlan?.fechaVencimiento ? new Date(ultimoPlan.fechaVencimiento).toLocaleDateString('es-AR') : '-'}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                            </>
-                                        )}
-
-                                        {tabActual === "inscripciones" && (
-                                            <>
-                                                <td className="block md:table-cell py-2 px-0 md:px-4 md:border-l border-marino-4/30">
-                                                    <div className="flex md:flex-col items-center justify-between">
-                                                        <span className="md:hidden text-[0.6rem] font-black text-gris uppercase tracking-[0.2em]">Ingreso</span>
-                                                        <span className="text-xs font-bold text-gris-claro uppercase tracking-widest">
-                                                            {new Date(cliente.fechaAlta).toLocaleDateString()}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="block md:table-cell py-3 px-0 md:px-4 md:border-l border-marino-4/30">
+                                        {/* Activos */}
+                                        {tabActual === "activos" && (<>
+                                            <td className="py-4 px-4">
+                                                <span className="text-xs font-bold text-gris-claro">
+                                                    {ultimoPlan?.fechaInicio
+                                                        ? new Date(ultimoPlan.fechaInicio).toLocaleDateString('es-AR')
+                                                        : '—'}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-4">
+                                                <span className={`text-xs font-bold ${vencido ? 'text-rojo' : 'text-gris-claro'}`}>
+                                                    {ultimoPlan?.fechaVencimiento
+                                                        ? new Date(ultimoPlan.fechaVencimiento).toLocaleDateString('es-AR')
+                                                        : '—'}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-4">
+                                                <span className="font-barlow-condensed font-black text-naranja uppercase tracking-wide text-sm">
+                                                    {ultimoPlan?.plan?.nombre || '—'}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-4">
+                                                {ultimoPlan && (
                                                     <button
-                                                        onClick={() => setClienteAsignando({
-                                                            id: cliente.id,
+                                                        onClick={() => setClientePago({
+                                                            clienteId: cliente.id,
+                                                            planAsignadoId: ultimoPlan.id,
                                                             nombre: cliente.nombre,
-                                                            ultimoPlanVencimiento: ultimoPlan?.fechaVencimiento
+                                                            estado: ultimoPlan.estado
                                                         })}
-                                                        className="w-full md:w-auto px-6 py-3 bg-naranja/10 text-naranja border border-naranja/20 rounded-xl text-[0.65rem] font-black uppercase tracking-widest active:scale-95 transition-all"
+                                                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-[0.65rem] font-black uppercase tracking-widest transition-all hover:brightness-110 ${estadoCfg.cls}`}
                                                     >
-                                                        Asignar Plan Inicial
-                                                    </button>
-                                                </td>
-                                            </>
-                                        )}
-
-                                        {/* ACCIONES FINALES */}
-                                        <td className="block md:table-cell py-4 md:py-4 px-0 md:px-4 md:border-l border-marino-4/30">
-                                            <div className="flex items-center gap-2">
-                                                <Link
-                                                    href={`/entrenador/clientes/${cliente.id}`}
-                                                    className="flex-1 text-center bg-marino-4 hover:bg-marino-3 text-blanco py-4 md:py-2 px-4 rounded-xl md:rounded-full font-black text-[0.65rem] uppercase tracking-[0.2em] transition-all border border-marino shadow-sm active:scale-95"
-                                                >
-                                                    Abrir Perfil
-                                                </Link>
-                                                {(tabActual === "activos" || tabActual === "inactivos") && (
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); setMenuAbierto(menuAbierto === cliente.id ? null : cliente.id) }}
-                                                        className="p-4 md:p-2 bg-marino-3 border border-marino-4 rounded-xl text-gris hover:text-blanco transition-colors active:scale-90"
-                                                    >
-                                                        <MoreVertical size={20} />
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                                                        {estadoCfg.label}
                                                     </button>
                                                 )}
-                                            </div>
+                                            </td>
+                                        </>)}
 
-                                            {menuAbierto === cliente.id && (
-                                                <div className="fixed md:absolute inset-x-0 bottom-0 md:bottom-auto md:top-full z-[110] p-4 md:p-0 md:mt-2">
-                                                    <div className="fixed inset-0 bg-marino/80 backdrop-blur-sm md:hidden" onClick={() => setMenuAbierto(null)}></div>
-                                                    <div className="relative bg-marino-2 border border-marino-4 rounded-3xl md:rounded-xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-10 duration-300">
-                                                        <div className="w-12 h-1.5 bg-marino-4 rounded-full mx-auto my-4 md:hidden opacity-50"></div>
-                                                        {tabActual === "activos" ? (
-                                                            <button
-                                                                onClick={() => handleToggleStatus(cliente.id, false)}
-                                                                disabled={isPending}
-                                                                className="w-full text-left px-8 py-6 md:px-4 md:py-3 text-[0.65rem] font-black uppercase tracking-widest text-rojo hover:bg-rojo/10 flex items-center gap-4 transition-colors active:bg-rojo/20"
-                                                            >
-                                                                <Ban size={20} /> Suspender Acceso
-                                                            </button>
-                                                        ) : (
+                                        {/* Inactivos */}
+                                        {tabActual === "inactivos" && (<>
+                                            <td className="py-4 px-4">
+                                                <span className="font-barlow-condensed font-black text-gris uppercase tracking-wide">
+                                                    {ultimoPlan?.plan?.nombre || '—'}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-4">
+                                                <span className="text-xs font-bold text-rojo/70">
+                                                    {ultimoPlan?.fechaVencimiento
+                                                        ? new Date(ultimoPlan.fechaVencimiento).toLocaleDateString('es-AR')
+                                                        : '—'}
+                                                </span>
+                                            </td>
+                                        </>)}
+
+                                        {/* Inscripciones */}
+                                        {tabActual === "inscripciones" && (<>
+                                            <td className="py-4 px-4">
+                                                <span className="text-xs font-bold text-gris-claro">
+                                                    {new Date(cliente.fechaAlta).toLocaleDateString('es-AR')}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-4">
+                                                <button
+                                                    onClick={() => setClienteAsignando({
+                                                        id: cliente.id,
+                                                        nombre: cliente.nombre,
+                                                        ultimoPlanVencimiento: ultimoPlan?.fechaVencimiento
+                                                    })}
+                                                    className="px-4 py-2 bg-naranja text-marino rounded-lg text-[0.65rem] font-black uppercase tracking-widest transition-all hover:bg-naranja-h active:scale-95"
+                                                >
+                                                    Asignar Plan
+                                                </button>
+                                            </td>
+                                        </>)}
+
+                                        {/* Acciones */}
+                                        <td className="py-4 px-4">
+                                            <div className="flex items-center justify-end gap-1.5 relative">
+                                                <Link
+                                                    href={`/entrenador/clientes/${cliente.id}`}
+                                                    className="flex items-center gap-1.5 px-3 py-2 bg-marino-3 hover:bg-marino-4 text-gris-claro hover:text-blanco rounded-lg text-[0.65rem] font-black uppercase tracking-widest transition-all border border-marino-4 group-hover:border-marino-3"
+                                                >
+                                                    Ver Perfil
+                                                    <ChevronRight size={12} className="opacity-60" />
+                                                </Link>
+
+                                                {(tabActual === "activos" || tabActual === "inactivos") && (
+                                                    <div className="relative">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setMenuAbierto(menuAbierto === cliente.id ? null : cliente.id);
+                                                            }}
+                                                            className="p-2 bg-marino-3 border border-marino-4 rounded-lg text-gris hover:text-blanco transition-colors"
+                                                        >
+                                                            <MoreVertical size={16} />
+                                                        </button>
+
+                                                        {menuAbierto === cliente.id && (
                                                             <>
-                                                                <button
-                                                                    onClick={() => handleToggleStatus(cliente.id, true)}
-                                                                    disabled={isPending}
-                                                                    className="w-full text-left px-8 py-6 md:px-4 md:py-3 text-[0.65rem] font-black uppercase tracking-widest text-verde hover:bg-verde/10 flex items-center gap-4 border-b border-marino-4 transition-colors active:bg-verde/20"
-                                                                >
-                                                                    <CheckCircle2 size={20} /> Reactivar Cliente
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setMenuAbierto(null);
-                                                                        setClienteAsignando({
-                                                                            id: cliente.id,
-                                                                            nombre: cliente.nombre,
-                                                                            ultimoPlanVencimiento: ultimoPlan?.fechaVencimiento
-                                                                        })
-                                                                    }}
-                                                                    className="w-full text-left px-8 py-6 md:px-4 md:py-3 text-[0.65rem] font-black uppercase tracking-widest text-naranja hover:bg-naranja/10 flex items-center gap-4 transition-colors active:bg-naranja/20 md:pb-3 pb-12"
-                                                                >
-                                                                    <CreditCard size={20} /> Nueva Membresía
-                                                                </button>
+                                                                <div
+                                                                    className="fixed inset-0 z-40"
+                                                                    onClick={() => setMenuAbierto(null)}
+                                                                />
+                                                                <div className="absolute right-0 top-full mt-1.5 z-50 bg-marino-2 border border-marino-4 rounded-xl shadow-2xl overflow-hidden min-w-[180px] animate-in fade-in zoom-in-95 duration-150">
+                                                                    {tabActual === "activos" ? (
+                                                                        <button
+                                                                            onClick={() => handleToggleStatus(cliente.id, false)}
+                                                                            disabled={isPending}
+                                                                            className="w-full text-left px-4 py-3 text-[0.65rem] font-black uppercase tracking-widest text-rojo hover:bg-rojo/10 flex items-center gap-3 transition-colors"
+                                                                        >
+                                                                            <Ban size={14} /> Suspender
+                                                                        </button>
+                                                                    ) : (<>
+                                                                        <button
+                                                                            onClick={() => handleToggleStatus(cliente.id, true)}
+                                                                            disabled={isPending}
+                                                                            className="w-full text-left px-4 py-3 text-[0.65rem] font-black uppercase tracking-widest text-verde hover:bg-verde/10 flex items-center gap-3 border-b border-marino-4 transition-colors"
+                                                                        >
+                                                                            <CheckCircle2 size={14} /> Reactivar
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setMenuAbierto(null);
+                                                                                setClienteAsignando({
+                                                                                    id: cliente.id,
+                                                                                    nombre: cliente.nombre,
+                                                                                    ultimoPlanVencimiento: ultimoPlan?.fechaVencimiento
+                                                                                });
+                                                                            }}
+                                                                            className="w-full text-left px-4 py-3 text-[0.65rem] font-black uppercase tracking-widest text-naranja hover:bg-naranja/10 flex items-center gap-3 transition-colors"
+                                                                        >
+                                                                            <CreditCard size={14} /> Nueva Membresía
+                                                                        </button>
+                                                                    </>)}
+                                                                </div>
                                                             </>
                                                         )}
                                                     </div>
-                                                </div>
-                                            )}
+                                                )}
+                                            </div>
                                         </td>
+
                                     </tr>
                                 );
                             })
@@ -325,6 +314,98 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                 </table>
             </div>
 
+            {/* ── VISTA MOBILE: Cards ── */}
+            <div className="block md:hidden divide-y divide-marino-4/50">
+                {clientes.length === 0 ? (
+                    <div className="py-16 text-center">
+                        <div className="flex flex-col items-center gap-3 opacity-30">
+                            <Users size={32} />
+                            <p className="font-bold tracking-widest uppercase text-xs text-gris">Sin clientes</p>
+                        </div>
+                    </div>
+                ) : (
+                    clientes.map((cliente) => {
+                        const ultimoPlan = cliente.planesAsignados?.[0];
+                        const whatsappNumber = formatPhone(cliente.telefono);
+                        const estadoCfg = ESTADO_CONFIG[ultimoPlan?.estado || "PENDIENTE"] ?? ESTADO_CONFIG.PENDIENTE;
+                        const vencido = ultimoPlan && new Date(ultimoPlan.fechaVencimiento) < new Date();
+
+                        return (
+                            <div key={cliente.id} className="p-4 space-y-3">
+                                {/* Cabecera card */}
+                                <div className="flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <Iniciales nombre={cliente.nombre} />
+                                        <div className="min-w-0">
+                                            <p className="font-barlow-condensed font-black text-blanco text-base uppercase leading-tight truncate">
+                                                {cliente.nombre}
+                                            </p>
+                                            <p className="text-[0.6rem] text-gris truncate">{cliente.email}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        {whatsappNumber && (
+                                            <a
+                                                href={`https://wa.me/${whatsappNumber}`}
+                                                target="_blank"
+                                                className="p-2 bg-verde/10 text-verde rounded-lg border border-verde/20"
+                                            >
+                                                <MessageCircle size={16} />
+                                            </a>
+                                        )}
+                                        <Link
+                                            href={`/entrenador/clientes/${cliente.id}`}
+                                            className="p-2 bg-marino-3 text-gris-claro rounded-lg border border-marino-4"
+                                        >
+                                            <ChevronRight size={16} />
+                                        </Link>
+                                    </div>
+                                </div>
+
+                                {/* Datos secundarios */}
+                                {tabActual === "activos" && ultimoPlan && (
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <span className="font-barlow-condensed font-black text-naranja uppercase text-xs tracking-wide">
+                                            {ultimoPlan.plan?.nombre}
+                                        </span>
+                                        <span className="text-gris/40 text-xs">·</span>
+                                        <span className={`text-xs font-bold ${vencido ? 'text-rojo' : 'text-gris'}`}>
+                                            Vence {new Date(ultimoPlan.fechaVencimiento).toLocaleDateString('es-AR')}
+                                        </span>
+                                        <button
+                                            onClick={() => setClientePago({
+                                                clienteId: cliente.id,
+                                                planAsignadoId: ultimoPlan.id,
+                                                nombre: cliente.nombre,
+                                                estado: ultimoPlan.estado
+                                            })}
+                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[0.6rem] font-black uppercase tracking-widest ${estadoCfg.cls}`}
+                                        >
+                                            <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                                            {estadoCfg.label}
+                                        </button>
+                                    </div>
+                                )}
+
+                                {tabActual === "inscripciones" && (
+                                    <button
+                                        onClick={() => setClienteAsignando({
+                                            id: cliente.id,
+                                            nombre: cliente.nombre,
+                                            ultimoPlanVencimiento: ultimoPlan?.fechaVencimiento
+                                        })}
+                                        className="w-full py-2.5 bg-naranja text-marino rounded-lg text-[0.65rem] font-black uppercase tracking-widest"
+                                    >
+                                        Asignar Plan Inicial
+                                    </button>
+                                )}
+                            </div>
+                        );
+                    })
+                )}
+            </div>
+
+            {/* Modales */}
             {clienteAsignando && (
                 <ModalAsignarPlan
                     clienteId={clienteAsignando.id}

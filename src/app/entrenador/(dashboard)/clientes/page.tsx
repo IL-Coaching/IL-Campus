@@ -17,7 +17,6 @@ export default async function ClientesPage({
     const todosLosClientes = await ClienteServicio.obtenerPorEntrenador(entrenador.id) || [];
     const planes = await PlanServicio.obtenerPorEntrenador(entrenador.id) || [];
 
-    // Segmentación lógica (Activos, Inactivos, Inscripciones)
     const activos = todosLosClientes.filter(c => c.activo === true && (c.planesAsignados?.length || 0) > 0);
     const inactivos = todosLosClientes.filter(c => c.activo === false && (c.planesAsignados?.length || 0) > 0);
     const inscripciones = todosLosClientes.filter(c => c.activo === false && (c.planesAsignados?.length || 0) === 0);
@@ -30,59 +29,47 @@ export default async function ClientesPage({
     if (tabActual === "inscripciones") clientesAMostrar = inscripciones;
 
     return (
-        <div className="space-y-8 fade-up visible">
-            {/* Header Mínimo - Diseño de plantilla */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#0a101f] p-6 rounded-t-xl border-l-[3px] border-naranja relative shadow-xl overflow-hidden mt-6">
-                <div className="absolute inset-0 bg-gradient-to-r from-[#060e22] to-transparent pointer-events-none" />
-                <div className="relative z-10 w-full flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-barlow-condensed font-black uppercase tracking-widest text-[#f5f5f5] mb-1 italic" style={{ textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>
-                            GESTION DE CLIENTES
-                        </h1>
-                        <p className="text-gris/90 font-medium text-sm">
-                            Seguimiento de clientes y formularios:
-                        </p>
-                    </div>
-                    <BotonAltaManual />
+        <div className="space-y-6 fade-up visible">
+
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-2">
+                <div>
+                    <h1 className="text-3xl font-barlow-condensed font-black uppercase tracking-tight text-blanco mb-1">
+                        Gestión de Clientes
+                    </h1>
+                    <p className="text-gris font-medium text-sm">
+                        Seguimiento de clientes y formularios
+                    </p>
                 </div>
+                <BotonAltaManual />
             </div>
 
-            {/* Píldoras Navegación (Tabs) Estilo Plantilla */}
-            <div className="flex flex-wrap lg:flex-nowrap items-center justify-between gap-4 w-full">
-                <Link
-                    href="/entrenador/clientes?tab=activos"
-                    className={`flex-1 text-center py-3.5 px-4 rounded-[1.2rem] font-black uppercase tracking-widest text-sm transition-all shadow-xl
-                        ${tabActual === "activos"
-                            ? "bg-[#e87717] text-blanco"
-                            : "bg-[#151c2e] text-blanco hover:bg-[#1a233a] border border-[#1a233a]"
-                        }`}
-                >
-                    Clientes Activos <br className="hidden lg:block" />({activos.length})
-                </Link>
-                <Link
-                    href="/entrenador/clientes?tab=inactivos"
-                    className={`flex-1 text-center py-3.5 px-4 rounded-[1.2rem] font-black uppercase tracking-widest text-sm transition-all shadow-xl
-                        ${tabActual === "inactivos"
-                            ? "bg-[#e87717] text-blanco"
-                            : "bg-[#151c2e] text-blanco hover:bg-[#1a233a] border border-[#1a233a]"
-                        }`}
-                >
-                    Clientes Inactivos <br className="hidden lg:block" />({inactivos.length})
-                </Link>
-                <Link
-                    href="/entrenador/clientes?tab=inscripciones"
-                    className={`flex-1 text-center py-3.5 px-4 rounded-[1.2rem] font-black uppercase tracking-widest text-sm transition-all shadow-xl
-                        ${tabActual === "inscripciones"
-                            ? "bg-[#e87717] text-blanco"
-                            : "bg-[#151c2e] text-blanco hover:bg-[#1a233a] border border-[#1a233a]"
-                        }`}
-                >
-                    Inscripciones <br className="hidden lg:block" />({inscripciones.length})
-                </Link>
+            {/* Tabs */}
+            <div className="flex items-center gap-1 bg-marino-2 border border-marino-4 rounded-xl p-1">
+                {[
+                    { key: "activos", label: "Activos", count: activos.length },
+                    { key: "inactivos", label: "Inactivos", count: inactivos.length },
+                    { key: "inscripciones", label: "Inscripciones", count: inscripciones.length },
+                ].map(tab => (
+                    <Link
+                        key={tab.key}
+                        href={`/entrenador/clientes?tab=${tab.key}`}
+                        className={`flex-1 text-center py-2.5 px-4 rounded-lg font-black uppercase tracking-widest text-xs transition-all
+                            ${tabActual === tab.key
+                                ? "bg-naranja text-marino shadow-lg"
+                                : "text-gris hover:text-blanco hover:bg-marino-3"
+                            }`}
+                    >
+                        {tab.label}
+                        <span className={`ml-2 text-[0.6rem] font-black ${tabActual === tab.key ? "opacity-80" : "opacity-50"}`}>
+                            ({tab.count})
+                        </span>
+                    </Link>
+                ))}
             </div>
 
-            {/* Listado dinámico (Componente de Cliente) */}
-            <div className="animate-in fade-in duration-500">
+            {/* Listado */}
+            <div className="animate-in fade-in duration-300">
                 <ListadoClientes
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     clientes={clientesAMostrar as any[]}
