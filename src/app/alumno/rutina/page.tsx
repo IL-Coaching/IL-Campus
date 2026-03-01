@@ -3,6 +3,7 @@ import { getAlumnoSesion } from "@/nucleo/seguridad/sesion";
 import { prisma } from "@/baseDatos/conexion";
 import { Dumbbell, Play, ChevronRight, Calendar, Clock, Target, Zap, Activity, ShieldAlert } from "lucide-react";
 import { Cliente } from '@prisma/client';
+import { DescargarRutinaBtn } from "@/compartido/componentes/pdf/DescargarRutinaBtn";
 
 const DIA_ORDEN: Record<string, number> = {
     Lunes: 1, Martes: 2, Miércoles: 3, Miercoles: 3,
@@ -90,6 +91,13 @@ export default async function RutinaPage() {
         }
     });
 
+    const datosEntrenador = await prisma.entrenador.findUnique({
+        where: { id: alumno.entrenadorId },
+        select: { nombre: true }
+    });
+
+    const nombreEntrenador = datosEntrenador?.nombre || 'Tu Entrenador';
+
     if (!macrociclo) {
         return (
             <div className="min-h-screen bg-marino pb-24 text-blanco flex flex-col items-center justify-center p-6 text-center">
@@ -162,6 +170,13 @@ export default async function RutinaPage() {
                             </div>
                         )}
                     </div>
+                    {macrociclo && macrociclo.bloquesMensuales.length > 0 && (
+                        <DescargarRutinaBtn
+                            macrociclo={macrociclo as unknown as import('@/compartido/componentes/pdf/DescargarRutinaBtn').MacrocicloData}
+                            nombreAlumno={alumno.nombre}
+                            nombreEntrenador={nombreEntrenador}
+                        />
+                    )}
                 </div>
             </header>
 

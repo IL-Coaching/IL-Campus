@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, useTransition } from 'react';
-import { Search, Send, Paperclip, User, MessageCircle } from 'lucide-react';
+import { useState, useEffect, useRef, useTransition, useCallback } from 'react';
+import { Search, Send, Paperclip, User, MessageCircle, Radio } from 'lucide-react';
 import { obtenerConversaciones, obtenerMensajesCliente, enviarMensaje, enviarMensajeConMedia } from '@/nucleo/acciones/mensajeria.accion';
+import { useChatRealtime, useConversacionesRealtime, type MensajeRealtime } from '@/compartido/infraestructura/useChatRealtime';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Image from 'next/image';
@@ -35,6 +36,33 @@ export default function ChatPanel() {
     const [isPending, startTransition] = useTransition();
     const scrollRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleNuevoMensaje = useCallback((mensaje: MensajeRealtime) => {
+        if (mensaje.clienteId === clienteActivo) {
+            setMensajes(prev => [...prev, {
+                id: mensaje.id,
+                emisor: mensaje.emisor,
+                contenido: mensaje.contenido,
+                tipo: mensaje.tipo,
+                mediaUrl: mensaje.mediaUrl,
+                creadoEn: mensaje.creadoEn,
+                leido: mensaje.leido
+            }]);
+            setTimeout(() => {
+                if (scrollRef.current) {
+                    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+                }
+            }, 100);
+        }
+        cargarConversaciones();
+    }, [clienteActivo]);
+
+    const handleNuevaActividad = useCallback(() => {
+        cargarConversaciones();
+    }, []);
+
+    useChatRealtime(clienteActivo, handleNuevoMensaje);
+    useConversacionesRealtime('entrenador', handleNuevaActividad);
 
     useEffect(() => {
         cargarConversaciones();
@@ -181,13 +209,18 @@ export default function ChatPanel() {
                 ) : (
                     <>
                         {/* Header del chat */}
-                        <div className="p-4 border-b border-marino-4 bg-marino-3/30 flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-naranja/10 flex items-center justify-center">
-                                <User size={16} className="text-naranja" />
-                            </div>
-                            <div>
-                                <p className="text-sm font-black text-blanco uppercase tracking-tight">{nombreActivo}</p>
-                                <p className="text-[0.55rem] text-gris uppercase tracking-widest font-bold">Chat directo</p>
+                        <div className="p-4 border-b border-marino-4 bg-marino-3/30 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-full bg-naranja/10 flex items-center justify-center">
+                                    <User size={16} className="text-naranja" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-black text-blanco uppercase tracking-tight">{nombreActivo}</p>
+                                    <div className="flex items-center gap-1.5">
+                                        <Radio size={8} className="text-green-400 animate-pulse" />
+                                        <p className="text-[0.55rem] text-green-400 uppercase tracking-widest font-bold">En vivo</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
