@@ -82,23 +82,22 @@ export default function SelectorEjercicioCelda({
                             onSelect({ nombre: inputValue, ejercicioId: null, esBiblioteca: false });
                         }
                     }}
-                    className="w-full bg-marino border border-white/10 rounded-lg px-3 py-3 text-blanco font-black text-base uppercase tracking-tight focus:ring-1 focus:ring-naranja/50 focus:border-naranja/50 focus:bg-marino-3 placeholder:text-gris/20 group-hover:text-naranja transition-all shadow-inner"
-                    placeholder="Escribir o buscar..."
+                    className="w-full bg-marino border border-white/5 rounded-lg px-2 py-2 text-blanco font-black text-sm uppercase tracking-tight focus:ring-1 focus:ring-naranja/50 focus:border-naranja/50 focus:bg-marino-3 placeholder:text-gris/20 group-hover:text-naranja transition-all shadow-inner"
+                    placeholder="Escribir..."
                 />
 
                 {esBiblioteca && ejercicioId && (
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="text-[0.55rem] text-naranja font-black uppercase tracking-[0.15em] flex items-center gap-1">
-                            <Check size={10} strokeWidth={3} /> Biblioteca IL
+                    <div className="flex items-center gap-1.5 mt-0.5 px-0.5">
+                        <span className="text-[0.5rem] text-naranja font-black uppercase tracking-tight flex items-center gap-1">
+                            <Check size={9} strokeWidth={3} /> Biblioteca
                         </span>
-                        {/* Indicador IUSCA si aplica (si tuviéramos acceso al objeto completo aquí o lo buscamos) */}
                     </div>
                 )}
             </div>
 
             {/* Dropdown de Autocompletado */}
             {isOpen && (inputValue.length >= 2 || loading) && (
-                <div className="absolute top-full left-0 w-80 mt-2 bg-marino-2 border border-marino-4 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="absolute top-full left-0 w-80 mt-1 bg-marino-2 border border-marino-4 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
                     <div className="p-2 border-b border-marino-4 bg-marino-3/50 flex items-center justify-between">
                         <span className="text-[0.6rem] font-black text-gris uppercase tracking-widest px-2">Sugerencias del Arsenal</span>
                         {loading && <div className="w-3 h-3 border-2 border-naranja border-t-transparent rounded-full animate-spin"></div>}

@@ -594,21 +594,21 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                     })()}
                 </div>
 
-                {/* Vista DESKTOP: Tabla Profesional Adaptive */}
-                <div className="hidden md:block w-full overflow-hidden">
-                    <table className="w-full text-left text-sm border-collapse table-fixed">
+                {/* Vista DESKTOP: Tabla Profesional Agile Grid */}
+                <div className="hidden md:block w-full overflow-x-auto scrollbar-hide">
+                    <table className="w-full text-left text-sm border-collapse table-fixed min-w-[1000px]">
                         <thead>
                             <tr className={`border-b border-white/5 ${semanaObjeto.esFaseDeload ? 'bg-blue-500/5' : 'bg-marino-3/40'}`}>
-                                <th className="p-4 w-[50px]"></th>
-                                <th className="p-4 w-[50px] font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.65rem] text-center">#</th>
-                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.65rem] w-[22%]">Ejercicio / Patrón</th>
-                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.65rem] w-[150px] text-center">Reps</th>
-                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.65rem] w-[100px] text-center">Sets</th>
-                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.65rem] w-[100px] text-center">RIR</th>
-                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.65rem] w-[120px] text-center">Rest</th>
-                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.65rem] w-[120px] text-center">Kg</th>
-                                <th className="p-4 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.65rem]">Técnica / Feedback</th>
-                                <th className="p-4 text-right w-[60px]"></th>
+                                <th className="p-3 w-[40px] sticky left-0 z-30 bg-marino-2 border-r border-white/5 shadow-[2px_0_5px_rgba(0,0,0,0.1)]"></th>
+                                <th className="p-3 w-[45px] font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] text-center sticky left-[40px] z-30 bg-marino-2 border-r border-white/5 shadow-[2px_0_5px_rgba(0,0,0,0.1)]">#</th>
+                                <th className="p-3 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.65rem] w-[220px] sticky left-[85px] z-30 bg-marino-2 border-r border-white/5 shadow-[5px_0_15px_rgba(0,0,0,0.2)]">Ejercicio / Patrón</th>
+                                <th className="p-3 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[130px] text-center">Reps</th>
+                                <th className="p-3 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[80px] text-center">Sets</th>
+                                <th className="p-3 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[80px] text-center">RIR</th>
+                                <th className="p-3 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[100px] text-center">Rest</th>
+                                <th className="p-3 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[100px] text-center">Kg</th>
+                                <th className="p-3 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem]">Técnica / Feedback</th>
+                                <th className="p-3 text-right w-[50px]"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-marino-4">
@@ -669,25 +669,25 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                             : `hover:bg-white/[0.02] ${draggingIdx === ejercicios.findIndex(e => e.id === gej.id) ? 'opacity-20' : ''}`
                                                             }`}
                                                     >
-                                                        <td className="p-5 text-center">
+                                                        <td className="p-3 text-center sticky left-0 z-10 bg-marino-2/95 backdrop-blur-sm border-r border-white/5">
                                                             {isSelectionMode ? (
                                                                 <div
                                                                     onClick={(e) => { e.stopPropagation(); handleToggleSelection(gej.id); }}
-                                                                    className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center mx-auto cursor-pointer transition-all ${selectedIds.includes(gej.id) ? 'bg-naranja border-naranja' : 'bg-marino-3 border-marino-4 hover:border-naranja/60'
+                                                                    className={`w-5 h-5 rounded border-2 flex items-center justify-center mx-auto cursor-pointer transition-all ${selectedIds.includes(gej.id) ? 'bg-naranja border-naranja' : 'bg-marino-3 border-marino-4 hover:border-naranja/60'
                                                                         }`}
                                                                 >
-                                                                    {selectedIds.includes(gej.id) && <span className="text-marino font-black text-xs">✓</span>}
+                                                                    {selectedIds.includes(gej.id) && <span className="text-marino font-black text-[10px]">✓</span>}
                                                                 </div>
                                                             ) : (
-                                                                <GripVertical size={16} className="opacity-0 group-hover:opacity-100 transition-opacity mx-auto text-gris cursor-grab" />
+                                                                <GripVertical size={14} className="opacity-0 group-hover:opacity-100 transition-opacity mx-auto text-gris cursor-grab" />
                                                             )}
                                                         </td>
-                                                        <td className="p-5 text-gris font-black text-lg text-center opacity-30 group-hover:opacity-100 transition-opacity">
+                                                        <td className="p-3 text-gris font-black text-base text-center opacity-30 group-hover:opacity-100 transition-opacity sticky left-[40px] z-10 bg-marino-2/95 backdrop-blur-sm border-r border-white/5">
                                                             {String.fromCharCode(65 + gidx)}
                                                         </td>
-                                                        <td className="p-5">
+                                                        <td className="p-3 sticky left-[85px] z-10 bg-marino-2/95 backdrop-blur-sm border-r border-white/10 shadow-[5px_0_15px_rgba(0,0,0,0.2)] w-[220px]">
                                                             {isSelectionMode ? (
-                                                                <span className="text-blanco font-black text-sm uppercase tracking-tight">
+                                                                <span className="text-blanco font-black text-[0.75rem] uppercase tracking-tight">
                                                                     {gej.ejercicio?.nombre || gej.nombreLibre || '—'}
                                                                 </span>
                                                             ) : (
@@ -703,70 +703,71 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                 />
                                                             )}
                                                         </td>
-                                                        <td className="p-5">
-                                                            <div className="flex items-center gap-1 bg-marino border border-white/10 rounded-xl overflow-hidden shadow-inner">
+                                                        <td className="p-2">
+                                                            <div className="flex items-center gap-0.5 bg-marino border border-white/5 rounded-lg overflow-hidden">
                                                                 <input
                                                                     type="number"
                                                                     value={gej.repsMin}
                                                                     onChange={(e) => handleUpdateChange(gej.id, { repsMin: parseInt(e.target.value) })}
-                                                                    className="w-full bg-marino-3 py-3 text-center text-blanco focus:outline-none text-base font-black"
+                                                                    className="w-full bg-marino-3/50 py-2 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10 transition-colors"
                                                                 />
-                                                                <span className="text-gris/20">—</span>
+                                                                <span className="text-gris/20 text-[10px]">—</span>
                                                                 <input
                                                                     type="number"
                                                                     value={gej.repsMax}
                                                                     onChange={(e) => handleUpdateChange(gej.id, { repsMax: parseInt(e.target.value) })}
-                                                                    className="w-full bg-marino-3 py-3 text-center text-blanco focus:outline-none text-base font-black"
+                                                                    className="w-full bg-marino-3/50 py-2 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10 transition-colors"
                                                                 />
                                                             </div>
                                                         </td>
-                                                        <td className="p-5 text-center">
+                                                        <td className="p-2 text-center">
                                                             <input
                                                                 type="number"
                                                                 value={gej.series}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { series: parseInt(e.target.value) })}
-                                                                className="w-full bg-marino-3 border border-white/10 py-3 rounded-xl text-center text-blanco transition-all font-black text-base shadow-inner"
+                                                                className="w-full bg-marino-3/50 border border-white/5 py-2 rounded-lg text-center text-blanco font-black text-sm focus:bg-naranja/10 focus:border-naranja/20 transition-all"
                                                             />
                                                         </td>
-                                                        <td className="p-5 text-center">
+                                                        <td className="p-2 text-center">
                                                             <input
                                                                 type="number"
                                                                 value={gej.RIR !== null ? gej.RIR : ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                                className="w-full bg-marino-3 border border-white/10 py-3 rounded-xl text-center text-naranja transition-all font-black text-base shadow-inner"
+                                                                className="w-full bg-marino-3/50 border border-white/5 py-2 rounded-lg text-center text-naranja font-black text-sm focus:bg-naranja/10 focus:border-naranja/20 transition-all"
                                                             />
                                                         </td>
-                                                        <td className="p-5 text-center">
-                                                            <div className="flex items-center gap-1 bg-marino-3 px-1 rounded-xl border border-white/10 shadow-inner">
+                                                        <td className="p-2 text-center">
+                                                            <div className="flex items-center gap-0.5 bg-marino-3/50 px-1 rounded-lg border border-white/5">
                                                                 <input
                                                                     type="number"
                                                                     value={gej.descansoSegundos !== null ? gej.descansoSegundos : ''}
                                                                     onChange={(e) => handleUpdateChange(gej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                                    className="w-full bg-transparent py-3 text-center text-blanco focus:outline-none text-base font-black"
+                                                                    className="w-full bg-transparent py-2 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/5"
                                                                 />
-                                                                <span className="text-[0.45rem] font-black text-gris/40 pr-1 lowercase">s</span>
+                                                                <span className="text-[0.4rem] font-black text-gris/30 pr-0.5">s</span>
                                                             </div>
                                                         </td>
-                                                        <td className="p-5 text-center">
+                                                        <td className="p-2 text-center">
                                                             <input
                                                                 type="number"
                                                                 step="0.5"
                                                                 value={gej.pesoSugerido || ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { pesoSugerido: parseFloat(e.target.value) })}
-                                                                className="w-full bg-marino-3 border border-verde/20 py-3 rounded-xl text-center text-verde transition-all font-black text-base shadow-inner shadow-verde/5"
+                                                                className="w-full bg-marino-3/50 border border-verde/10 py-2 rounded-lg text-center text-verde font-black text-sm focus:bg-verde/5 focus:border-verde/30 transition-all"
                                                             />
                                                         </td>
-                                                        <td className="p-5">
+                                                        <td className="p-2">
                                                             <textarea
                                                                 value={gej.notasTecnicas || ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { notasTecnicas: e.target.value })}
                                                                 rows={1}
-                                                                className="w-full bg-marino-3/50 border border-white/10 p-3 rounded-xl text-blanco text-xs focus:outline-none focus:border-naranja/20 transition-all resize-none h-12 overflow-hidden hover:h-24 shadow-inner"
+                                                                className="w-full bg-marino-3/30 border border-white/5 p-2 rounded-lg text-blanco text-[10px] focus:outline-none focus:border-naranja/20 transition-all resize-none h-9 focus:h-20 focus:z-30 relative"
+                                                                placeholder="..."
                                                             />
                                                         </td>
-                                                        <td className="p-5 text-right">
-                                                            <button onClick={() => handleEliminar(gej.id)} className="text-gris/30 hover:text-rojo p-2 rounded-lg">
-                                                                <Trash2 size={16} />
+                                                        <td className="p-2 text-right">
+                                                            <button onClick={() => handleEliminar(gej.id)} className="text-gris/20 hover:text-rojo p-1.5 rounded-lg transition-colors">
+                                                                <Trash2 size={14} />
                                                             </button>
                                                         </td>
                                                     </tr>
@@ -788,23 +789,23 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                 : `hover:bg-white/[0.02] ${draggingIdx === idx ? 'opacity-20' : ''}`
                                                 }`}
                                         >
-                                            <td className="p-5 text-center" onClick={(e) => e.stopPropagation()}>
+                                            <td className="p-3 text-center sticky left-0 z-10 bg-marino-2 border-r border-white/5" onClick={(e) => e.stopPropagation()}>
                                                 {isSelectionMode ? (
                                                     <div
                                                         onClick={(e) => { e.stopPropagation(); handleToggleSelection(ej.id); }}
-                                                        className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center mx-auto cursor-pointer transition-all ${selectedIds.includes(ej.id) ? 'bg-naranja border-naranja' : 'bg-marino-3 border-marino-4 hover:border-naranja/60'
+                                                        className={`w-5 h-5 rounded border-2 flex items-center justify-center mx-auto cursor-pointer transition-all ${selectedIds.includes(ej.id) ? 'bg-naranja border-naranja' : 'bg-marino-3 border-marino-4 hover:border-naranja/60'
                                                             }`}
                                                     >
-                                                        {selectedIds.includes(ej.id) && <span className="text-marino font-black text-xs">✓</span>}
+                                                        {selectedIds.includes(ej.id) && <span className="text-marino font-black text-[10px]">✓</span>}
                                                     </div>
                                                 ) : (
-                                                    <GripVertical size={16} className="opacity-0 group-hover:opacity-100 transition-opacity mx-auto text-gris cursor-grab" />
+                                                    <GripVertical size={14} className="opacity-0 group-hover:opacity-100 transition-opacity mx-auto text-gris cursor-grab" />
                                                 )}
                                             </td>
-                                            <td className="p-5 text-gris font-black text-lg text-center opacity-30 group-hover:opacity-100 transition-opacity">{idx + 1}</td>
-                                            <td className="p-5" onClick={(e) => { if (isSelectionMode) e.stopPropagation(); }}>
+                                            <td className="p-3 text-gris font-black text-base text-center opacity-30 group-hover:opacity-100 transition-opacity sticky left-[40px] z-10 bg-marino-2 border-r border-white/5">{idx + 1}</td>
+                                            <td className="p-3 sticky left-[85px] z-10 bg-marino-2 border-r border-white/10 shadow-[5px_0_15px_rgba(0,0,0,0.2)] w-[220px]" onClick={(e) => { if (isSelectionMode) e.stopPropagation(); }}>
                                                 {isSelectionMode ? (
-                                                    <span className="text-blanco font-black text-sm uppercase tracking-tight">
+                                                    <span className="text-blanco font-black text-[0.75rem] uppercase tracking-tight">
                                                         {ej.ejercicio?.nombre || ej.nombreLibre || '—'}
                                                     </span>
                                                 ) : (
@@ -820,69 +821,70 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                     />
                                                 )}
                                             </td>
-                                            <td className="p-5">
-                                                <div className="flex items-center gap-1 bg-marino border border-white/10 rounded-xl overflow-hidden shadow-inner">
+                                            <td className="p-2">
+                                                <div className="flex items-center gap-0.5 bg-marino border border-white/5 rounded-lg overflow-hidden">
                                                     <input
                                                         type="number"
                                                         value={ej.repsMin}
                                                         onChange={(e) => handleUpdateChange(ej.id, { repsMin: parseInt(e.target.value) })}
-                                                        className="w-full bg-marino-3 py-3 text-center text-blanco focus:outline-none text-base font-black"
+                                                        className="w-full bg-marino-3/50 py-2 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10 transition-colors"
                                                     />
-                                                    <span className="text-gris/20">—</span>
+                                                    <span className="text-gris/20 text-[10px]">—</span>
                                                     <input
                                                         type="number"
                                                         value={ej.repsMax}
                                                         onChange={(e) => handleUpdateChange(ej.id, { repsMax: parseInt(e.target.value) })}
-                                                        className="w-full bg-marino-3 py-3 text-center text-blanco focus:outline-none text-base font-black"
+                                                        className="w-full bg-marino-3/50 py-2 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10 transition-colors"
                                                     />
                                                 </div>
                                             </td>
-                                            <td className="p-5 text-center">
+                                            <td className="p-2 text-center">
                                                 <input
                                                     type="number"
                                                     value={ej.series}
                                                     onChange={(e) => handleUpdateChange(ej.id, { series: parseInt(e.target.value) })}
-                                                    className="w-full bg-marino-3 border border-white/10 py-3 rounded-xl text-center text-blanco transition-all font-black text-base shadow-inner"
+                                                    className="w-full bg-marino-3/50 border border-white/5 py-2 rounded-lg text-center text-blanco font-black text-sm focus:bg-naranja/10 focus:border-naranja/20 transition-all"
                                                 />
                                             </td>
-                                            <td className="p-5 text-center">
+                                            <td className="p-2 text-center">
                                                 <input
                                                     type="number"
                                                     value={ej.RIR !== null ? ej.RIR : ''}
                                                     onChange={(e) => handleUpdateChange(ej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                    className="w-full bg-marino-3 border border-white/10 py-3 rounded-xl text-center text-naranja transition-all font-black text-base shadow-inner"
+                                                    className="w-full bg-marino-3/50 border border-white/5 py-2 rounded-lg text-center text-naranja font-black text-sm focus:bg-naranja/10 focus:border-naranja/20 transition-all"
                                                 />
                                             </td>
-                                            <td className="p-5 text-center">
-                                                <div className="flex items-center gap-1 bg-marino-3 px-1 rounded-xl border border-white/10 shadow-inner">
+                                            <td className="p-2 text-center">
+                                                <div className="flex items-center gap-0.5 bg-marino-3/50 px-1 rounded-lg border border-white/5">
                                                     <input
                                                         type="number"
                                                         value={ej.descansoSegundos !== null ? ej.descansoSegundos : ''}
                                                         onChange={(e) => handleUpdateChange(ej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                        className="w-full bg-transparent py-3 text-center text-blanco focus:outline-none text-base font-black"
+                                                        className="w-full bg-transparent py-2 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/5"
                                                     />
-                                                    <span className="text-[0.45rem] font-black text-gris/40 pr-1 lowercase">s</span>
+                                                    <span className="text-[0.4rem] font-black text-gris/30 pr-0.5">s</span>
                                                 </div>
                                             </td>
-                                            <td className="p-5 text-center">
+                                            <td className="p-2 text-center">
                                                 <input
                                                     type="number"
                                                     step="0.5"
                                                     value={ej.pesoSugerido || ''}
                                                     onChange={(e) => handleUpdateChange(ej.id, { pesoSugerido: parseFloat(e.target.value) })}
-                                                    className="w-full bg-marino-3 border border-verde/20 py-3 rounded-xl text-center text-verde transition-all font-black text-base shadow-inner shadow-verde/5"
+                                                    className="w-full bg-marino-3/50 border border-verde/10 py-2 rounded-lg text-center text-verde font-black text-sm focus:bg-verde/5 focus:border-verde/30 transition-all"
                                                 />
                                             </td>
-                                            <td className="p-5">
+                                            <td className="p-2">
                                                 <textarea
                                                     value={ej.notasTecnicas || ''}
                                                     onChange={(e) => handleUpdateChange(ej.id, { notasTecnicas: e.target.value })}
-                                                    className="w-full bg-marino-3/50 border border-white/10 p-3 rounded-xl text-blanco text-xs focus:outline-none focus:border-naranja/20 transition-all resize-none h-12 overflow-hidden hover:h-24 shadow-inner"
+                                                    className="w-full bg-marino-3/30 border border-white/5 p-2 rounded-lg text-blanco text-[10px] focus:outline-none focus:border-naranja/20 transition-all resize-none h-9 focus:h-20 focus:z-30 relative"
+                                                    placeholder="..."
                                                 />
                                             </td>
-                                            <td className="p-5 text-right">
-                                                <button onClick={() => handleEliminar(ej.id)} className="text-gris/30 hover:text-rojo p-2 rounded-lg transition-all">
-                                                    <Trash2 size={16} />
+                                            <td className="p-2 text-right">
+                                                <button onClick={() => handleEliminar(ej.id)} className="text-gris/20 hover:text-rojo p-1.5 rounded-lg transition-all">
+                                                    <Trash2 size={14} />
                                                 </button>
                                             </td>
                                         </tr>
