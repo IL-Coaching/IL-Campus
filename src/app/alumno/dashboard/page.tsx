@@ -2,8 +2,6 @@ import {
     Play,
     TrendingUp,
     Calendar,
-    AlertCircle,
-    ChevronRight,
     Flame,
     Weight,
     Zap,
@@ -21,6 +19,8 @@ import { prisma } from '@/baseDatos/conexion';
 import { calcularFaseMenstrual } from '@/nucleo/utilidades/ciclo';
 import { obtenerDashboardData } from '@/nucleo/acciones/dashboard-alumno.accion';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+const MiniCheckin = dynamic(() => import('@/compartido/componentes/MiniCheckin'), { ssr: false });
 
 function getSaludoYIcono() {
     const hora = new Date().getHours();
@@ -295,18 +295,9 @@ export default async function AlumnoDashboard() {
                         </div>
                     </section>
 
-                    {/* Alerta de Check-in */}
+                    {/* Mini Check-in integrado */}
                     {datos.tieneCheckinPendiente && (
-                        <Link href="/alumno/checkin" className="bg-marino-3/50 border border-[#EAB308]/30 p-5 rounded-2xl flex gap-4 items-center group cursor-pointer hover:border-[#EAB308]/60 transition-colors active:scale-[0.98]">
-                            <div className="w-10 h-10 rounded-full bg-[#EAB308]/10 flex items-center justify-center shrink-0 border border-[#EAB308]/20">
-                                <AlertCircle size={20} className="text-[#EAB308]" />
-                            </div>
-                            <div className="flex-1">
-                                <h4 className="text-sm font-bold text-blanco leading-tight">Check-in Pendiente</h4>
-                                <p className="text-xs text-gris-claro font-medium mt-0.5">Compartí cómo te sentiste esta semana.</p>
-                            </div>
-                            <ChevronRight size={20} className="text-gris group-hover:translate-x-1 transition-transform" />
-                        </Link>
+                        <MiniCheckin />
                     )}
 
                     {/* Frase Motivacional del día */}
