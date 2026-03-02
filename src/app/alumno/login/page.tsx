@@ -1,4 +1,5 @@
 "use client"
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, ArrowRight, AlertCircle } from 'lucide-react';
@@ -38,7 +39,7 @@ export default function AlumnoLoginPage() {
             const result = await completarForzarPassword(tempToken, password);
 
             if (result.success) {
-                router.push('/alumno/dashboard');
+                router.push('/alumno/bienvenida');
             } else {
                 setError(result.error || "Ocurrió un error inesperado al activar la cuenta.");
                 setLoading(false);
@@ -53,7 +54,7 @@ export default function AlumnoLoginPage() {
             setTempToken(result.tempToken);
             setLoading(false);
         } else if (result.success) {
-            router.push('/alumno/dashboard');
+            router.push('/alumno/bienvenida');
         } else {
             setError(result.error || "Ocurrió un error inesperado.");
             setLoading(false);
@@ -78,96 +79,111 @@ export default function AlumnoLoginPage() {
                             <div className="w-1.5 h-6 bg-gris-claro rounded-sm"></div>
                         </div>
                     </Link>
-                    <h1 className="text-3xl font-barlow-condensed font-black uppercase text-blanco tracking-tight">Campus Virtual</h1>
-                    <p className="text-gris text-sm font-medium mt-2 max-w-[280px]">Ingresá para acceder a tu planificación y seguimiento personalizado</p>
+                    
+                    <h1 className="text-3xl font-barlow-condensed font-black uppercase tracking-tight text-blanco">
+                        Bienvenido<span className="text-naranja">.</span>
+                    </h1>
+                    <p className="text-gris font-medium text-sm">
+                        Accedé a tu espacio de entrenamiento
+                    </p>
                 </div>
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="space-y-6 bg-marino-2 p-10 rounded-3xl border border-marino-4 shadow-2xl relative overflow-hidden">
-                    {/* Glow efecto sutil en el borde superior */}
-                    <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-naranja/40 to-transparent"></div>
-
-                    {error && (
-                        <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-xl text-xs font-bold flex items-center gap-3 animate-shake">
-                            <AlertCircle size={16} /> {error}
-                        </div>
-                    )}
-
+                <form onSubmit={handleSubmit} className="space-y-4">
                     {!faseActivacion ? (
                         <>
-                            <div className="space-y-2">
-                                <label className="text-[0.65rem] text-naranja font-black uppercase tracking-[0.25em] ml-1">Email / Usuario</label>
+                            <div>
+                                <label className="block text-xs font-bold text-gris uppercase tracking-widest mb-2">
+                                    Código de activación
+                                </label>
                                 <input
-                                    name="email"
-                                    type="email"
+                                    name="codigo"
+                                    type="text"
                                     required
-                                    placeholder="tu@email.com"
-                                    className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:outline-none focus:border-naranja transition-all font-medium placeholder:text-gris/20"
+                                    className="w-full bg-marino-2 border border-marino-4 rounded-xl py-3 px-4 text-blanco placeholder:text-gris focus:outline-none focus:border-naranja/50 transition-colors"
+                                    placeholder="Ingresa tu código"
                                 />
                             </div>
-
-                            <div className="space-y-2">
-                                <div className="flex justify-between items-center">
-                                    <label className="text-[0.65rem] text-naranja font-black uppercase tracking-[0.25em] ml-1">Código de Activación / Contraseña</label>
-                                    <Link href="/recuperar" className="text-[0.6rem] text-gris hover:text-naranja uppercase font-bold tracking-tighter transition-colors">¿Problemas?</Link>
-                                </div>
+                            
+                            <div>
+                                <label className="block text-xs font-bold text-gris uppercase tracking-widest mb-2">
+                                    Contraseña
+                                </label>
                                 <input
                                     name="password"
                                     type="password"
                                     required
+                                    className="w-full bg-marino-2 border border-marino-4 rounded-xl py-3 px-4 text-blanco placeholder:text-gris focus:outline-none focus:border-naranja/50 transition-colors"
                                     placeholder="••••••••"
-                                    className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:outline-none focus:border-naranja transition-all font-medium placeholder:text-gris/20"
                                 />
                             </div>
                         </>
                     ) : (
                         <>
-                            <div className="bg-naranja/10 border border-naranja/30 p-4 rounded-xl mb-4">
-                                <h3 className="text-naranja font-black uppercase tracking-widest text-xs mb-1">¡Cuenta Encontrada!</h3>
-                                <p className="text-gris text-sm">Por seguridad, debés crear tu contraseña definitiva para continuar a tu panel.</p>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-[0.65rem] text-naranja font-black uppercase tracking-[0.25em] ml-1">Nueva Contraseña</label>
+                            <div>
+                                <label className="block text-xs font-bold text-gris uppercase tracking-widest mb-2">
+                                    Nueva Contraseña
+                                </label>
                                 <input
                                     name="password"
                                     type="password"
                                     required
-                                    placeholder="••••••••"
-                                    className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:outline-none focus:border-naranja transition-all font-medium placeholder:text-gris/20"
+                                    minLength={6}
+                                    className="w-full bg-marino-2 border border-marino-4 rounded-xl py-3 px-4 text-blanco placeholder:text-gris focus:outline-none focus:border-naranja/50 transition-colors"
+                                    placeholder="Mínimo 6 caracteres"
                                 />
                             </div>
-
-                            <div className="space-y-2">
-                                <label className="text-[0.65rem] text-naranja font-black uppercase tracking-[0.25em] ml-1">Repetí la Contraseña</label>
+                            
+                            <div>
+                                <label className="block text-xs font-bold text-gris uppercase tracking-widest mb-2">
+                                    Confirmar Contraseña
+                                </label>
                                 <input
                                     name="password_confirm"
                                     type="password"
                                     required
-                                    placeholder="••••••••"
-                                    className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:outline-none focus:border-naranja transition-all font-medium placeholder:text-gris/20"
+                                    minLength={6}
+                                    className="w-full bg-marino-2 border border-marino-4 rounded-xl py-3 px-4 text-blanco placeholder:text-gris focus:outline-none focus:border-naranja/50 transition-colors"
+                                    placeholder="Repetí tu contraseña"
                                 />
                             </div>
                         </>
                     )}
 
-                    <div className="pt-4">
-                        <button
-                            disabled={loading}
-                            className="w-full bg-naranja hover:bg-naranja-h disabled:opacity-50 transition-all text-marino font-black py-4.5 rounded-xl uppercase tracking-widest font-barlow-condensed text-xl shadow-xl shadow-naranja/10 active:scale-[0.98] flex items-center justify-center gap-3"
-                        >
-                            {loading ? <Loader2 className="animate-spin" size={24} /> : (
-                                faseActivacion ? "Guardar y Entrar" : <><ArrowRight size={20} /> Entrar al Campus</>
-                            )}
-                        </button>
-                    </div>
+                    {error && (
+                        <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                            <AlertCircle size={16} className="text-red-400 shrink-0" />
+                            <p className="text-red-400 text-xs font-bold">{error}</p>
+                        </div>
+                    )}
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-naranja hover:bg-naranja-h text-marino font-black py-4 rounded-xl flex items-center justify-center gap-2 uppercase tracking-widest font-barlow-condensed text-lg transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {loading ? (
+                            <>
+                                <Loader2 size={20} className="animate-spin" />
+                                <span>Ingresando...</span>
+                            </>
+                        ) : (
+                            <>
+                                <span>{faseActivacion ? 'Activar Cuenta' : 'Ingresar'}</span>
+                                <ArrowRight size={20} />
+                            </>
+                        )}
+                    </button>
                 </form>
 
-                <div className="flex flex-col items-center gap-6 pt-4">
-                    <Link href="/ingresar" className="text-[0.65rem] text-gris hover:text-blanco transition-colors font-bold uppercase tracking-[0.2em] border-b border-gris/20 pb-1">
-                        ← Ver otras opciones de acceso
+                {/* Footer Links */}
+                <div className="text-center space-y-2">
+                    <Link href="/recuperar" className="block text-xs text-gris hover:text-naranja transition-colors">
+                        ¿Olvidaste tu contraseña?
                     </Link>
-                    <p className="text-[0.6rem] text-gris/30 font-bold uppercase tracking-[0.3em] italic">Potenciado por IL-Coaching Platform</p>
+                    <Link href="/" className="block text-xs text-gris hover:text-naranja transition-colors">
+                        ← Volver al inicio
+                    </Link>
                 </div>
             </div>
         </main>
