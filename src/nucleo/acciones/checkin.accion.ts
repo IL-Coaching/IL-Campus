@@ -2,6 +2,7 @@
 
 import { prisma } from "@/baseDatos/conexion";
 import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";
+import { getAlumnoSesion } from "@/nucleo/seguridad/sesion";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -85,5 +86,47 @@ export async function marcarCheckinVisto(checkinId: string) {
     } catch (error) {
         console.error("Error al marcar check-in:", error);
         return { error: "No se pudo marcar como visto." };
+    }
+}
+
+interface CheckinInput {
+    energia: number;
+    sueno: number;
+    adherencia: number;
+    problemaFisico: boolean;
+    notaProblema?: string;
+    intensidad: string;
+    nota?: string;
+    pesoKg?: number;
+}
+
+/**
+ * Envía un check-in desde el cliente.
+ * @security Autenticación validada por sesión.
+ */
+export async function enviarCheckin(data: CheckinInput) {
+    try {
+        const cliente = await getAlumnoSesion();
+
+        const checkin = await prisma.checkin.create({
+            data: {
+                clienteId: cliente.id,
+                energia: data.energia,
+                sueno: data.sueno,
+                adherencia: data.adherencia,
+                nota: data.nota || '',
+                faseCiclo: data.intensidad,
+                ajustesEsperados: data.problemaFisico ? data.notaProblema : null,
+                visto: false
+            }
+        });
+
+        revalidatePath('/alumno/dashboard');
+        revalidatePath('/alumno/checkin');
+        
+        return { exito: true, checkin };
+    } catch (error) {
+        console.error("Error al enviar check-in:", error);
+        return { error: "No se pudo enviar el check-in." };
     }
 }

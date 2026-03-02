@@ -6,34 +6,53 @@ import {
     ChevronRight,
     Flame,
     Weight,
-    Zap
+    Zap,
+    MessageCircle,
+    Clock,
+    Target
 } from 'lucide-react';
 import AlumnoNav from '@/compartido/componentes/AlumnoNav';
 import { getAlumnoSesion } from '@/nucleo/seguridad/sesion';
 import { prisma } from '@/baseDatos/conexion';
 import { calcularFaseMenstrual } from '@/nucleo/utilidades/ciclo';
+import { obtenerDashboardData } from '@/nucleo/acciones/dashboard-alumno.accion';
 import Link from 'next/link';
 
 export default async function AlumnoDashboard() {
     const alumno = await getAlumnoSesion();
+    
+    const [datosDashboard, ciclo, macrosCiclo] = await Promise.all([
+        obtenerDashboardData(),
+        prisma.cicloMenstrual.findUnique({ where: { clienteId: alumno.id } }),
+        prisma.macrociclo.findFirst({
+            where: { clienteId: alumno.id },
+            orderBy: { creadoEn: 'desc' },
+            include: {
+                bloquesMensuales: {
+                    orderBy: { id: 'asc' },
+                    include: {
+                        semanas: {
+                            orderBy: { numeroSemana: 'asc' },
+                            take: 1
+                        }
+                    }
+                }
+            }
+        })
+    ]);
 
-    // Consultar ciclo menstrual si está habilitado
-    const ciclo = await prisma.cicloMenstrual.findUnique({
-        where: { clienteId: alumno.id }
-    });
+    const infoCiclo = ciclo?.activo 
+        ? calcularFaseMenstrual(new Date(ciclo.fechaInicioUltimoCiclo), ciclo.duracionCiclo)
+        : null;
 
-    let infoCiclo = null;
-    if (ciclo && ciclo.activo) {
-        infoCiclo = calcularFaseMenstrual(new Date(ciclo.fechaInicioUltimoCiclo), ciclo.duracionCiclo);
-    }
-
-    // Obtenemos las iniciales para el avatar
     const iniciales = alumno.nombre
         .split(' ')
         .map((n: string) => n[0])
         .join('')
         .toUpperCase()
         .slice(0, 2);
+
+    const datos = datosDashboard.datos;
 
     return (
         <div className="min-h-screen bg-marino pb-24 text-blanco">
@@ -42,19 +61,35 @@ export default async function AlumnoDashboard() {
                 <header className="p-6 pt-10 flex justify-between items-start border-b border-marino-4 bg-marino-2/50 backdrop-blur-md sticky top-0 z-40">
                     <div>
                         <h1 className="text-3xl font-barlow-condensed font-black uppercase text-blanco leading-none">¡Hola, {alumno.nombre.split(' ')[0]}! 🚀</h1>
-                        <div className="flex items-center gap-2 mt-2">
-                            <span className="text-[0.6rem] font-bold text-naranja uppercase tracking-[0.15em] border border-naranja/30 bg-naranja/5 px-2 py-0.5 rounded">Alumno IL Campus</span>
-                            <span className="text-[0.6rem] font-bold text-gris uppercase tracking-[0.15em]">Seguimiento Activo</span>
+                        <div className="flex items-center gap-2 mt-2 flex-wrap">
+                            <span className="text-[0.6rem] font-bold text-naranja uppercase tracking-[0.15em] border border-naranja/30 bg-naranja/5 px-2 py-0.5 rounded">IL Campus</span>
+                            {datos.plan && (
+                                <span className="text-[0.55rem] font-bold text-green-400 uppercase tracking-[0.15em] flex items-center gap-1">
+                                    <Clock size={10} /> {datos.plan.diasRestantes} días restantes
+                                </span>
+                            )}
                         </div>
                     </div>
-                    <Link href="/alumno/perfil" className="w-12 h-12 rounded-full border-2 border-naranja overflow-hidden bg-marino-3 flex items-center justify-center font-barlow-condensed font-black text-naranja text-xl shadow-lg shadow-naranja/20 hover:scale-105 transition-transform active:scale-95">
-                        {iniciales}
-                    </Link>
+                    <div className="flex items-center gap-3">
+                        {datos.mensajesNoLeidos > 0 && (
+                            <Link href="/alumno/mensajeria" className="relative">
+                                <div className="w-10 h-10 rounded-full bg-marino-3 border border-marino-4 flex items-center justify-center">
+                                    <MessageCircle size={18} className="text-naranja" />
+                                </div>
+                                <span className="absolute -top-1 -right-1 w-5 h-5 bg-naranja text-marino text-[0.6rem] font-black rounded-full flex items-center justify-center">
+                                    {datos.mensajesNoLeidos}
+                                </span>
+                            </Link>
+                        )}
+                        <Link href="/alumno/perfil" className="w-12 h-12 rounded-full border-2 border-naranja overflow-hidden bg-marino-3 flex items-center justify-center font-barlow-condensed font-black text-naranja text-xl shadow-lg shadow-naranja/20 hover:scale-105 transition-transform active:scale-95">
+                            {iniciales}
+                        </Link>
+                    </div>
                 </header>
 
-                <main className="p-6 space-y-8 animate-in fade-in duration-700">
+                <main className="p-6 space-y-6 animate-in fade-in duration-700">
 
-                    {/* Banner de Ciclo Menstrual (Si aplica) */}
+                    {/* Banner de Ciclo Menstrual */}
                     {infoCiclo && (
                         <section className="animate-in slide-in-from-top-4 duration-500">
                             <div
@@ -77,13 +112,7 @@ export default async function AlumnoDashboard() {
                                             <span className="text-[0.6rem] font-bold px-2 py-0.5 rounded-full bg-blanco/5 text-gris uppercase border border-blanco/10">Recomendado</span>
                                         </div>
                                         <p className="text-blanco font-bold text-sm leading-tight italic">{infoCiclo.intensidad}</p>
-                                        <p className="text-gris-claro text-xs leading-relaxed max-w-sm mt-2">{infoCiclo.recomendacion}</p>
                                     </div>
-                                </div>
-
-                                {/* Decoración fondo */}
-                                <div className="absolute -right-8 -bottom-8 opacity-10 rotate-12">
-                                    <Zap size={120} color={infoCiclo.color} />
                                 </div>
                             </div>
                         </section>
@@ -92,25 +121,25 @@ export default async function AlumnoDashboard() {
                     {/* Acción Principal: Entrenar */}
                     <section className="relative group">
                         <div className="absolute -inset-1 bg-gradient-to-r from-naranja to-naranja-h rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-                        <div className="relative bg-marino-2 border border-marino-4 p-6 rounded-2xl shadow-xl overflow-hidden active:scale-[0.98] transition-transform">
+                        <div className="relative bg-marino-2 border border-marino-4 p-6 rounded-2xl shadow-xl overflow-hidden">
                             <div className="flex justify-between items-start mb-4">
                                 <div>
                                     <span className="text-[0.6rem] font-bold text-naranja uppercase tracking-[0.2em] block mb-1">Hoy te toca entrenar</span>
-                                    <h2 className="text-3xl font-barlow-condensed font-black uppercase leading-[0.9]">Planificación<br />Personalizada</h2>
+                                    <h2 className="text-3xl font-barlow-condensed font-black uppercase leading-[0.9]">Tu Entrenamiento</h2>
                                 </div>
                                 <div className="bg-marino-3 p-3 rounded-xl border border-marino-4">
                                     <Flame size={24} className="text-naranja" />
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-4 mb-6">
+                            <div className="flex items-center gap-4 mb-6 flex-wrap">
                                 <div className="flex items-center gap-1.5">
                                     <Calendar size={14} className="text-gris" />
-                                    <span className="text-xs text-gris-claro font-medium">Revisá tu rutina</span>
+                                    <span className="text-xs text-gris-claro font-medium">Tu rutina de la semana</span>
                                 </div>
                                 <div className="flex items-center gap-1.5">
-                                    <TrendingUp size={14} className="text-gris" />
-                                    <span className="text-xs text-gris-claro font-medium italic">Progreso Real</span>
+                                    <Target size={14} className="text-gris" />
+                                    <span className="text-xs text-gris-claro font-medium italic">{macrosCiclo ? `${macrosCiclo.duracionSemanas} semanas` : 'Sin planificar'}</span>
                                 </div>
                             </div>
 
@@ -122,32 +151,52 @@ export default async function AlumnoDashboard() {
 
                     {/* Métricas Rápidas */}
                     <section>
-                        <h3 className="text-xs font-bold text-gris uppercase tracking-[0.2em] mb-4 ml-1">Estado de tu Proceso</h3>
-                        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                            <div className="bg-marino-2 border border-marino-4 p-4 rounded-xl min-w-[140px] flex-1">
-                                <Weight size={18} className="text-naranja mb-3" />
-                                <p className="text-[0.6rem] text-gris uppercase font-bold tracking-widest">Peso Actual</p>
-                                <p className="text-xl font-barlow-condensed font-black text-blanco">No registrado</p>
+                        <h3 className="text-xs font-bold text-gris uppercase tracking-[0.2em] mb-4 ml-1">Tu Estado</h3>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-marino-2 border border-marino-4 p-4 rounded-xl">
+                                <Weight size={18} className="text-naranja mb-2" />
+                                <p className="text-[0.6rem] text-gris uppercase font-bold tracking-widest">Peso</p>
+                                <p className="text-xl font-barlow-condensed font-black text-blanco">
+                                    {datos.ultimoCheckin?.pesoKg ? `${datos.ultimoCheckin.pesoKg} kg` : 'Sin registro'}
+                                </p>
                             </div>
-                            <div className="bg-marino-2 border border-marino-4 p-4 rounded-xl min-w-[140px] flex-1">
-                                <TrendingUp size={18} className="text-[#22C55E] mb-3" />
-                                <p className="text-[0.6rem] text-gris uppercase font-bold tracking-widest">Estado</p>
-                                <p className="text-xl font-barlow-condensed font-black text-blanco">Activo</p>
+                            <div className="bg-marino-2 border border-marino-4 p-4 rounded-xl">
+                                <TrendingUp size={18} className="text-green-400 mb-2" />
+                                <p className="text-[0.6rem] text-gris uppercase font-bold tracking-widest">Check-ins</p>
+                                <p className="text-xl font-barlow-condensed font-black text-blanco">
+                                    {datos.checkinsUltimaSemana > 0 ? 'Esta semana' : 'Pendiente'}
+                                </p>
+                            </div>
+                            <div className="bg-marino-2 border border-marino-4 p-4 rounded-xl">
+                                <Calendar size={18} className="text-blue-400 mb-2" />
+                                <p className="text-[0.6rem] text-gris uppercase font-bold tracking-widest">Plan</p>
+                                <p className="text-xl font-barlow-condensed font-black text-blanco">
+                                    {datos.plan ? `${datos.plan.diasRestantes} días` : 'Sin plan'}
+                                </p>
+                            </div>
+                            <div className="bg-marino-2 border border-marino-4 p-4 rounded-xl">
+                                <MessageCircle size={18} className="text-purple-400 mb-2" />
+                                <p className="text-[0.6rem] text-gris uppercase font-bold tracking-widest">Mensajes</p>
+                                <p className="text-xl font-barlow-condensed font-black text-blanco">
+                                    {datos.mensajesNoLeidos > 0 ? `${datos.mensajesNoLeidos} nuevos` : 'Sin nuevos'}
+                                </p>
                             </div>
                         </div>
                     </section>
 
                     {/* Alerta de Check-in */}
-                    <Link href="/alumno/checkin" className="bg-marino-3/50 border border-[#EAB308]/30 p-5 rounded-2xl flex gap-4 items-center group cursor-pointer hover:border-[#EAB308]/60 transition-colors active:scale-[0.98]">
-                        <div className="w-10 h-10 rounded-full bg-[#EAB308]/10 flex items-center justify-center shrink-0 border border-[#EAB308]/20">
-                            <AlertCircle size={20} className="text-[#EAB308]" />
-                        </div>
-                        <div className="flex-1">
-                            <h4 className="text-sm font-bold text-blanco leading-tight">Check-in Pendiente</h4>
-                            <p className="text-xs text-gris-claro font-medium mt-0.5">Subí tus fotos y reportes de la semana.</p>
-                        </div>
-                        <ChevronRight size={20} className="text-gris group-hover:translate-x-1 transition-transform" />
-                    </Link>
+                    {datos.tieneCheckinPendiente && (
+                        <Link href="/alumno/checkin" className="bg-marino-3/50 border border-[#EAB308]/30 p-5 rounded-2xl flex gap-4 items-center group cursor-pointer hover:border-[#EAB308]/60 transition-colors active:scale-[0.98]">
+                            <div className="w-10 h-10 rounded-full bg-[#EAB308]/10 flex items-center justify-center shrink-0 border border-[#EAB308]/20">
+                                <AlertCircle size={20} className="text-[#EAB308]" />
+                            </div>
+                            <div className="flex-1">
+                                <h4 className="text-sm font-bold text-blanco leading-tight">Check-in Pendiente</h4>
+                                <p className="text-xs text-gris-claro font-medium mt-0.5">Compartí cómo te sentiste esta semana.</p>
+                            </div>
+                            <ChevronRight size={20} className="text-gris group-hover:translate-x-1 transition-transform" />
+                        </Link>
+                    )}
 
                     {/* Frase Motivadora */}
                     <section className="py-6 text-center italic text-gris-claro text-sm font-light leading-relaxed max-w-xs mx-auto">
@@ -157,7 +206,6 @@ export default async function AlumnoDashboard() {
                 </main>
 
             </div>
-            {/* Navegación Alumno */}
             <AlumnoNav />
         </div>
     );

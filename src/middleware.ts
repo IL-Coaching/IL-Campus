@@ -33,6 +33,9 @@ const RUTAS_PROTEGIDAS_ALUMNO = [
     '/alumno/rutina',
     '/alumno/checkin',
     '/alumno/perfil',
+    '/alumno/mensajeria',
+    '/alumno/progreso',
+    '/alumno/membresia',
 ];
 
 const RUTAS_PUBLICAS = [
