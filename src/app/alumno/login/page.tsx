@@ -79,7 +79,7 @@ export default function AlumnoLoginPage() {
                             <div className="w-1.5 h-6 bg-gris-claro rounded-sm"></div>
                         </div>
                     </Link>
-                    
+
                     <h1 className="text-3xl font-barlow-condensed font-black uppercase tracking-tight text-blanco">
                         Bienvenido<span className="text-naranja">.</span>
                     </h1>
@@ -97,14 +97,14 @@ export default function AlumnoLoginPage() {
                                     Código de activación
                                 </label>
                                 <input
-                                    name="codigo"
-                                    type="text"
+                                    name="email"
+                                    type="email"
                                     required
                                     className="w-full bg-marino-2 border border-marino-4 rounded-xl py-3 px-4 text-blanco placeholder:text-gris focus:outline-none focus:border-naranja/50 transition-colors"
-                                    placeholder="Ingresa tu código"
+                                    placeholder="Ingresa tu email o código"
                                 />
                             </div>
-                            
+
                             <div>
                                 <label className="block text-xs font-bold text-gris uppercase tracking-widest mb-2">
                                     Contraseña
@@ -133,7 +133,7 @@ export default function AlumnoLoginPage() {
                                     placeholder="Mínimo 6 caracteres"
                                 />
                             </div>
-                            
+
                             <div>
                                 <label className="block text-xs font-bold text-gris uppercase tracking-widest mb-2">
                                     Confirmar Contraseña
