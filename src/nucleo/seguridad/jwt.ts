@@ -1,7 +1,9 @@
 import { SignJWT, jwtVerify } from 'jose';
 
 const secret = new TextEncoder().encode(
-    process.env.JWT_SECRET || (() => { throw new Error("JWT_SECRET no configurado en variables de entorno"); })()
+    process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' 
+        ? (() => { throw new Error("JWT_SECRET no configurado en variables de entorno"); })()
+        : 'dev-secret-please-change-in-production')
 );
 
 /**
