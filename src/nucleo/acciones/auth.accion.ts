@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { OTP } from 'otplib';
 
 // Instancia global estable de OTP para TOTP (compatible con Vercel/NextJS)
@@ -11,8 +12,65 @@ import { CriptoServicio } from "@/nucleo/seguridad/cripto";
 import { establecerSesion, cerrarSesion } from "@/nucleo/seguridad/sesion";
 import { EsquemaLoginEntrenador, EsquemaLoginAlumno } from "../validadores/auth.validador";
 
-// Función auxiliar para mitigar ataques de tiempo y fuerza bruta básica
+// Función auxiliar para mitigar ataques de tiempo
 const delayFallo = () => new Promise(resolve => setTimeout(resolve, 1000));
+
+/**
+ * Verifica el límite de peticiones interactuando con la tabla persistente RegistroAutenticacion.
+ * @security Prevención contra Brute-Force incluso en edge runtimes.
+ */
+async function verificarRateLimitPersistente(ip: string): Promise<boolean> {
+    try {
+        const now = new Date();
+        const registro = await prisma.registroAutenticacion.findUnique({ where: { ip } });
+
+        if (!registro) {
+            await prisma.registroAutenticacion.create({ data: { ip, intentos: 1 } });
+            return true;
+        }
+
+        if (registro.bloqueadoHasta && registro.bloqueadoHasta > now) {
+            return false;
+        }
+
+        const windowMs = 15 * 60 * 1000; // 15 minutos
+        if (now.getTime() - registro.ultimoIntento.getTime() > windowMs) {
+            // Pasó la ventana de bloqueo, reset
+            await prisma.registroAutenticacion.update({
+                where: { ip },
+                data: { intentos: 1, ultimoIntento: now, bloqueadoHasta: null }
+            });
+            return true;
+        }
+
+        const nuevosIntentos = registro.intentos + 1;
+        let bloqueadoHasta = null;
+        if (nuevosIntentos >= 10) { // Bloquear por 15min luego de 10 fallos
+            bloqueadoHasta = new Date(now.getTime() + windowMs);
+        }
+
+        await prisma.registroAutenticacion.update({
+            where: { ip },
+            data: { intentos: nuevosIntentos, ultimoIntento: now, bloqueadoHasta }
+        });
+
+        return nuevosIntentos <= 10;
+    } catch (e) {
+        console.error("Fallo rate limiter DB, usando bypass de emergencia", e);
+        return true;
+    }
+}
+
+async function resetearRateLimit(ip: string) {
+    try {
+        await prisma.registroAutenticacion.updateMany({
+            where: { ip },
+            data: { intentos: 0, bloqueadoHasta: null }
+        });
+    } catch (e) {
+        console.error("Error al resetear rate limiter", e);
+    }
+}
 
 // Tipado para Prisma dinámico sin 'any'
 type PrismaUpdateRaw = {
@@ -51,6 +109,14 @@ export async function loginEntrenador(formData: FormData) {
         return { error: validacion.error.issues[0].message };
     }
 
+    // 2. Rate Limiter Persistente DB
+    const head = headers();
+    const ip = head.get("x-forwarded-for")?.split(",")[0] || head.get("x-real-ip") || "unknown";
+    if (ip !== "unknown") {
+        const permitido = await verificarRateLimitPersistente(ip);
+        if (!permitido) return { error: "Demasiados intentos fallidos. Intente más tarde." };
+    }
+
     try {
         const entrenadorRaw = await prisma.entrenador.findUnique({
             where: { email }
@@ -77,6 +143,8 @@ export async function loginEntrenador(formData: FormData) {
         }
 
         await establecerSesion(entrenador.id, "entrenador");
+        if (ip !== "unknown") await resetearRateLimit(ip);
+
         return { success: true };
     } catch {
         return { error: "Error de conexión con la base de datos." };
@@ -130,6 +198,14 @@ export async function loginAlumno(formData: FormData) {
         return { error: validacion.error.issues[0].message };
     }
 
+    // 2. Rate Limiter Persistente DB
+    const head = headers();
+    const ip = head.get("x-forwarded-for")?.split(",")[0] || head.get("x-real-ip") || "unknown";
+    if (ip !== "unknown") {
+        const permitido = await verificarRateLimitPersistente(ip);
+        if (!permitido) return { error: "Demasiados intentos fallidos. Intente más tarde." };
+    }
+
     try {
         const clienteRaw = await prisma.cliente.findUnique({
             where: { email }
@@ -178,6 +254,8 @@ export async function loginAlumno(formData: FormData) {
         });
 
         await establecerSesion(cliente.id, "alumno");
+        if (ip !== "unknown") await resetearRateLimit(ip);
+
         return { success: true };
     } catch {
         return { error: "Error de conexión." };

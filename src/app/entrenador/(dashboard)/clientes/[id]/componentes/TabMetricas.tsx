@@ -22,6 +22,7 @@ import {
     AreaChart,
     Area
 } from 'recharts';
+import MetricasFuerza from "./MetricasFuerza";
 
 interface MetricasAdherencia {
     sesionesPlanificadas: number;
@@ -283,6 +284,9 @@ export default function TabMetricas({ clienteId }: Props) {
                     </p>
                 </div>
             )}
+
+            {/* ──── HISTORIAL DE FUERZA (1RM) ──── */}
+            <MetricasFuerza clienteId={clienteId} />
         </div>
     );
 }

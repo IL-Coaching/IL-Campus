@@ -111,6 +111,7 @@ model Cliente {
   registrosAdherencia   RegistroAdherencia[]
   resultadosTesteo      ResultadoTesteo[]
   sesiones              SesionRegistrada[]
+  gamificacion          GamificacionCliente?
 }
 
 model PlanAsignado {
@@ -623,3 +624,26 @@ enum GravedadNotificacion {
   ALERTA
   CRITICO
 }
+
+model RegistroAutenticacion {
+  id            String    @id @default(uuid())
+  ip            String    @unique
+  intentos      Int       @default(1)
+  bloqueadoHasta DateTime?
+  ultimoIntento DateTime  @default(now())
+}
+
+model GamificacionCliente {
+  id              String   @id @default(uuid())
+  clienteId       String   @unique
+  nivel           Int      @default(1)
+  experiencia     Int      @default(0)
+  rachaDias       Int      @default(0)
+  ultimoCheckin   DateTime?
+  logrosGenerales String[] // Array de keys de logros
+  creadoEn        DateTime @default(now())
+  actualizadoEn   DateTime @updatedAt
+
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+}
+

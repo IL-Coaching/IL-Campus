@@ -3,6 +3,7 @@
 import { prisma } from "@/baseDatos/conexion";
 import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";
 import { revalidatePath } from "next/cache";
+import { EsquemaRutina } from "../validadores/rutina.validador";
 
 /**
  * Obtiene todas las rutinas plantilla del entrenador.
@@ -38,6 +39,7 @@ export async function obtenerRutinas() {
 }
 
 /** Datos para crear/actualizar ejercicios dentro de una rutina. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface DatosEjercicioRutina {
     ejercicioId?: string | null;
     nombreLibre?: string | null;
@@ -55,25 +57,20 @@ interface DatosEjercicioRutina {
  * Crea una nueva rutina plantilla con sus ejercicios.
  * @security Valida entrenadorId en sesión (BOLA).
  */
-export async function crearRutina(data: {
-    nombre: string;
-    descripcion?: string;
-    categoria?: string;
-    ejercicios: DatosEjercicioRutina[];
-}) {
+export async function crearRutina(data: unknown) {
     try {
         const entrenador = await getEntrenadorSesion();
 
-        if (!data.nombre.trim()) return { error: "El nombre de la rutina es obligatorio." };
+        const validados = EsquemaRutina.parse(data);
 
         const rutina = await prisma.rutinaPlantilla.create({
             data: {
                 entrenadorId: entrenador.id,
-                nombre: data.nombre.trim(),
-                descripcion: data.descripcion?.trim() || null,
-                categoria: data.categoria?.trim() || null,
+                nombre: validados.nombre.trim(),
+                descripcion: validados.descripcion?.trim() || null,
+                categoria: validados.categoria?.trim() || null,
                 ejercicios: {
-                    create: data.ejercicios.map((ej, i) => ({
+                    create: validados.ejercicios.map((ej) => ({
                         ejercicioId: ej.ejercicioId || null,
                         nombreLibre: ej.nombreLibre || null,
                         series: ej.series,
@@ -83,7 +80,7 @@ export async function crearRutina(data: {
                         tempo: ej.tempo || null,
                         metodo: ej.metodo || null,
                         notasTecnicas: ej.notasTecnicas || null,
-                        orden: i
+                        orden: ej.orden
                     }))
                 }
             }
@@ -102,14 +99,11 @@ export async function crearRutina(data: {
  * Elimina los ejercicios anteriores y los recrea con los nuevos datos.
  * @security Valida propiedad de la rutina por entrenadorId (BOLA).
  */
-export async function actualizarRutina(rutinaId: string, data: {
-    nombre: string;
-    descripcion?: string;
-    categoria?: string;
-    ejercicios: DatosEjercicioRutina[];
-}) {
+export async function actualizarRutina(rutinaId: string, data: unknown) {
     try {
         const entrenador = await getEntrenadorSesion();
+
+        const validados = EsquemaRutina.parse(data);
 
         // BOLA
         const rutinaExistente = await prisma.rutinaPlantilla.findFirst({
@@ -123,11 +117,11 @@ export async function actualizarRutina(rutinaId: string, data: {
             prisma.rutinaPlantilla.update({
                 where: { id: rutinaId },
                 data: {
-                    nombre: data.nombre.trim(),
-                    descripcion: data.descripcion?.trim() || null,
-                    categoria: data.categoria?.trim() || null,
+                    nombre: validados.nombre.trim(),
+                    descripcion: validados.descripcion?.trim() || null,
+                    categoria: validados.categoria?.trim() || null,
                     ejercicios: {
-                        create: data.ejercicios.map((ej, i) => ({
+                        create: validados.ejercicios.map((ej) => ({
                             ejercicioId: ej.ejercicioId || null,
                             nombreLibre: ej.nombreLibre || null,
                             series: ej.series,
@@ -137,7 +131,7 @@ export async function actualizarRutina(rutinaId: string, data: {
                             tempo: ej.tempo || null,
                             metodo: ej.metodo || null,
                             notasTecnicas: ej.notasTecnicas || null,
-                            orden: i
+                            orden: ej.orden
                         }))
                     }
                 }

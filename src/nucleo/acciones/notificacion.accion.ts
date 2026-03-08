@@ -110,6 +110,28 @@ export async function purgarNotificaciones(ids?: string[]) {
 }
 
 /**
+ * Función auxiliar interna para verificar si ya existe una notificación reciente
+ * y así evitar duplicados innecesarios.
+ */
+async function existeNotificacionReciente(
+    entrenadorId: string,
+    tipo: TipoNotificacion,
+    textoBusqueda: string,
+    campo: 'titulo' | 'cuerpo',
+    horasMaximas?: number
+) {
+    const whereClause: Record<string, unknown> = {
+        entrenadorId,
+        tipo,
+        [campo]: { contains: textoBusqueda }
+    };
+    if (horasMaximas) {
+        whereClause.creadaEn = { gte: new Date(Date.now() - horasMaximas * 60 * 60 * 1000) };
+    }
+    return await prisma.notificacion.findFirst({ where: whereClause });
+}
+
+/**
  * Lógica automática: Generar alertas de finanzas para el dashboard.
  * Se puede llamar desde un cron o al cargar el dashboard.
  */
@@ -132,21 +154,14 @@ export async function dispararAlertasFinancieras() {
 
         for (const plan of planesParaVencer) {
             // Evitar duplicados del mismo tipo para el mismo cliente en las últimas 24h
-            const existePlan = await prisma.notificacion.findFirst({
-                where: {
-                    entrenadorId: entrenador.id,
-                    tipo: "FINANZA",
-                    titulo: { contains: plan.cliente.nombre },
-                    creadaEn: { gte: new Date(ahora.getTime() - 24 * 60 * 60 * 1000) }
-                }
-            });
+            const existePlan = await existeNotificacionReciente(entrenador.id, TipoNotificacion.FINANZA, plan.cliente.nombre, 'titulo', 24);
 
             if (!existePlan) {
                 await prisma.notificacion.create({
                     data: {
                         entrenadorId: entrenador.id,
-                        tipo: "FINANZA",
-                        gravedad: "ALERTA",
+                        tipo: TipoNotificacion.FINANZA,
+                        gravedad: GravedadNotificacion.ALERTA,
                         titulo: `Vencimiento de Membresía: ${plan.cliente.nombre}`,
                         cuerpo: `El plan asignado a ${plan.cliente.nombre} vence el ${plan.fechaVencimiento.toLocaleDateString()}. Recordá gestionar el próximo cobro.`
                     }
@@ -179,21 +194,15 @@ export async function dispararAlertasFormularios() {
         });
 
         for (const p of prospectosPendientes) {
-            const existeNotif = await prisma.notificacion.findFirst({
-                where: {
-                    entrenadorId: entrenador.id,
-                    tipo: "NUEVO_FORMULARIO",
-                    titulo: { contains: p.nombre }
-                }
-            });
+            const existeNotif = await existeNotificacionReciente(entrenador.id, TipoNotificacion.NUEVO_FORMULARIO, p.nombre, 'cuerpo');
 
             if (!existeNotif) {
                 await prisma.notificacion.create({
                     data: {
                         entrenadorId: entrenador.id,
-                        tipo: "NUEVO_FORMULARIO",
-                        gravedad: "INFO",
-                        titulo: "Formulario Pendiente",
+                        tipo: TipoNotificacion.NUEVO_FORMULARIO,
+                        gravedad: GravedadNotificacion.INFO,
+                        titulo: `Formulario Pendiente: ${p.nombre}`,
                         cuerpo: `El prospecto ${p.nombre} envió su formulario y aún no tiene un plan asignado.`
                     }
                 });

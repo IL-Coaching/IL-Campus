@@ -60,3 +60,32 @@ export async function obtenerResumenMetricasCliente(clienteId: string) {
         return { exito: false, error: "No se pudieron calcular las métricas." };
     }
 }
+
+/**
+ * Obtiene los 1RM y porcentajes registrados del cliente para todos los ejercicios.
+ */
+export async function obtenerFuerzaMaximaCliente(clienteId: string) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        // Verificación BOLA
+        const clienteBase = await prisma.cliente.findFirst({
+            where: { id: clienteId, entrenadorId: entrenador.id }
+        });
+
+        if (!clienteBase) return { error: "Acceso denegado" };
+
+        const records = await prisma.porcentajesCliente.findMany({
+            where: { clienteId },
+            include: {
+                ejercicio: { select: { nombre: true, musculoPrincipal: true } }
+            },
+            orderBy: { fechaTesteo: 'desc' }
+        });
+
+        return { exito: true, datos: records };
+    } catch (error) {
+        console.error("Error obteniendo fuerza máxima:", error);
+        return { error: "No se pudo recuperar la información de fuerza." };
+    }
+}

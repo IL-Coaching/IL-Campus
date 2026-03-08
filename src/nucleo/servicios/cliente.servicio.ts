@@ -139,7 +139,7 @@ export const ClienteServicio = {
                 entrenadorId: data.entrenadorId,
                 tipo: "NUEVO_FORMULARIO",
                 gravedad: "INFO",
-                titulo: "Nuevo Formulario de Inscripción",
+                titulo: `Nuevo Formulario: ${data.nombre}`,
                 cuerpo: `El prospecto ${data.nombre} ha completado el formulario de inscripción desde la landing page.`
             }
         });

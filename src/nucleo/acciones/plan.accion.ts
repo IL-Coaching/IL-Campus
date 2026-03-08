@@ -3,6 +3,7 @@
 import { prisma } from "@/baseDatos/conexion";
 import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";
 import { revalidatePath } from "next/cache";
+import { EsquemaPlan, EsquemaActualizarPlan } from "../validadores/plan.validador";
 
 /**
  * Obtiene la lista de planes del entrenador actual.
@@ -27,30 +28,17 @@ export async function obtenerPlanes() {
 /**
  * Crea un nevo plan.
  */
-export async function crearPlan(data: {
-    nombre: string;
-    precio: number;
-    duracionDias: number;
-    precioPromocional?: number | null;
-    mesesPromocion?: number | null;
-    descripcion?: string;
-    beneficios: string[];
-    visible: boolean;
-}) {
+export async function crearPlan(data: unknown) {
     try {
         const entrenador = await getEntrenadorSesion();
+
+        // Validación con Zod
+        const datosValidados = EsquemaPlan.parse(data);
 
         const nuevoPlan = await prisma.plan.create({
             data: {
                 entrenadorId: entrenador.id,
-                nombre: data.nombre,
-                precio: data.precio,
-                precioPromocional: data.precioPromocional || null,
-                mesesPromocion: data.mesesPromocion || null,
-                duracionDias: data.duracionDias,
-                descripcion: data.descripcion || null,
-                beneficios: data.beneficios,
-                visible: data.visible
+                ...datosValidados
             }
         });
 
@@ -67,30 +55,24 @@ export async function crearPlan(data: {
 /**
  * Actualiza un plan existente. Requiere validación BOLA.
  */
-export async function actualizarPlan(id: string, data: {
-    nombre: string;
-    precio: number;
-    duracionDias: number;
-    precioPromocional?: number | null;
-    mesesPromocion?: number | null;
-    descripcion?: string;
-    beneficios: string[];
-    visible: boolean;
-}) {
+export async function actualizarPlan(id: string, data: unknown) {
     try {
         const entrenador = await getEntrenadorSesion();
 
+        // Validación con Zod incorporando el id
+        const datosValidados = EsquemaActualizarPlan.parse({ id, ...(data as object) });
+
         await prisma.plan.update({
-            where: { id, entrenadorId: entrenador.id }, // BOLA
+            where: { id: datosValidados.id, entrenadorId: entrenador.id }, // BOLA
             data: {
-                nombre: data.nombre,
-                precio: data.precio,
-                precioPromocional: data.precioPromocional || null,
-                mesesPromocion: data.mesesPromocion || null,
-                duracionDias: data.duracionDias,
-                descripcion: data.descripcion || null,
-                beneficios: data.beneficios,
-                visible: data.visible
+                nombre: datosValidados.nombre,
+                precio: datosValidados.precio,
+                precioPromocional: datosValidados.precioPromocional,
+                mesesPromocion: datosValidados.mesesPromocion,
+                duracionDias: datosValidados.duracionDias,
+                descripcion: datosValidados.descripcion,
+                beneficios: datosValidados.beneficios,
+                visible: datosValidados.visible
             }
         });
 

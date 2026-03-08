@@ -2,9 +2,10 @@
 
 import { getEntrenadorSesion } from "../seguridad/sesion";
 import { EjercicioServicio } from "../servicios/ejercicio.servicio";
-import { GrupoMuscular, TipoArticulacion, PatronMovimiento, TipoEquipamiento, Lateralidad, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/baseDatos/conexion";
 import { revalidatePath } from "next/cache";
+import { EsquemaEjercicio } from "../validadores/ejercicio.validador";
 
 export async function buscarEjercicios(query: string = "", musculoFiltro?: string) {
     try {
@@ -17,26 +18,33 @@ export async function buscarEjercicios(query: string = "", musculoFiltro?: strin
 }
 
 
-export async function crearEjercicio(formData: Record<string, unknown>) {
+export async function crearEjercicio(formData: unknown) {
     try {
         const entrenador = await getEntrenadorSesion();
 
-        const data = {
-            nombre: (formData.nombre as string) || "Sin nombre",
-            musculoPrincipal: (formData.musculoPrincipal as GrupoMuscular),
-            articulacion: (formData.articulacion as TipoArticulacion),
-            patron: (formData.patronMovimiento as PatronMovimiento) || (formData.patron as PatronMovimiento) || "AISLAMIENTO",
-            equipamiento: (formData.equipamiento as TipoEquipamiento[]) || [],
-            lateralidad: (formData.lateralidad as Lateralidad) || "BILATERAL",
-            descripcion: (formData.descripcion as string) || undefined,
-            urlVideo: (formData.videoUrl as string) || (formData.urlVideo as string) || undefined,
-            entrenadorId: entrenador.id
+        // Si formData viene como un objeto plano en lugar de FormData, parseamos:
+        const payload = formData as Record<string, unknown>;
+        const dataParaValidar = {
+            nombre: payload.nombre || "Sin nombre",
+            musculoPrincipal: payload.musculoPrincipal,
+            articulacion: payload.articulacion,
+            patron: payload.patronMovimiento || payload.patron || "AISLAMIENTO",
+            equipamiento: payload.equipamiento || [],
+            lateralidad: payload.lateralidad || "BILATERAL",
+            descripcion: payload.descripcion || undefined,
+            urlVideo: payload.videoUrl || payload.urlVideo || undefined,
+            visibleParaClientes: payload.visibleParaClientes ?? true
         };
 
-        if (data.urlVideo === "") data.urlVideo = undefined;
-        if (data.descripcion === "") data.descripcion = undefined;
+        const validados = EsquemaEjercicio.parse(dataParaValidar);
 
-        await EjercicioServicio.crear(data);
+        if (validados.urlVideo === "") validados.urlVideo = undefined;
+        if (validados.descripcion === "") validados.descripcion = undefined;
+
+        await EjercicioServicio.crear({
+            ...validados,
+            entrenadorId: entrenador.id
+        });
         revalidatePath("/entrenador/biblioteca");
 
         return { exito: true };
@@ -46,7 +54,7 @@ export async function crearEjercicio(formData: Record<string, unknown>) {
     }
 }
 
-export async function actualizarEjercicio(id: string, formData: Record<string, unknown>) {
+export async function actualizarEjercicio(id: string, formData: unknown) {
     try {
         const entrenador = await getEntrenadorSesion();
 
@@ -56,17 +64,25 @@ export async function actualizarEjercicio(id: string, formData: Record<string, u
 
         if (!ejercicioPropio) throw new Error("Acceso denegado.");
 
-        const updateData: Partial<Prisma.EjercicioUpdateInput> = {};
-        if (formData.nombre) updateData.nombre = formData.nombre as string;
-        if (formData.musculoPrincipal) updateData.musculoPrincipal = formData.musculoPrincipal as GrupoMuscular;
-        if (formData.articulacion) updateData.articulacion = formData.articulacion as TipoArticulacion;
-        if (formData.patronMovimiento || formData.patron)
-            updateData.patron = (formData.patronMovimiento || formData.patron) as PatronMovimiento;
-        if (formData.equipamiento) updateData.equipamiento = formData.equipamiento as TipoEquipamiento[];
-        if (formData.lateralidad) updateData.lateralidad = formData.lateralidad as Lateralidad;
-        if (formData.descripcion !== undefined) updateData.descripcion = (formData.descripcion as string) || null;
-        if (formData.videoUrl !== undefined || formData.urlVideo !== undefined)
-            updateData.urlVideo = (formData.videoUrl as string) || (formData.urlVideo as string) || null;
+        const payload = formData as Record<string, unknown>;
+        const dataParaValidar: Record<string, unknown> = {};
+
+        if (payload.nombre !== undefined) dataParaValidar.nombre = payload.nombre;
+        if (payload.musculoPrincipal !== undefined) dataParaValidar.musculoPrincipal = payload.musculoPrincipal;
+        if (payload.articulacion !== undefined) dataParaValidar.articulacion = payload.articulacion;
+        if (payload.patronMovimiento || payload.patron) dataParaValidar.patron = payload.patronMovimiento || payload.patron;
+        if (payload.equipamiento !== undefined) dataParaValidar.equipamiento = payload.equipamiento;
+        if (payload.lateralidad !== undefined) dataParaValidar.lateralidad = payload.lateralidad;
+        if (payload.descripcion !== undefined) dataParaValidar.descripcion = payload.descripcion;
+        if (payload.videoUrl !== undefined || payload.urlVideo !== undefined) dataParaValidar.urlVideo = payload.videoUrl || payload.urlVideo;
+        if (payload.visibleParaClientes !== undefined) dataParaValidar.visibleParaClientes = payload.visibleParaClientes;
+
+        // Validamos usando schema.partial() ya que son updates
+        const validados = EsquemaEjercicio.partial().parse(dataParaValidar);
+
+        const updateData: Partial<Prisma.EjercicioUpdateInput> = { ...validados };
+        if (updateData.urlVideo === "") updateData.urlVideo = null;
+        if (updateData.descripcion === "") updateData.descripcion = null;
 
         await EjercicioServicio.actualizar(id, updateData);
         revalidatePath("/entrenador/biblioteca");

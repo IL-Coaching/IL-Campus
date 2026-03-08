@@ -3,6 +3,7 @@ import { obtenerDatosProgreso } from '@/nucleo/acciones/progreso-alumno.accion';
 import AlumnoNav from '@/compartido/componentes/AlumnoNav';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import TesteoFuerzaAlumno from './TesteoFuerzaAlumno';
 
 export default async function ProgresoPage() {
     const datos = await obtenerDatosProgreso();
@@ -96,6 +97,11 @@ export default async function ProgresoPage() {
                             ))
                         )}
                     </div>
+                </section>
+
+                {/* Testeo de Fuerza / RM */}
+                <section>
+                    <TesteoFuerzaAlumno />
                 </section>
 
                 {/* motivational */}

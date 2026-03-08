@@ -2,6 +2,7 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { obtenerGamificacion, sincronizarGamificacion } from '@/nucleo/acciones/gamificacion.accion';
 
 export interface Logro {
     id: string;
@@ -26,6 +27,7 @@ interface GamificacionState {
     maxRacha: number;
     ultimoCheckin: string | null;
     logrosDesbloqueados: LogroDesbloqueado[];
+    dbSynced: boolean;
     agregarXP: (cantidad: number, motivo: string) => void;
     actualizarRacha: (diasConsecutivos: number) => void;
     registrarCheckin: () => void;
@@ -33,6 +35,7 @@ interface GamificacionState {
     getNivelActual: () => number;
     getXPSiguienteNivel: () => number;
     getProgresoNivel: () => number;
+    hidratarDesdeDB: () => Promise<void>;
 }
 
 const LOGROS: Logro[] = [
@@ -59,6 +62,7 @@ export const useGamificacionStore = create<GamificacionState>()(
             maxRacha: 0,
             ultimoCheckin: null,
             logrosDesbloqueados: [],
+            dbSynced: false,
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             agregarXP: (cantidad: number, _motivo?: string): void => {
@@ -66,6 +70,12 @@ export const useGamificacionStore = create<GamificacionState>()(
                 const nuevoXP = state.xp + cantidad;
                 const nuevoNivel = Math.floor(nuevoXP / 500) + 1;
                 set({ xp: nuevoXP, nivel: nuevoNivel });
+                // Background DB Sync
+                sincronizarGamificacion({
+                    xp: nuevoXP, nivel: nuevoNivel, rachas: state.rachas,
+                    maxRacha: state.maxRacha, ultimoCheckin: state.ultimoCheckin,
+                    logrosDesbloqueados: state.logrosDesbloqueados,
+                }).catch(e => console.error("Error al sincronizar gamificación", e));
             },
 
             actualizarRacha: (diasConsecutivos: number) => {
@@ -73,28 +83,36 @@ export const useGamificacionStore = create<GamificacionState>()(
                 const nuevaRacha = Math.max(state.rachas, diasConsecutivos);
                 const nuevaMaxRacha = Math.max(state.maxRacha, nuevaRacha);
                 set({ rachas: nuevaRacha, maxRacha: nuevaMaxRacha });
+
+                sincronizarGamificacion({
+                    xp: state.xp, nivel: state.nivel, rachas: nuevaRacha,
+                    maxRacha: nuevaMaxRacha, ultimoCheckin: state.ultimoCheckin,
+                    logrosDesbloqueados: state.logrosDesbloqueados,
+                }).catch(e => console.error(e));
             },
 
             registrarCheckin: () => {
                 const ahora = new Date().toISOString();
                 set({ ultimoCheckin: ahora });
-                get().agregarXP(20, 'Check-in enviado');
+                get().agregarXP(20, 'Check-in enviado'); // Esto ya llama a sincronizar
             },
 
             desbloquearLogro: (logroId: string) => {
                 const state = get();
                 const yaDesbloqueado = state.logrosDesbloqueados.some((l: LogroDesbloqueado) => l.logroId === logroId);
                 if (yaDesbloqueado) return;
-                
+
                 const logro = LOGROS.find((l: Logro) => l.id === logroId);
                 if (!logro) return;
-                
-                set({
-                    logrosDesbloqueados: [
-                        ...state.logrosDesbloqueados,
-                        { logroId, unlockedAt: new Date() }
-                    ]
-                });
+
+                const nuevosLogros = [
+                    ...state.logrosDesbloqueados,
+                    { logroId, unlockedAt: new Date() }
+                ];
+
+                set({ logrosDesbloqueados: nuevosLogros });
+
+                // Actualiza SQL Background antes de invocar agregarXP, para no duplicar llamadas innecesarias, igual agregarXP terminará salvando todo
                 get().agregarXP(logro.xpRecompensa, `Logro: ${logro.titulo}`);
             },
 
@@ -105,6 +123,43 @@ export const useGamificacionStore = create<GamificacionState>()(
                 const xpInicioNivel = (state.nivel - 1) * 500;
                 const xpProgreso = state.xp - xpInicioNivel;
                 return Math.min(100, (xpProgreso / 500) * 100);
+            },
+
+            hidratarDesdeDB: async () => {
+                // Prevenimos múltiple fetching si ya se cargó en la sesión
+                if (get().dbSynced) return;
+
+                try {
+                    const rescate = await obtenerGamificacion();
+                    if (rescate.exito && rescate.datos) {
+                        const { experiencia, nivel, rachaDias, ultimoCheckin, logrosGenerales } = rescate.datos;
+
+                        // Formateamos logros desde string[] en la DB a LogroDesbloqueado[] temporal para Zustand
+                        const logrosConvertidos: LogroDesbloqueado[] = logrosGenerales.map((id: string) => ({
+                            logroId: id,
+                            unlockedAt: new Date(), // En este setup simple la DB guarda strings
+                        }));
+
+                        // Verificamos quién tiene la verdad para no pisar el progreso offline 
+                        // En un escenario real se consolida usando timestamps, pero priorizaremos un max:
+                        const estadoLocal = get();
+                        const finalXp = Math.max(estadoLocal.xp, experiencia);
+                        const finalNivel = Math.max(estadoLocal.nivel, nivel);
+                        const finalRacha = Math.max(estadoLocal.rachas, rachaDias);
+
+                        set({
+                            xp: finalXp,
+                            nivel: finalNivel,
+                            rachas: finalRacha,
+                            // Mantenemos max local
+                            ultimoCheckin: ultimoCheckin ? ultimoCheckin.toISOString() : estadoLocal.ultimoCheckin,
+                            logrosDesbloqueados: logrosConvertidos.length > estadoLocal.logrosDesbloqueados.length ? logrosConvertidos : estadoLocal.logrosDesbloqueados,
+                            dbSynced: true
+                        });
+                    }
+                } catch (e) {
+                    console.error("Error al hidratar gamificación local:", e);
+                }
             }
         }),
         {

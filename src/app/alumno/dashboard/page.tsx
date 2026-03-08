@@ -20,6 +20,8 @@ import { calcularFaseMenstrual } from '@/nucleo/utilidades/ciclo';
 import { obtenerDashboardData } from '@/nucleo/acciones/dashboard-alumno.accion';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { GamificacionSync } from '@/compartido/componentes/gamificacion/GamificacionSync';
+
 const MiniCheckin = dynamic(() => import('@/compartido/componentes/MiniCheckin'), { ssr: false });
 
 function getSaludoYIcono() {
@@ -103,7 +105,7 @@ function getFraseMotivacional() {
 
 export default async function AlumnoDashboard() {
     const alumno = await getAlumnoSesion();
-    
+
     const [datosDashboard, ciclo, macrosCiclo] = await Promise.all([
         obtenerDashboardData(),
         prisma.cicloMenstrual.findUnique({ where: { clienteId: alumno.id } }),
@@ -127,7 +129,7 @@ export default async function AlumnoDashboard() {
     // Calcular días activo como cliente
     const diasActivo = Math.ceil((new Date().getTime() - new Date(alumno.fechaAlta).getTime()) / (1000 * 60 * 60 * 24));
 
-    const infoCiclo = ciclo?.activo 
+    const infoCiclo = ciclo?.activo
         ? calcularFaseMenstrual(new Date(ciclo.fechaInicioUltimoCiclo), ciclo.duracionCiclo)
         : null;
 
@@ -145,6 +147,7 @@ export default async function AlumnoDashboard() {
 
     return (
         <div className="min-h-screen bg-marino pb-24 text-blanco">
+            <GamificacionSync />
             <div className="fade-up visible">
                 {/* Header con bienvenida dinámica */}
                 <header className="p-6 pt-10 border-b border-marino-4 bg-gradient-to-b from-marino-2/80 to-transparent">
@@ -157,31 +160,30 @@ export default async function AlumnoDashboard() {
                                 </div>
                                 <span className="text-naranja text-xs font-bold uppercase tracking-[0.2em]">{saludo}</span>
                             </div>
-                            
+
                             <h1 className="text-4xl font-barlow-condensed font-black uppercase text-blanco leading-none">
                                 {alumno.nombre.split(' ')[0]}{" "}
                                 <span className="text-naranja">{emoji}</span>
                             </h1>
-                            
+
                             {/* Mensaje contextual */}
-                            <div className={`mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg ${
-                                tipo === 'bienvenida' ? 'bg-green-500/10 border border-green-500/20' :
-                                tipo === 'mensajes' ? 'bg-blue-500/10 border border-blue-500/20' :
-                                tipo === 'checkin' ? 'bg-yellow-500/10 border border-yellow-500/20' :
-                                tipo === 'aviso' ? 'bg-red-500/10 border border-red-500/20' :
-                                'bg-naranja/10 border border-naranja/20'
-                            }`}>
+                            <div className={`mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg ${tipo === 'bienvenida' ? 'bg-green-500/10 border border-green-500/20' :
+                                    tipo === 'mensajes' ? 'bg-blue-500/10 border border-blue-500/20' :
+                                        tipo === 'checkin' ? 'bg-yellow-500/10 border border-yellow-500/20' :
+                                            tipo === 'aviso' ? 'bg-red-500/10 border border-red-500/20' :
+                                                'bg-naranja/10 border border-naranja/20'
+                                }`}>
                                 <Sparkles size={12} className={
                                     tipo === 'bienvenida' ? 'text-green-400' :
-                                    tipo === 'mensajes' ? 'text-blue-400' :
-                                    tipo === 'checkin' ? 'text-yellow-400' :
-                                    tipo === 'aviso' ? 'text-red-400' :
-                                    'text-naranja'
+                                        tipo === 'mensajes' ? 'text-blue-400' :
+                                            tipo === 'checkin' ? 'text-yellow-400' :
+                                                tipo === 'aviso' ? 'text-red-400' :
+                                                    'text-naranja'
                                 } />
                                 <span className="text-xs font-medium text-blanco">{_mensaje}</span>
                             </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-3">
                             {datos.mensajesNoLeidos > 0 && (
                                 <Link href="/alumno/mensajeria" className="relative">
