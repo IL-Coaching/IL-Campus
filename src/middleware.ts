@@ -6,6 +6,7 @@ import { jwtVerify } from 'jose';
  * Middleware de Seguridad — ArchSecure AI
  *
  * Funciones:
+ * - Rate Limiting para prevenir ataques de fuerza bruta
  * - Headers de seguridad (CSP, HSTS, X-Frame-Options)
  * - Protección de rutas autenticadas con verificación real de JWT (HMAC-SHA256)
  * - Redirección de usuarios no autenticados
@@ -16,8 +17,13 @@ import { jwtVerify } from 'jose';
  */
 
 const JWT_SECRET = new TextEncoder().encode(
-    process.env.JWT_SECRET || 'fallback-secret-para-desarrollo-local-no-usar-en-produccion'
+    process.env.JWT_SECRET || (() => { throw new Error("JWT_SECRET no configurado en variables de entorno"); })()
 );
+
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
+const RATE_LIMIT_MAX_REQUESTS = 20;
+
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
 const RUTAS_PROTEGIDAS_ENTRENADOR = [
     '/entrenador/dashboard',
@@ -48,6 +54,11 @@ const RUTAS_PUBLICAS = [
     '/favicon.ico',
 ];
 
+const RUTAS_LOGIN = [
+    '/entrenador/login',
+    '/alumno/login',
+];
+
 function esRutaEntrenador(pathname: string): boolean {
     return RUTAS_PROTEGIDAS_ENTRENADOR.some(ruta => pathname.startsWith(ruta));
 }
@@ -58,6 +69,35 @@ function esRutaAlumno(pathname: string): boolean {
 
 function esRutaPublica(pathname: string): boolean {
     return RUTAS_PUBLICAS.some(ruta => pathname === ruta || pathname.startsWith(ruta));
+}
+
+function esRutaLogin(pathname: string): boolean {
+    return RUTAS_LOGIN.some(ruta => pathname.startsWith(ruta));
+}
+
+function getClientIp(request: NextRequest): string {
+    return request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() 
+        || request.headers.get('x-real-ip') 
+        || 'unknown';
+}
+
+function checkRateLimit(request: NextRequest): boolean {
+    const ip = getClientIp(request);
+    const now = Date.now();
+    
+    const record = rateLimitMap.get(ip);
+    
+    if (!record || now > record.resetTime) {
+        rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+        return true;
+    }
+    
+    if (record.count >= RATE_LIMIT_MAX_REQUESTS) {
+        return false;
+    }
+    
+    record.count++;
+    return true;
 }
 
 function getTokenFromCookies(request: NextRequest): string | null {
@@ -85,6 +125,17 @@ export async function middleware(request: NextRequest) {
 
     if (esRutaPublica(pathname)) {
         return applySecurityHeaders(NextResponse.next());
+    }
+
+    if (esRutaLogin(pathname)) {
+        if (!checkRateLimit(request)) {
+            return new NextResponse('Too Many Requests', {
+                status: 429,
+                headers: {
+                    'Retry-After': String(Math.ceil(RATE_LIMIT_WINDOW_MS / 1000)),
+                },
+            });
+        }
     }
 
     const token = getTokenFromCookies(request);

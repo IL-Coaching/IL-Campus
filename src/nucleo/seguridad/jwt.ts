@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 
 const secret = new TextEncoder().encode(
-    process.env.JWT_SECRET || 'fallback-secret-para-desarrollo-local-no-usar-en-produccion'
+    process.env.JWT_SECRET || (() => { throw new Error("JWT_SECRET no configurado en variables de entorno"); })()
 );
 
 /**

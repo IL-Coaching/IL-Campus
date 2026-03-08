@@ -2,6 +2,7 @@
 
 import { prisma } from "@/baseDatos/conexion";
 import { ClienteServicio } from "../servicios/cliente.servicio";
+import { EsquemaInscripcionCompleto } from "../validadores/inscripcion.validador";
 
 interface RespuestasInscripcion {
     datosPersonales?: {
@@ -55,6 +56,17 @@ export async function enviarFormularioInscripcion(datos: {
     respuestas: RespuestasInscripcion;
 }) {
     try {
+        const validacion = EsquemaInscripcionCompleto.safeParse(datos);
+        
+        if (!validacion.success) {
+            const mensajesError = validacion.error.issues.map(issue => 
+                `${issue.path.join('.')}: ${issue.message}`
+            ).join(', ');
+            
+            return { error: `Por favor, completa todos los campos obligatorios: ${mensajesError}` };
+        }
+
+        const { nombre, email, telefono, respuestas } = validacion.data;
         // 1. Buscamos al entrenador principal
         const emailEntrenador = process.env.ENTRENADOR_EMAIL;
 
@@ -75,31 +87,31 @@ export async function enviarFormularioInscripcion(datos: {
         // Agrupamos las respuestas según el esquema JSON definido en Prisma
         const formularioData = {
             datosPersonales: {
-                nombre: datos.nombre,
-                nacimiento: datos.respuestas.datosPersonales?.nacimiento,
-                edad: datos.respuestas.datosPersonales?.edad,
-                genero: datos.respuestas.datosPersonales?.genero,
-                peso: datos.respuestas.datosPersonales?.peso,
-                altura: datos.respuestas.datosPersonales?.altura,
-                ubicacion: datos.respuestas.datosPersonales?.ubicacion,
+                nombre: nombre,
+                nacimiento: respuestas.datosPersonales.nacimiento,
+                edad: respuestas.datosPersonales.edad,
+                genero: respuestas.datosPersonales.genero,
+                peso: respuestas.datosPersonales.peso,
+                altura: respuestas.datosPersonales.altura,
+                ubicacion: respuestas.datosPersonales.ubicacion,
             },
             contacto: {
-                whatsapp: datos.telefono,
-                email: datos.email,
+                whatsapp: telefono,
+                email: email,
             },
-            saludMedica: datos.respuestas.saludMedica,
-            estiloDeVida: datos.respuestas.estiloDeVida,
-            experiencia: datos.respuestas.experiencia,
-            objetivos: datos.respuestas.objetivos,
-            disponibilidad: datos.respuestas.disponibilidad,
-            personalizacion: datos.respuestas.personalizacion,
-            consentimiento: datos.respuestas.consentimiento
+            saludMedica: respuestas.saludMedica,
+            estiloDeVida: respuestas.estiloDeVida,
+            experiencia: respuestas.experiencia,
+            objetivos: respuestas.objetivos,
+            disponibilidad: respuestas.disponibilidad,
+            personalizacion: respuestas.personalizacion,
+            consentimiento: respuestas.consentimiento
         };
 
         const result = await ClienteServicio.crearProspectoConFormulario({
-            nombre: datos.nombre,
-            email: datos.email,
-            telefono: datos.telefono,
+            nombre,
+            email,
+            telefono,
             entrenadorId: entrenador.id,
             formulario: formularioData
         });

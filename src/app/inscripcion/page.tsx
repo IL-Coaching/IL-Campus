@@ -14,15 +14,27 @@ import {
     AlertTriangle,
     MapPin,
     Phone,
-    Mail
+    Mail,
+    XCircle
 } from 'lucide-react';
 import Link from 'next/link';
 import { enviarFormularioInscripcion } from '@/nucleo/acciones/inscripcion.accion';
+import {
+    EsquemaDatosPersonales,
+    EsquemaEstiloDeVida,
+    EsquemaSaludMedica,
+    EsquemaExperiencia,
+    EsquemaObjetivos,
+    EsquemaDisponibilidad,
+    EsquemaConsentimiento,
+} from '@/nucleo/validadores/inscripcion.validador';
 
 export default function InscripcionPage() {
     const [step, setStep] = useState(0);
     const [enviando, setEnviando] = useState(false);
     const [estadoEnviado, setEstadoEnviado] = useState<'pendiente' | 'exito' | 'error'>('pendiente');
+    const [errores, setErrores] = useState<Record<string, string>>({});
+    const [mostrarErrores, setMostrarErrores] = useState(false);
 
     const [formData, setFormData] = useState({
         nombre: '',
@@ -85,6 +97,111 @@ export default function InscripcionPage() {
         { title: "Finalizar", icon: <CheckCircle2 size={20} /> }
     ];
 
+    const validarStep = (stepIndex: number): boolean => {
+        const nuevosErrores: Record<string, string> = {};
+        
+        if (stepIndex === 1) {
+            const datos = {
+                nombre: formData.nombre,
+                email: formData.email,
+                telefono: formData.telefono,
+                nacimiento: formData.respuestas.datosPersonales.nacimiento,
+                edad: formData.respuestas.datosPersonales.edad,
+                genero: formData.respuestas.datosPersonales.genero,
+                peso: formData.respuestas.datosPersonales.peso,
+                altura: formData.respuestas.datosPersonales.altura,
+                ubicacion: formData.respuestas.datosPersonales.ubicacion,
+            };
+            const resultado = EsquemaDatosPersonales.safeParse(datos);
+            if (!resultado.success) {
+                resultado.error.issues.forEach(issue => {
+                    nuevosErrores[issue.path[0] as string] = issue.message;
+                });
+            }
+        }
+        
+        if (stepIndex === 2) {
+            const datos = {
+                actividad: formData.respuestas.estiloDeVida.actividad,
+                sueno: formData.respuestas.estiloDeVida.sueno,
+                otraActividadFisica: formData.respuestas.estiloDeVida.otraActividadFisica,
+            };
+            const resultado = EsquemaEstiloDeVida.safeParse(datos);
+            if (!resultado.success) {
+                resultado.error.issues.forEach(issue => {
+                    nuevosErrores[issue.path[0] as string] = issue.message;
+                });
+            }
+        }
+        
+        if (stepIndex === 3) {
+            const datos = {
+                condiciones: formData.respuestas.saludMedica.condiciones,
+                otrasCondiciones: formData.respuestas.saludMedica.otrasCondiciones,
+                aptomedico: formData.respuestas.saludMedica.aptoMedico,
+            };
+            const resultado = EsquemaSaludMedica.safeParse(datos);
+            if (!resultado.success) {
+                resultado.error.issues.forEach(issue => {
+                    nuevosErrores[issue.path[0] as string] = issue.message;
+                });
+            }
+        }
+        
+        if (stepIndex === 4) {
+            const datos = {
+                entrenaActualmente: formData.respuestas.experiencia.entrenaActualmente,
+                tiempo: formData.respuestas.experiencia.tiempo,
+            };
+            const resultado = EsquemaExperiencia.safeParse(datos);
+            if (!resultado.success) {
+                resultado.error.issues.forEach(issue => {
+                    nuevosErrores[issue.path[0] as string] = issue.message;
+                });
+            }
+            
+            const objetivos = {
+                principales: formData.respuestas.objetivos.principales,
+                motivacion: formData.respuestas.objetivos.motivacion,
+            };
+            const resultObj = EsquemaObjetivos.safeParse(objetivos);
+            if (!resultObj.success) {
+                resultObj.error.issues.forEach(issue => {
+                    nuevosErrores[issue.path[0] as string] = issue.message;
+                });
+            }
+        }
+        
+        if (stepIndex === 5) {
+            const datos = {
+                sesionesSemanales: formData.respuestas.disponibilidad.sesionesSemanales,
+                tiempoSesion: formData.respuestas.disponibilidad.tiempoSesion,
+                lugar: formData.respuestas.disponibilidad.lugar,
+                equipamiento: formData.respuestas.disponibilidad.equipamiento,
+            };
+            const resultado = EsquemaDisponibilidad.safeParse(datos);
+            if (!resultado.success) {
+                resultado.error.issues.forEach(issue => {
+                    nuevosErrores[issue.path[0] as string] = issue.message;
+                });
+            }
+            
+            const consentimiento = {
+                aceptado: formData.respuestas.consentimiento.aceptado,
+                declaracionFinal: formData.respuestas.consentimiento.declaracionFinal,
+            };
+            const resultCons = EsquemaConsentimiento.safeParse(consentimiento);
+            if (!resultCons.success) {
+                resultCons.error.issues.forEach(issue => {
+                    nuevosErrores[issue.path[0] as string] = issue.message;
+                });
+            }
+        }
+        
+        setErrores(nuevosErrores);
+        return Object.keys(nuevosErrores).length === 0;
+    };
+
     const handleSubmit = async () => {
         setEnviando(true);
         const result = await enviarFormularioInscripcion({
@@ -104,7 +221,21 @@ export default function InscripcionPage() {
         }
     };
 
+    const clearError = (key: string) => {
+        const newErrors = { ...errores };
+        delete newErrors[key];
+        setErrores(newErrors);
+    };
+
     const nextStep = () => {
+        if (!validarStep(step)) {
+            setMostrarErrores(true);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+        setMostrarErrores(false);
+        setErrores({});
+        
         if (step === steps.length - 2) {
             handleSubmit();
         } else {
@@ -172,7 +303,7 @@ export default function InscripcionPage() {
                     ].map((opt) => (
                         <button
                             key={opt.val}
-                            onClick={() => updateNested('respuestas.estiloDeVida.actividad', opt.val)}
+                            onClick={() => { updateNested('respuestas.estiloDeVida.actividad', opt.val); clearError('actividad') }}
                             className={`p-4 rounded-xl border text-left transition-all ${formData.respuestas.estiloDeVida.actividad === opt.val
                                 ? 'bg-naranja/10 border-naranja shadow-[0_0_20px_rgba(255,107,0,0.1)]'
                                 : 'bg-marino-3 border-marino-4 hover:border-naranja/30'
@@ -183,6 +314,11 @@ export default function InscripcionPage() {
                         </button>
                     ))}
                 </div>
+                {mostrarErrores && errores.actividad && (
+                    <p className="text-red-500 text-xs font-bold flex items-center gap-1 bg-red-500/10 p-2 rounded-lg">
+                        <XCircle size={12} /> {errores.actividad}
+                    </p>
+                )}
             </div>
 
             <div className="space-y-4">
@@ -191,7 +327,7 @@ export default function InscripcionPage() {
                     {['Menos de 6hs', '6 a 7 hs', '7 a 8 hs', 'Más de 8 hs'].map((opt) => (
                         <button
                             key={opt}
-                            onClick={() => updateNested('respuestas.estiloDeVida.sueno', opt)}
+                            onClick={() => { updateNested('respuestas.estiloDeVida.sueno', opt); clearError('sueno') }}
                             className={`px-4 py-3 rounded-xl border text-[0.65rem] font-black uppercase tracking-widest transition-all ${formData.respuestas.estiloDeVida.sueno === opt
                                 ? 'bg-naranja border-naranja text-marino'
                                 : 'bg-marino-3 border-marino-4 text-gris'
@@ -201,6 +337,11 @@ export default function InscripcionPage() {
                         </button>
                     ))}
                 </div>
+                {mostrarErrores && errores.sueno && (
+                    <p className="text-red-500 text-xs font-bold flex items-center gap-1 bg-red-500/10 p-2 rounded-lg">
+                        <XCircle size={12} /> {errores.sueno}
+                    </p>
+                )}
             </div>
 
             <div className="space-y-4">
@@ -255,7 +396,7 @@ export default function InscripcionPage() {
                     {['Sí', 'No', 'En trámite'].map((opt) => (
                         <button
                             key={opt}
-                            onClick={() => updateNested('respuestas.saludMedica.aptoMedico', opt)}
+                            onClick={() => { updateNested('respuestas.saludMedica.aptoMedico', opt); clearError('aptoMedico') }}
                             className={`flex-1 py-3 rounded-xl border font-black uppercase tracking-widest text-[0.65rem] transition-all ${formData.respuestas.saludMedica.aptoMedico === opt
                                 ? 'bg-naranja border-naranja text-marino'
                                 : 'bg-marino-3 border-marino-4 text-gris hover:border-naranja/50'
@@ -265,6 +406,11 @@ export default function InscripcionPage() {
                         </button>
                     ))}
                 </div>
+                {mostrarErrores && errores.aptoMedico && (
+                    <p className="text-red-500 text-xs font-bold flex items-center gap-1 bg-red-500/10 p-2 rounded-lg">
+                        <XCircle size={12} /> {errores.aptoMedico}
+                    </p>
+                )}
             </div>
         </div>
     );
@@ -281,13 +427,18 @@ export default function InscripcionPage() {
                     {["Sí, frecuentemente", "Sí, a veces", "No, hace tiempo", "Nunca"].map((opc) => (
                         <button
                             key={opc}
-                            onClick={() => updateNested('respuestas.experiencia.entrenaActualmente', opc)}
+                            onClick={() => { updateNested('respuestas.experiencia.entrenaActualmente', opc); clearError('entrenaActualmente') }}
                             className={`p-4 rounded-xl border text-left transition-all ${formData.respuestas.experiencia.entrenaActualmente === opc ? 'bg-naranja/10 border-naranja' : 'bg-marino-3 border-marino-4 hover:border-naranja/30'}`}
                         >
                             <span className={`text-xs font-black uppercase tracking-widest ${formData.respuestas.experiencia.entrenaActualmente === opc ? 'text-naranja' : 'text-blanco'}`}>{opc}</span>
                         </button>
                     ))}
                 </div>
+                {mostrarErrores && errores.entrenaActualmente && (
+                    <p className="text-red-500 text-xs font-bold flex items-center gap-1 bg-red-500/10 p-2 rounded-lg">
+                        <XCircle size={12} /> {errores.entrenaActualmente}
+                    </p>
+                )}
             </div>
 
             <div className="space-y-4">
@@ -296,13 +447,18 @@ export default function InscripcionPage() {
                     {['Hipertrofia', 'Fuerza', 'Pérdida de Grasa', 'Salud/Bienestar', 'Rendimiento'].map((opt) => (
                         <button
                             key={opt}
-                            onClick={() => toggleArray('respuestas.objetivos.principales', opt)}
+                            onClick={() => { toggleArray('respuestas.objetivos.principales', opt); clearError('principales') }}
                             className={`p-3 rounded-xl border transition-all ${formData.respuestas.objetivos.principales.includes(opt) ? 'bg-naranja/20 border-naranja text-blanco' : 'bg-marino-3 border-marino-4 text-gris'}`}
                         >
                             <span className="text-[0.65rem] font-black uppercase tracking-tight">{opt}</span>
                         </button>
                     ))}
                 </div>
+                {mostrarErrores && errores.principales && (
+                    <p className="text-red-500 text-xs font-bold flex items-center gap-1 bg-red-500/10 p-2 rounded-lg">
+                        <XCircle size={12} /> {errores.principales}
+                    </p>
+                )}
             </div>
 
             <div className="space-y-2">
@@ -329,7 +485,7 @@ export default function InscripcionPage() {
                     <select
                         value={formData.respuestas.disponibilidad.sesionesSemanales}
                         onChange={(e) => updateNested('respuestas.disponibilidad.sesionesSemanales', e.target.value)}
-                        className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco text-xs focus:border-naranja/50 outline-none transition-all cursor-pointer"
+                        className={`w-full bg-marino-3 border rounded-xl px-4 py-3 text-blanco text-xs focus:border-naranja/50 outline-none transition-all cursor-pointer ${mostrarErrores && errores.sesionesSemanales ? 'border-red-500' : 'border-marino-4'}`}
                     >
                         <option value="">Seleccionar</option>
                         <option value="1-2">1 a 2 días</option>
@@ -337,19 +493,29 @@ export default function InscripcionPage() {
                         <option value="4">4 días</option>
                         <option value="5+">5 o más días</option>
                     </select>
+                    {mostrarErrores && errores.sesionesSemanales && (
+                        <p className="text-red-500 text-xs font-bold flex items-center gap-1">
+                            <XCircle size={12} /> {errores.sesionesSemanales}
+                        </p>
+                    )}
                 </div>
                 <div className="space-y-2">
                     <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-1 block">Tiempo por Sesión</label>
                     <select
                         value={formData.respuestas.disponibilidad.tiempoSesion}
                         onChange={(e) => updateNested('respuestas.disponibilidad.tiempoSesion', e.target.value)}
-                        className="w-full bg-marino-3 border border-marino-4 rounded-xl px-4 py-3 text-blanco text-xs focus:border-naranja/50 outline-none transition-all cursor-pointer"
+                        className={`w-full bg-marino-3 border rounded-xl px-4 py-3 text-blanco text-xs focus:border-naranja/50 outline-none transition-all cursor-pointer ${mostrarErrores && errores.tiempoSesion ? 'border-red-500' : 'border-marino-4'}`}
                     >
                         <option value="">Seleccionar</option>
                         <option value="45min">~45 min</option>
                         <option value="60min">~60 min</option>
                         <option value="90min+">90 min o más</option>
                     </select>
+                    {mostrarErrores && errores.tiempoSesion && (
+                        <p className="text-red-500 text-xs font-bold flex items-center gap-1">
+                            <XCircle size={12} /> {errores.tiempoSesion}
+                        </p>
+                    )}
                 </div>
             </div>
 
@@ -359,13 +525,18 @@ export default function InscripcionPage() {
                     {['Gimnasio', 'Casa', 'Parque', 'Sin Equipo'].map((opt) => (
                         <button
                             key={opt}
-                            onClick={() => toggleArray('respuestas.disponibilidad.lugar', opt)}
+                            onClick={() => { toggleArray('respuestas.disponibilidad.lugar', opt); clearError('lugar') }}
                             className={`p-3 rounded-xl border text-[0.65rem] font-black uppercase tracking-widest transition-all ${formData.respuestas.disponibilidad.lugar.includes(opt) ? 'bg-naranja border-naranja text-marino' : 'bg-marino-3 border-marino-4 text-gris'}`}
                         >
                             {opt}
                         </button>
                     ))}
                 </div>
+                {mostrarErrores && errores.lugar && (
+                    <p className="text-red-500 text-xs font-bold flex items-center gap-1 bg-red-500/10 p-2 rounded-lg">
+                        <XCircle size={12} /> {errores.lugar}
+                    </p>
+                )}
             </div>
 
             <div className="space-y-4">
@@ -380,10 +551,10 @@ export default function InscripcionPage() {
 
             <div className="p-4 bg-marino-3 border-l-4 border-l-naranja rounded-r-xl">
                 <button
-                    onClick={() => updateNested('respuestas.consentimiento.declaracionFinal', !formData.respuestas.consentimiento.declaracionFinal)}
-                    className="flex items-start gap-3 text-left"
+                    onClick={() => { updateNested('respuestas.consentimiento.declaracionFinal', !formData.respuestas.consentimiento.declaracionFinal); clearError('declaracionFinal') }}
+                    className="flex items-start gap-3 text-left w-full"
                 >
-                    <div className={`mt-1 w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-all ${formData.respuestas.consentimiento.declaracionFinal ? 'bg-naranja border-naranja' : 'border-marino-4'}`}>
+                    <div className={`mt-1 w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center transition-all ${mostrarErrores && errores.declaracionFinal ? 'border-red-500' : formData.respuestas.consentimiento.declaracionFinal ? 'bg-naranja border-naranja' : 'border-marino-4'}`}>
                         {formData.respuestas.consentimiento.declaracionFinal && <CheckCircle2 size={12} className="text-marino" />}
                     </div>
                     <div>
@@ -392,6 +563,11 @@ export default function InscripcionPage() {
                         </p>
                     </div>
                 </button>
+                {mostrarErrores && errores.declaracionFinal && (
+                    <p className="text-red-500 text-xs font-bold flex items-center gap-1 mt-2 ml-8">
+                        <XCircle size={12} /> {errores.declaracionFinal}
+                    </p>
+                )}
             </div>
         </div>
     );
@@ -491,101 +667,163 @@ export default function InscripcionPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Nombre y Apellido *</label>
-                                    <input
-                                        type="text"
-                                        value={formData.nombre}
-                                        onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                                        className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all placeholder:text-gris/20"
-                                        placeholder="Tu nombre completo"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={formData.nombre}
+                                            onChange={(e) => { setFormData({ ...formData, nombre: e.target.value }); clearError('nombre'); }}
+                                            className={`w-full bg-marino border rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all placeholder:text-gris/20 ${mostrarErrores && errores.nombre ? 'border-red-500' : 'border-marino-4'}`}
+                                            placeholder="Tu nombre completo"
+                                        />
+                                        {mostrarErrores && errores.nombre && (
+                                            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-red-500 text-xs font-bold">
+                                                <XCircle size={14} />
+                                            </div>
+                                        )}
+                                    </div>
+                                    {mostrarErrores && errores.nombre && (
+                                        <p className="text-red-500 text-xs font-bold flex items-center gap-1">
+                                            <XCircle size={12} /> {errores.nombre}
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Fecha de Nacimiento *</label>
-                                    <input
-                                        type="date"
-                                        value={formData.respuestas.datosPersonales.nacimiento}
-                                        onChange={(e) => updateNested('respuestas.datosPersonales.nacimiento', e.target.value)}
-                                        className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="date"
+                                            value={formData.respuestas.datosPersonales.nacimiento}
+                                            onChange={(e) => updateNested('respuestas.datosPersonales.nacimiento', e.target.value)}
+                                            className={`w-full bg-marino border rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all ${mostrarErrores && errores.nacimiento ? 'border-red-500' : 'border-marino-4'}`}
+                                        />
+                                        {mostrarErrores && errores.nacimiento && (
+                                            <p className="text-red-500 text-xs font-bold mt-1 flex items-center gap-1">
+                                                <XCircle size={12} /> {errores.nacimiento}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Edad *</label>
-                                        <input
-                                            type="number"
-                                            value={formData.respuestas.datosPersonales.edad}
-                                            onChange={(e) => updateNested('respuestas.datosPersonales.edad', e.target.value)}
-                                            className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all"
-                                        />
+                                        <div className="relative">
+                                            <input
+                                                type="number"
+                                                value={formData.respuestas.datosPersonales.edad}
+                                                onChange={(e) => updateNested('respuestas.datosPersonales.edad', e.target.value)}
+                                                className={`w-full bg-marino border rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all ${mostrarErrores && errores.edad ? 'border-red-500' : 'border-marino-4'}`}
+                                            />
+                                        </div>
+                                        {mostrarErrores && errores.edad && (
+                                            <p className="text-red-500 text-xs font-bold flex items-center gap-1">
+                                                <XCircle size={12} /> {errores.edad}
+                                            </p>
+                                        )}
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Género *</label>
                                         <select
                                             value={formData.respuestas.datosPersonales.genero}
                                             onChange={(e) => updateNested('respuestas.datosPersonales.genero', e.target.value)}
-                                            className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all appearance-none cursor-pointer"
+                                            className={`w-full bg-marino border rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all appearance-none cursor-pointer ${mostrarErrores && errores.genero ? 'border-red-500' : 'border-marino-4'}`}
                                         >
                                             <option value="">Seleccionar</option>
                                             <option value="M">Masculino</option>
                                             <option value="F">Femenino</option>
                                         </select>
+                                        {mostrarErrores && errores.genero && (
+                                            <p className="text-red-500 text-xs font-bold flex items-center gap-1">
+                                                <XCircle size={12} /> {errores.genero}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Peso (kg) *</label>
-                                        <input
-                                            type="number"
-                                            value={formData.respuestas.datosPersonales.peso}
-                                            onChange={(e) => updateNested('respuestas.datosPersonales.peso', e.target.value)}
-                                            className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Altura (cm) *</label>
-                                        <input
-                                            type="number"
-                                            value={formData.respuestas.datosPersonales.altura}
-                                            onChange={(e) => updateNested('respuestas.datosPersonales.altura', e.target.value)}
-                                            className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all"
-                                        />
-                                    </div>
+<div className="space-y-2">
+                                         <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Peso (kg) *</label>
+                                         <input
+                                             type="number"
+                                             value={formData.respuestas.datosPersonales.peso}
+                                             onChange={(e) => updateNested('respuestas.datosPersonales.peso', e.target.value)}
+                                             className={`w-full bg-marino border rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all ${mostrarErrores && errores.peso ? 'border-red-500' : 'border-marino-4'}`}
+                                         />
+                                         {mostrarErrores && errores.peso && (
+                                             <p className="text-red-500 text-xs font-bold flex items-center gap-1">
+                                                 <XCircle size={12} /> {errores.peso}
+                                             </p>
+                                         )}
+                                     </div>
+                                     <div className="space-y-2">
+                                         <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Altura (cm) *</label>
+                                         <input
+                                             type="number"
+                                             value={formData.respuestas.datosPersonales.altura}
+                                             onChange={(e) => updateNested('respuestas.datosPersonales.altura', e.target.value)}
+                                             className={`w-full bg-marino border rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all ${mostrarErrores && errores.altura ? 'border-red-500' : 'border-marino-4'}`}
+                                         />
+                                         {mostrarErrores && errores.altura && (
+                                             <p className="text-red-500 text-xs font-bold flex items-center gap-1">
+                                                 <XCircle size={12} /> {errores.altura}
+                                             </p>
+                                         )}
+                                     </div>
                                 </div>
                                 <div className="space-y-2 md:col-span-2">
                                     <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1 flex items-center gap-2">
                                         <MapPin size={12} /> Ubicación *
                                     </label>
-                                    <input
-                                        type="text"
-                                        value={formData.respuestas.datosPersonales.ubicacion}
-                                        onChange={(e) => updateNested('respuestas.datosPersonales.ubicacion', e.target.value)}
-                                        placeholder="Ciudad, País"
-                                        className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all placeholder:text-gris/20"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={formData.respuestas.datosPersonales.ubicacion}
+                                            onChange={(e) => updateNested('respuestas.datosPersonales.ubicacion', e.target.value)}
+                                            placeholder="Ciudad, País"
+                                            className={`w-full bg-marino border rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all placeholder:text-gris/20 ${mostrarErrores && errores.ubicacion ? 'border-red-500' : 'border-marino-4'}`}
+                                        />
+                                    </div>
+                                    {mostrarErrores && errores.ubicacion && (
+                                        <p className="text-red-500 text-xs font-bold flex items-center gap-1">
+                                            <XCircle size={12} /> {errores.ubicacion}
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1 flex items-center gap-2">
                                         <Phone size={12} /> WhatsApp *
                                     </label>
-                                    <input
-                                        type="tel"
-                                        value={formData.telefono}
-                                        onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                                        className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all placeholder:text-gris/20"
-                                        placeholder="+54 9..."
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="tel"
+                                            value={formData.telefono}
+                                            onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                                            className={`w-full bg-marino border rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all placeholder:text-gris/20 ${mostrarErrores && errores.telefono ? 'border-red-500' : 'border-marino-4'}`}
+                                            placeholder="+54 9..."
+                                        />
+                                    </div>
+                                    {mostrarErrores && errores.telefono && (
+                                        <p className="text-red-500 text-xs font-bold flex items-center gap-1">
+                                            <XCircle size={12} /> {errores.telefono}
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1 flex items-center gap-2">
                                         <Mail size={12} /> Email *
                                     </label>
-                                    <input
-                                        type="email"
-                                        value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all placeholder:text-gris/20"
-                                        placeholder="tu@email.com"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="email"
+                                            value={formData.email}
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            className={`w-full bg-marino border rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all placeholder:text-gris/20 ${mostrarErrores && errores.email ? 'border-red-500' : 'border-marino-4'}`}
+                                            placeholder="tu@email.com"
+                                        />
+                                    </div>
+                                    {mostrarErrores && errores.email && (
+                                        <p className="text-red-500 text-xs font-bold flex items-center gap-1">
+                                            <XCircle size={12} /> {errores.email}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         </div>

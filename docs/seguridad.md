@@ -18,10 +18,14 @@ El sistema IL-Campus maneja datos sensibles de clientes (salud, peso, informaci�
 
 ## Decisiones de Seguridad
 
-### 1. Autenticación y Auditoría (Simulada/Fase 1)
+### 1. Autenticación JWT con MFA
 
-- Actualmente se utiliza una capa de sesión simulada en `src/nucleo/seguridad/sesion.ts`.
-- **Roadmap**: Migración completa a Supabase Auth para manejo seguro de contraseñas y MFA (Multi-Factor Authentication).
+- Se utiliza **JWT (JSON Web Tokens)** con firma HMAC-SHA256 para gestión de sesiones.
+- Tokens almacenados en cookies httpOnly con atributos secure (producción) y sameSite.
+- Duración: 7 días para sesiones persistentes.
+- **MFA (Multi-Factor Authentication)** implementado con TOTP (Time-based One-Time Password).
+- Tokens verificados en middleware y Server Actions mediante la librería `jose`.
+- No existe fallback para JWT_SECRET en producción - el sistema falla si no está configurado.
 
 ### 2. Validación de Entradas
 
