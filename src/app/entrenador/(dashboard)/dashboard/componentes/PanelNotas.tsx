@@ -130,10 +130,7 @@ export default function PanelNotas() {
                     notas.map((nota) => (
                         <div
                             key={nota.id}
-                            draggable
-                            onDragStart={() => handleDragStart(nota.id)}
                             onDragOver={(e) => handleDragOver(e, nota.id)}
-                            onDragEnd={handleDragEnd}
                             className={`p-3 rounded-xl border border-marino-4 bg-marino-3/50 group transition-all hover:border-naranja/30 ${draggingId === nota.id ? 'opacity-50 scale-95' : ''
                                 }`}
                         >
@@ -166,7 +163,14 @@ export default function PanelNotas() {
                             ) : (
                                 /* Modo visualización */
                                 <div className="flex items-start gap-2">
-                                    <GripVertical size={14} className="text-marino-4 group-hover:text-gris cursor-grab mt-0.5 flex-shrink-0" />
+                                    <div
+                                        draggable
+                                        onDragStart={() => handleDragStart(nota.id)}
+                                        onDragEnd={handleDragEnd}
+                                        className="text-marino-4 group-hover:text-gris cursor-grab mt-0.5 flex-shrink-0"
+                                    >
+                                        <GripVertical size={14} />
+                                    </div>
 
                                     <div className="flex-1 min-w-0">
                                         <p className="text-[0.55rem] text-naranja font-black uppercase tracking-widest mb-1">

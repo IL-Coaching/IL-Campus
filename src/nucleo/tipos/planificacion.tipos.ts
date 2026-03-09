@@ -13,6 +13,7 @@ export type EjercicioConDetalle = EjercicioPlanificado & {
 
 export type DiaConEjercicios = DiaSesion & {
     ejercicios: EjercicioConDetalle[];
+    sesionesReales?: (Prisma.SesionRegistradaGetPayload<{ include: { metricas: true } }>)[];
 };
 
 export type SemanaConDias = Semana & {

@@ -27,7 +27,11 @@ export const PlanificacionServicio = {
                                         },
                                         sesionesReales: {
                                             where: { completada: true },
-                                            select: { id: true, completada: true }
+                                            include: {
+                                                metricas: true
+                                            },
+                                            orderBy: { fecha: 'desc' },
+                                            take: 1
                                         }
                                     }
                                 }

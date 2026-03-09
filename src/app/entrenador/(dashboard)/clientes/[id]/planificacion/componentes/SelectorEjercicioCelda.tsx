@@ -9,19 +9,26 @@ interface SelectorEjercicioCeldaProps {
     ejercicioId?: string | null;
     esBiblioteca: boolean;
     onSelect: (data: { nombre: string; ejercicioId: string | null; esBiblioteca: boolean }) => void;
+    onOpenChange?: (isOpen: boolean) => void;
 }
 
 export default function SelectorEjercicioCelda({
     initialValue,
     ejercicioId,
     esBiblioteca,
-    onSelect
+    onSelect,
+    onOpenChange
 }: SelectorEjercicioCeldaProps) {
     const [inputValue, setInputValue] = useState(initialValue);
     const [isOpen, setIsOpen] = useState(false);
     const [resultados, setResultados] = useState<Ejercicio[]>([]);
     const [loading, setLoading] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    // Notificar al padre cuando cambia el estado de apertura
+    useEffect(() => {
+        onOpenChange?.(isOpen);
+    }, [isOpen, onOpenChange]);
 
     // Búsqueda con debounce
     useEffect(() => {

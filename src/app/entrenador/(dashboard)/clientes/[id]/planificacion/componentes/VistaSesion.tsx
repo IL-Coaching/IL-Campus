@@ -25,6 +25,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [copiedSesionId, setCopiedSesionId] = useState<string | null>(null);
+    const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
     const router = useRouter();
     const params = useParams();
     const clienteId = params.id as string;
@@ -659,17 +660,19 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                 {groupMembers.map((gej, gidx) => (
                                                     <tr
                                                         key={gej.id}
-                                                        draggable={!isSelectionMode}
-                                                        onDragStart={() => handleDragStart(ejercicios.findIndex(e => e.id === gej.id))}
                                                         onDragOver={handleDragOver}
                                                         onDrop={() => handleDrop(ejercicios.findIndex(e => e.id === gej.id))}
                                                         onClick={() => { if (isSelectionMode) handleToggleSelection(gej.id); }}
                                                         className={`group transition-all border-l-4 border-l-naranja/20 ${isSelectionMode
                                                             ? (selectedIds.includes(gej.id) ? 'bg-naranja/10 cursor-pointer' : 'hover:bg-naranja/5 cursor-pointer')
                                                             : `hover:bg-white/[0.02] ${draggingIdx === ejercicios.findIndex(e => e.id === gej.id) ? 'opacity-20' : ''}`
-                                                            }`}
+                                                            } ${activeDropdownId === gej.id ? 'z-[60] relative' : ''}`}
                                                     >
-                                                        <td className="p-3 text-center sticky left-0 z-10 bg-marino-2/95 backdrop-blur-sm border-r border-white/5">
+                                                        <td
+                                                            className={`p-3 text-center sticky left-0 z-10 bg-marino-2/95 backdrop-blur-sm border-r border-white/5 ${activeDropdownId === gej.id ? 'z-[70]' : ''}`}
+                                                            draggable={!isSelectionMode}
+                                                            onDragStart={() => handleDragStart(ejercicios.findIndex(e => e.id === gej.id))}
+                                                        >
                                                             {isSelectionMode ? (
                                                                 <div
                                                                     onClick={(e) => { e.stopPropagation(); handleToggleSelection(gej.id); }}
@@ -685,7 +688,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                         <td className="p-3 text-gris font-black text-base text-center opacity-30 group-hover:opacity-100 transition-opacity sticky left-[40px] z-10 bg-marino-2/95 backdrop-blur-sm border-r border-white/5">
                                                             {String.fromCharCode(65 + gidx)}
                                                         </td>
-                                                        <td className="p-3 sticky left-[85px] z-10 bg-marino-2/95 backdrop-blur-sm border-r border-white/10 shadow-[5px_0_15px_rgba(0,0,0,0.2)] w-[220px]">
+                                                        <td className={`p-3 sticky left-[85px] z-10 bg-marino-2/95 backdrop-blur-sm border-r border-white/10 shadow-[5px_0_15px_rgba(0,0,0,0.2)] w-[220px] ${activeDropdownId === gej.id ? 'z-[70]' : ''}`}>
                                                             {isSelectionMode ? (
                                                                 <span className="text-blanco font-black text-[0.75rem] uppercase tracking-tight">
                                                                     {gej.ejercicio?.nombre || gej.nombreLibre || '—'}
@@ -700,6 +703,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                         nombreLibre: data.nombre,
                                                                         esBiblioteca: data.esBiblioteca
                                                                     })}
+                                                                    onOpenChange={(isOpen) => setActiveDropdownId(isOpen ? gej.id : null)}
                                                                 />
                                                             )}
                                                         </td>
@@ -779,17 +783,20 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                     return (
                                         <tr
                                             key={ej.id}
-                                            draggable={!isSelectionMode}
-                                            onDragStart={() => handleDragStart(idx)}
                                             onDragOver={handleDragOver}
                                             onDrop={() => handleDrop(idx)}
                                             onClick={() => { if (isSelectionMode) handleToggleSelection(ej.id); }}
                                             className={`group transition-all relative ${isSelectionMode
                                                 ? (selectedIds.includes(ej.id) ? 'bg-naranja/10 cursor-pointer' : 'hover:bg-naranja/5 cursor-pointer')
                                                 : `hover:bg-white/[0.02] ${draggingIdx === idx ? 'opacity-20' : ''}`
-                                                }`}
+                                                } ${activeDropdownId === ej.id ? 'z-[60]' : ''}`}
                                         >
-                                            <td className="p-3 text-center sticky left-0 z-10 bg-marino-2 border-r border-white/5" onClick={(e) => e.stopPropagation()}>
+                                            <td
+                                                className={`p-3 text-center sticky left-0 z-10 bg-marino-2 border-r border-white/5 ${activeDropdownId === ej.id ? 'z-[70]' : ''}`}
+                                                onClick={(e) => e.stopPropagation()}
+                                                draggable={!isSelectionMode}
+                                                onDragStart={() => handleDragStart(idx)}
+                                            >
                                                 {isSelectionMode ? (
                                                     <div
                                                         onClick={(e) => { e.stopPropagation(); handleToggleSelection(ej.id); }}
@@ -803,7 +810,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                 )}
                                             </td>
                                             <td className="p-3 text-gris font-black text-base text-center opacity-30 group-hover:opacity-100 transition-opacity sticky left-[40px] z-10 bg-marino-2 border-r border-white/5">{idx + 1}</td>
-                                            <td className="p-3 sticky left-[85px] z-10 bg-marino-2 border-r border-white/10 shadow-[5px_0_15px_rgba(0,0,0,0.2)] w-[220px]" onClick={(e) => { if (isSelectionMode) e.stopPropagation(); }}>
+                                            <td className={`p-3 sticky left-[85px] z-10 bg-marino-2 border-r border-white/10 shadow-[5px_0_15px_rgba(0,0,0,0.2)] w-[220px] ${activeDropdownId === ej.id ? 'z-[70]' : ''}`} onClick={(e) => { if (isSelectionMode) e.stopPropagation(); }}>
                                                 {isSelectionMode ? (
                                                     <span className="text-blanco font-black text-[0.75rem] uppercase tracking-tight">
                                                         {ej.ejercicio?.nombre || ej.nombreLibre || '—'}
@@ -818,6 +825,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                             nombreLibre: data.nombre,
                                                             esBiblioteca: data.esBiblioteca
                                                         })}
+                                                        onOpenChange={(isOpen) => setActiveDropdownId(isOpen ? ej.id : null)}
                                                     />
                                                 )}
                                             </td>
@@ -907,36 +915,61 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                         <span className="font-barlow-condensed font-black uppercase tracking-[0.4em] text-sm">Expandir Arsenal de Sesión</span>
                     </button>
 
-                    {/* Metricas de Pie — Rediseño Cohesivo */}
+                    {/* Metricas de Pie — Resultados del Atleta */}
                     <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-2">
-                        <div className="flex items-center gap-5 p-5 bg-marino-2 border border-marino-4/30 rounded-3xl hover:border-rojo/20 transition-all group">
-                            <div className="p-3 bg-rojo/5 rounded-2xl text-rojo group-hover:bg-rojo/10 transition-colors"><Activity size={24} /></div>
-                            <div className="flex-1">
-                                <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest block mb-1.5">DOMS / Carga</label>
-                                <input placeholder="Nivel 0-10" className="w-full bg-marino-3/30 border border-marino-4/50 rounded-xl px-3 py-2 text-blanco font-bold text-base focus:ring-1 focus:ring-rojo/20 placeholder:text-gris/20" />
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-5 p-5 bg-marino-2 border border-marino-4/30 rounded-3xl hover:border-blue-400/20 transition-all group">
-                            <div className="p-3 bg-blue-400/5 rounded-2xl text-blue-400 group-hover:bg-blue-400/10 transition-colors"><Gauge size={24} /></div>
-                            <div className="flex-1">
-                                <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest block mb-1.5">Esfuerzo Percibido</label>
-                                <input placeholder="RPE 0-10" className="w-full bg-marino-3/30 border border-marino-4/50 rounded-xl px-3 py-2 text-blanco font-bold text-base focus:ring-1 focus:ring-blue-400/20 placeholder:text-gris/20" />
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-5 p-5 bg-marino-2 border border-marino-4/30 rounded-3xl hover:border-verde/20 transition-all group">
-                            <div className="p-3 bg-verde/5 rounded-2xl text-verde group-hover:bg-verde/10 transition-colors"><Scale size={24} /></div>
-                            <div className="flex-1">
-                                <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest block mb-1.5">Masa Corporal</label>
-                                <input placeholder="Kg" className="w-full bg-marino-3/30 border border-marino-4/50 rounded-xl px-3 py-2 text-blanco font-bold text-base focus:ring-1 focus:ring-verde/20 placeholder:text-gris/20" />
-                            </div>
-                        </div>
+                        {(() => {
+                            const latestSesion = diaObjeto.sesionesReales?.[0];
+                            const metricas = latestSesion?.metricas;
+
+                            return (
+                                <>
+                                    <div className="flex items-center gap-5 p-5 bg-marino-2 border border-marino-4/30 rounded-3xl hover:border-rojo/20 transition-all group">
+                                        <div className="p-3 bg-rojo/5 rounded-2xl text-rojo group-hover:bg-rojo/10 transition-colors"><Activity size={24} /></div>
+                                        <div className="flex-1">
+                                            <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest block mb-1.5">DOMS / Carga</label>
+                                            <div className="flex items-baseline gap-1">
+                                                <span className="text-blanco font-black text-xl">{metricas?.DOMS || '--'}</span>
+                                                <span className="text-[0.6rem] text-gris/40 font-bold uppercase">/ 10</span>
+                                            </div>
+                                            <p className="text-[0.5rem] text-gris/40 font-bold uppercase mt-1 tracking-tighter">Feedback del Atleta</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-5 p-5 bg-marino-2 border border-marino-4/30 rounded-3xl hover:border-blue-400/20 transition-all group">
+                                        <div className="p-3 bg-blue-400/5 rounded-2xl text-blue-400 group-hover:bg-blue-400/10 transition-colors"><Gauge size={24} /></div>
+                                        <div className="flex-1">
+                                            <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest block mb-1.5">Esfuerzo Percibido</label>
+                                            <div className="flex items-baseline gap-1">
+                                                <span className="text-blanco font-black text-xl">{metricas?.esfuerzoGral || '--'}</span>
+                                                <span className="text-[0.6rem] text-gris/40 font-bold uppercase">RPE</span>
+                                            </div>
+                                            <p className="text-[0.5rem] text-gris/40 font-bold uppercase mt-1 tracking-tighter">Reportado post-sesión</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-5 p-5 bg-marino-2 border border-marino-4/30 rounded-3xl hover:border-verde/20 transition-all group">
+                                        <div className="p-3 bg-verde/5 rounded-2xl text-verde group-hover:bg-verde/10 transition-colors"><Scale size={24} /></div>
+                                        <div className="flex-1">
+                                            <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest block mb-1.5">Pesaje del Atleta</label>
+                                            <div className="flex items-baseline gap-1">
+                                                <span className="text-blanco font-black text-xl">{metricas?.pesajeDia || '--'}</span>
+                                                <span className="text-[0.6rem] text-gris/40 font-bold uppercase">KG</span>
+                                            </div>
+                                            <p className="text-[0.5rem] text-gris/40 font-bold uppercase mt-1 tracking-tighter">Dato sincronizado</p>
+                                        </div>
+                                    </div>
+                                </>
+                            );
+                        })()}
+
                         <div className="flex items-center gap-5 p-5 bg-marino-2 border border-naranja/20 rounded-3xl hover:border-naranja/40 transition-all group">
                             <div className="p-3 bg-naranja/5 rounded-2xl text-naranja group-hover:bg-naranja/10 transition-colors"><Dumbbell size={24} /></div>
                             <div className="flex-1">
-                                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-[0.2em] block mb-1.5">Tonelaje Total</label>
-                                <span className="text-blanco font-black text-lg uppercase tracking-tighter">
+                                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-[0.2em] block mb-1.5">Tonelaje Teórico</label>
+                                <span className="text-blanco font-black text-xl uppercase tracking-tighter">
                                     {ejercicios.reduce((acc, ej) => acc + (ej.series * (ej.repsMax || 0) * (ej.pesoSugerido || 0)), 0).toLocaleString()} <span className="text-[0.6rem] text-gris font-medium">KG</span>
                                 </span>
+                                <p className="text-[0.5rem] text-naranja/40 font-black uppercase mt-1 tracking-tighter">Carga Total Planificada</p>
                             </div>
                         </div>
                     </div>
