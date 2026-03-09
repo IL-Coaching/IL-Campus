@@ -30,7 +30,7 @@ export type BloqueConSemanas = Prisma.BloqueMensualGetPayload<{
                 diasSesion: {
                     include: {
                         ejercicios: { include: { ejercicio: true } },
-                        sesionesReales: true
+                        sesionesReales: { include: { metricas: true } }
                     }
                 }
             }
