@@ -69,8 +69,10 @@ export default function Hero({ imageUrl, titulo, subtitulo }: Props) {
                             src={imageUrl}
                             alt={sitioConfig.entrenador}
                             fill
-                            className="object-cover"
+                            className="object-cover object-top"
                             priority
+                            quality={90}
+                            sizes="(max-width: 768px) 100vw, 50vw"
                         />
                     ) : (
                         <>

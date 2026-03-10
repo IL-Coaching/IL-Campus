@@ -1,0 +1,532 @@
+"use client";
+
+import { useState, useEffect, useTransition } from "react";
+import { Dumbbell, Play, ChevronRight, Calendar, Clock, Zap, ShieldAlert, ArrowLeft, Square, RotateCcw, CheckCircle2 } from "lucide-react";
+import { guardarSeries } from "@/nucleo/acciones/sesion-alumno.accion";
+
+// Types
+type Ejercicio = {
+    id: string;
+    nombreLibre: string | null;
+    series: number;
+    repsMin: number | null;
+    repsMax: number | null;
+    RIR: number | null;
+    descansoSegundos: number | null;
+    pesoSugerido: number | null;
+    esTesteo: boolean;
+    modalidadTesteo: string | null;
+    notasTecnicas: string | null;
+    ejercicio: {
+        nombre: string;
+        urlVideo: string | null;
+        thumbnailUrl: string | null;
+        musculoPrincipal: string | null;
+        posicionCarga: string | null;
+    } | null;
+};
+
+type DiaSesion = {
+    id: string;
+    diaSemana: string;
+    focoMuscular: string | null;
+    notas: string | null;
+    ejercicios: Ejercicio[];
+};
+
+type Semana = {
+    id: string;
+    numeroSemana: number;
+    objetivoSemana: string | null;
+    RIRobjetivo: number | null;
+    esFaseDeload: boolean;
+    diasSesion: DiaSesion[];
+};
+
+type MacrocicloData = {
+    semanaActiva: Semana | undefined;
+    todasLasSemanas: Semana[];
+    bloqueObjetivo: string | undefined;
+    notasMacrociclo: string | null;
+};
+
+const DIA_ORDEN: Record<string, number> = {
+    Lunes: 1, Martes: 2, Miércoles: 3, Miercoles: 3,
+    Jueves: 4, Viernes: 5, Sábado: 6, Sabado: 6, Domingo: 7
+};
+
+function idxToLetter(idx: number) {
+    return String.fromCharCode(65 + idx);
+}
+
+function CronometroDescanso({ segundos }: { segundos: number }) {
+    const [timeLeft, setTimeLeft] = useState<number | null>(null);
+    const [isRunning, setIsRunning] = useState(false);
+
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (isRunning && timeLeft !== null && timeLeft > 0) {
+            timer = setInterval(() => {
+                setTimeLeft(prev => prev! - 1);
+            }, 1000);
+        } else if (isRunning && timeLeft === 0) {
+            setIsRunning(false);
+            try {
+                const audio = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+                audio.play().catch(() => {});
+            } catch {}
+        }
+        return () => clearInterval(timer);
+    }, [isRunning, timeLeft]);
+
+    const handleStart = () => {
+        if (timeLeft === 0 || timeLeft === null) {
+            setTimeLeft(segundos);
+        }
+        setIsRunning(!isRunning);
+    };
+
+    const handleReset = () => {
+        setIsRunning(false);
+        setTimeLeft(segundos);
+    };
+
+    const displayTime = timeLeft !== null ? timeLeft : segundos;
+    const mins = Math.floor(displayTime / 60);
+    const secs = displayTime % 60;
+    const format = `${mins}:${secs.toString().padStart(2, '0')}`;
+
+    return (
+        <div className="flex items-center justify-between gap-3 bg-marino-2 p-2.5 rounded-xl border border-marino-4/50 w-full min-w-[140px]">
+            <div className="flex items-center gap-2">
+                <Clock size={14} className={isRunning ? "text-naranja animate-pulse" : "text-gris"} />
+                <span className={`font-mono text-lg leading-none font-bold ${isRunning ? "text-naranja" : "text-blanco"}`}>
+                    {format}
+                </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+                {(timeLeft !== null && timeLeft !== segundos) && (
+                    <button onClick={handleReset} className="p-1.5 bg-marino-3 hover:bg-marino-4 rounded-md text-gris/70 hover:text-gris transition-colors flex items-center justify-center">
+                        <RotateCcw size={14} />
+                    </button>
+                )}
+                <button onClick={handleStart} className={`p-1.5 rounded-md transition-colors flex items-center justify-center ${isRunning ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' : 'bg-verde/20 text-verde hover:bg-verde/30'}`}>
+                    {isRunning ? <Square size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
+                </button>
+            </div>
+        </div>
+    );
+}
+
+type SetLogEntry = { pesoKg: string; repsReales: string };
+
+function RegistroSeries({
+    ejercicioPlanificadoId,
+    diaId,
+    numSeries,
+    pesoSugerido,
+}: {
+    ejercicioPlanificadoId: string;
+    diaId: string;
+    numSeries: number;
+    pesoSugerido: number | null;
+}) {
+    const [sets, setSets] = useState<SetLogEntry[]>(
+        Array.from({ length: numSeries }, () => ({ pesoKg: pesoSugerido ? String(pesoSugerido) : "", repsReales: "" }))
+    );
+    const [saved, setSaved] = useState(false);
+    const [isPending, startTransition] = useTransition();
+
+    const handleChange = (idx: number, field: keyof SetLogEntry, val: string) => {
+        setSets(prev => prev.map((s, i) => i === idx ? { ...s, [field]: val } : s));
+        setSaved(false);
+    };
+
+    const handleGuardar = () => {
+        const payload = sets.map(s => ({
+            pesoKg: s.pesoKg !== "" ? parseFloat(s.pesoKg) : null,
+            repsReales: s.repsReales !== "" ? parseInt(s.repsReales) : null,
+        }));
+        startTransition(async () => {
+            const res = await guardarSeries({ diaId, ejercicioPlanificadoId, series: payload });
+            if (res.exito) setSaved(true);
+        });
+    };
+
+    return (
+        <div className="mt-4 border-t border-marino-4/30 pt-4">
+            <h4 className="text-[0.6rem] font-black text-gris uppercase tracking-widest mb-3 flex items-center gap-2">
+                <CheckCircle2 size={12} className={saved ? "text-verde" : "text-gris/40"} />
+                Registro de Series
+                {saved && <span className="text-verde text-[0.55rem] font-bold">Guardado</span>}
+            </h4>
+            <div className="space-y-2 mb-3">
+                {sets.map((s, i) => (
+                    <div key={i} className="grid grid-cols-[28px_1fr_1fr] items-center gap-2">
+                        <span className="text-[0.6rem] font-black text-gris text-center">{i + 1}</span>
+                        <div className="relative">
+                            <input
+                                type="number"
+                                placeholder="kg"
+                                value={s.pesoKg}
+                                onChange={e => handleChange(i, 'pesoKg', e.target.value)}
+                                className="w-full bg-marino-3 border border-marino-4/60 rounded-lg px-3 py-2 text-sm text-blanco placeholder-gris/40 focus:outline-none focus:border-naranja/50 transition-colors"
+                            />
+                            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[0.55rem] text-gris/60 font-bold pointer-events-none">KG</span>
+                        </div>
+                        <div className="relative">
+                            <input
+                                type="number"
+                                placeholder="reps"
+                                value={s.repsReales}
+                                onChange={e => handleChange(i, 'repsReales', e.target.value)}
+                                className="w-full bg-marino-3 border border-marino-4/60 rounded-lg px-3 py-2 text-sm text-blanco placeholder-gris/40 focus:outline-none focus:border-naranja/50 transition-colors"
+                            />
+                            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[0.55rem] text-gris/60 font-bold pointer-events-none">REP</span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <button
+                onClick={handleGuardar}
+                disabled={isPending}
+                className="w-full py-2.5 rounded-xl text-[0.65rem] font-black uppercase tracking-[0.15em] bg-naranja/10 text-naranja border border-naranja/20 hover:bg-naranja/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+                {isPending ? (
+                    <><Clock size={12} className="animate-spin" /> Guardando...</>
+                ) : saved ? (
+                    <><CheckCircle2 size={12} /> Guardado — Actualizar</>
+                ) : (
+                    <><CheckCircle2 size={12} /> Guardar Series</>
+                )}
+            </button>
+        </div>
+    );
+}
+
+export default function RutinaClient({ macrocicloData }: { macrocicloData: MacrocicloData }) {
+    const { semanaActiva, todasLasSemanas, bloqueObjetivo, notasMacrociclo } = macrocicloData;
+    const [semanaSeleccionadaId, setSemanaSeleccionadaId] = useState<string | undefined>(semanaActiva?.id);
+    const [diaVisualizado, setDiaVisualizado] = useState<DiaSesion | null>(null);
+
+    const semanaActual = todasLasSemanas.find(s => s.id === semanaSeleccionadaId) || semanaActiva;
+    
+    const diasConEjercicios = semanaActual
+        ? [...semanaActual.diasSesion]
+            .sort((a, b) => (DIA_ORDEN[a.diaSemana] || 99) - (DIA_ORDEN[b.diaSemana] || 99))
+            .filter(d => d.ejercicios.length > 0)
+        : [];
+
+    const handleDiaClick = (dia: DiaSesion) => {
+        setDiaVisualizado(dia);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    const handleVolverAlHub = () => {
+        setDiaVisualizado(null);
+    };
+
+    // --- VISTA: MODO FOCO DIARIO ---
+    if (diaVisualizado) {
+        // Collect all unique muscles for the day
+        const musculosDelDia = Array.from(new Set(diaVisualizado.ejercicios.map(e => e.ejercicio?.musculoPrincipal).filter(Boolean)));
+        
+        return (
+            <div className="animate-in fade-in slide-in-from-right-8 duration-500">
+                {/* Botón Volver */}
+                <button 
+                    onClick={handleVolverAlHub}
+                    className="flex items-center gap-2 text-gris hover:text-blanco transition-colors mb-6 group bg-marino-2/50 backdrop-blur-md px-4 py-2 rounded-full border border-marino-4/30 hover:border-marino-4"
+                >
+                    <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                    <span className="text-xs font-bold uppercase tracking-widest">Volver al Hub Semanal</span>
+                </button>
+
+                {/* Cabecera del Día Activo */}
+                <div className="bg-gradient-to-br from-marino-2 to-marino-3 border border-marino-4/50 rounded-[2rem] p-8 mb-6 relative overflow-hidden shadow-2xl">
+                    <div className="absolute top-0 right-0 p-8 opacity-[0.03] rotate-12 pointer-events-none">
+                        <Dumbbell size={200} />
+                    </div>
+                    
+                    <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                        <div>
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="px-3 py-1 bg-naranja/10 border border-naranja/20 rounded-lg">
+                                    <span className="text-[0.65rem] font-black text-naranja uppercase tracking-[0.2em] flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-naranja shadow-[0_0_6px_#FF6B00] animate-pulse"></div>
+                                        Modo Foco Activo
+                                    </span>
+                                </div>
+                                <span className="text-[0.65rem] font-bold text-gris uppercase tracking-widest">
+                                    Semana {semanaActual?.numeroSemana}
+                                </span>
+                            </div>
+                            
+                            <h2 className="text-5xl md:text-6xl font-barlow-condensed font-black uppercase text-blanco leading-none tracking-tighter mb-2">
+                                {diaVisualizado.diaSemana}
+                            </h2>
+                            
+                            {diaVisualizado.focoMuscular && (
+                                <p className="text-lg text-gris-claro font-medium">
+                                    Foco: <span className="text-blanco font-bold">{diaVisualizado.focoMuscular}</span>
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="flex gap-2 flex-wrap max-w-xs md:justify-end">
+                            {musculosDelDia.map(musculo => (
+                                <span key={musculo} className="text-[0.55rem] font-black bg-marino-4/30 border border-marino-4/50 text-gris-claro px-2.5 py-1 rounded-md uppercase tracking-widest">
+                                    {musculo}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Notas del Día (si existen) */}
+                {diaVisualizado.notas && (
+                    <div className="mb-8 p-5 bg-marino-2/40 border border-blue-500/20 rounded-2xl relative overflow-hidden">
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500/50"></div>
+                        <h4 className="text-[0.65rem] font-black text-blue-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                            Notas del Día
+                        </h4>
+                        <p className="text-sm text-blue-100/80 leading-relaxed whitespace-pre-wrap">
+                            {diaVisualizado.notas}
+                        </p>
+                    </div>
+                )}
+
+                {/* Lista de Ejercicios */}
+                <div className="space-y-4">
+                    {diaVisualizado.ejercicios.map((ep, idx) => {
+                        const nombreEjercicio = ep.ejercicio?.nombre || ep.nombreLibre || "Ejercicio sin nombre";
+                        const tieneVideo = !!ep.ejercicio?.urlVideo;
+                        const esLongitudLarga = ep.ejercicio?.posicionCarga === "LONGITUD_LARGA";
+
+                        return (
+                            <div 
+                                key={ep.id} 
+                                className={`bg-marino-2/60 backdrop-blur-sm border ${ep.esTesteo ? 'border-red-500/30 shadow-[0_4px_20px_-10px_rgba(239,68,68,0.2)]' : 'border-marino-4/40'} rounded-3xl p-5 md:p-6 transition-all hover:border-marino-4/80 flex flex-col gap-6`}
+                            >
+                                {/* HEADER: Título y Botón Play */}
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-10 h-10 rounded-full bg-marino-3 border border-marino-4 flex items-center justify-center shrink-0">
+                                            <span className={`text-xl font-barlow-condensed font-black ${ep.esTesteo ? 'text-red-400' : 'text-blanco'}`}>
+                                                {idx + 1}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl md:text-2xl font-black text-blanco uppercase tracking-tight leading-tight mb-2">
+                                                {nombreEjercicio}
+                                            </h3>
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                {ep.esTesteo && (
+                                                    <span className="text-[0.55rem] font-black bg-red-500/10 text-red-400 border border-red-500/20 px-2 py-0.5 rounded uppercase tracking-widest flex items-center gap-1 w-fit">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                                                        Testeo
+                                                    </span>
+                                                )}
+                                                {esLongitudLarga && (
+                                                    <span className="border border-blue-500/20 bg-blue-500/5 px-2 py-0.5 rounded text-[0.55rem] font-black text-blue-300 flex items-center gap-1 w-fit uppercase tracking-widest">
+                                                        <ShieldAlert size={10} /> IUSCA
+                                                    </span>
+                                                )}
+                                                {ep.pesoSugerido && (
+                                                    <span className="border border-verde/20 bg-verde/5 px-2 py-0.5 rounded text-verde/90 text-[0.55rem] font-bold uppercase tracking-widest w-fit flex items-center gap-1">
+                                                        <Dumbbell size={10} /> {ep.pesoSugerido} kg
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Video Link */}
+                                    {tieneVideo && ep.ejercicio?.urlVideo && (
+                                        <a
+                                            href={ep.ejercicio.urlVideo}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="shrink-0 flex items-center justify-center w-12 h-12 bg-naranja/10 border border-naranja/20 rounded-2xl text-naranja hover:bg-naranja hover:text-marino transition-all shadow-[0_0_15px_-5px_#FF6B00]"
+                                            title="Ver Video"
+                                        >
+                                            <Play size={18} fill="currentColor" className="ml-1" />
+                                        </a>
+                                    )}
+                                </div>
+
+                                {/* DATA & TIMER: Grid Layout */}
+                                <div className="grid grid-cols-3 md:grid-cols-5 bg-marino-3/50 rounded-2xl border border-marino-4/30 overflow-hidden divide-x-0 divide-y md:divide-x md:divide-y-0 divide-marino-4/30">
+                                    
+                                    {/* STATS (Columnas 1-3) */}
+                                    <div className="flex flex-col items-center justify-center p-4 col-span-1">
+                                        <span className="text-[0.6rem] text-gris uppercase tracking-widest font-black mb-1">Sets</span>
+                                        <span className="text-2xl md:text-3xl font-barlow-condensed font-black text-blanco leading-none">{ep.series}</span>
+                                    </div>
+                                    <div className="flex flex-col items-center justify-center p-4 col-span-1 border-l border-marino-4/30">
+                                        <span className="text-[0.6rem] text-gris uppercase tracking-widest font-black mb-1">Reps</span>
+                                        <span className="text-2xl md:text-3xl font-barlow-condensed font-black text-naranja tracking-widest leading-none">{ep.repsMin}<span className="text-gris/40 mx-0.5 font-normal">—</span>{ep.repsMax}</span>
+                                    </div>
+                                    <div className="flex flex-col items-center justify-center p-4 col-span-1 border-l border-marino-4/30">
+                                        <span className="text-[0.6rem] text-gris uppercase tracking-widest font-black mb-1">RIR</span>
+                                        <span className="text-2xl md:text-3xl font-barlow-condensed font-black text-verde leading-none">{ep.RIR ?? "-"}</span>
+                                    </div>
+
+                                    {/* TIMER Component (Columnas 4-5) */}
+                                    <div className="col-span-3 md:col-span-2 bg-marino-2/80 p-4 flex flex-col justify-center">
+                                        <span className="text-[0.55rem] text-gris uppercase tracking-widest font-black block mb-2 px-1 text-center md:text-left">Recuperación</span>
+                                        {ep.descansoSegundos && ep.descansoSegundos > 0 ? (
+                                            <CronometroDescanso segundos={ep.descansoSegundos} />
+                                        ) : (
+                                            <div className="text-sm text-gris-claro font-medium px-1">— Sin descanso pautado</div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Notas Técnicas del Ejercicio */}
+                                {ep.notasTecnicas && (
+                                    <div className="mt-4 p-4 bg-marino-3/30 border border-marino-4/50 rounded-xl relative">
+                                        <h4 className="text-[0.65rem] font-black text-gris uppercase tracking-widest mb-1.5">
+                                            Feedback / Notas Técnicas
+                                        </h4>
+                                        <p className="text-sm text-gris-claro leading-relaxed whitespace-pre-wrap">
+                                            {ep.notasTecnicas}
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* Testing protocol CTA */}
+                                {ep.esTesteo && (
+                                    <div className={`mt-2 pt-5 border-t ${ep.modalidadTesteo === 'DIRECTO' ? 'border-red-500/20' : 'border-naranja/20'}`}>
+                                         <button className={`w-full py-3.5 rounded-xl text-[0.7rem] font-black uppercase tracking-[0.2em] transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 ${ep.modalidadTesteo === 'DIRECTO' ? 'bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20' : 'bg-naranja/10 text-naranja border border-naranja/20 hover:bg-naranja/20'}`}>
+                                            <Zap size={16} fill="currentColor" />
+                                            Registrar Protocolo de Testeo
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Registro de Series */}
+                                <RegistroSeries
+                                    ejercicioPlanificadoId={ep.id}
+                                    diaId={diaVisualizado.id}
+                                    numSeries={ep.series}
+                                    pesoSugerido={ep.pesoSugerido}
+                                />
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    }
+
+
+    // --- VISTA: HUB SEMANAL ---
+    return (
+        <div className="space-y-8 animate-in fade-in duration-500">
+            {/* Cabecera del Bloque */}
+            {bloqueObjetivo && (
+                <section className="bg-marino-2/60 backdrop-blur-md border border-marino-4/50 rounded-2xl p-5 flex flex-col justify-center shadow-lg">
+                    <span className="text-[0.55rem] text-naranja uppercase font-black tracking-widest mb-1.5 flex items-center gap-1.5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-naranja animate-pulse shadow-[0_0_4px_#FF6B00]"></div>
+                        Bloque de Entrenamiento
+                    </span>
+                    <span className="text-xl md:text-2xl font-barlow-condensed font-black text-blanco uppercase tracking-tight leading-none mb-4">
+                        {bloqueObjetivo}
+                    </span>
+                    
+                    {notasMacrociclo && (
+                        <div className="mt-2 text-sm text-gris-claro/90 leading-relaxed border-t border-marino-4/30 pt-4 whitespace-pre-wrap">
+                            <span className="text-[0.6rem] font-black text-gris uppercase tracking-widest block mb-2">Nota de la Rutina</span>
+                            {notasMacrociclo}
+                        </div>
+                    )}
+                </section>
+            )}
+
+            {/* Listado de Días (Cards) */}
+            <section>
+                <div className="flex items-center justify-between mb-4 px-2">
+                    <h2 className="text-[0.65rem] font-black text-gris uppercase tracking-[0.3em] flex items-center gap-2">
+                        <Calendar size={12} /> Tu Programa de Entrenamiento
+                    </h2>
+                </div>
+
+                {diasConEjercicios.length === 0 ? (
+                    <div className="bg-marino-2/40 border border-marino-4/30 border-dashed rounded-[2rem] p-12 text-center">
+                        <Dumbbell size={32} className="text-marino-4 mx-auto mb-4 opacity-20" />
+                        <p className="text-[0.7rem] font-bold text-gris uppercase tracking-[0.2em] max-w-xs mx-auto">
+                            No hay ejercicios asignados para esta semana todavía.
+                        </p>
+                    </div>
+                ) : (
+                    <div className="grid gap-3">
+                        {diasConEjercicios.map((dia, idx) => (
+                            <button
+                                key={dia.id}
+                                onClick={() => handleDiaClick(dia)}
+                                className="bg-marino-2 border border-marino-4/50 rounded-3xl p-5 text-left flex items-center justify-between group hover:border-naranja/50 transition-all hover:shadow-[0_8px_30px_-10px_rgba(255,107,0,0.15)] active:scale-[0.99] relative overflow-hidden"
+                            >
+                                {/* Barra de color lateral para enfatizar CTA implícito */}
+                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-marino-4 to-marino-5 group-hover:from-naranja group-hover:to-naranja/50 transition-colors"></div>
+                                
+                                <div className="pl-2">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <p className="text-[0.6rem] font-black text-gris uppercase tracking-widest">
+                                            Día {idxToLetter(idx)}
+                                        </p>
+                                        {dia.ejercicios.some(e => e.esTesteo) && (
+                                            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_6px_rgba(239,68,68,0.6)]"></span>
+                                        )}
+                                    </div>
+                                    <h3 className="text-2xl font-barlow-condensed font-black uppercase text-blanco leading-none tracking-tight group-hover:text-naranja transition-colors">
+                                        {dia.diaSemana}
+                                    </h3>
+                                    {dia.focoMuscular && (
+                                        <p className="text-xs text-gris-claro font-medium mt-1 truncate max-w-[200px] md:max-w-md">
+                                            {dia.focoMuscular} • {dia.ejercicios.length} Ejercicios
+                                        </p>
+                                    )}
+                                </div>
+                                
+                                <div className="w-10 h-10 rounded-full bg-marino-3 border border-marino-4 flex items-center justify-center text-gris group-hover:bg-naranja group-hover:border-naranja group-hover:text-marino transition-all">
+                                    <ChevronRight size={18} className="translate-x-[1px]" />
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </section>
+
+             {/* Navegación entre semanas (Selector Compacto) */}
+             {todasLasSemanas.length > 1 && (
+                <section className="mt-8 pt-8 border-t border-marino-4/30">
+                    <h3 className="text-[0.6rem] font-black text-gris uppercase tracking-[0.2em] mb-4 text-center">Navegar Semanas</h3>
+                    <div className="flex gap-2 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0">
+                        {[...todasLasSemanas].sort((a, b) => a.numeroSemana - b.numeroSemana).map((semana) => {
+                            const esSeleccionada = semana.id === semanaSeleccionadaId;
+                            return (
+                                <button
+                                    key={semana.id}
+                                    onClick={() => setSemanaSeleccionadaId(semana.id)}
+                                    className={`snap-center shrink-0 w-32 p-3 rounded-2xl border text-center transition-all ${
+                                        esSeleccionada
+                                        ? 'bg-marino-3 border-gris text-blanco'
+                                        : 'bg-marino-2 border-marino-4/50 text-gris hover:border-marino-4'
+                                    }`}
+                                >
+                                    <span className="text-xl font-barlow-condensed font-black block leading-none mb-1">
+                                        S{semana.numeroSemana}
+                                    </span>
+                                    <span className="text-[0.55rem] font-bold uppercase tracking-widest block truncate">
+                                        {semana.esFaseDeload ? 'Deload' : 'Regular'}
+                                    </span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </section>
+            )}
+        </div>
+    );
+}

@@ -35,12 +35,12 @@ export default function TabResumen({ cliente }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 fade-up visible">
             {/* Columna Izquierda: Información y Estado */}
             <div className="lg:col-span-1 space-y-6">
-                <div className="bg-marino-2 border border-marino-4 rounded-2xl p-6 shadow-xl">
+                <div className="bg-gradient-to-br from-marino-2 to-marino-3 border border-marino-4 rounded-3xl p-8 shadow-2xl transition-all duration-300 hover:border-marino-3 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
                     <div className="flex flex-col items-center text-center pb-6 border-b border-marino-4 mb-6">
-                        <div className="w-24 h-24 bg-marino-3 rounded-full flex items-center justify-center border-2 border-naranja/30 mb-4 text-4xl font-barlow-condensed font-black text-naranja">
+                        <div className="w-24 h-24 bg-marino-3 rounded-full flex items-center justify-center border-2 border-naranja/30 mb-4 text-4xl font-barlow-condensed font-black text-transparent bg-clip-text bg-gradient-to-r from-naranja to-naranja-h">
                             {cliente.nombre.charAt(0)}
                         </div>
-                        <h3 className="text-xl font-bold text-blanco leading-none">{cliente.nombre}</h3>
+                        <h3 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blanco to-gris-claro leading-none">{cliente.nombre}</h3>
                         <p className="text-gris text-sm mt-1">{cliente.email}</p>
                         <div className="mt-4 flex gap-2">
                             {cliente.activo ? (
@@ -68,13 +68,13 @@ export default function TabResumen({ cliente }: Props) {
                     <div className="mt-8 space-y-3">
                         <Link
                             href={`/entrenador/clientes/${cliente.id}/planificacion`}
-                            className="w-full bg-naranja hover:bg-naranja-h text-marino font-black py-3 rounded-xl uppercase tracking-widest font-barlow-condensed text-sm transition-all shadow-lg shadow-naranja/10 text-center block"
+                            className="w-full bg-gradient-to-r from-naranja to-naranja-h hover:from-naranja-h hover:to-naranja text-marino font-black py-3 rounded-xl uppercase tracking-widest font-barlow-condensed text-sm transition-all shadow-[0_0_20px_rgba(255,107,0,0.2)] hover:shadow-[0_0_30px_rgba(255,107,0,0.4)] hover:-translate-y-1 text-center block"
                         >
                             Gestionar Planificación
                         </Link>
                         <Link
                             href={`/entrenador/mensajes?receptor=${cliente.id}`}
-                            className="w-full bg-marino-3 border border-marino-4 text-blanco font-bold py-3 rounded-xl uppercase tracking-widest font-barlow-condensed text-xs hover:bg-marino-4 transition-all flex items-center justify-center gap-2 text-center"
+                            className="w-full bg-marino-3 border border-marino-4 text-blanco font-bold py-3 rounded-xl uppercase tracking-widest font-barlow-condensed text-xs hover:bg-marino-4 hover:-translate-y-1 transition-all flex items-center justify-center gap-2 text-center"
                         >
                             <MessageCircle size={14} /> Enviar Mensaje
                         </Link>
@@ -89,7 +89,7 @@ export default function TabResumen({ cliente }: Props) {
             <div className="lg:col-span-2 space-y-6">
 
                 {/* Notas Rápidas / Auto-Guardables */}
-                <div className="bg-marino-2 border border-marino-4 rounded-2xl p-6 flex flex-col h-full">
+                <div className="bg-gradient-to-br from-marino-2 to-marino-3 border border-marino-4 rounded-3xl p-8 flex flex-col h-full shadow-2xl transition-all duration-300 hover:border-marino-3 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
                     <div className="flex justify-between items-center mb-4">
                         <h4 className="flex-1 text-[0.6rem] font-black text-gris uppercase tracking-[0.2em]">Notas Internas (Privado)</h4>
                         {guardadoExitoy && (
@@ -104,7 +104,7 @@ export default function TabResumen({ cliente }: Props) {
                             onChange={(e) => setNotas(e.target.value)}
                             onBlur={handleGuardarNotas}
                             placeholder="Escribe aquí notas sobre el entrenado..."
-                            className="w-full h-full min-h-[200px] md:min-h-[300px] bg-marino p-6 rounded-2xl border border-marino-4 text-sm text-gris-claro leading-relaxed resize-none focus:outline-none focus:border-naranja/50 transition-colors shadow-inner"
+                            className="w-full h-full min-h-[200px] md:min-h-[300px] bg-marino/50 p-6 rounded-2xl border border-marino-4 text-sm text-gris-claro leading-relaxed resize-none focus:outline-none focus:ring-1 focus:ring-naranja/50 focus:border-naranja/50 transition-all shadow-inner"
                         />
                         <button
                             onClick={handleGuardarNotas}

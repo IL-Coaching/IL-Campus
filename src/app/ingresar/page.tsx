@@ -12,15 +12,15 @@ export default function IngresarPage() {
 
                 {/* Header (Full Width) */}
                 <div className="md:col-span-2 text-center mb-8">
-                    <div className="flex justify-center items-center gap-1 mb-6">
-                        <div className="w-1.5 h-6 bg-gris-claro rounded-sm"></div>
-                        <div className="w-2.5 h-8 bg-gris-claro rounded-sm"></div>
-                        <span className="text-5xl font-barlow-condensed font-black italic text-naranja leading-none tracking-tighter mx-2">IL</span>
-                        <div className="w-2.5 h-8 bg-gris-claro rounded-sm"></div>
-                        <div className="w-1.5 h-6 bg-gris-claro rounded-sm"></div>
+                    <div className="flex justify-center items-center gap-1.5 mb-6">
+                        <div className="w-2 h-8 bg-gris-claro rounded-sm opacity-60"></div>
+                        <div className="w-3 h-10 bg-gris-claro rounded-sm opacity-80"></div>
+                        <span className="text-6xl md:text-7xl font-barlow-condensed font-black italic text-naranja leading-none tracking-tighter mx-3 drop-shadow-[0_0_20px_rgba(255,107,0,0.4)]">IL</span>
+                        <div className="w-3 h-10 bg-gris-claro rounded-sm opacity-80"></div>
+                        <div className="w-2 h-8 bg-gris-claro rounded-sm opacity-60"></div>
                     </div>
-                    <h1 className="text-4xl font-barlow-condensed font-black uppercase text-blanco tracking-tight mb-2">Bienvenido al Campus</h1>
-                    <p className="text-gris font-medium">Seleccioná tu tipo de acceso para continuar</p>
+                    <h1 className="text-3xl sm:text-4xl font-barlow-condensed font-black uppercase text-blanco tracking-tight mb-2">Bienvenido al Campus</h1>
+                    <p className="text-gris font-medium text-sm sm:text-base">Seleccioná tu tipo de acceso para continuar</p>
                 </div>
 
                 {/* Opción Alumno */}

@@ -13,7 +13,7 @@ export default function TabExpediente({ cliente }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 fade-up visible">
             {/* Columna Izquierda: Auditoría / History */}
             <div className="lg:col-span-1 space-y-6">
-                <div className="bg-marino-2 border border-marino-4 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                <div className="bg-gradient-to-br from-marino-2 to-marino-3 border border-marino-4 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all duration-300 hover:border-marino-3 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
                     <div className="flex items-center gap-3 mb-6 border-b border-marino-4 pb-4">
                         <History size={20} className="text-naranja" />
                         <h3 className="text-sm font-black text-blanco uppercase tracking-widest">

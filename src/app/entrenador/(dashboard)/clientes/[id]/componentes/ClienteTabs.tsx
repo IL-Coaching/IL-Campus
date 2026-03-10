@@ -4,8 +4,6 @@ import { useState } from "react";
 import { ClientePlanificacion } from "@/nucleo/tipos/planificacion.tipos";
 import TabResumen from "./TabResumen";
 import TabExpediente from "./TabExpediente";
-import TabMetricas from "./TabMetricas";
-import TabFinanzas from "./TabFinanzas";
 import {
     LayoutDashboard,
     FileText,
@@ -15,9 +13,11 @@ import {
 
 interface Props {
     cliente: ClientePlanificacion;
+    tabMetricas: React.ReactNode;
+    tabFinanzas: React.ReactNode;
 }
 
-export default function ClienteTabs({ cliente }: Props) {
+export default function ClienteTabs({ cliente, tabMetricas, tabFinanzas }: Props) {
     const [tabActiva, setTabActiva] = useState<"resumen" | "expediente" | "metricas" | "finanzas">("resumen");
 
     const TABS = [
@@ -48,9 +48,9 @@ export default function ClienteTabs({ cliente }: Props) {
             {/* Contenido */}
             <div className="mt-6">
                 {tabActiva === "resumen" && <TabResumen cliente={cliente} />}
-                {tabActiva === "metricas" && <TabMetricas clienteId={cliente.id} />}
+                {tabActiva === "metricas" && tabMetricas}
                 {tabActiva === "expediente" && <TabExpediente cliente={cliente} />}
-                {tabActiva === "finanzas" && <TabFinanzas clienteId={cliente.id} clienteNombre={cliente.nombre} />}
+                {tabActiva === "finanzas" && tabFinanzas}
             </div>
         </div>
     );

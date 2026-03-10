@@ -74,8 +74,8 @@ export default function DetallesFormulario({ cliente }: { cliente: ClientePlanif
     };
 
     return (
-        <div className="bg-marino-2 border border-marino-4 rounded-2xl overflow-hidden shadow-xl">
-            <div className="p-4 border-b border-marino-4 bg-marino-3/50 flex items-center justify-between">
+        <div className="bg-gradient-to-br from-marino-2 to-marino-3 border border-marino-4 rounded-3xl overflow-hidden shadow-2xl transition-all duration-300 hover:border-marino-3 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
+            <div className="p-6 border-b border-marino-4 bg-marino-3/50 flex items-center justify-between">
                 <h3 className="font-barlow-condensed font-bold tracking-widest uppercase text-sm text-blanco flex items-center gap-2">
                     <FileText size={16} className="text-naranja" />
                     Respuestas del Formulario
@@ -88,12 +88,12 @@ export default function DetallesFormulario({ cliente }: { cliente: ClientePlanif
                     <Download size={14} /> {descargando ? 'PROCESANDO...' : 'DESCARGAR PDF'}
                 </button>
             </div>
-            <div className="p-6 overflow-x-auto text-blanco">
+            <div className="p-8 overflow-x-auto text-blanco">
                 {/* Contenedor que será convertido a PDF */}
-                <div id="formulario-inscripcion-pdf" className="p-2 sm:p-6 bg-marino-2" style={{ color: '#F5F5F5' }}>
+                <div id="formulario-inscripcion-pdf" className="p-2 sm:p-6 bg-transparent" style={{ color: '#F5F5F5' }}>
                     <div className="mb-10 text-center border-b border-marino-4 pb-6">
                         <p className="text-[0.65rem] font-black text-naranja uppercase tracking-[0.3em] mb-2">Expediente Oficial</p>
-                        <h2 className="text-3xl font-barlow-condensed font-black uppercase text-blanco">Ficha de Inscripción</h2>
+                        <h2 className="text-3xl font-barlow-condensed font-black uppercase text-transparent bg-clip-text bg-gradient-to-r from-blanco to-gris-claro">Ficha de Inscripción</h2>
                         <h3 className="text-xl font-bold text-gris mt-2">{cliente.nombre}</h3>
                         <p className="text-xs text-gris-claro mt-2">Fecha de Alta: {new Date(cliente.fechaAlta).toLocaleDateString()}</p>
                     </div>

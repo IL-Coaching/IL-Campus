@@ -1,17 +1,49 @@
-import { Loader2 } from "lucide-react";
-
 export default function Loading() {
     return (
-        <div className="w-full h-[70vh] flex flex-col items-center justify-center animate-in fade-in duration-300">
-            <div className="relative mb-6">
-                <div className="w-16 h-16 border-4 border-marino-4 rounded-full"></div>
-                <div className="absolute top-0 left-0 w-16 h-16 border-4 border-naranja border-t-transparent rounded-full animate-spin"></div>
+        <div className="space-y-8 animate-in fade-in duration-500 w-full pt-10">
+            {/* Header Skeleton */}
+            <div className="flex items-center gap-4 mb-10">
+                <div className="w-12 h-12 rounded-xl skeleton-shimmer"></div>
+                <div className="space-y-2">
+                    <div className="w-48 h-8 rounded-lg skeleton-shimmer"></div>
+                    <div className="w-64 h-3 rounded-full skeleton-shimmer opacity-50"></div>
+                </div>
             </div>
 
-            <h2 className="text-blanco font-barlow-condensed text-xl uppercase tracking-widest font-black">Cargando Módulo...</h2>
-            <p className="text-gris text-xs font-bold uppercase tracking-[0.2em] mt-2 flex items-center gap-2">
-                <Loader2 size={12} className="animate-spin" /> Verificando configuración
-            </p>
+            {/* Config Forms Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Form 1 */}
+                <div className="bg-marino-2/50 border border-marino-4/50 rounded-3xl p-8">
+                    <div className="h-6 w-32 rounded-lg skeleton-shimmer mb-6"></div>
+                    <div className="space-y-6">
+                        <div>
+                            <div className="h-4 w-24 rounded-full skeleton-shimmer mb-2"></div>
+                            <div className="h-12 w-full rounded-xl skeleton-shimmer"></div>
+                        </div>
+                        <div>
+                            <div className="h-4 w-32 rounded-full skeleton-shimmer mb-2"></div>
+                            <div className="h-12 w-full rounded-xl skeleton-shimmer"></div>
+                        </div>
+                        <div className="h-12 w-48 rounded-xl skeleton-shimmer mt-4"></div>
+                    </div>
+                </div>
+
+                {/* Form 2 */}
+                <div className="bg-marino-2/50 border border-marino-4/50 rounded-3xl p-8">
+                    <div className="h-6 w-40 rounded-lg skeleton-shimmer mb-6"></div>
+                    <div className="space-y-6">
+                        <div>
+                            <div className="h-4 w-24 rounded-full skeleton-shimmer mb-2"></div>
+                            <div className="h-12 w-full rounded-xl skeleton-shimmer"></div>
+                        </div>
+                        <div>
+                            <div className="h-4 w-32 rounded-full skeleton-shimmer mb-2"></div>
+                            <div className="h-12 w-full rounded-xl skeleton-shimmer"></div>
+                        </div>
+                        <div className="h-12 w-48 rounded-xl skeleton-shimmer mt-4"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
