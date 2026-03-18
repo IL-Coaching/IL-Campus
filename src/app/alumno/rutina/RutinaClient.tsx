@@ -762,25 +762,51 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
              {todasLasSemanas.length > 1 && (
                 <section className="mt-8 pt-8 border-t border-marino-4/30">
                     <h3 className="text-[0.6rem] font-black text-gris uppercase tracking-[0.2em] mb-4 text-center">Navegar Semanas</h3>
-                    <div className="flex gap-2 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0">
+                    <div className="flex gap-3 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0">
                         {[...todasLasSemanas].sort((a, b) => a.numeroSemana - b.numeroSemana).map((semana) => {
                             const esSeleccionada = semana.id === semanaSeleccionadaId;
+                            
+                            // Calcular progreso de la semana
+                            const diasConEj = semana.diasSesion.filter(d => d.ejercicios.length > 0);
+                            const completados = diasConEj.filter(d => d.sesionesReales && d.sesionesReales.length > 0).length;
+                            const estaCompletada = diasConEj.length > 0 && completados === diasConEj.length;
+                            const enProgreso = completados > 0 && completados < diasConEj.length;
+
                             return (
                                 <button
                                     key={semana.id}
                                     onClick={() => setSemanaSeleccionadaId(semana.id)}
-                                    className={`snap-center shrink-0 w-32 p-3 rounded-2xl border text-center transition-all ${
+                                    className={`snap-center shrink-0 w-32 p-4 rounded-3xl border transition-all relative group flex flex-col items-center gap-1 ${
                                         esSeleccionada
-                                        ? 'bg-marino-3 border-gris text-blanco'
-                                        : 'bg-marino-2 border-marino-4/50 text-gris hover:border-marino-4'
+                                        ? 'bg-gradient-to-br from-marino-3 to-marino-4 border-naranja text-blanco shadow-lg shadow-naranja/5'
+                                        : estaCompletada
+                                            ? 'bg-marino-2/40 border-verde/20 text-verde/60'
+                                            : 'bg-marino-2 border-marino-4/50 text-gris hover:border-marino-4'
                                     }`}
                                 >
-                                    <span className="text-xl font-barlow-condensed font-black block leading-none mb-1">
-                                        S{semana.numeroSemana}
-                                    </span>
-                                    <span className="text-[0.55rem] font-bold uppercase tracking-widest block truncate">
+                                    <div className="flex items-center gap-1.5">
+                                        <span className={`text-xl font-barlow-condensed font-black block leading-none ${esSeleccionada ? 'text-blanco' : estaCompletada ? 'text-verde/70' : ''}`}>
+                                            S{semana.numeroSemana}
+                                        </span>
+                                        {estaCompletada && <CheckCircle2 size={12} className="text-verde/70" />}
+                                    </div>
+                                    
+                                    <span className={`text-[0.45rem] font-black uppercase tracking-[0.2em] block truncate ${esSeleccionada ? 'text-naranja' : estaCompletada ? 'text-verde/40' : 'text-gris/40'}`}>
                                         {semana.esFaseDeload ? 'Deload' : 'Regular'}
                                     </span>
+
+                                    {/* Barra de Progreso Minimalista */}
+                                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-marino-4/20 rounded-b-3xl overflow-hidden">
+                                        <div 
+                                            className={`h-full transition-all duration-500 ${estaCompletada ? 'bg-verde' : 'bg-naranja'}`}
+                                            style={{ width: `${(completados / (diasConEj.length || 1)) * 100}%` }}
+                                        ></div>
+                                    </div>
+
+                                    {/* Indicador de "Hoy/Activa" */}
+                                    {esSeleccionada && (
+                                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-naranja rounded-full animate-pulse shadow-[0_0_8px_#FF6B00]"></div>
+                                    )}
                                 </button>
                             );
                         })}
