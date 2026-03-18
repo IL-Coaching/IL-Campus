@@ -27,12 +27,20 @@ type Ejercicio = {
     } | null;
 };
 
+type SesionRealMeta = {
+    id: string;
+    fecha: Date;
+    completada: boolean;
+    duracionMinutos: number | null;
+};
+
 type DiaSesion = {
     id: string;
     diaSemana: string;
     focoMuscular: string | null;
     notas: string | null;
     ejercicios: Ejercicio[];
+    sesionesReales?: SesionRealMeta[];
 };
 
 type Semana = {
@@ -639,13 +647,32 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                 </section>
             )}
 
-            {/* Listado de Días (Cards) */}
+            {/* Listado de Días (Cola de Estímulos) */}
             <section>
-                <div className="flex items-center justify-between mb-4 px-2">
-                    <h2 className="text-[0.65rem] font-black text-gris uppercase tracking-[0.3em] flex items-center gap-2">
-                        <Calendar size={12} /> Tu Programa de Entrenamiento
-                    </h2>
-                </div>
+                {(() => {
+                    const totalSemanas = diasConEjercicios.length;
+                    const completadas = diasConEjercicios.filter(d => d.sesionesReales && d.sesionesReales.length > 0).length;
+                    const porcentaje = (completadas / totalSemanas) * 100;
+
+                    return (
+                        <div className="mb-8 px-2">
+                             <div className="flex items-center justify-between mb-3">
+                                <h2 className="text-[0.65rem] font-black text-gris uppercase tracking-[0.3em] flex items-center gap-2">
+                                    <Activity size={12} /> Tu Progreso Semanal
+                                </h2>
+                                <span className="text-[0.65rem] font-black text-naranja uppercase tracking-widest">
+                                    {completadas} / {totalSemanas} Estímulos
+                                </span>
+                            </div>
+                            <div className="h-2 w-full bg-marino-3 rounded-full overflow-hidden border border-white/5 p-[1px]">
+                                <div 
+                                    className="h-full bg-gradient-to-r from-naranja/50 to-naranja rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(255,107,0,0.3)]"
+                                    style={{ width: `${porcentaje}%` }}
+                                ></div>
+                            </div>
+                        </div>
+                    );
+                })()}
 
                 {diasConEjercicios.length === 0 ? (
                     <div className="bg-marino-2/40 border border-marino-4/30 border-dashed rounded-[2rem] p-12 text-center">
@@ -655,40 +682,80 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                         </p>
                     </div>
                 ) : (
-                    <div className="grid gap-3">
-                        {diasConEjercicios.map((dia: DiaSesion, idx: number) => (
-                            <button
-                                key={dia.id}
-                                onClick={() => handleDiaClick(dia)}
-                                className="bg-marino-2 border border-marino-4/50 rounded-3xl p-5 text-left flex items-center justify-between group hover:border-naranja/50 transition-all hover:shadow-[0_8px_30px_-10px_rgba(255,107,0,0.15)] active:scale-[0.99] relative overflow-hidden"
-                            >
-                                {/* Barra de color lateral para enfatizar CTA implícito */}
-                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-marino-4 to-marino-5 group-hover:from-naranja group-hover:to-naranja/50 transition-colors"></div>
-                                
-                                <div className="pl-2">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <p className="text-[0.6rem] font-black text-gris uppercase tracking-widest">
-                                            Día {idxToLetter(idx)}
-                                        </p>
-                                        {dia.ejercicios.some(e => e.esTesteo) && (
-                                            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_6px_rgba(239,68,68,0.6)]"></span>
+                    <div className="grid gap-4">
+                        {(() => {
+                            let haEncontradoSiguiente = false;
+                            
+                            return diasConEjercicios.map((dia: DiaSesion, idx: number) => {
+                                const tieneSesionReal = dia.sesionesReales && dia.sesionesReales.length > 0;
+                                const esSiguiente = !tieneSesionReal && !haEncontradoSiguiente;
+                                if (esSiguiente) haEncontradoSiguiente = true;
+
+                                return (
+                                    <button
+                                        key={dia.id}
+                                        onClick={() => handleDiaClick(dia)}
+                                        className={`relative overflow-hidden group transition-all duration-300 rounded-[2.5rem] p-6 text-left border ${
+                                            tieneSesionReal 
+                                            ? 'bg-marino-2/40 border-marino-4/30 opacity-60' 
+                                            : esSiguiente
+                                                ? 'bg-gradient-to-br from-marino-2 to-marino-3 border-naranja/40 shadow-[0_10px_40px_-15px_rgba(255,107,0,0.25)] scale-[1.02] z-10'
+                                                : 'bg-marino-2 border-marino-4/50 opacity-90'
+                                        }`}
+                                    >
+                                        {/* Badge de Estado Superior */}
+                                        <div className="flex items-center justify-between mb-4">
+                                            <span className={`text-[0.6rem] font-black uppercase tracking-[0.25em] flex items-center gap-2 ${
+                                                tieneSesionReal ? 'text-verde/60' : esSiguiente ? 'text-naranja' : 'text-gris'
+                                            }`}>
+                                                {tieneSesionReal ? (
+                                                    <><CheckCircle2 size={12} /> Completado</>
+                                                ) : esSiguiente ? (
+                                                    <><Play size={10} fill="currentColor" /> Siguiente Estímulo</>
+                                                ) : (
+                                                    <><Clock size={10} /> Programado</>
+                                                )}
+                                            </span>
+                                            
+                                            <span className="text-[0.65rem] font-barlow-condensed font-black text-gris/40 uppercase tracking-widest bg-marino-3/50 px-3 py-1 rounded-full">
+                                                Paso {idx + 1}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-end justify-between gap-4">
+                                            <div>
+                                                <h3 className={`text-3xl font-barlow-condensed font-black uppercase leading-none tracking-tight mb-2 ${
+                                                    tieneSesionReal ? 'text-gris' : 'text-blanco'
+                                                }`}>
+                                                    {dia.diaSemana}
+                                                </h3>
+                                                {dia.focoMuscular && (
+                                                    <p className={`text-sm font-medium ${tieneSesionReal ? 'text-gris/50' : 'text-gris-claro'}`}>
+                                                        {dia.focoMuscular}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            <div className="flex flex-col items-end gap-1">
+                                                <span className={`text-[0.7rem] font-bold ${tieneSesionReal ? 'text-gris/40' : 'text-blanco/60'}`}>
+                                                    {dia.ejercicios.length} ejercicios
+                                                </span>
+                                                {esSiguiente && (
+                                                    <div className="w-10 h-10 rounded-full bg-naranja flex items-center justify-center text-marino shadow-lg shadow-naranja/20 transition-transform group-hover:scale-110">
+                                                        <Play size={18} fill="currentColor" className="translate-x-[1px]" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Overlay Glow para el siguiente dia */}
+                                        {esSiguiente && (
+                                            <div className="absolute top-0 right-0 w-32 h-32 bg-naranja/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
                                         )}
-                                    </div>
-                                    <h3 className="text-2xl font-barlow-condensed font-black uppercase text-blanco leading-none tracking-tight group-hover:text-naranja transition-colors">
-                                        {dia.diaSemana}
-                                    </h3>
-                                    {dia.focoMuscular && (
-                                        <p className="text-xs text-gris-claro font-medium mt-1 truncate max-w-[200px] md:max-w-md">
-                                            {dia.focoMuscular} • {dia.ejercicios.length} Ejercicios
-                                        </p>
-                                    )}
-                                </div>
-                                
-                                <div className="w-10 h-10 rounded-full bg-marino-3 border border-marino-4 flex items-center justify-center text-gris group-hover:bg-naranja group-hover:border-naranja group-hover:text-marino transition-all">
-                                    <ChevronRight size={18} className="translate-x-[1px]" />
-                                </div>
-                            </button>
-                        ))}
+                                    </button>
+                                );
+                            });
+                        })()}
                     </div>
                 )}
             </section>

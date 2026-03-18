@@ -45,6 +45,16 @@ export default async function RutinaPage() {
                                 diasSesion: {
                                     orderBy: { diaSemana: "asc" },
                                     include: {
+                                        sesionesReales: {
+                                            orderBy: { fecha: "desc" },
+                                            take: 1,
+                                            select: {
+                                                id: true,
+                                                fecha: true,
+                                                completada: true,
+                                                duracionMinutos: true
+                                            }
+                                        },
                                         ejercicios: {
                                             orderBy: { orden: "asc" },
                                             include: {
