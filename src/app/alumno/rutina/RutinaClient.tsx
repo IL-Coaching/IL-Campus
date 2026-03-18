@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import { Dumbbell, Play, ChevronRight, Calendar, Clock, Zap, ShieldAlert, ArrowLeft, Square, RotateCcw, CheckCircle2, Activity, AlertCircle } from "lucide-react";
+import { Dumbbell, Play, Clock, Zap, ShieldAlert, ArrowLeft, Square, RotateCcw, CheckCircle2, Activity, AlertCircle } from "lucide-react";
 import { guardarSeries, obtenerSeriesRegistradas, finalizarSesion } from "@/nucleo/acciones/sesion-alumno.accion";
 import { registrarPesoSesion } from "@/nucleo/acciones/checkin.accion";
 
@@ -64,9 +64,7 @@ const DIA_ORDEN: Record<string, number> = {
     Jueves: 4, Viernes: 5, Sábado: 6, Sabado: 6, Domingo: 7
 };
 
-function idxToLetter(idx: number) {
-    return String.fromCharCode(65 + idx);
-}
+
 
 function CronometroDescanso({ segundos }: { segundos: number }) {
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
