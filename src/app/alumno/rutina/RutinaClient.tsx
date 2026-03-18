@@ -770,7 +770,6 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                             const diasConEj = semana.diasSesion.filter(d => d.ejercicios.length > 0);
                             const completados = diasConEj.filter(d => d.sesionesReales && d.sesionesReales.length > 0).length;
                             const estaCompletada = diasConEj.length > 0 && completados === diasConEj.length;
-                            const enProgreso = completados > 0 && completados < diasConEj.length;
 
                             return (
                                 <button
