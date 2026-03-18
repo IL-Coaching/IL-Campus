@@ -4,6 +4,12 @@
 import { useState } from "react";
 import { ChevronDown, CheckCircle2, AlertCircle, XCircle, Clock, Calendar } from "lucide-react";
 
+const DIAS_SEMANA_ORDEN = ["lunes", "martes", "miércoles", "miercoles", "jueves", "viernes", "sábado", "sabado", "domingo"];
+const obtenerOrdenDia = (dia: string) => {
+    const index = DIAS_SEMANA_ORDEN.indexOf(dia.trim().toLowerCase());
+    return index === -1 ? 99 : index;
+};
+
 interface Props {
     macrociclos: any[]; // Todo el árbol anidado
 }
@@ -77,7 +83,7 @@ export default function TabBitacoraClient({ macrociclos }: Props) {
                                                             {semana.diasSesion.length === 0 ? (
                                                                 <p className="text-xs text-gris italic px-2">Sin sesiones planificadas en esta semana.</p>
                                                             ) : (
-                                                                semana.diasSesion.map((dia: any) => {
+                                                                [...semana.diasSesion].sort((a: any, b: any) => obtenerOrdenDia(a.diaSemana) - obtenerOrdenDia(b.diaSemana)).map((dia: any) => {
                                                                     const sesionReal = dia.sesionesReales?.[0]; // Tomamos la última/única
                                                                     let estado = 'PENDIENTE';
                                                                     let uiStyles = 'bg-marino-2 border-marino-4 opacity-100'; // Default
