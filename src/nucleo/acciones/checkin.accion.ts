@@ -117,6 +117,7 @@ export async function enviarCheckin(data: CheckinInput) {
                 nota: data.nota || '',
                 faseCiclo: data.intensidad,
                 ajustesEsperados: data.problemaFisico ? data.notaProblema : null,
+                pesoKg: data.pesoKg,
                 visto: false
             }
         });
@@ -128,5 +129,26 @@ export async function enviarCheckin(data: CheckinInput) {
     } catch (error) {
         console.error("Error al enviar check-in:", error);
         return { error: "No se pudo enviar el check-in." };
+    }
+}
+
+/**
+ * registrarPesoSesion — Registro rápido de peso desde el entrenamiento.
+ */
+export async function registrarPesoSesion(pesoKg: number) {
+    try {
+        const cliente = await getAlumnoSesion();
+        await prisma.checkin.create({
+            data: {
+                clienteId: cliente.id,
+                pesoKg,
+                visto: false,
+                nota: "Registro rápido desde entrenamiento"
+            }
+        });
+        revalidatePath('/alumno/dashboard');
+        return { exito: true };
+    } catch {
+        return { error: "No se pudo registrar el peso." };
     }
 }

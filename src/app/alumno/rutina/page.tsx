@@ -30,30 +30,32 @@ export default async function RutinaPage() {
         );
     }
 
-    // Buscar el macrociclo activo del alumno con toda la jerarquía
-    const macrociclo = await prisma.macrociclo.findFirst({
-        where: { clienteId: alumno.id },
-        orderBy: { creadoEn: "desc" },
-        include: {
-            bloquesMensuales: {
-                orderBy: { id: "asc" },
-                include: {
-                    semanas: {
-                        orderBy: { numeroSemana: "asc" },
-                        include: {
-                            diasSesion: {
-                                orderBy: { diaSemana: "asc" },
-                                include: {
-                                    ejercicios: {
-                                        orderBy: { orden: "asc" },
-                                        include: {
-                                            ejercicio: {
-                                                select: {
-                                                    nombre: true,
-                                                    urlVideo: true,
-                                                    thumbnailUrl: true,
-                                                    musculoPrincipal: true,
-                                                    posicionCarga: true,
+    // Buscar el macrociclo activo y datos del entrenador en paralelo
+    const [macrociclo, datosEntrenador] = await Promise.all([
+        prisma.macrociclo.findFirst({
+            where: { clienteId: alumno.id },
+            orderBy: { creadoEn: "desc" },
+            include: {
+                bloquesMensuales: {
+                    orderBy: { id: "asc" },
+                    include: {
+                        semanas: {
+                            orderBy: { numeroSemana: "asc" },
+                            include: {
+                                diasSesion: {
+                                    orderBy: { diaSemana: "asc" },
+                                    include: {
+                                        ejercicios: {
+                                            orderBy: { orden: "asc" },
+                                            include: {
+                                                ejercicio: {
+                                                    select: {
+                                                        nombre: true,
+                                                        urlVideo: true,
+                                                        thumbnailUrl: true,
+                                                        musculoPrincipal: true,
+                                                        posicionCarga: true,
+                                                    }
                                                 }
                                             }
                                         }
@@ -64,13 +66,12 @@ export default async function RutinaPage() {
                     }
                 }
             }
-        }
-    });
-
-    const datosEntrenador = await prisma.entrenador.findUnique({
-        where: { id: alumno.entrenadorId },
-        select: { nombre: true }
-    });
+        }),
+        prisma.entrenador.findUnique({
+            where: { id: alumno.entrenadorId },
+            select: { nombre: true }
+        })
+    ]);
 
     const nombreEntrenador = datosEntrenador?.nombre || 'Tu Entrenador';
 

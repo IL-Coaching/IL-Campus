@@ -8,21 +8,24 @@ import {
     LayoutDashboard,
     FileText,
     LineChart,
-    Wallet
+    Wallet,
+    Archive
 } from "lucide-react";
 
 interface Props {
     cliente: ClientePlanificacion;
     tabMetricas: React.ReactNode;
     tabFinanzas: React.ReactNode;
+    tabBitacora: React.ReactNode;
 }
 
-export default function ClienteTabs({ cliente, tabMetricas, tabFinanzas }: Props) {
-    const [tabActiva, setTabActiva] = useState<"resumen" | "expediente" | "metricas" | "finanzas">("resumen");
+export default function ClienteTabs({ cliente, tabMetricas, tabFinanzas, tabBitacora }: Props) {
+    const [tabActiva, setTabActiva] = useState<"resumen" | "expediente" | "metricas" | "bitacora" | "finanzas">("resumen");
 
     const TABS = [
         { id: "resumen", label: "Resumen", icon: <LayoutDashboard size={16} /> },
         { id: "metricas", label: "Métricas", icon: <LineChart size={16} /> },
+        { id: "bitacora", label: "Bitácora", icon: <Archive size={16} /> },
         { id: "expediente", label: "Expediente", icon: <FileText size={16} /> },
         { id: "finanzas", label: "Finanzas", icon: <Wallet size={16} /> }
     ] as const;
@@ -49,6 +52,7 @@ export default function ClienteTabs({ cliente, tabMetricas, tabFinanzas }: Props
             <div className="mt-6">
                 {tabActiva === "resumen" && <TabResumen cliente={cliente} />}
                 {tabActiva === "metricas" && tabMetricas}
+                {tabActiva === "bitacora" && tabBitacora}
                 {tabActiva === "expediente" && <TabExpediente cliente={cliente} />}
                 {tabActiva === "finanzas" && tabFinanzas}
             </div>

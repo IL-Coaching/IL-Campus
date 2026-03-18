@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import { Dumbbell, Play, ChevronRight, Calendar, Clock, Zap, ShieldAlert, ArrowLeft, Square, RotateCcw, CheckCircle2 } from "lucide-react";
-import { guardarSeries } from "@/nucleo/acciones/sesion-alumno.accion";
+import { Dumbbell, Play, ChevronRight, Calendar, Clock, Zap, ShieldAlert, ArrowLeft, Square, RotateCcw, CheckCircle2, Activity, AlertCircle } from "lucide-react";
+import { guardarSeries, obtenerSeriesRegistradas, finalizarSesion } from "@/nucleo/acciones/sesion-alumno.accion";
+import { registrarPesoSesion } from "@/nucleo/acciones/checkin.accion";
 
 // Types
 type Ejercicio = {
@@ -125,14 +126,18 @@ function RegistroSeries({
     diaId,
     numSeries,
     pesoSugerido,
+    seriesRegistradas,
 }: {
     ejercicioPlanificadoId: string;
     diaId: string;
     numSeries: number;
     pesoSugerido: number | null;
+    seriesRegistradas?: SetLogEntry[];
 }) {
     const [sets, setSets] = useState<SetLogEntry[]>(
-        Array.from({ length: numSeries }, () => ({ pesoKg: pesoSugerido ? String(pesoSugerido) : "", repsReales: "" }))
+        seriesRegistradas && seriesRegistradas.length > 0
+            ? seriesRegistradas
+            : Array.from({ length: numSeries }, () => ({ pesoKg: pesoSugerido ? String(pesoSugerido) : "", repsReales: "" }))
     );
     const [saved, setSaved] = useState(false);
     const [isPending, startTransition] = useTransition();
@@ -208,22 +213,79 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
     const { semanaActiva, todasLasSemanas, bloqueObjetivo, notasMacrociclo } = macrocicloData;
     const [semanaSeleccionadaId, setSemanaSeleccionadaId] = useState<string | undefined>(semanaActiva?.id);
     const [diaVisualizado, setDiaVisualizado] = useState<DiaSesion | null>(null);
+    const [seriesDelDia, setSeriesDelDia] = useState<Record<string, SetLogEntry[]>>({});
+    const [pesoCorporal, setPesoCorporal] = useState("");
+    const [isSavingPeso, setIsSavingPeso] = useState(false);
+    const [pesoGuardado, setPesoGuardado] = useState(false);
+    const [showFinishModal, setShowFinishModal] = useState(false);
+    const [isFinishing, startFinishing] = useTransition();
 
     const semanaActual = todasLasSemanas.find(s => s.id === semanaSeleccionadaId) || semanaActiva;
-    
-    const diasConEjercicios = semanaActual
-        ? [...semanaActual.diasSesion]
-            .sort((a, b) => (DIA_ORDEN[a.diaSemana] || 99) - (DIA_ORDEN[b.diaSemana] || 99))
-            .filter(d => d.ejercicios.length > 0)
-        : [];
 
-    const handleDiaClick = (dia: DiaSesion) => {
+    const handleDiaClick = async (dia: DiaSesion) => {
         setDiaVisualizado(dia);
         window.scrollTo({ top: 0, behavior: "smooth" });
+
+        // Cargar series ya registradas hoy
+        const res = await obtenerSeriesRegistradas(dia.id);
+        if (res.exito && res.series) {
+            const mapped: Record<string, SetLogEntry[]> = {};
+            res.series.forEach((s: { ejercicioPlanificadoId: string; pesoKg: number | null; repsReales: number | null }) => {
+                if (!mapped[s.ejercicioPlanificadoId]) mapped[s.ejercicioPlanificadoId] = [];
+                mapped[s.ejercicioPlanificadoId].push({
+                    pesoKg: s.pesoKg?.toString() || "",
+                    repsReales: s.repsReales?.toString() || ""
+                });
+            });
+            setSeriesDelDia(mapped);
+        }
     };
+
+    const handleGuardarPeso = async () => {
+        if (!pesoCorporal || isSavingPeso) return;
+        setIsSavingPeso(true);
+        try {
+            const res = await registrarPesoSesion(parseFloat(pesoCorporal));
+            if (res.exito) setPesoGuardado(true);
+        } finally {
+            setIsSavingPeso(false);
+        }
+    };
+
+    const diasConEjercicios = semanaActual
+        ? [...semanaActual.diasSesion]
+            .sort((a: DiaSesion, b: DiaSesion) => (DIA_ORDEN[a.diaSemana] || 99) - (DIA_ORDEN[b.diaSemana] || 99))
+            .filter((d: DiaSesion) => d.ejercicios.length > 0)
+        : [];
 
     const handleVolverAlHub = () => {
         setDiaVisualizado(null);
+    };
+
+    const handleFinalizarClic = () => {
+        if (!diaVisualizado) return;
+        const totalEjercicios = diaVisualizado.ejercicios.length;
+        const completados = diaVisualizado.ejercicios.filter(e => seriesDelDia[e.id] && seriesDelDia[e.id].length > 0).length;
+        
+        if (completados < totalEjercicios) {
+            setShowFinishModal(true);
+        } else {
+            confirmarFinalizacion();
+        }
+    };
+
+    const confirmarFinalizacion = () => {
+        if (!diaVisualizado) return;
+        startFinishing(async () => {
+            const res = await finalizarSesion(diaVisualizado.id);
+            if (res.exito) {
+                setShowFinishModal(false);
+                setDiaVisualizado(null); // Vuelve al hub al finalizar
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            } else {
+                alert(res.error || "Error al finalizar la sesión.");
+            }
+        });
     };
 
     // --- VISTA: MODO FOCO DIARIO ---
@@ -280,6 +342,40 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                                 </span>
                             ))}
                         </div>
+                    </div>
+                </div>
+
+                {/* Registro de Peso Corporal (Antes de empezar) */}
+                <div className="bg-marino-2 border border-marino-4 rounded-2xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-naranja/10 flex items-center justify-center border border-naranja/20">
+                            <Activity size={24} className="text-naranja" />
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-bold text-blanco">Peso Corporal de Hoy</h4>
+                            <p className="text-[0.65rem] text-gris uppercase tracking-widest font-bold">Registro matutino o pre-entreno</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2 w-full md:w-auto">
+                        <input
+                            type="number"
+                            placeholder="kg"
+                            value={pesoCorporal}
+                            disabled={pesoGuardado}
+                            onChange={(e) => setPesoCorporal(e.target.value)}
+                            className="bg-marino-3 border border-marino-4 rounded-xl px-4 py-2.5 text-blanco font-bold focus:border-naranja/50 focus:outline-none w-full md:w-24 text-center"
+                        />
+                        <button
+                            onClick={handleGuardarPeso}
+                            disabled={isSavingPeso || pesoGuardado || !pesoCorporal}
+                            className={`px-6 py-2.5 rounded-xl font-black uppercase tracking-widest text-[0.65rem] transition-all flex items-center gap-2 ${
+                                pesoGuardado 
+                                ? 'bg-verde/10 text-verde border border-verde/20' 
+                                : 'bg-naranja text-marino hover:bg-naranja-h'
+                            }`}
+                        >
+                            {isSavingPeso ? <Clock size={14} className="animate-spin" /> : pesoGuardado ? <CheckCircle2 size={14} /> : 'Guardar'}
+                        </button>
                     </div>
                 </div>
 
@@ -411,11 +507,65 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                                     diaId={diaVisualizado.id}
                                     numSeries={ep.series}
                                     pesoSugerido={ep.pesoSugerido}
+                                    seriesRegistradas={seriesDelDia[ep.id]}
                                 />
                             </div>
                         );
                     })}
                 </div>
+
+                {/* BOTÓN FINALIZAR SESIÓN */}
+                <div className="mt-8">
+                    <button
+                        onClick={handleFinalizarClic}
+                        disabled={isFinishing}
+                        className="w-full py-4 bg-gradient-to-r from-naranja to-naranja-h shadow-[0_0_20px_rgba(255,107,0,0.2)] hover:shadow-[0_0_30px_rgba(255,107,0,0.4)] text-marino rounded-2xl font-black uppercase tracking-widest text-lg flex items-center justify-center gap-2 transition-all hover:-translate-y-1 active:scale-95"
+                    >
+                        {isFinishing ? <Clock className="animate-spin" size={20} /> : <CheckCircle2 size={24} />}
+                        Finalizar Sesión de Hoy
+                    </button>
+                </div>
+
+                {/* MODAL ANTI MISS-CLICK */}
+                {showFinishModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-marino/80 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="bg-marino-2 border border-naranja/50 rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-naranja/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+                            
+                            <div className="flex flex-col items-center text-center relative z-10">
+                                <div className="w-16 h-16 bg-naranja/10 rounded-full flex items-center justify-center text-naranja mb-6 border border-naranja/20">
+                                    <AlertCircle size={32} />
+                                </div>
+                                
+                                <h3 className="text-2xl font-barlow-condensed font-black text-blanco uppercase tracking-tight mb-2">
+                                    Sesión Incompleta
+                                </h3>
+                                
+                                <p className="text-[0.75rem] font-medium text-gris-claro leading-relaxed mb-8">
+                                    Tienes ejercicios planeados sin series registradas. ¿Seguro que deseas dar por finalizada la sesión así? Se guardará como <strong className="text-naranja">Parcial</strong>.
+                                </p>
+                                
+                                <div className="w-full space-y-3">
+                                    <button
+                                        onClick={confirmarFinalizacion}
+                                        disabled={isFinishing}
+                                        className="w-full py-3.5 bg-naranja hover:bg-naranja-h text-marino rounded-xl font-black uppercase tracking-widest text-[0.65rem] transition-all relative"
+                                    >
+                                        {isFinishing ? "Finalizando..." : "Sí, Finalizar Sesión Real"}
+                                    </button>
+                                    
+                                    <button
+                                        onClick={() => setShowFinishModal(false)}
+                                        disabled={isFinishing}
+                                        className="w-full py-3.5 bg-marino-3 hover:bg-marino-4 border border-marino-4/50 text-gris-claro rounded-xl font-black uppercase tracking-widest text-[0.65rem] transition-all"
+                                    >
+                                        Perdón, me falto cargar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         );
     }
@@ -461,7 +611,7 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                     </div>
                 ) : (
                     <div className="grid gap-3">
-                        {diasConEjercicios.map((dia, idx) => (
+                        {diasConEjercicios.map((dia: DiaSesion, idx: number) => (
                             <button
                                 key={dia.id}
                                 onClick={() => handleDiaClick(dia)}

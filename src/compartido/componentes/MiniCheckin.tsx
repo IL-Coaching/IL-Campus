@@ -22,6 +22,7 @@ export default function MiniCheckin({ onSuccess }: MiniCheckinProps) {
         problemaFisico: false,
         notaProblema: '',
         intensidad: 'media',
+        peso: '',
         nota: ''
     });
 
@@ -36,6 +37,7 @@ export default function MiniCheckin({ onSuccess }: MiniCheckinProps) {
                 problemaFisico: formData.problemaFisico,
                 notaProblema: formData.notaProblema,
                 intensidad: formData.intensidad,
+                pesoKg: formData.peso !== "" ? parseFloat(formData.peso) : undefined,
                 nota: formData.nota
             });
             
@@ -136,6 +138,19 @@ export default function MiniCheckin({ onSuccess }: MiniCheckinProps) {
                         value={formData.adherencia}
                         onChange={(e) => setFormData({...formData, adherencia: parseInt(e.target.value)})}
                         className="w-full h-2 bg-marino-3 rounded-full appearance-none cursor-pointer accent-green-500"
+                    />
+                </div>
+
+                {/* Peso */}
+                <div>
+                    <label className="text-xs font-bold text-gris uppercase block mb-2">Peso actual (kg)</label>
+                    <input
+                        type="number"
+                        placeholder="0.0"
+                        step="0.1"
+                        value={formData.peso}
+                        onChange={(e) => setFormData({...formData, peso: e.target.value})}
+                        className="w-full bg-marino-3 border border-marino-4 rounded-lg px-3 py-2 text-sm text-blanco focus:border-naranja/50 focus:outline-none"
                     />
                 </div>
 

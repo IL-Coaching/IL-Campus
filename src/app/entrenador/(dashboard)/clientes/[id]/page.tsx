@@ -5,6 +5,7 @@ import { ChevronLeft } from "lucide-react";
 import ClienteTabs from "./componentes/ClienteTabs";
 import TabMetricas from "./componentes/TabMetricas";
 import TabFinanzas from "./componentes/TabFinanzas";
+import TabBitacora from "./componentes/TabBitacora";
 import { Suspense } from "react";
 
 export default async function PerfilClientePage({ params }: { params: { id: string } }) {
@@ -43,6 +44,16 @@ export default async function PerfilClientePage({ params }: { params: { id: stri
                         </div>
                     }>
                         <TabMetricas clienteId={cliente.id} />
+                    </Suspense>
+                }
+                tabBitacora={
+                    <Suspense fallback={
+                        <div className="py-20 flex flex-col items-center justify-center space-y-4">
+                            <div className="w-12 h-12 border-4 border-naranja border-t-transparent rounded-full animate-spin"></div>
+                            <p className="text-gris text-xs font-black uppercase tracking-widest animate-pulse">Cargando bitácora de entrenamientos...</p>
+                        </div>
+                    }>
+                        <TabBitacora clienteId={cliente.id} />
                     </Suspense>
                 }
                 tabFinanzas={

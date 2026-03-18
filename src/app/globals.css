@@ -96,9 +96,14 @@ select:-webkit-autofill:focus {
 
   /* Skeleton Vivos (Premium Shimmer) */
   .skeleton-shimmer {
-    background: linear-gradient(90deg, var(--marino-2) 25%, var(--marino-3) 50%, var(--marino-2) 75%);
+    background: linear-gradient(
+      90deg, 
+      rgba(26, 37, 64, 0.4) 25%, 
+      rgba(42, 58, 92, 0.6) 50%, 
+      rgba(26, 37, 64, 0.4) 75%
+    );
     background-size: 200% 100%;
-    animation: shimmer 1.5s infinite linear;
+    animation: shimmer 2s infinite ease-in-out;
   }
 }
 

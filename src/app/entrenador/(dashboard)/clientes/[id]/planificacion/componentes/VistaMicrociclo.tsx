@@ -2,9 +2,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SemanaConDias } from "@/nucleo/tipos/planificacion.tipos";
-import { Calendar, Trash2, Zap, Plus, Activity, BarChart3, AlertTriangle, Layers, Copy, ClipboardPaste, Loader2 } from "lucide-react";
+import { Calendar, Trash2, Zap, Plus, Activity, BarChart3, AlertTriangle, Copy, ClipboardPaste, Loader2 } from "lucide-react";
 import { crearSesion, eliminarSesion, obtenerVolumenSemanal, actualizarSemana, clonarSemana } from "@/nucleo/acciones/planificacion.accion";
-import { ModeloPeriodizacion } from "@prisma/client";
 
 interface VistaMicrocicloProps {
     semana: SemanaConDias;
@@ -111,25 +110,7 @@ export default function VistaMicrociclo({ semana, onSelectSesion }: VistaMicroci
                 </div>
 
                 <div className="flex flex-wrap gap-4 items-center">
-                    {/* Selector de Periodización Científica */}
-                    <div className="relative group/sel">
-                        <div className="flex items-center gap-3 bg-marino-3/50 border border-marino-4 px-4 py-2.5 rounded-xl transition-all hover:border-naranja/40">
-                            <Layers size={16} className="text-naranja" />
-                            <select
-                                defaultValue={semana.modeloPeriodizacion}
-                                onChange={async (e) => {
-                                    await actualizarSemana(semana.id, { modeloPeriodizacion: e.target.value as ModeloPeriodizacion });
-                                    router.refresh();
-                                }}
-                                className="bg-transparent text-xs font-black text-blanco uppercase tracking-widest outline-none cursor-pointer pr-2"
-                            >
-                                <option value="LINEAL" className="bg-marino-2 text-blanco">Periodización Lineal</option>
-                                <option value="ONDULANTE" className="bg-marino-2 text-blanco">Periodización Ondulante</option>
-                                <option value="CONJUGADA" className="bg-marino-2 text-blanco">Periodización Conjugada</option>
-                                <option value="PERSONALIZADO" className="bg-marino-2 text-blanco">Personalizado</option>
-                            </select>
-                        </div>
-                    </div>
+
 
                     {/* Switch de Check-in */}
                     <button

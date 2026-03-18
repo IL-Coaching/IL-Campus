@@ -54,10 +54,11 @@ export async function guardarSeries(data: {
                 data: {
                     clienteId: alumno.id,
                     diaId: data.diaId,
-                    completada: false
+                    completada: false // Antes era true, ahora requiere finalizar manualmente
                 }
             });
         }
+
 
         // Eliminar series previas de este ejercicio en esta sesión
         await prisma.serieRegistrada.deleteMany({
@@ -83,6 +84,7 @@ export async function guardarSeries(data: {
         }
 
         revalidatePath("/alumno/rutina");
+        revalidatePath("/alumno/dashboard");
         return { exito: true, sesionId: sesion.id };
     } catch (error) {
         console.error("Error al guardar series:", error);
@@ -116,5 +118,50 @@ export async function obtenerSeriesRegistradas(diaId: string) {
         return { exito: true, series: sesion?.series ?? [] };
     } catch {
         return { exito: false, series: [] };
+    }
+}
+
+/**
+ * finalizarSesion — Marca la sesión del día como completada.
+ */
+export async function finalizarSesion(diaId: string) {
+    try {
+        const alumno = await getAlumnoSesion();
+
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        const manana = new Date(hoy);
+        manana.setDate(manana.getDate() + 1);
+
+        const sesion = await prisma.sesionRegistrada.findFirst({
+            where: {
+                clienteId: alumno.id,
+                diaId,
+                fecha: { gte: hoy, lt: manana }
+            }
+        });
+
+        if (!sesion) {
+            // Si no hay sesión, creamos una completada (ej: el alumno entró y finalizó sin cargar nada, aunque el UI lo debería evitar)
+            await prisma.sesionRegistrada.create({
+                data: {
+                    clienteId: alumno.id,
+                    diaId,
+                    completada: true
+                }
+            });
+        } else if (!sesion.completada) {
+            await prisma.sesionRegistrada.update({
+                where: { id: sesion.id },
+                data: { completada: true }
+            });
+        }
+
+        revalidatePath("/alumno/rutina");
+        revalidatePath("/alumno/dashboard");
+        return { exito: true };
+    } catch (error) {
+        console.error("Error al finalizar sesión:", error);
+        return { error: "No se pudo finalizar la sesión." };
     }
 }

@@ -19,6 +19,7 @@ export default function CheckinPage() {
         problemaFisico: false,
         notaProblema: '',
         intensidad: 'media',
+        peso: '',
         nota: ''
     });
 
@@ -32,6 +33,7 @@ export default function CheckinPage() {
                 problemaFisico: formData.problemaFisico,
                 notaProblema: formData.notaProblema,
                 intensidad: formData.intensidad,
+                pesoKg: formData.peso !== "" ? parseFloat(formData.peso) : undefined,
                 nota: formData.nota
             });
             
@@ -176,6 +178,27 @@ export default function CheckinPage() {
                                     {formData.adherencia}%
                                 </span>
                             </div>
+                        </section>
+
+                        {/* Peso */}
+                        <section className="bg-marino-2 border border-marino-4 rounded-2xl p-5">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 bg-naranja/10 rounded-xl flex items-center justify-center">
+                                    <Activity size={20} className="text-naranja" />
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-bold text-blanco">Tu peso actual</h3>
+                                    <p className="text-[0.6rem] text-gris">Registro de peso en kg</p>
+                                </div>
+                            </div>
+                            <input
+                                type="number"
+                                placeholder="0.0"
+                                step="0.1"
+                                value={formData.peso}
+                                onChange={(e) => setFormData({ ...formData, peso: e.target.value })}
+                                className="w-full bg-marino-3 border border-marino-4 rounded-xl p-4 text-center text-2xl font-barlow-condensed font-black text-blanco focus:border-naranja/50 focus:outline-none placeholder:text-gris/20"
+                            />
                         </section>
 
                         {/* Botón siguiente */}
