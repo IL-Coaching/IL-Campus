@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Copy, Save, Info, Loader2, Dumbbell, ClipboardList, Gauge, Scale, Activity, ShieldAlert, ChevronDown, ChevronUp, GripVertical } from 'lucide-react';
+import { Plus, Trash2, Copy, Save, Info, Loader2, Dumbbell, ClipboardList, Gauge, Scale, Activity, ShieldAlert, ChevronDown, ChevronUp, GripVertical, ChevronLeft } from 'lucide-react';
 import { DiaConEjercicios, EjercicioConDetalle, SemanaConDias } from '@/nucleo/tipos/planificacion.tipos';
 import { guardarCambiosEjercicio, eliminarEjercicio, reordenarEjercicios, agruparEjercicios, desagruparEjercicios, actualizarNombreGrupo, clonarContenidoSesion, actualizarDiaSesion } from '@/nucleo/acciones/planificacion.accion';
 import { obtenerCondicionesClinicas } from '@/nucleo/acciones/cliente.accion';
@@ -13,8 +13,9 @@ interface VistaSesionProps {
     semanaObjeto: SemanaConDias;
     semanaNombre: string;
     onOpenBuscador: () => void;
+    onBack: () => void;
 }
-export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onOpenBuscador }: VistaSesionProps) {
+export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onOpenBuscador, onBack }: VistaSesionProps) {
     const [ejercicios, setEjercicios] = useState<EjercicioConDetalle[]>(diaObjeto.ejercicios);
     const [notasGrales, setNotasGrales] = useState<string>(diaObjeto.notas || '');
     const [saving, setSaving] = useState(false);
@@ -26,6 +27,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
     const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [copiedSesionId, setCopiedSesionId] = useState<string | null>(null);
     const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const router = useRouter();
     const params = useParams();
     const clienteId = params.id as string;
@@ -45,11 +47,30 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
         const [draggedItem] = newEjercicios.splice(draggingIdx, 1);
         newEjercicios.splice(idx, 0, draggedItem);
 
-        setEjercicios(newEjercicios);
+        // Actualizar órdenes
+        const updated = newEjercicios.map((ej, i) => ({ ...ej, orden: i + 1 }));
+
+        setEjercicios(updated);
         setDraggingIdx(null);
 
         // Persistir orden
-        await reordenarEjercicios(diaObjeto.id, newEjercicios.map(e => e.id));
+        await reordenarEjercicios(diaObjeto.id, updated.map(e => e.id));
+    };
+
+    const handleMove = async (idx: number, direction: 'up' | 'down') => {
+        const newIdx = direction === 'up' ? idx - 1 : idx + 1;
+        if (newIdx < 0 || newIdx >= ejercicios.length) return;
+
+        const newEjercicios = [...ejercicios];
+        const temp = newEjercicios[idx];
+        newEjercicios[idx] = newEjercicios[newIdx];
+        newEjercicios[newIdx] = temp;
+
+        // Actualizar órdenes
+        const updated = newEjercicios.map((ej, i) => ({ ...ej, orden: i + 1 }));
+        setEjercicios(updated);
+
+        await reordenarEjercicios(diaObjeto.id, updated.map(e => e.id));
     };
 
     useEffect(() => {
@@ -67,9 +88,30 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
 
     // Sincronizar state si cambia el objeto de prop (ej. cambio de día)
     useEffect(() => {
-        setEjercicios(diaObjeto.ejercicios);
+        const sorted = [...diaObjeto.ejercicios].sort((a, b) => a.orden - b.orden);
+        setEjercicios(sorted);
         setNotasGrales(diaObjeto.notas || '');
+        setHasUnsavedChanges(false);
     }, [diaObjeto]);
+
+    // Detectar cambios
+    useEffect(() => {
+        const isDirty = JSON.stringify(ejercicios) !== JSON.stringify([...diaObjeto.ejercicios].sort((a, b) => a.orden - b.orden)) || 
+                        notasGrales !== (diaObjeto.notas || '');
+        setHasUnsavedChanges(isDirty);
+    }, [ejercicios, notasGrales, diaObjeto]);
+
+    // Registrar advertencia de salida
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [hasUnsavedChanges]);
 
     const handleEliminar = async (id: string) => {
         if (!confirm("¿Seguro que quieres eliminar este ejercicio de la sesión?")) return;
@@ -112,6 +154,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                 });
             }
             router.refresh();
+            setHasUnsavedChanges(false);
             alert("Sesión guardada correctamente.");
         } catch (error) {
             console.error(error);
@@ -235,6 +278,20 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
             {/* Header Sesion Profesional — Unificado */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-white/5 pb-8">
                 <div className="flex items-center gap-5">
+                    <button
+                        onClick={() => {
+                            if (hasUnsavedChanges) {
+                                if (confirm("Tenés cambios sin guardar. ¿Seguro que querés volver? Los cambios se perderán.")) {
+                                    onBack();
+                                }
+                            } else {
+                                onBack();
+                            }
+                        }}
+                        className="md:hidden w-12 h-12 bg-marino-2 border border-marino-4 rounded-2xl flex items-center justify-center shrink-0 shadow-xl text-gris hover:text-blanco"
+                    >
+                        <ChevronLeft size={24} />
+                    </button>
                     <div className="w-14 h-14 bg-marino-2 border border-marino-4 rounded-3xl flex items-center justify-center shrink-0 shadow-2xl">
                         <ClipboardList className="text-naranja" size={28} />
                     </div>
@@ -249,6 +306,13 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                         </h2>
                     </div>
                 </div>
+
+                {hasUnsavedChanges && (
+                    <div className="bg-naranja/10 border border-naranja/30 rounded-2xl px-4 py-2 flex items-center gap-3 animate-pulse">
+                        <div className="w-2 h-2 bg-naranja rounded-full"></div>
+                        <span className="text-[0.65rem] font-black text-naranja uppercase tracking-widest">Cambios sin guardar</span>
+                    </div>
+                )}
 
                 <div className="grid grid-cols-2 md:flex md:flex-wrap gap-4 w-full lg:w-auto">
                     <button
@@ -395,9 +459,27 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                             </div>
                                                         </div>
                                                         {!isSelectionMode && (
-                                                            <button onClick={() => handleEliminar(gej.id)} className="p-2 text-rojo/30">
-                                                                <Trash2 size={18} />
-                                                            </button>
+                                                            <div className="flex gap-1">
+                                                                <div className="flex flex-col gap-1 mr-2">
+                                                                    <button
+                                                                        onClick={() => handleMove(ejercicios.findIndex(e => e.id === gej.id), 'up')}
+                                                                        disabled={idx === 0}
+                                                                        className="p-1.5 bg-marino-3 border border-marino-4 rounded-lg text-gris hover:text-naranja disabled:opacity-20 translate-y-1"
+                                                                    >
+                                                                        <ChevronUp size={14} />
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleMove(ejercicios.findIndex(e => e.id === gej.id), 'down')}
+                                                                        disabled={idx === ejercicios.length - 1}
+                                                                        className="p-1.5 bg-marino-3 border border-marino-4 rounded-lg text-gris hover:text-naranja disabled:opacity-20 -translate-y-1"
+                                                                    >
+                                                                        <ChevronDown size={14} />
+                                                                    </button>
+                                                                </div>
+                                                                <button onClick={() => handleEliminar(gej.id)} className="p-2 text-rojo/30">
+                                                                    <Trash2 size={18} />
+                                                                </button>
+                                                            </div>
                                                         )}
                                                     </div>
 
@@ -406,6 +488,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                             <label className="text-[0.55rem] font-black text-gris uppercase tracking-widest block mb-1">Sets</label>
                                                             <input
                                                                 type="number"
+                                                                inputMode="numeric"
+                                                                pattern="[0-9]*"
                                                                 value={gej.series}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { series: parseInt(e.target.value) })}
                                                                 className="w-full bg-marino-4/20 rounded-lg py-1 px-2 text-2xl font-barlow-condensed font-black text-blanco focus:outline-none border border-marino-4/50"
@@ -415,6 +499,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                             <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest block mb-1">RIR</label>
                                                             <input
                                                                 type="number"
+                                                                inputMode="numeric"
+                                                                pattern="[0-9]*"
                                                                 value={gej.RIR !== null ? gej.RIR : ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
                                                                 className="w-full bg-marino-4/20 rounded-lg py-1 px-2 text-2xl font-barlow-condensed font-black text-naranja focus:outline-none border border-marino-4/50"
@@ -427,6 +513,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                         <input
                                                             type="number"
                                                             step="0.5"
+                                                            inputMode="decimal"
+                                                            pattern="[0-9]*(\.[0-9]+)?"
                                                             value={gej.pesoSugerido || ''}
                                                             onChange={(e) => handleUpdateChange(gej.id, { pesoSugerido: parseFloat(e.target.value) })}
                                                             className="w-full bg-marino-4/20 rounded-lg py-1.5 px-3 text-3xl font-barlow-condensed font-black text-verde focus:outline-none border border-verde/20"
@@ -440,6 +528,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                             <div className="flex items-center gap-2">
                                                                 <input
                                                                     type="number"
+                                                                    inputMode="numeric"
+                                                                    pattern="[0-9]*"
                                                                     value={gej.repsMin}
                                                                     onChange={(e) => handleUpdateChange(gej.id, { repsMin: parseInt(e.target.value) })}
                                                                     className="w-14 bg-marino-4/30 border border-marino-4 rounded-lg py-2 text-base font-black text-blanco focus:outline-none text-center"
@@ -447,6 +537,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                 <span className="text-gris/40">—</span>
                                                                 <input
                                                                     type="number"
+                                                                    inputMode="numeric"
+                                                                    pattern="[0-9]*"
                                                                     value={gej.repsMax}
                                                                     onChange={(e) => handleUpdateChange(gej.id, { repsMax: parseInt(e.target.value) })}
                                                                     className="w-14 bg-marino-4/30 border border-marino-4 rounded-lg py-2 text-base font-black text-blanco focus:outline-none text-center"
@@ -457,6 +549,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                             <label className="text-[0.55rem] font-black text-gris uppercase tracking-widest block mb-1">Descanso</label>
                                                             <input
                                                                 type="number"
+                                                                inputMode="numeric"
+                                                                pattern="[0-9]*"
                                                                 value={gej.descansoSegundos !== null ? gej.descansoSegundos : ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
                                                                 className="w-full bg-marino-4/30 border border-marino-4 rounded-lg py-2 text-center text-base font-black text-blanco focus:outline-none"
@@ -513,9 +607,27 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                             </div>
                                         </div>
                                         {!isSelectionMode && (
-                                            <button onClick={() => handleEliminar(ej.id)} className="p-2 text-rojo/30">
-                                                <Trash2 size={18} />
-                                            </button>
+                                            <div className="flex gap-1">
+                                                <div className="flex flex-col gap-1 mr-2">
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); handleMove(idx, 'up'); }}
+                                                        disabled={idx === 0}
+                                                        className="p-1.5 bg-marino-3 border border-marino-4 rounded-lg text-gris hover:text-naranja disabled:opacity-20 translate-y-1"
+                                                    >
+                                                        <ChevronUp size={14} />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); handleMove(idx, 'down'); }}
+                                                        disabled={idx === ejercicios.length - 1}
+                                                        className="p-1.5 bg-marino-3 border border-marino-4 rounded-lg text-gris hover:text-naranja disabled:opacity-20 -translate-y-1"
+                                                    >
+                                                        <ChevronDown size={14} />
+                                                    </button>
+                                                </div>
+                                                <button onClick={(e) => { e.stopPropagation(); handleEliminar(ej.id); }} className="p-2 text-rojo/30">
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </div>
                                         )}
                                     </div>
 
@@ -524,6 +636,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                             <label className="text-[0.55rem] font-black text-gris uppercase tracking-widest block mb-1">Sets</label>
                                             <input
                                                 type="number"
+                                                inputMode="numeric"
+                                                pattern="[0-9]*"
                                                 value={ej.series}
                                                 onChange={(e) => handleUpdateChange(ej.id, { series: parseInt(e.target.value) })}
                                                 className="w-full bg-marino-4/20 rounded-lg py-1 px-2 text-2xl font-barlow-condensed font-black text-blanco focus:outline-none border border-marino-4/50"
@@ -533,6 +647,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                             <label className="text-[0.55rem] font-black text-naranja uppercase tracking-widest block mb-1">RIR</label>
                                             <input
                                                 type="number"
+                                                inputMode="numeric"
+                                                pattern="[0-9]*"
                                                 value={ej.RIR !== null ? ej.RIR : ''}
                                                 onChange={(e) => handleUpdateChange(ej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
                                                 className="w-full bg-marino-4/20 rounded-lg py-1 px-2 text-2xl font-barlow-condensed font-black text-naranja focus:outline-none border border-marino-4/50"
@@ -545,6 +661,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                         <input
                                             type="number"
                                             step="0.5"
+                                            inputMode="decimal"
+                                            pattern="[0-9]*(\.[0-9]+)?"
                                             value={ej.pesoSugerido || ''}
                                             onChange={(e) => handleUpdateChange(ej.id, { pesoSugerido: parseFloat(e.target.value) })}
                                             className="w-full bg-marino-4/20 rounded-lg py-1.5 px-3 text-3xl font-barlow-condensed font-black text-verde focus:outline-none border border-verde/20"
@@ -558,6 +676,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                             <div className="flex items-center gap-2">
                                                 <input
                                                     type="number"
+                                                    inputMode="numeric"
+                                                    pattern="[0-9]*"
                                                     value={ej.repsMin}
                                                     onChange={(e) => handleUpdateChange(ej.id, { repsMin: parseInt(e.target.value) })}
                                                     className="w-14 bg-marino-4/30 border border-marino-4 rounded-lg py-2 text-base font-black text-blanco focus:outline-none text-center"
@@ -565,6 +685,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                 <span className="text-gris/40">—</span>
                                                 <input
                                                     type="number"
+                                                    inputMode="numeric"
+                                                    pattern="[0-9]*"
                                                     value={ej.repsMax}
                                                     onChange={(e) => handleUpdateChange(ej.id, { repsMax: parseInt(e.target.value) })}
                                                     className="w-14 bg-marino-4/30 border border-marino-4 rounded-lg py-2 text-base font-black text-blanco focus:outline-none text-center"
@@ -575,6 +697,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                             <label className="text-[0.55rem] font-black text-gris uppercase tracking-widest block mb-1">Descanso</label>
                                             <input
                                                 type="number"
+                                                inputMode="numeric"
+                                                pattern="[0-9]*"
                                                 value={ej.descansoSegundos !== null ? ej.descansoSegundos : ''}
                                                 onChange={(e) => handleUpdateChange(ej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
                                                 className="w-full bg-marino-4/30 border border-marino-4 rounded-lg py-2 text-center text-base font-black text-blanco focus:outline-none"
@@ -711,6 +835,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                             <div className="flex items-center gap-0.5 bg-marino border border-white/5 rounded-lg overflow-hidden">
                                                                 <input
                                                                     type="number"
+                                                                    inputMode="numeric"
+                                                                    pattern="[0-9]*"
                                                                     value={gej.repsMin}
                                                                     onChange={(e) => handleUpdateChange(gej.id, { repsMin: parseInt(e.target.value) })}
                                                                     className="w-full bg-marino-3/50 py-2 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10 transition-colors"
@@ -718,6 +844,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                 <span className="text-gris/20 text-[10px]">—</span>
                                                                 <input
                                                                     type="number"
+                                                                    inputMode="numeric"
+                                                                    pattern="[0-9]*"
                                                                     value={gej.repsMax}
                                                                     onChange={(e) => handleUpdateChange(gej.id, { repsMax: parseInt(e.target.value) })}
                                                                     className="w-full bg-marino-3/50 py-2 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10 transition-colors"
@@ -727,6 +855,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                         <td className="p-2 text-center">
                                                             <input
                                                                 type="number"
+                                                                inputMode="numeric"
+                                                                pattern="[0-9]*"
                                                                 value={gej.series}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { series: parseInt(e.target.value) })}
                                                                 className="w-full bg-marino-3/50 border border-white/5 py-2 rounded-lg text-center text-blanco font-black text-sm focus:bg-naranja/10 focus:border-naranja/20 transition-all"
@@ -735,6 +865,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                         <td className="p-2 text-center">
                                                             <input
                                                                 type="number"
+                                                                inputMode="numeric"
+                                                                pattern="[0-9]*"
                                                                 value={gej.RIR !== null ? gej.RIR : ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
                                                                 className="w-full bg-marino-3/50 border border-white/5 py-2 rounded-lg text-center text-naranja font-black text-sm focus:bg-naranja/10 focus:border-naranja/20 transition-all"
@@ -744,6 +876,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                             <div className="flex items-center gap-0.5 bg-marino-3/50 px-1 rounded-lg border border-white/5">
                                                                 <input
                                                                     type="number"
+                                                                    inputMode="numeric"
+                                                                    pattern="[0-9]*"
                                                                     value={gej.descansoSegundos !== null ? gej.descansoSegundos : ''}
                                                                     onChange={(e) => handleUpdateChange(gej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
                                                                     className="w-full bg-transparent py-2 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/5"
@@ -755,6 +889,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                             <input
                                                                 type="number"
                                                                 step="0.5"
+                                                                inputMode="decimal"
+                                                                pattern="[0-9]*(\.[0-9]+)?"
                                                                 value={gej.pesoSugerido || ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { pesoSugerido: parseFloat(e.target.value) })}
                                                                 className="w-full bg-marino-3/50 border border-verde/10 py-2 rounded-lg text-center text-verde font-black text-sm focus:bg-verde/5 focus:border-verde/30 transition-all"
@@ -833,6 +969,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                 <div className="flex items-center gap-0.5 bg-marino border border-white/5 rounded-lg overflow-hidden">
                                                     <input
                                                         type="number"
+                                                        inputMode="numeric"
+                                                        pattern="[0-9]*"
                                                         value={ej.repsMin}
                                                         onChange={(e) => handleUpdateChange(ej.id, { repsMin: parseInt(e.target.value) })}
                                                         className="w-full bg-marino-3/50 py-2 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10 transition-colors"
@@ -840,6 +978,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                     <span className="text-gris/20 text-[10px]">—</span>
                                                     <input
                                                         type="number"
+                                                        inputMode="numeric"
+                                                        pattern="[0-9]*"
                                                         value={ej.repsMax}
                                                         onChange={(e) => handleUpdateChange(ej.id, { repsMax: parseInt(e.target.value) })}
                                                         className="w-full bg-marino-3/50 py-2 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10 transition-colors"
@@ -849,6 +989,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                             <td className="p-2 text-center">
                                                 <input
                                                     type="number"
+                                                    inputMode="numeric"
+                                                    pattern="[0-9]*"
                                                     value={ej.series}
                                                     onChange={(e) => handleUpdateChange(ej.id, { series: parseInt(e.target.value) })}
                                                     className="w-full bg-marino-3/50 border border-white/5 py-2 rounded-lg text-center text-blanco font-black text-sm focus:bg-naranja/10 focus:border-naranja/20 transition-all"
@@ -857,6 +999,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                             <td className="p-2 text-center">
                                                 <input
                                                     type="number"
+                                                    inputMode="numeric"
+                                                    pattern="[0-9]*"
                                                     value={ej.RIR !== null ? ej.RIR : ''}
                                                     onChange={(e) => handleUpdateChange(ej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
                                                     className="w-full bg-marino-3/50 border border-white/5 py-2 rounded-lg text-center text-naranja font-black text-sm focus:bg-naranja/10 focus:border-naranja/20 transition-all"
@@ -866,6 +1010,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                 <div className="flex items-center gap-0.5 bg-marino-3/50 px-1 rounded-lg border border-white/5">
                                                     <input
                                                         type="number"
+                                                        inputMode="numeric"
+                                                        pattern="[0-9]*"
                                                         value={ej.descansoSegundos !== null ? ej.descansoSegundos : ''}
                                                         onChange={(e) => handleUpdateChange(ej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
                                                         className="w-full bg-transparent py-2 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/5"

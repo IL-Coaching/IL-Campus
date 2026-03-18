@@ -155,6 +155,7 @@ export default function ConstructorCliente({ cliente, macrocicloInicial, limiteC
                                     semanaObjeto={semanaActual}
                                     semanaNombre={`Semana ${semanaActiva}`}
                                     onOpenBuscador={() => setBuscadorOpen(true)}
+                                    onBack={volver}
                                 />
                             )}
                         </>

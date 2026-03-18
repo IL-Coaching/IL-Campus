@@ -12,7 +12,7 @@
     "dev": "next dev",
     "build": "prisma generate --schema=src/baseDatos/esquema.prisma && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "next lint src",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:unit": "vitest run tests/unitarios",
