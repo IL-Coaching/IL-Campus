@@ -119,6 +119,49 @@ function CronometroDescanso({ segundos }: { segundos: number }) {
     );
 }
 
+
+function CronometroSesion({ diaId }: { diaId: string }) {
+    const [seconds, setSeconds] = useState(0);
+
+    useEffect(() => {
+        const storedStart = localStorage.getItem(`sesion_inicio_${diaId}`);
+        let startTime: number;
+
+        if (storedStart) {
+            startTime = parseInt(storedStart);
+        } else {
+            startTime = Date.now();
+            localStorage.setItem(`sesion_inicio_${diaId}`, startTime.toString());
+        }
+
+        const interval = setInterval(() => {
+            const now = Date.now();
+            setSeconds(Math.floor((now - startTime) / 1000));
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [diaId]);
+
+    const format = (s: number) => {
+        const hrs = Math.floor(s / 3600);
+        const mins = Math.floor((s % 3600) / 60);
+        const secs = s % 60;
+        return `${hrs > 0 ? hrs.toString().padStart(2, '0') + ':' : ''}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    return (
+        <div className="flex items-center gap-2 bg-marino-3/50 backdrop-blur-sm px-4 py-2 rounded-2xl border border-naranja/20 shadow-lg shadow-naranja/5">
+            <Clock size={16} className="text-naranja animate-pulse" />
+            <div className="flex flex-col">
+                <span className="text-[0.55rem] font-black text-gris uppercase tracking-[0.2em] leading-none mb-1">Duración</span>
+                <span className="font-mono text-lg font-black text-blanco tracking-widest leading-none">
+                    {format(seconds)}
+                </span>
+            </div>
+        </div>
+    );
+}
+
 type SetLogEntry = { pesoKg: string; repsReales: string };
 
 function RegistroSeries({
@@ -279,6 +322,7 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
         startFinishing(async () => {
             const res = await finalizarSesion(diaVisualizado.id);
             if (res.exito) {
+                localStorage.removeItem(`sesion_inicio_${diaVisualizado.id}`);
                 setShowFinishModal(false);
                 setDiaVisualizado(null); // Vuelve al hub al finalizar
                 window.scrollTo({ top: 0, behavior: "smooth" });
@@ -319,6 +363,7 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                                         Modo Foco Activo
                                     </span>
                                 </div>
+                                <CronometroSesion diaId={diaVisualizado.id} />
                                 <span className="text-[0.65rem] font-bold text-gris uppercase tracking-widest">
                                     Semana {semanaActual?.numeroSemana}
                                 </span>
