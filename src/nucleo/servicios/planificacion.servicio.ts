@@ -470,10 +470,37 @@ export const PlanificacionServicio = {
         });
     },
 
-    async actualizarNombreGrupo(grupoId: string, nuevoNombre: string) {
-        return await prisma.ejercicioPlanificado.updateMany({
-            where: { grupoId },
+    async actualizarNombreGrupo(bloqueId: string, nuevoNombre: string) {
+        await prisma.ejercicioPlanificado.updateMany({
+            where: { grupoId: bloqueId },
             data: { nombreGrupo: nuevoNombre }
+        });
+        return await prisma.bloqueSesion.update({
+            where: { id: bloqueId },
+            data: { nombre: nuevoNombre }
+        });
+    },
+
+    async actualizarBloqueSesion(bloqueId: string, data: { modalidad?: ModalidadBloque, nombre?: string }) {
+        if (data.nombre) {
+            await prisma.ejercicioPlanificado.updateMany({
+                where: { grupoId: bloqueId },
+                data: { nombreGrupo: data.nombre }
+            });
+        }
+        return await prisma.bloqueSesion.update({
+            where: { id: bloqueId },
+            data
+        });
+    },
+
+    async vincularEjerciciosABloque(bloqueId: string, ejercicioIds: string[]) {
+        const bloque = await prisma.bloqueSesion.findUnique({ where: { id: bloqueId } });
+        if (!bloque) throw new Error("Bloque no encontrado");
+
+        return await prisma.ejercicioPlanificado.updateMany({
+            where: { id: { in: ejercicioIds } },
+            data: { bloqueId: bloque.id, grupoId: bloque.id, nombreGrupo: bloque.nombre }
         });
     }
 };

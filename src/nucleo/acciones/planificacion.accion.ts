@@ -611,6 +611,42 @@ export async function actualizarNombreGrupo(diaId: string, grupoId: string, nomb
     }
 }
 
+export async function actualizarBloqueSesion(diaId: string, bloqueId: string, data: { modalidad?: ModalidadBloque, nombre?: string }) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+        const diaPropio = await prisma.diaSesion.findFirst({
+            where: { id: diaId, semana: { bloqueMensual: { macrociclo: { cliente: { entrenadorId: entrenador.id } } } } },
+            include: { semana: { include: { bloqueMensual: { include: { macrociclo: true } } } } }
+        });
+        if (!diaPropio) throw new Error("Acceso denegado.");
+
+        const clienteId = diaPropio.semana.bloqueMensual.macrociclo.clienteId;
+        await PlanificacionServicio.actualizarBloqueSesion(bloqueId, data);
+        revalidatePath(`/entrenador/clientes/${clienteId}/planificacion`);
+        return { exito: true };
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : "Error al actualizar bloque" };
+    }
+}
+
+export async function vincularEjerciciosABloque(diaId: string, bloqueId: string, ejercicioIds: string[]) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+        const diaPropio = await prisma.diaSesion.findFirst({
+            where: { id: diaId, semana: { bloqueMensual: { macrociclo: { cliente: { entrenadorId: entrenador.id } } } } },
+            include: { semana: { include: { bloqueMensual: { include: { macrociclo: true } } } } }
+        });
+        if (!diaPropio) throw new Error("Acceso denegado.");
+
+        const clienteId = diaPropio.semana.bloqueMensual.macrociclo.clienteId;
+        await PlanificacionServicio.vincularEjerciciosABloque(bloqueId, ejercicioIds);
+        revalidatePath(`/entrenador/clientes/${clienteId}/planificacion`);
+        return { exito: true };
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : "Error al vincular ejercicios" };
+    }
+}
+
 /**
  * Clona el contenido completo de una semana (microciclo) a otra semana destino.
  * Copia todas las sesiones con sus ejercicios, parámetros y agrupaciones.

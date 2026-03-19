@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Copy, Save, Info, Loader2, Dumbbell, ClipboardList, Gauge, Scale, Activity, ShieldAlert, ChevronDown, ChevronUp, GripVertical, ChevronLeft } from 'lucide-react';
 import { DiaConEjercicios, EjercicioConDetalle, SemanaConDias } from '@/nucleo/tipos/planificacion.tipos';
-import { guardarCambiosEjercicio, eliminarEjercicio, reordenarEjercicios, agruparEjercicios, desagruparEjercicios, actualizarNombreGrupo, clonarContenidoSesion, actualizarDiaSesion } from '@/nucleo/acciones/planificacion.accion';
+import { guardarCambiosEjercicio, eliminarEjercicio, reordenarEjercicios, agruparEjercicios, desagruparEjercicios, actualizarNombreGrupo, clonarContenidoSesion, actualizarDiaSesion, actualizarBloqueSesion, vincularEjerciciosABloque } from '@/nucleo/acciones/planificacion.accion';
 import { obtenerCondicionesClinicas } from '@/nucleo/acciones/cliente.accion';
 import { useRouter, useParams } from 'next/navigation';
 import SelectorEjercicioCelda from './SelectorEjercicioCelda';
@@ -231,6 +231,25 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
         if (nuevoNombre && nuevoNombre !== nombreActual) {
             const res = await actualizarNombreGrupo(diaObjeto.id, grupoId, nuevoNombre);
             if (res.exito) router.refresh();
+        }
+    };
+
+    const handleAlternarModalidad = async (bloqueId: string, modalidadActual: string) => {
+        const nuevaModalidad = modalidadActual === 'CIRCUITO' ? 'SECUENCIAL' : 'CIRCUITO';
+        const res = await actualizarBloqueSesion(diaObjeto.id, bloqueId, { modalidad: nuevaModalidad });
+        if (res.exito) router.refresh();
+    };
+
+    const handleVincularABloque = async (bloqueId: string) => {
+        if (selectedIds.length === 0) {
+            alert("Primero selecciona los ejercicios sueltos que quieres unir a este bloque.");
+            return;
+        }
+        const res = await vincularEjerciciosABloque(diaObjeto.id, bloqueId, selectedIds);
+        if (res.exito) {
+            router.refresh();
+            setSelectedIds([]);
+            setIsSelectionMode(false);
         }
     };
 
@@ -812,17 +831,51 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                 </div>
                                                                 <button
                                                                     onClick={() => handleCambiarNombreGrupo(ej.grupoId!, ej.nombreGrupo || "Bloque")}
-                                                                    className="text-[0.7rem] font-black text-blanco uppercase tracking-[0.2em] hover:text-naranja transition-colors flex items-center gap-2"
+                                                                    className="text-sm font-black text-blanco uppercase tracking-widest hover:text-naranja transition-colors flex items-center gap-2"
                                                                 >
                                                                     {ej.nombreGrupo || "Bloque Vinculado"}
                                                                 </button>
+                                                                
+                                                                <div className="flex items-center gap-1 bg-marino-4/30 p-1 rounded-xl border border-white/5">
+                                                                    <button
+                                                                        onClick={() => handleAlternarModalidad(ej.grupoId!, ej.bloque?.modalidad || 'SECUENCIAL')}
+                                                                        className={`text-[0.6rem] font-bold px-3 py-1 rounded-lg uppercase tracking-wider transition-all ${
+                                                                            (ej.bloque?.modalidad || 'SECUENCIAL') === 'CIRCUITO'
+                                                                            ? 'bg-naranja text-marino'
+                                                                            : 'text-gris/60 hover:text-blanco'
+                                                                        }`}
+                                                                    >
+                                                                        Circuito
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleAlternarModalidad(ej.grupoId!, ej.bloque?.modalidad || 'SECUENCIAL')}
+                                                                        className={`text-[0.6rem] font-bold px-3 py-1 rounded-lg uppercase tracking-wider transition-all ${
+                                                                            (ej.bloque?.modalidad || 'SECUENCIAL') === 'SECUENCIAL'
+                                                                            ? 'bg-blanco text-marino'
+                                                                            : 'text-gris/60 hover:text-blanco'
+                                                                        }`}
+                                                                    >
+                                                                        Serie
+                                                                    </button>
+                                                                </div>
                                                             </div>
-                                                            <button
-                                                                onClick={() => handleDesagrupar(ej.grupoId!)}
-                                                                className="text-[0.6rem] font-black text-gris/30 hover:text-rojo uppercase tracking-widest px-4 py-1.5 border border-marino-4 rounded-xl hover:bg-rojo/5 transition-all"
-                                                            >
-                                                                Disolver Bloque
-                                                            </button>
+                                                            <div className="flex items-center gap-2">
+                                                                {isSelectionMode && selectedIds.length > 0 && (
+                                                                    <button
+                                                                        onClick={() => handleVincularABloque(ej.grupoId!)}
+                                                                        className="text-[0.6rem] font-black text-naranja border border-naranja/40 rounded-xl px-4 py-1.5 hover:bg-naranja hover:text-marino transition-all uppercase tracking-widest flex items-center gap-2"
+                                                                    >
+                                                                        <Plus size={12} />
+                                                                        Unir Seleccionados
+                                                                    </button>
+                                                                )}
+                                                                <button
+                                                                    onClick={() => handleDesagrupar(ej.grupoId!)}
+                                                                    className="text-[0.6rem] font-black text-gris/30 hover:text-rojo uppercase tracking-widest px-4 py-1.5 border border-marino-4 rounded-xl hover:bg-rojo/5 transition-all"
+                                                                >
+                                                                    Disolver Bloque
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </td>
                                                 </tr>
