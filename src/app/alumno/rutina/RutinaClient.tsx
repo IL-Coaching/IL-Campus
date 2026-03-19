@@ -757,9 +757,29 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                             let haEncontradoSiguiente = false;
                             
                             return diasConEjercicios.map((dia: DiaSesion, idx: number) => {
-                                const tieneSesionReal = dia.sesionesReales && dia.sesionesReales.some(sr => sr.completada === true);
+                                const seriesEsperadas = dia.ejercicios.reduce((acc, ej) => acc + (ej.series || 0), 0);
+                                const sr = (dia.sesionesReales && dia.sesionesReales.length > 0) ? dia.sesionesReales[0] : null;
+                                const tieneSesionReal = sr?.completada === true;
+                                // @ts-expect-error - _count exists in Prisma payload
+                                const seriesRegistradas = sr?._count?.series || 0;
                                 const esSiguiente = !tieneSesionReal && !haEncontradoSiguiente;
+                                
                                 if (esSiguiente) haEncontradoSiguiente = true;
+
+                                let estadoColorStr = "";
+                                let estadoTextStr = "";
+                                if (tieneSesionReal) {
+                                    if (seriesRegistradas === 0) {
+                                        estadoTextStr = "Sin entrenamiento";
+                                        estadoColorStr = "red";
+                                    } else if (seriesRegistradas < seriesEsperadas) {
+                                        estadoTextStr = "Parcialmente completa";
+                                        estadoColorStr = "yellow";
+                                    } else {
+                                        estadoTextStr = "Completada";
+                                        estadoColorStr = "emerald";
+                                    }
+                                }
 
                                 return (
                                     <button
@@ -767,7 +787,7 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                                         onClick={() => handleDiaClick(dia)}
                                         className={`relative overflow-hidden group transition-all duration-500 rounded-[2rem] text-left border ${
                                             tieneSesionReal 
-                                            ? 'bg-marino-2/20 border-marino-4/20 opacity-40 py-4 px-6 scale-[0.98]' 
+                                            ? (estadoColorStr === "red" ? 'bg-red-500/5 border-red-500/20 py-4 px-6 scale-[0.98]' : estadoColorStr === "yellow" ? 'bg-yellow-500/5 border-yellow-500/20 py-4 px-6 scale-[0.98]' : 'bg-emerald-500/5 border-emerald-500/20 py-4 px-6 scale-[0.98]') 
                                             : esSiguiente
                                                 ? 'bg-gradient-to-br from-marino-2 to-marino-3 border-naranja shadow-[0_20px_50px_-20px_rgba(255,107,0,0.3)] py-8 px-8 scale-100 mb-2 z-10'
                                                 : 'bg-marino-2/60 border-marino-4/40 py-6 px-6 opacity-80'
@@ -777,9 +797,19 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                                         <div className="flex items-center justify-between mb-4">
                                             <div className="flex items-center gap-2">
                                                 {tieneSesionReal ? (
-                                                    <div className="px-2 py-0.5 bg-verde/10 border border-verde/20 rounded-full flex items-center gap-1.5">
-                                                        <CheckCircle2 size={10} className="text-verde" />
-                                                        <span className="text-[0.55rem] font-black text-verde uppercase tracking-widest">Completado</span>
+                                                    <div className={`px-2 py-0.5 border rounded-full flex items-center gap-1.5 ${
+                                                        estadoColorStr === "red" ? 'bg-red-500/10 border-red-500/20' : 
+                                                        estadoColorStr === "yellow" ? 'bg-yellow-500/10 border-yellow-500/20' : 
+                                                        'bg-emerald-500/10 border-emerald-500/20'
+                                                    }`}>
+                                                        {estadoColorStr === "red" ? <AlertCircle size={10} className="text-red-500" /> : 
+                                                         estadoColorStr === "yellow" ? <Activity size={10} className="text-yellow-500" /> : 
+                                                         <CheckCircle2 size={10} className="text-emerald-500" />}
+                                                        <span className={`text-[0.45rem] sm:text-[0.55rem] font-black uppercase tracking-widest ${
+                                                            estadoColorStr === "red" ? 'text-red-500' : 
+                                                            estadoColorStr === "yellow" ? 'text-yellow-500' : 
+                                                            'text-emerald-500'
+                                                        }`}>{estadoTextStr}</span>
                                                     </div>
                                                 ) : esSiguiente ? (
                                                     <div className="px-3 py-1 bg-naranja border border-naranja/20 rounded-full flex items-center gap-1.5 shadow-[0_0_15px_rgba(255,107,0,0.4)]">
@@ -794,7 +824,7 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                                                 )}
                                             </div>
                                             
-                                            <span className={`text-[0.6rem] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${esSiguiente ? 'bg-naranja/10 text-naranja border border-naranja/20' : 'text-gris/40 bg-marino-3/50'}`}>
+                                            <span className={`text-[0.6rem] font-black uppercase tracking-widest px-2 py-0.5 rounded-md shrink-0 ${esSiguiente ? 'bg-naranja/10 text-naranja border border-naranja/20' : 'text-gris/40 bg-marino-3/50'}`}>
                                                 Paso {idx + 1}
                                             </span>
                                         </div>
@@ -802,7 +832,7 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                                         <div className="flex items-end justify-between gap-4">
                                             <div className="flex-1">
                                                 <h3 className={`font-barlow-condensed font-black uppercase leading-none tracking-tighter transition-all ${
-                                                    tieneSesionReal ? 'text-lg text-gris' : esSiguiente ? 'text-5xl text-blanco mb-2' : 'text-3xl text-blanco/80 mb-1'
+                                                    tieneSesionReal ? (estadoColorStr === "red" ? 'text-lg text-red-500/50' : estadoColorStr === "yellow" ? 'text-lg text-yellow-500/50' : 'text-lg text-emerald-500/50') : esSiguiente ? 'text-5xl text-blanco mb-2' : 'text-3xl text-blanco/80 mb-1'
                                                 }`}>
                                                     {dia.diaSemana}
                                                 </h3>
@@ -827,7 +857,6 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                                                         <Play size={28} fill="currentColor" className="translate-x-[2px]" />
                                                     </div>
                                                 )}
-                                                {tieneSesionReal && <div className="p-1 px-2 border border-verde/20 bg-verde/5 rounded text-[0.6rem] font-bold text-verde/40 uppercase">Vencido</div>}
                                             </div>
                                         </div>
  
@@ -860,7 +889,7 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                         </div>
                     </div>
 
-                    <div className="flex gap-4 overflow-x-auto pb-8 snap-x snap-mandatory scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0 scroll-smooth">
+                    <div className="flex gap-4 overflow-x-auto pt-6 pb-12 snap-x snap-mandatory scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0 scroll-smooth">
                         {[...todasLasSemanas].sort((a, b) => a.numeroSemana - b.numeroSemana).map((semana) => {
                             // Calcular progreso real de la semana
                             const diasConEj = semana.diasSesion.filter(d => d.ejercicios.length > 0);

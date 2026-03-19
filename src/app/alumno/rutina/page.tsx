@@ -52,7 +52,10 @@ export default async function RutinaPage() {
                                                 id: true,
                                                 fecha: true,
                                                 completada: true,
-                                                duracionMinutos: true
+                                                duracionMinutos: true,
+                                                _count: {
+                                                    select: { series: true }
+                                                }
                                             }
                                         },
                                         ejercicios: {
