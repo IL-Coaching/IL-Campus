@@ -40,7 +40,7 @@ export const EsquemaEjercicio = z.object({
     musculosSecundarios: z.array(GrupoMuscularEnum).optional().default([]),
     articulacion: TipoArticulacionEnum,
     patron: PatronMovimientoEnum,
-    equipamiento: z.array(TipoEquipamientoEnum).min(1, "Al menos un equipamiento requerido"),
+    equipamiento: z.array(TipoEquipamientoEnum).default([]),
     lateralidad: LateralidadEnum,
     posicionCarga: PosicionCargaEnum.default("NEUTRA"),
     nivelTecnico: NivelTecnicoEnum.default("BASICO"),
