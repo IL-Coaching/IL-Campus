@@ -52,8 +52,10 @@ export async function crearNuevoMacrociclo(clienteId: string, formData: FormData
 
 export async function guardarCambiosEjercicio(ejercicioPlanificadoId: string, data: {
     series?: number;
-    repsMin?: number;
-    repsMax?: number;
+    modoMedicion?: 'REPS' | 'TIEMPO' | 'DISTANCIA' | 'AMRAP';
+    repsMin?: number | null;
+    repsMax?: number | null;
+    tiempoObjetivoSeg?: number | null;
     RIR?: number | null;
     descanso?: number | null;
     tempo?: string;
@@ -98,8 +100,10 @@ export async function guardarCambiosEjercicio(ejercicioPlanificadoId: string, da
 
         await PlanificacionServicio.actualizarEjercicioPlanificado(ejercicioPlanificadoId, {
             series: validacion.data.series,
+            modoMedicion: validacion.data.modoMedicion,
             repsMin: validacion.data.repsMin,
             repsMax: validacion.data.repsMax,
+            tiempoObjetivoSeg: validacion.data.tiempoObjetivoSeg,
             RIR: validacion.data.RIR,
             descansoSegundos: validacion.data.descanso,
             tempo: validacion.data.tempo,

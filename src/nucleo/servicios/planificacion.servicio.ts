@@ -277,8 +277,10 @@ export const PlanificacionServicio = {
      */
     async actualizarEjercicioPlanificado(id: string, data: {
         series?: number;
-        repsMin?: number;
-        repsMax?: number;
+        modoMedicion?: 'REPS' | 'TIEMPO' | 'DISTANCIA' | 'AMRAP';
+        repsMin?: number | null;
+        repsMax?: number | null;
+        tiempoObjetivoSeg?: number | null;
         RIR?: number | null;
         tempo?: string;
         descansoSegundos?: number | null;

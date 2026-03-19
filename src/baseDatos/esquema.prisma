@@ -255,8 +255,10 @@ model EjercicioPlanificado {
   nombreLibre          String?
   esBiblioteca         Boolean           @default(false)
   series               Int
-  repsMin              Int
-  repsMax              Int
+  modoMedicion         ModoMedicion      @default(REPS)
+  repsMin              Int?
+  repsMax              Int?
+  tiempoObjetivoSeg    Int?              // en segundos, para modo TIEMPO
   RIR                  Int?
   tempo                String?
   tempoExcentrica      Int?
@@ -631,6 +633,13 @@ enum ZonaIntensidad {
 enum ModalidadTesteo {
   DIRECTO
   INDIRECTO
+}
+
+enum ModoMedicion {
+  REPS
+  TIEMPO
+  DISTANCIA
+  AMRAP
 }
 
 enum TipoNotificacion {

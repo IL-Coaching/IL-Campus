@@ -173,8 +173,10 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
             for (const ej of ejercicios) {
                 await guardarCambiosEjercicio(ej.id, {
                     series: ej.series,
-                    repsMin: ej.repsMin,
-                    repsMax: ej.repsMax,
+                    modoMedicion: (ej.modoMedicion as 'REPS' | 'TIEMPO' | 'DISTANCIA' | 'AMRAP') || 'REPS',
+                    repsMin: ej.repsMin ?? null,
+                    repsMax: ej.repsMax ?? null,
+                    tiempoObjetivoSeg: ej.tiempoObjetivoSeg ?? null,
                     RIR: ej.RIR,
                     descanso: ej.descansoSegundos,
                     tempo: ej.tempo || undefined,
@@ -783,7 +785,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                 <th className="p-3 w-[40px] sticky left-0 z-30 bg-marino-2 border-r border-white/5 shadow-[2px_0_5px_rgba(0,0,0,0.1)]"></th>
                                 <th className="p-3 w-[45px] font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] text-center sticky left-[40px] z-30 bg-marino-2 border-r border-white/5 shadow-[2px_0_5px_rgba(0,0,0,0.1)]">#</th>
                                 <th className="p-3 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.65rem] w-[220px] sticky left-[85px] z-30 bg-marino-2 border-r border-white/5 shadow-[5px_0_15px_rgba(0,0,0,0.2)]">Ejercicio / Patrón</th>
-                                <th className="p-3 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[130px] text-center">Reps</th>
+                                <th className="p-3 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[130px] text-center">Medición</th>
                                 <th className="p-3 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[80px] text-center">Sets</th>
                                 <th className="p-3 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[80px] text-center">RIR</th>
                                 <th className="p-3 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[100px] text-center">Rest</th>
@@ -930,45 +932,61 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                             )}
                                                         </td>
                                                         <td className="p-2">
-                                                            <div className="flex items-center gap-0.5 bg-marino border border-white/5 rounded-lg overflow-hidden">
-                                                                <input
-                                                                    type="number"
-                                                                    inputMode="numeric"
-                                                                    pattern="[0-9]*"
-                                                                    value={gej.repsMin}
-                                                                    onChange={(e) => handleUpdateChange(gej.id, { repsMin: parseInt(e.target.value) })}
-                                                                    className="w-full bg-marino-3/50 py-2 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10 transition-colors"
-                                                                />
-                                                                <span className="text-gris/20 text-[10px]">—</span>
-                                                                <input
-                                                                    type="number"
-                                                                    inputMode="numeric"
-                                                                    pattern="[0-9]*"
-                                                                    value={gej.repsMax}
-                                                                    onChange={(e) => handleUpdateChange(gej.id, { repsMax: parseInt(e.target.value) })}
-                                                                    className="w-full bg-marino-3/50 py-2 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10 transition-colors"
-                                                                />
+                                                            {/* Toggle modo + campo adaptativo */}
+                                                            <div className="flex flex-col gap-1">
+                                                                <div className="flex items-center gap-0.5 bg-marino-4/30 rounded-md p-0.5">
+                                                                    {(['REPS','TIEMPO','AMRAP'] as const).map(modo => (
+                                                                        <button key={modo}
+                                                                            onClick={() => handleUpdateChange(gej.id, { modoMedicion: modo, repsMin: modo !== 'REPS' ? null : gej.repsMin, repsMax: modo !== 'REPS' ? null : gej.repsMax, tiempoObjetivoSeg: modo !== 'TIEMPO' ? null : gej.tiempoObjetivoSeg })}
+                                                                            className={`flex-1 text-[0.5rem] font-black uppercase py-0.5 rounded transition-all ${ (gej.modoMedicion || 'REPS') === modo ? 'bg-naranja text-marino' : 'text-gris/50 hover:text-blanco' }`}
+                                                                        >{modo === 'AMRAP' ? 'AMRP' : modo}</button>
+                                                                    ))}
+                                                                </div>
+                                                                {(gej.modoMedicion || 'REPS') === 'REPS' && (
+                                                                    <div className="flex items-center gap-0.5 bg-marino border border-white/5 rounded-lg overflow-hidden">
+                                                                        <input type="number" inputMode="numeric" value={gej.repsMin ?? ''}
+                                                                            onChange={(e) => handleUpdateChange(gej.id, { repsMin: parseInt(e.target.value) || null })}
+                                                                            className="w-full bg-marino-3/50 py-1.5 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10"
+                                                                        />
+                                                                        <span className="text-gris/20 text-[10px]">—</span>
+                                                                        <input type="number" inputMode="numeric" value={gej.repsMax ?? ''}
+                                                                            onChange={(e) => handleUpdateChange(gej.id, { repsMax: parseInt(e.target.value) || null })}
+                                                                            className="w-full bg-marino-3/50 py-1.5 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10"
+                                                                        />
+                                                                    </div>
+                                                                )}
+                                                                {(gej.modoMedicion || 'REPS') === 'TIEMPO' && (
+                                                                    <div className="flex items-center gap-0.5 bg-marino border border-blue-400/20 rounded-lg overflow-hidden px-2">
+                                                                        <input type="number" inputMode="numeric" value={gej.tiempoObjetivoSeg ?? ''}
+                                                                            onChange={(e) => handleUpdateChange(gej.id, { tiempoObjetivoSeg: parseInt(e.target.value) || null })}
+                                                                            className="w-full bg-transparent py-1.5 text-center text-blue-300 focus:outline-none text-sm font-black"
+                                                                            placeholder="seg"
+                                                                        />
+                                                                        <span className="text-[0.5rem] font-black text-blue-400/50">s</span>
+                                                                    </div>
+                                                                )}
+                                                                {(gej.modoMedicion || 'REPS') === 'AMRAP' && (
+                                                                    <div className="text-center text-[0.6rem] font-black text-naranja/60 uppercase tracking-wider py-1">Máx posibles</div>
+                                                                )}
                                                             </div>
                                                         </td>
                                                         <td className="p-2 text-center">
-                                                            <input
-                                                                type="number"
-                                                                inputMode="numeric"
-                                                                pattern="[0-9]*"
+                                                            <input type="number" inputMode="numeric" pattern="[0-9]*"
                                                                 value={gej.series}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { series: parseInt(e.target.value) })}
                                                                 className="w-full bg-marino-3/50 border border-white/5 py-2 rounded-lg text-center text-blanco font-black text-sm focus:bg-naranja/10 focus:border-naranja/20 transition-all"
                                                             />
                                                         </td>
                                                         <td className="p-2 text-center">
-                                                            <input
-                                                                type="number"
-                                                                inputMode="numeric"
-                                                                pattern="[0-9]*"
-                                                                value={gej.RIR !== null ? gej.RIR : ''}
-                                                                onChange={(e) => handleUpdateChange(gej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                                className="w-full bg-marino-3/50 border border-white/5 py-2 rounded-lg text-center text-naranja font-black text-sm focus:bg-naranja/10 focus:border-naranja/20 transition-all"
-                                                            />
+                                                            {(gej.modoMedicion === 'REPS' || !gej.modoMedicion) ? (
+                                                                <input type="number" inputMode="numeric" pattern="[0-9]*"
+                                                                    value={gej.RIR !== null ? gej.RIR : ''}
+                                                                    onChange={(e) => handleUpdateChange(gej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
+                                                                    className="w-full bg-marino-3/50 border border-white/5 py-2 rounded-lg text-center text-naranja font-black text-sm focus:bg-naranja/10 focus:border-naranja/20 transition-all"
+                                                                />
+                                                            ) : (
+                                                                <span className="text-gris/20 text-[0.6rem] font-bold uppercase">N/A</span>
+                                                            )}
                                                         </td>
                                                         <td className="p-2 text-center">
                                                             <div className="flex items-center gap-0.5 bg-marino-3/50 px-1 rounded-lg border border-white/5">
@@ -1064,45 +1082,61 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                 )}
                                             </td>
                                             <td className="p-2">
-                                                <div className="flex items-center gap-0.5 bg-marino border border-white/5 rounded-lg overflow-hidden">
-                                                    <input
-                                                        type="number"
-                                                        inputMode="numeric"
-                                                        pattern="[0-9]*"
-                                                        value={ej.repsMin}
-                                                        onChange={(e) => handleUpdateChange(ej.id, { repsMin: parseInt(e.target.value) })}
-                                                        className="w-full bg-marino-3/50 py-2 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10 transition-colors"
-                                                    />
-                                                    <span className="text-gris/20 text-[10px]">—</span>
-                                                    <input
-                                                        type="number"
-                                                        inputMode="numeric"
-                                                        pattern="[0-9]*"
-                                                        value={ej.repsMax}
-                                                        onChange={(e) => handleUpdateChange(ej.id, { repsMax: parseInt(e.target.value) })}
-                                                        className="w-full bg-marino-3/50 py-2 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10 transition-colors"
-                                                    />
+                                                {/* Toggle modo + campo adaptativo */}
+                                                <div className="flex flex-col gap-1">
+                                                    <div className="flex items-center gap-0.5 bg-marino-4/30 rounded-md p-0.5">
+                                                        {(['REPS','TIEMPO','AMRAP'] as const).map(modo => (
+                                                            <button key={modo}
+                                                                onClick={() => handleUpdateChange(ej.id, { modoMedicion: modo, repsMin: modo !== 'REPS' ? null : ej.repsMin, repsMax: modo !== 'REPS' ? null : ej.repsMax, tiempoObjetivoSeg: modo !== 'TIEMPO' ? null : ej.tiempoObjetivoSeg })}
+                                                                className={`flex-1 text-[0.5rem] font-black uppercase py-0.5 rounded transition-all ${ (ej.modoMedicion || 'REPS') === modo ? 'bg-naranja text-marino' : 'text-gris/50 hover:text-blanco' }`}
+                                                            >{modo === 'AMRAP' ? 'AMRP' : modo}</button>
+                                                        ))}
+                                                    </div>
+                                                    {(ej.modoMedicion || 'REPS') === 'REPS' && (
+                                                        <div className="flex items-center gap-0.5 bg-marino border border-white/5 rounded-lg overflow-hidden">
+                                                            <input type="number" inputMode="numeric" value={ej.repsMin ?? ''}
+                                                                onChange={(e) => handleUpdateChange(ej.id, { repsMin: parseInt(e.target.value) || null })}
+                                                                className="w-full bg-marino-3/50 py-1.5 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10"
+                                                            />
+                                                            <span className="text-gris/20 text-[10px]">—</span>
+                                                            <input type="number" inputMode="numeric" value={ej.repsMax ?? ''}
+                                                                onChange={(e) => handleUpdateChange(ej.id, { repsMax: parseInt(e.target.value) || null })}
+                                                                className="w-full bg-marino-3/50 py-1.5 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                    {(ej.modoMedicion || 'REPS') === 'TIEMPO' && (
+                                                        <div className="flex items-center gap-0.5 bg-marino border border-blue-400/20 rounded-lg overflow-hidden px-2">
+                                                            <input type="number" inputMode="numeric" value={ej.tiempoObjetivoSeg ?? ''}
+                                                                onChange={(e) => handleUpdateChange(ej.id, { tiempoObjetivoSeg: parseInt(e.target.value) || null })}
+                                                                className="w-full bg-transparent py-1.5 text-center text-blue-300 focus:outline-none text-sm font-black"
+                                                                placeholder="seg"
+                                                            />
+                                                            <span className="text-[0.5rem] font-black text-blue-400/50">s</span>
+                                                        </div>
+                                                    )}
+                                                    {(ej.modoMedicion || 'REPS') === 'AMRAP' && (
+                                                        <div className="text-center text-[0.6rem] font-black text-naranja/60 uppercase tracking-wider py-1">Máx posibles</div>
+                                                    )}
                                                 </div>
                                             </td>
                                             <td className="p-2 text-center">
-                                                <input
-                                                    type="number"
-                                                    inputMode="numeric"
-                                                    pattern="[0-9]*"
+                                                <input type="number" inputMode="numeric" pattern="[0-9]*"
                                                     value={ej.series}
                                                     onChange={(e) => handleUpdateChange(ej.id, { series: parseInt(e.target.value) })}
                                                     className="w-full bg-marino-3/50 border border-white/5 py-2 rounded-lg text-center text-blanco font-black text-sm focus:bg-naranja/10 focus:border-naranja/20 transition-all"
                                                 />
                                             </td>
                                             <td className="p-2 text-center">
-                                                <input
-                                                    type="number"
-                                                    inputMode="numeric"
-                                                    pattern="[0-9]*"
-                                                    value={ej.RIR !== null ? ej.RIR : ''}
-                                                    onChange={(e) => handleUpdateChange(ej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                    className="w-full bg-marino-3/50 border border-white/5 py-2 rounded-lg text-center text-naranja font-black text-sm focus:bg-naranja/10 focus:border-naranja/20 transition-all"
-                                                />
+                                                {(ej.modoMedicion === 'REPS' || !ej.modoMedicion) ? (
+                                                    <input type="number" inputMode="numeric" pattern="[0-9]*"
+                                                        value={ej.RIR !== null ? ej.RIR : ''}
+                                                        onChange={(e) => handleUpdateChange(ej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
+                                                        className="w-full bg-marino-3/50 border border-white/5 py-2 rounded-lg text-center text-naranja font-black text-sm focus:bg-naranja/10 focus:border-naranja/20 transition-all"
+                                                    />
+                                                ) : (
+                                                    <span className="text-gris/20 text-[0.6rem] font-bold uppercase">N/A</span>
+                                                )}
                                             </td>
                                             <td className="p-2 text-center">
                                                 <div className="flex items-center gap-0.5 bg-marino-3/50 px-1 rounded-lg border border-white/5">

@@ -14,8 +14,10 @@ export const EsquemaNuevoMacrociclo = z.object({
  */
 export const EsquemaActualizarEjercicio = z.object({
     series: z.number().min(1).max(20).optional(),
-    repsMin: z.number().min(0).max(100).optional(),
-    repsMax: z.number().min(0).max(100).optional(),
+    modoMedicion: z.enum(['REPS', 'TIEMPO', 'DISTANCIA', 'AMRAP']).optional(),
+    repsMin: z.number().min(0).max(100).nullable().optional(),
+    repsMax: z.number().min(0).max(100).nullable().optional(),
+    tiempoObjetivoSeg: z.number().min(1).max(7200).nullable().optional(),
     RIR: z.number().min(0).max(10).nullable().optional(),
     descanso: z.number().min(0).max(600).nullable().optional(),
     tempo: z.string().max(10).optional(),
