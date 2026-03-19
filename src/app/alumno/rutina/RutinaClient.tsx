@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, useRef } from "react";
 import { Dumbbell, Play, Clock, Zap, ShieldAlert, ArrowLeft, Square, RotateCcw, CheckCircle2, Activity, AlertCircle } from "lucide-react";
 import { guardarSeries, obtenerSeriesRegistradas, finalizarSesion } from "@/nucleo/acciones/sesion-alumno.accion";
 import { registrarPesoSesion } from "@/nucleo/acciones/checkin.accion";
@@ -204,47 +204,77 @@ function RegistroSeries({
             repsReales: sr?.repsReales ?? "",
             notas: sr?.notas ?? ""
         };
-    });
-
-    const [sets, setSets] = useState<SetLogEntry[]>(initialState);
-    const [saved, setSaved] = useState(false);
+    });    const [sets, setSets] = useState<SetLogEntry[]>(initialState);
+    const [estadoGuardado, setEstadoGuardado] = useState<"ignorado" | "guardando" | "guardado" | "error">("ignorado");
     const [isPending, startTransition] = useTransition();
 
-    const handleChange = (idx: number, field: keyof SetLogEntry, val: string) => {
-        setSets(prev => prev.map((s, i) => i === idx ? { ...s, [field]: val } : s));
-        setSaved(false);
-    };
+    // Use a ref to keep track of the timeout ID
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const handleGuardar = () => {
-        const payload = sets.map(s => ({
+    const guardarSilencioso = (currentSets: SetLogEntry[]) => {
+        setEstadoGuardado("guardando");
+        
+        const payload = currentSets.map(s => ({
             pesoKg: s.pesoKg !== "" ? parseFloat(s.pesoKg) : null,
             repsReales: s.repsReales !== "" ? parseInt(s.repsReales) : null,
             notas: s.notas || null
         }));
-        // If not started yet, start it upon saving implicitly
+
+        // Si es la primera vez que hace algo, iniciar la sesión en LocalStorage
         const started = localStorage.getItem(`sesion_inicio_${diaId}`);
         if (!started) {
             localStorage.setItem(`sesion_inicio_${diaId}`, Date.now().toString());
-            // It will trigger react state upstream to sync, but let's fire a storage event simply to trigger the timer (or the timer will catch it next render)
+            window.dispatchEvent(new Event('storage'));
         }
-        
+
         startTransition(async () => {
             const res = await guardarSeries({ diaId, ejercicioPlanificadoId, series: payload });
             if (res.exito) {
-                setSaved(true);
-                // Force a pseudo state refresh to trigger Timer if not actively rendered as true
+                setEstadoGuardado("guardado");
                 window.dispatchEvent(new Event('storage'));
+            } else {
+                setEstadoGuardado("error");
             }
         });
     };
 
+    const handleChange = (idx: number, field: keyof SetLogEntry, val: string) => {
+        const nuevosSets = sets.map((s, i) => i === idx ? { ...s, [field]: val } : s);
+        setSets(nuevosSets);
+        setEstadoGuardado("guardando");
+
+        // Debounce auto-save
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => guardarSilencioso(nuevosSets), 1200);
+    };
+
     return (
         <div className="mt-4 border-t border-marino-4/30 pt-4">
-            <h4 className="text-[0.6rem] font-black text-gris uppercase tracking-widest mb-3 flex items-center gap-2">
-                <CheckCircle2 size={12} className={saved ? "text-verde" : "text-gris/40"} />
-                Registro de Series
-                {saved && <span className="text-verde text-[0.55rem] font-bold">Guardado</span>}
-            </h4>
+            <div className="flex items-center justify-between mb-3">
+                <h4 className="text-[0.6rem] font-black text-gris uppercase tracking-widest flex items-center gap-2">
+                    <CheckCircle2 size={12} className={estadoGuardado === "guardado" ? "text-verde" : "text-gris/40"} />
+                    Registro de Series
+                </h4>
+                {/* Indicador de Estado Automático */}
+                <div className="flex items-center gap-1.5">
+                    {estadoGuardado === "guardando" && (
+                        <span className="text-naranja text-[0.55rem] font-black uppercase tracking-widest flex items-center gap-1">
+                            <Clock size={10} className="animate-spin" /> Auto-guardando
+                        </span>
+                    )}
+                    {estadoGuardado === "guardado" && (
+                        <span className="text-verde text-[0.55rem] font-black uppercase tracking-widest flex items-center gap-1">
+                            <CheckCircle2 size={10} /> Sincronizado
+                        </span>
+                    )}
+                    {estadoGuardado === "error" && (
+                        <span className="text-red-400 text-[0.55rem] font-black uppercase tracking-widest flex items-center gap-1">
+                            <AlertCircle size={10} /> Error al guardar
+                        </span>
+                    )}
+                </div>
+            </div>
+            
             <div className="space-y-2 mb-3">
                 {sets.map((s, i) => (
                     <div key={i} className="grid grid-cols-[28px_1fr_1fr] items-center gap-2">
@@ -273,7 +303,7 @@ function RegistroSeries({
                 ))}
             </div>
             
-            <div className="mb-4">
+            <div className="mb-2">
                 <textarea 
                     placeholder="Escribe aquí si tuviste que realizar otro ejercicio (Ej: Máquina rota, hice press en banco), acotar algún dolor o molestia..."
                     value={sets[0]?.notas || ""}
@@ -281,20 +311,6 @@ function RegistroSeries({
                     className="w-full bg-marino-3 border border-marino-4/60 rounded-lg px-3 py-2 text-[0.7rem] text-blanco placeholder-gris/40 focus:outline-none focus:border-naranja/50 transition-colors resize-none h-16"
                 />
             </div>
-
-            <button
-                onClick={handleGuardar}
-                disabled={isPending}
-                className="w-full py-2.5 rounded-xl text-[0.65rem] font-black uppercase tracking-[0.15em] bg-naranja/10 text-naranja border border-naranja/20 hover:bg-naranja/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-                {isPending ? (
-                    <><Clock size={12} className="animate-spin" /> Guardando...</>
-                ) : saved ? (
-                    <><CheckCircle2 size={12} /> Guardado — Actualizar</>
-                ) : (
-                    <><CheckCircle2 size={12} /> Guardar Series y Notas</>
-                )}
-            </button>
         </div>
     );
 }
