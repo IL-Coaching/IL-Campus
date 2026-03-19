@@ -110,9 +110,10 @@ Estas reglas deben respetarse en todo código nuevo de la Fase 4:
 | Fase 2: UX del Constructor (Colapsables, D&D) | Arquitecto | ✅ Completo |
 | Fase 3: Vínculo Cliente-Finanzas | Arquitecto | ✅ Completo |
 | Limpieza de raíz y estructura del repo | Arquitecto | ✅ 2026-02-26 |
-| **Fase 4: Adaptación Móvil** | Por definir | 🔲 Pendiente |
-| Auditoría de seguridad | Guardián de Seguridad | 🔲 Pendiente |
-| Suite de tests críticos | Centinela de Calidad | 🔲 Pendiente |
+| Fase 4: Adaptación Móvil | Por definir | ✅ 2026-03-19 |
+| Auditoría de seguridad | Guardián de Seguridad | ✅ 2026-03-19 |
+| **Suite de tests críticos** | Centinela de Calidad | ✅ 2026-03-19 |
+- [x] **Calidad:** Creada suite de tests unitarios para `EsquemaActualizarEjercicio` (`tests/unitarios/planificacion.test.ts`). Cobertura del 100% en lógica de `ModoMedicion`.
 
 ---
 
