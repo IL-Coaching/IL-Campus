@@ -1,6 +1,6 @@
 import { prisma } from "@/baseDatos/conexion";
 import { MacrocicloCompleto } from "../tipos/planificacion.tipos";
-import { TipoCarga, Prisma, ModeloPeriodizacion } from "@prisma/client";
+import { TipoCarga, Prisma, ModeloPeriodizacion, ModalidadBloque } from "@prisma/client";
 
 /**
  * Servicio de Planificación — ArchSecure AI
@@ -440,20 +440,33 @@ export const PlanificacionServicio = {
     },
 
     /**
-     * Agrupa varios ejercicios en un bloque (superserie, circuito, etc).
+     * Agrupa varios ejercicios creando un BloqueSesion (Cluster).
      */
-    async agruparEjercicios(ejercicioIds: string[], nombreGrupo: string) {
-        const grupoId = Math.random().toString(36).substring(2, 11); // ID corto para el grupo
+    async agruparEjercicios(diaId: string, ejercicioIds: string[], nombreGrupo: string, modalidad: ModalidadBloque = 'SECUENCIAL') {
+        const nuevoBloque = await prisma.bloqueSesion.create({
+            data: {
+                diaId,
+                nombre: nombreGrupo,
+                modalidad
+            }
+        });
+
         return await prisma.ejercicioPlanificado.updateMany({
             where: { id: { in: ejercicioIds } },
-            data: { grupoId, nombreGrupo }
+            data: { bloqueId: nuevoBloque.id, grupoId: nuevoBloque.id, nombreGrupo }
         });
     },
 
-    async desagruparEjercicios(grupoId: string) {
-        return await prisma.ejercicioPlanificado.updateMany({
-            where: { grupoId },
-            data: { grupoId: null, nombreGrupo: null }
+    async desagruparEjercicios(bloqueId: string) {
+        // Al desagrupar, vaciamos la referencia a bloqueId en los ejercicios
+        await prisma.ejercicioPlanificado.updateMany({
+            where: { bloqueId },
+            data: { bloqueId: null, grupoId: null, nombreGrupo: null }
+        });
+        
+        // Y eliminamos el bloque de la DB
+        return await prisma.bloqueSesion.delete({
+            where: { id: bloqueId }
         });
     },
 

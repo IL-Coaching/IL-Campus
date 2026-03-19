@@ -304,7 +304,7 @@ export async function clonarContenidoSesion(idOrigen: string, idDestino: string)
         const [origen, destino] = await Promise.all([
             prisma.diaSesion.findFirst({
                 where: { id: idOrigen, semana: { bloqueMensual: { macrociclo: { cliente: { entrenadorId: entrenador.id } } } } },
-                include: { ejercicios: true }
+                include: { ejercicios: true, bloques: true }
             }),
             prisma.diaSesion.findFirst({
                 where: { id: idDestino, semana: { bloqueMensual: { macrociclo: { cliente: { entrenadorId: entrenador.id } } } } },
@@ -320,19 +320,27 @@ export async function clonarContenidoSesion(idOrigen: string, idDestino: string)
         await prisma.$transaction(async (tx) => {
             // Limpiar destino
             await tx.ejercicioPlanificado.deleteMany({ where: { diaId: idDestino } });
+            await tx.bloqueSesion.deleteMany({ where: { diaId: idDestino } });
 
             const groupMap = new Map<string, string>(); // viejo_grupo_id -> nuevo_grupo_id
 
+            // Clonar bloques primero
+            for (const bloque of origen.bloques) {
+                const nuevoBloque = await tx.bloqueSesion.create({
+                    data: {
+                        diaId: idDestino,
+                        nombre: bloque.nombre,
+                        orden: bloque.orden,
+                        modalidad: bloque.modalidad,
+                    }
+                });
+                groupMap.set(bloque.id, nuevoBloque.id);
+            }
+
             for (const ej of origen.ejercicios) {
                 let nuevoGrupoId = null;
-                if (ej.grupoId) {
-                    if (groupMap.has(ej.grupoId)) {
-                        nuevoGrupoId = groupMap.get(ej.grupoId);
-                    } else {
-                        const newGuid = randomUUID();
-                        groupMap.set(ej.grupoId, newGuid);
-                        nuevoGrupoId = newGuid;
-                    }
+                if (ej.grupoId && groupMap.has(ej.grupoId)) {
+                    nuevoGrupoId = groupMap.get(ej.grupoId);
                 }
 
                 await tx.ejercicioPlanificado.create({
@@ -353,6 +361,7 @@ export async function clonarContenidoSesion(idOrigen: string, idDestino: string)
                         esTesteo: ej.esTesteo,
                         modalidadTesteo: ej.modalidadTesteo,
                         grupoId: nuevoGrupoId,
+                        bloqueId: nuevoGrupoId,
                         nombreGrupo: ej.nombreGrupo
                     }
                 });
@@ -549,7 +558,7 @@ export async function reordenarEjercicios(diaId: string, ejercicioIds: string[])
     }
 }
 
-export async function agruparEjercicios(diaId: string, ejercicioIds: string[], nombreGrupo: string) {
+export async function agruparEjercicios(diaId: string, ejercicioIds: string[], nombreGrupo: string, modalidad: any = 'SECUENCIAL') {
     try {
         const entrenador = await getEntrenadorSesion();
         const diaPropio = await prisma.diaSesion.findFirst({
@@ -559,7 +568,7 @@ export async function agruparEjercicios(diaId: string, ejercicioIds: string[], n
         if (!diaPropio) throw new Error("Acceso denegado.");
 
         const clienteId = diaPropio.semana.bloqueMensual.macrociclo.clienteId;
-        await PlanificacionServicio.agruparEjercicios(ejercicioIds, nombreGrupo);
+        await PlanificacionServicio.agruparEjercicios(diaId, ejercicioIds, nombreGrupo, modalidad);
         revalidatePath(`/entrenador/clientes/${clienteId}/planificacion`);
         return { exito: true };
     } catch (error) {
@@ -621,7 +630,7 @@ export async function clonarSemana(semanaOrigenId: string, semanaDestinoId: stri
                 },
                 include: {
                     diasSesion: {
-                        include: { ejercicios: true }
+                        include: { ejercicios: true, bloques: true }
                     }
                 }
             }),
@@ -646,6 +655,7 @@ export async function clonarSemana(semanaOrigenId: string, semanaDestinoId: stri
             // 1. Eliminar ejercicios de las sesiones destino y luego las sesiones
             for (const dia of semanaDestino.diasSesion) {
                 await tx.ejercicioPlanificado.deleteMany({ where: { diaId: dia.id } });
+                await tx.bloqueSesion.deleteMany({ where: { diaId: dia.id } });
             }
             await tx.diaSesion.deleteMany({ where: { semanaId: semanaDestinoId } });
 
@@ -660,19 +670,25 @@ export async function clonarSemana(semanaOrigenId: string, semanaDestinoId: stri
                     }
                 });
 
-                // Re-mapear grupoIds para evitar colisiones
                 const groupMap = new Map<string, string>();
+                
+                // Clonar bloques
+                for (const bloque of diaOrigen.bloques) {
+                    const nuevoBloque = await tx.bloqueSesion.create({
+                        data: {
+                            diaId: nuevoDia.id,
+                            nombre: bloque.nombre,
+                            orden: bloque.orden,
+                            modalidad: bloque.modalidad,
+                        }
+                    });
+                    groupMap.set(bloque.id, nuevoBloque.id);
+                }
 
                 for (const ej of diaOrigen.ejercicios) {
                     let nuevoGrupoId: string | null = null;
-                    if (ej.grupoId) {
-                        if (groupMap.has(ej.grupoId)) {
-                            nuevoGrupoId = groupMap.get(ej.grupoId)!;
-                        } else {
-                            const newId = randomUUID();
-                            groupMap.set(ej.grupoId, newId);
-                            nuevoGrupoId = newId;
-                        }
+                    if (ej.grupoId && groupMap.has(ej.grupoId)) {
+                        nuevoGrupoId = groupMap.get(ej.grupoId)!;
                     }
 
                     await tx.ejercicioPlanificado.create({
@@ -693,6 +709,7 @@ export async function clonarSemana(semanaOrigenId: string, semanaDestinoId: stri
                             esTesteo: ej.esTesteo,
                             modalidadTesteo: ej.modalidadTesteo,
                             grupoId: nuevoGrupoId,
+                            bloqueId: nuevoGrupoId,
                             nombreGrupo: ej.nombreGrupo,
                         }
                     });

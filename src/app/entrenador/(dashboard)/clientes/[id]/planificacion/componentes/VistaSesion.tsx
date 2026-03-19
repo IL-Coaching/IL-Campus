@@ -168,8 +168,11 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
         if (selectedIds.length < 2) return;
         const nombre = prompt("Nombre del Bloque (ej: Superserie A, Circuito Core):", "Superserie");
         if (!nombre) return;
+        
+        const esCircuito = window.confirm("¿Este bloque tiene modalidad CIRCUITO? (Conectará los ejercicios visualmente en el celular del alumno)");
+        const modalidad = esCircuito ? 'CIRCUITO' : 'SECUENCIAL';
 
-        const res = await agruparEjercicios(diaObjeto.id, selectedIds, nombre);
+        const res = await agruparEjercicios(diaObjeto.id, selectedIds, nombre, modalidad);
         if (res.exito) {
             router.refresh();
             setSelectedIds([]);
