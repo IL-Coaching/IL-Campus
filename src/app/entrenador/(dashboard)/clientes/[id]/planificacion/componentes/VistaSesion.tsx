@@ -32,8 +32,11 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
     const params = useParams();
     const clienteId = params.id as string;
 
-    const handleDragStart = (idx: number) => {
+    const [isDraggingBlock, setIsDraggingBlock] = useState(false);
+
+    const handleDragStart = (idx: number, isBlock = false) => {
         setDraggingIdx(idx);
+        setIsDraggingBlock(isBlock);
     };
 
     const handleDragOver = (e: React.DragEvent) => {
@@ -44,17 +47,48 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
         if (draggingIdx === null || draggingIdx === idx) return;
 
         const newEjercicios = [...ejercicios];
-        const [draggedItem] = newEjercicios.splice(draggingIdx, 1);
-        newEjercicios.splice(idx, 0, draggedItem);
+        
+        if (isDraggingBlock) {
+            const blockId = ejercicios[draggingIdx].grupoId;
+            if (!blockId) return;
 
-        // Actualizar órdenes
-        const updated = newEjercicios.map((ej, i) => ({ ...ej, orden: i + 1 }));
+            const blockItems = ejercicios.filter(e => e.grupoId === blockId);
+            const targetItem = ejercicios[idx];
+            
+            // Si el target es parte del mismo bloque, no hacemos nada
+            if (targetItem.grupoId === blockId) {
+                setDraggingIdx(null);
+                setIsDraggingBlock(false);
+                return;
+            }
 
-        setEjercicios(updated);
-        setDraggingIdx(null);
+            const otherItems = ejercicios.filter(e => e.grupoId !== blockId);
+            const targetIdxInOthers = otherItems.findIndex(e => e.id === targetItem.id);
+            
+            const result = [...otherItems];
+            if (targetIdxInOthers === -1) {
+                result.push(...blockItems);
+            } else {
+                result.splice(targetIdxInOthers, 0, ...blockItems);
+            }
+            
+            // Actualizar órdenes
+            const updated = result.map((ej, i) => ({ ...ej, orden: i + 1 }));
+            setEjercicios(updated);
+            setDraggingIdx(null);
+            setIsDraggingBlock(false);
+            await reordenarEjercicios(diaObjeto.id, updated.map(e => e.id));
+        } else {
+            const [draggedItem] = newEjercicios.splice(draggingIdx, 1);
+            newEjercicios.splice(idx, 0, draggedItem);
 
-        // Persistir orden
-        await reordenarEjercicios(diaObjeto.id, updated.map(e => e.id));
+            // Actualizar órdenes
+            const updated = newEjercicios.map((ej, i) => ({ ...ej, orden: i + 1 }));
+            setEjercicios(updated);
+            setDraggingIdx(null);
+            setIsDraggingBlock(false);
+            await reordenarEjercicios(diaObjeto.id, updated.map(e => e.id));
+        }
     };
 
     const handleMove = async (idx: number, direction: 'up' | 'down') => {
@@ -763,11 +797,19 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                         const groupMembers = ejercicios.filter(e => e.grupoId === ej.grupoId);
                                         return (
                                             <React.Fragment key={ej.grupoId}>
-                                                <tr className="bg-marino-3/20">
+                                                <tr 
+                                                    className={`bg-marino-3/20 border-l-4 border-l-naranja cursor-grab group transition-all ${draggingIdx === idx && isDraggingBlock ? 'opacity-20' : ''}`}
+                                                    draggable={!isSelectionMode}
+                                                    onDragStart={() => handleDragStart(idx, true)}
+                                                    onDragOver={handleDragOver}
+                                                    onDrop={() => handleDrop(idx)}
+                                                >
                                                     <td colSpan={10} className="px-8 py-3 group/header">
                                                         <div className="flex items-center justify-between">
                                                             <div className="flex items-center gap-4">
-                                                                <div className="w-2 h-2 bg-naranja rounded-full"></div>
+                                                                <div className="p-1.5 bg-naranja/10 rounded-lg text-naranja group-hover:bg-naranja group-hover:text-marino transition-all">
+                                                                    <GripVertical size={14} />
+                                                                </div>
                                                                 <button
                                                                     onClick={() => handleCambiarNombreGrupo(ej.grupoId!, ej.nombreGrupo || "Bloque")}
                                                                     className="text-[0.7rem] font-black text-blanco uppercase tracking-[0.2em] hover:text-naranja transition-colors flex items-center gap-2"
