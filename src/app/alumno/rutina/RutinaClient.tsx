@@ -18,6 +18,13 @@ type Ejercicio = {
     esTesteo: boolean;
     modalidadTesteo: string | null;
     notasTecnicas: string | null;
+    bloqueId?: string | null;
+    bloque?: {
+        id: string;
+        nombre: string | null;
+        modalidad: string;
+        orden: number;
+    } | null;
     ejercicio: {
         nombre: string;
         urlVideo: string | null;
@@ -515,126 +522,177 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                     </div>
                 )}
 
-                {/* Lista de Ejercicios */}
-                <div className="space-y-4">
-                    {diaVisualizado.ejercicios.map((ep, idx) => {
-                        const nombreEjercicio = ep.ejercicio?.nombre || ep.nombreLibre || "Ejercicio sin nombre";
-                        const tieneVideo = !!ep.ejercicio?.urlVideo;
-                        const esLongitudLarga = ep.ejercicio?.posicionCarga === "LONGITUD_LARGA";
-
-                        return (
-                            <div 
-                                key={ep.id} 
-                                className={`bg-marino-2/60 backdrop-blur-sm border ${ep.esTesteo ? 'border-red-500/30 shadow-[0_4px_20px_-10px_rgba(239,68,68,0.2)]' : 'border-marino-4/40'} rounded-3xl p-5 md:p-6 transition-all hover:border-marino-4/80 flex flex-col gap-6`}
-                            >
-                                {/* HEADER: Título y Botón Play */}
-                                <div className="flex items-start justify-between gap-4">
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-10 h-10 rounded-full bg-marino-3 border border-marino-4 flex items-center justify-center shrink-0">
-                                            <span className={`text-xl font-barlow-condensed font-black ${ep.esTesteo ? 'text-red-400' : 'text-blanco'}`}>
-                                                {idx + 1}
-                                            </span>
-                                        </div>
-                                        <div>
-                                            <h3 className="text-xl md:text-2xl font-black text-blanco uppercase tracking-tight leading-tight mb-2">
-                                                {nombreEjercicio}
-                                            </h3>
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                {ep.esTesteo && (
-                                                    <span className="text-[0.55rem] font-black bg-red-500/10 text-red-400 border border-red-500/20 px-2 py-0.5 rounded uppercase tracking-widest flex items-center gap-1 w-fit">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
-                                                        Testeo
-                                                    </span>
-                                                )}
-                                                {esLongitudLarga && (
-                                                    <span className="border border-blue-500/20 bg-blue-500/5 px-2 py-0.5 rounded text-[0.55rem] font-black text-blue-300 flex items-center gap-1 w-fit uppercase tracking-widest">
-                                                        <ShieldAlert size={10} /> IUSCA
-                                                    </span>
-                                                )}
-                                                {ep.pesoSugerido && (
-                                                    <span className="border border-verde/20 bg-verde/5 px-2 py-0.5 rounded text-verde/90 text-[0.55rem] font-bold uppercase tracking-widest w-fit flex items-center gap-1">
-                                                        <Dumbbell size={10} /> {ep.pesoSugerido} kg
-                                                    </span>
-                                                )}
+                {/* Lista de Ejercicios por Bloques */}
+                <div className="space-y-6">
+                    {(() => {
+                        const chunks: any[] = [];
+                        let currentBlockId: string | null = null;
+                        let currentChunk: any[] = [];
+                        let currentBlockName = 'Entrenamiento Principal';
+                        let currentModalidad = 'SECUENCIAL';
+                        
+                        diaVisualizado.ejercicios.forEach(ep => {
+                            if (ep.bloqueId !== currentBlockId) {
+                                if (currentChunk.length > 0) {
+                                    chunks.push({ isBlock: !!currentBlockId, id: currentBlockId || `free-${chunks.length}`, nombre: currentBlockName, modalidad: currentModalidad, ejercicios: currentChunk });
+                                }
+                                currentBlockId = ep.bloqueId || null;
+                                currentBlockName = ep.bloque?.nombre || 'Entrenamiento Principal';
+                                currentModalidad = ep.bloque?.modalidad || 'SECUENCIAL';
+                                currentChunk = [];
+                            }
+                            currentChunk.push(ep);
+                        });
+                        if (currentChunk.length > 0) chunks.push({ isBlock: !!currentBlockId, id: currentBlockId || `free-${chunks.length}`, nombre: currentBlockName, modalidad: currentModalidad, ejercicios: currentChunk });
+                        
+                        return chunks.map((chunk, chunkIdx) => {
+                            // Si son flat (viejos o sueltos), se agrupan en un bloque "Entrenamiento Principal"
+                            return (
+                                <details key={chunk.id || chunkIdx} className="group" open={chunkIdx === 0}>
+                                    <summary className="list-none cursor-pointer p-4 md:p-5 bg-marino-2/40 border border-marino-4/30 rounded-2xl md:rounded-3xl hover:bg-marino-3/50 transition-all flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-xl bg-marino-3 flex items-center justify-center font-black text-blanco shadow-[0_4px_10px_-2px_rgba(0,0,0,0.5)]">
+                                                {chunkIdx + 1}
+                                            </div>
+                                            <div>
+                                                <h3 className="text-xl md:text-2xl font-barlow-condensed font-black uppercase text-blanco tracking-widest">{chunk.nombre}</h3>
+                                                <span className="text-[0.6rem] font-bold text-naranja tracking-widest uppercase">{chunk.ejercicios.length} ejercicios • Modalidad {chunk.modalidad}</span>
                                             </div>
                                         </div>
-                                    </div>
+                                        <div className="text-gris/50 group-open:rotate-180 transition-transform duration-300 w-8 h-8 flex items-center justify-center bg-marino-4/20 rounded-full shrink-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                        </div>
+                                    </summary>
                                     
-                                    {/* Video Link */}
-                                    {tieneVideo && ep.ejercicio?.urlVideo && (
-                                        <a
-                                            href={ep.ejercicio.urlVideo}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="shrink-0 flex items-center justify-center w-12 h-12 bg-naranja/10 border border-naranja/20 rounded-2xl text-naranja hover:bg-naranja hover:text-marino transition-all shadow-[0_0_15px_-5px_#FF6B00]"
-                                            title="Ver Video"
-                                        >
-                                            <Play size={18} fill="currentColor" className="ml-1" />
-                                        </a>
-                                    )}
-                                </div>
+                                    <div className="space-y-4 pl-0 md:pl-4 border-l-2 border-transparent md:border-marino-4/20 md:ml-5 py-4 mb-8">
+                                        {chunk.ejercicios.map((ep: any, idx: number) => {
+                                            const nombreEjercicio = ep.ejercicio?.nombre || ep.nombreLibre || "Ejercicio sin nombre";
+                                            const tieneVideo = !!ep.ejercicio?.urlVideo;
+                                            const esLongitudLarga = ep.ejercicio?.posicionCarga === "LONGITUD_LARGA";
 
-                                {/* DATA & TIMER: Grid Layout */}
-                                <div className="grid grid-cols-3 md:grid-cols-5 bg-marino-3/50 rounded-2xl border border-marino-4/30 overflow-hidden divide-x-0 divide-y md:divide-x md:divide-y-0 divide-marino-4/30">
-                                    
-                                    {/* STATS (Columnas 1-3) */}
-                                    <div className="flex flex-col items-center justify-center p-4 col-span-1">
-                                        <span className="text-[0.6rem] text-gris uppercase tracking-widest font-black mb-1">Sets</span>
-                                        <span className="text-2xl md:text-3xl font-barlow-condensed font-black text-blanco leading-none">{ep.series}</span>
-                                    </div>
-                                    <div className="flex flex-col items-center justify-center p-4 col-span-1 border-l border-marino-4/30">
-                                        <span className="text-[0.6rem] text-gris uppercase tracking-widest font-black mb-1">Reps</span>
-                                        <span className="text-2xl md:text-3xl font-barlow-condensed font-black text-naranja tracking-widest leading-none">{ep.repsMin}<span className="text-gris/40 mx-0.5 font-normal">—</span>{ep.repsMax}</span>
-                                    </div>
-                                    <div className="flex flex-col items-center justify-center p-4 col-span-1 border-l border-marino-4/30">
-                                        <span className="text-[0.6rem] text-gris uppercase tracking-widest font-black mb-1">RIR</span>
-                                        <span className="text-2xl md:text-3xl font-barlow-condensed font-black text-verde leading-none">{ep.RIR ?? "-"}</span>
-                                    </div>
+                                            return (
+                                                <div 
+                                                    key={ep.id} 
+                                                    className={`bg-marino-2/60 backdrop-blur-sm border ${ep.esTesteo ? 'border-red-500/30 shadow-[0_4px_20px_-10px_rgba(239,68,68,0.2)]' : 'border-marino-4/40'} rounded-3xl p-5 md:p-6 transition-all hover:border-marino-4/80 flex flex-col gap-6 relative`}
+                                                >
+                                                    {/* Decorador de Conexión del Circuito */}
+                                                    {chunk.modalidad !== 'SECUENCIAL' && idx !== chunk.ejercicios.length - 1 && (
+                                                        <div className="absolute -bottom-8 left-12 w-0.5 h-8 bg-naranja/20 hidden md:block"></div>
+                                                    )}
 
-                                    {/* TIMER Component (Columnas 4-5) */}
-                                    <div className="col-span-3 md:col-span-2 bg-marino-2/80 p-4 flex flex-col justify-center">
-                                        <span className="text-[0.55rem] text-gris uppercase tracking-widest font-black block mb-2 px-1 text-center md:text-left">Recuperación</span>
-                                        {ep.descansoSegundos && ep.descansoSegundos > 0 ? (
-                                            <CronometroDescanso segundos={ep.descansoSegundos} />
-                                        ) : (
-                                            <div className="text-sm text-gris-claro font-medium px-1">— Sin descanso pautado</div>
-                                        )}
-                                    </div>
-                                </div>
+                                                    {/* HEADER: Título y Botón Play */}
+                                                    <div className="flex items-start justify-between gap-4">
+                                                        <div className="flex items-start gap-4">
+                                                            <div className="w-10 h-10 rounded-full bg-marino-3 border border-marino-4 flex items-center justify-center shrink-0">
+                                                                <span className={`text-xl font-barlow-condensed font-black ${ep.esTesteo ? 'text-red-400' : 'text-blanco'}`}>
+                                                                    {chunk.modalidad === 'SECUENCIAL' ? idx + 1 : `${idx + 1}`}
+                                                                </span>
+                                                            </div>
+                                                            <div>
+                                                                <h3 className="text-xl md:text-2xl font-black text-blanco uppercase tracking-tight leading-tight mb-2">
+                                                                    {nombreEjercicio}
+                                                                </h3>
+                                                                <div className="flex flex-wrap items-center gap-2">
+                                                                    {ep.esTesteo && (
+                                                                        <span className="text-[0.55rem] font-black bg-red-500/10 text-red-400 border border-red-500/20 px-2 py-0.5 rounded uppercase tracking-widest flex items-center gap-1 w-fit">
+                                                                            <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                                                                            Testeo
+                                                                        </span>
+                                                                    )}
+                                                                    {esLongitudLarga && (
+                                                                        <span className="border border-blue-500/20 bg-blue-500/5 px-2 py-0.5 rounded text-[0.55rem] font-black text-blue-300 flex items-center gap-1 w-fit uppercase tracking-widest">
+                                                                            <ShieldAlert size={10} /> IUSCA
+                                                                        </span>
+                                                                    )}
+                                                                    {ep.pesoSugerido && (
+                                                                        <span className="border border-verde/20 bg-verde/5 px-2 py-0.5 rounded text-verde/90 text-[0.55rem] font-bold uppercase tracking-widest w-fit flex items-center gap-1">
+                                                                            <Dumbbell size={10} /> {ep.pesoSugerido} kg
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        {/* Video Link */}
+                                                        {tieneVideo && ep.ejercicio?.urlVideo && (
+                                                            <a
+                                                                href={ep.ejercicio.urlVideo}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="shrink-0 flex items-center justify-center w-12 h-12 bg-naranja/10 border border-naranja/20 rounded-2xl text-naranja hover:bg-naranja hover:text-marino transition-all shadow-[0_0_15px_-5px_#FF6B00]"
+                                                                title="Ver Video"
+                                                            >
+                                                                <Play size={18} fill="currentColor" className="ml-1" />
+                                                            </a>
+                                                        )}
+                                                    </div>
 
-                                {/* Notas Técnicas del Ejercicio */}
-                                {ep.notasTecnicas && (
-                                    <div className="mt-4 p-4 bg-marino-3/30 border border-marino-4/50 rounded-xl relative">
-                                        <h4 className="text-[0.65rem] font-black text-gris uppercase tracking-widest mb-1.5">
-                                            Feedback / Notas Técnicas
-                                        </h4>
-                                        <p className="text-sm text-gris-claro leading-relaxed whitespace-pre-wrap">
-                                            {ep.notasTecnicas}
-                                        </p>
-                                    </div>
-                                )}
+                                                    {/* DATA & TIMER: Grid Layout */}
+                                                    <div className="grid grid-cols-3 md:grid-cols-5 bg-marino-3/50 rounded-2xl border border-marino-4/30 overflow-hidden divide-x-0 divide-y md:divide-x md:divide-y-0 divide-marino-4/30">
+                                                        
+                                                        {/* STATS (Columnas 1-3) */}
+                                                        <div className="flex flex-col items-center justify-center p-4 col-span-1">
+                                                            <span className="text-[0.6rem] text-gris uppercase tracking-widest font-black mb-1">Sets</span>
+                                                            <span className="text-2xl md:text-3xl font-barlow-condensed font-black text-blanco leading-none">{ep.series}</span>
+                                                        </div>
+                                                        <div className="flex flex-col items-center justify-center p-4 col-span-1 border-l border-marino-4/30">
+                                                            <span className="text-[0.6rem] text-gris uppercase tracking-widest font-black mb-1">Reps</span>
+                                                            <span className="text-2xl md:text-3xl font-barlow-condensed font-black text-naranja tracking-widest leading-none">{ep.repsMin}<span className="text-gris/40 mx-0.5 font-normal">—</span>{ep.repsMax}</span>
+                                                        </div>
+                                                        <div className="flex flex-col items-center justify-center p-4 col-span-1 border-l border-marino-4/30">
+                                                            <span className="text-[0.6rem] text-gris uppercase tracking-widest font-black mb-1">RIR</span>
+                                                            <span className="text-2xl md:text-3xl font-barlow-condensed font-black text-verde leading-none">{ep.RIR ?? "-"}</span>
+                                                        </div>
 
-                                {/* Testing protocol CTA */}
-                                {ep.esTesteo && (
-                                    <div className={`mt-2 pt-5 border-t ${ep.modalidadTesteo === 'DIRECTO' ? 'border-red-500/20' : 'border-naranja/20'}`}>
-                                         <button className={`w-full py-3.5 rounded-xl text-[0.7rem] font-black uppercase tracking-[0.2em] transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 ${ep.modalidadTesteo === 'DIRECTO' ? 'bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20' : 'bg-naranja/10 text-naranja border border-naranja/20 hover:bg-naranja/20'}`}>
-                                            <Zap size={16} fill="currentColor" />
-                                            Registrar Protocolo de Testeo
-                                        </button>
-                                    </div>
-                                )}
+                                                        {/* TIMER Component (Columnas 4-5) */}
+                                                        <div className="col-span-3 md:col-span-2 bg-marino-2/80 p-4 flex flex-col justify-center">
+                                                            <span className="text-[0.55rem] text-gris uppercase tracking-widest font-black block mb-2 px-1 text-center md:text-left">Recuperación</span>
+                                                            {ep.descansoSegundos && ep.descansoSegundos > 0 ? (
+                                                                <CronometroDescanso segundos={ep.descansoSegundos} />
+                                                            ) : (
+                                                                <div className="text-sm text-gris-claro font-medium px-1">— Sin descanso pautado</div>
+                                                            )}
+                                                        </div>
+                                                    </div>
 
-                                {/* Registro de Series */}
-                                <RegistroSeries
-                                    ejercicioPlanificadoId={ep.id}
-                                    diaId={diaVisualizado.id}
-                                    numSeries={ep.series}
-                                    pesoSugerido={ep.pesoSugerido}
-                                    seriesRegistradas={seriesDelDia[ep.id]}
-                                />
-                            </div>
-                        );
-                    })}
+                                                    {/* Notas Técnicas del Ejercicio */}
+                                                    {ep.notasTecnicas && (
+                                                        <div className="mt-4 p-4 bg-marino-3/30 border border-marino-4/50 rounded-xl relative">
+                                                            <h4 className="text-[0.65rem] font-black text-gris uppercase tracking-widest mb-1.5">
+                                                                Feedback / Notas Técnicas
+                                                            </h4>
+                                                            <p className="text-sm text-gris-claro leading-relaxed whitespace-pre-wrap">
+                                                                {ep.notasTecnicas}
+                                                            </p>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Testing protocol CTA */}
+                                                    {ep.esTesteo && (
+                                                        <div className={`mt-2 pt-5 border-t ${ep.modalidadTesteo === 'DIRECTO' ? 'border-red-500/20' : 'border-naranja/20'}`}>
+                                                            <button className={`w-full py-3.5 rounded-xl text-[0.7rem] font-black uppercase tracking-[0.2em] transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 ${ep.modalidadTesteo === 'DIRECTO' ? 'bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20' : 'bg-naranja/10 text-naranja border border-naranja/20 hover:bg-naranja/20'}`}>
+                                                                <Zap size={16} fill="currentColor" />
+                                                                Registrar Protocolo de Testeo
+                                                            </button>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Registro de Series */}
+                                                    <RegistroSeries
+                                                        ejercicioPlanificadoId={ep.id}
+                                                        diaId={diaVisualizado.id}
+                                                        numSeries={ep.series}
+                                                        pesoSugerido={ep.pesoSugerido}
+                                                        seriesRegistradas={seriesDelDia[ep.id]}
+                                                    />
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </details>
+                            );
+                        });
+                    })()}
                 </div>
 
                 {/* BOTÓN FINALIZAR SESIÓN */}

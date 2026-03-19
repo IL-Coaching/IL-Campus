@@ -223,13 +223,34 @@ model DiaSesion {
   focoMuscular   String
   notas          String?
   semana         Semana                 @relation(fields: [semanaId], references: [id])
+  bloques        BloqueSesion[]
   ejercicios     EjercicioPlanificado[]
   sesionesReales SesionRegistrada[]
+}
+
+model BloqueSesion {
+  id             String                 @id @default(uuid())
+  diaId          String
+  dia            DiaSesion              @relation(fields: [diaId], references: [id], onDelete: Cascade)
+  nombre         String?                // Ej: "Activación Nerviosa", "Fuerza Estructural"
+  orden          Int                    @default(1)
+  modalidad      ModalidadBloque        @default(SECUENCIAL)
+  ejercicios     EjercicioPlanificado[]
+}
+
+enum ModalidadBloque {
+  SECUENCIAL
+  CIRCUITO
+  SUPERSERIE
+  AMRAP
+  EMOM
 }
 
 model EjercicioPlanificado {
   id                   String            @id @default(uuid())
   diaId                String
+  bloqueId             String?
+  bloque               BloqueSesion?     @relation(fields: [bloqueId], references: [id], onDelete: Cascade)
   ejercicioId          String?
   nombreLibre          String?
   esBiblioteca         Boolean           @default(false)

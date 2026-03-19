@@ -61,6 +61,7 @@ export default async function RutinaPage() {
                                         ejercicios: {
                                             orderBy: { orden: "asc" },
                                             include: {
+                                                bloque: true,
                                                 ejercicio: {
                                                     select: {
                                                         nombre: true,
