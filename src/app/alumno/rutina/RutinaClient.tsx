@@ -786,7 +786,10 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                             });
                         })()}
                     </div>
-                     {/* Navegación entre semanas (Selector Ultra Premium) */}
+                )}
+            </section>
+
+             {/* Navegación entre semanas (Selector Ultra Premium) */}
              {todasLasSemanas.length > 1 && (
                 <section className="mt-12 pt-8 border-t border-marino-4/20 relative">
                     <div className="flex items-center justify-between mb-8 px-2">
@@ -885,8 +888,6 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                     </div>
                 </section>
              )}
-                </section>
-            )}
         </div>
     );
 }
