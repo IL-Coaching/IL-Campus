@@ -786,79 +786,105 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                             });
                         })()}
                     </div>
-                )}
-            </section>
-
-             {/* Navegación entre semanas (Selector Compacto) */}
+                     {/* Navegación entre semanas (Selector Ultra Premium) */}
              {todasLasSemanas.length > 1 && (
-                <section className="mt-8 pt-8 border-t border-marino-4/30">
-                    <h3 className="text-[0.6rem] font-black text-gris uppercase tracking-[0.2em] mb-4 text-center">Navegar Semanas</h3>
-                    <div className="flex gap-3 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0">
+                <section className="mt-12 pt-8 border-t border-marino-4/20 relative">
+                    <div className="flex items-center justify-between mb-8 px-2">
+                        <h3 className="text-[0.6rem] font-black text-gris uppercase tracking-[0.4em]">Cronograma de Bloques</h3>
+                        <div className="flex gap-4">
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-1.5 h-1.5 rounded-full bg-verde/40"></div>
+                                <span className="text-[0.45rem] font-bold text-gris/60 uppercase tracking-widest">Listo</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-1.5 h-1.5 rounded-full bg-naranja animate-pulse"></div>
+                                <span className="text-[0.45rem] font-bold text-naranja uppercase tracking-widest">En Curso</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-4 overflow-x-auto pb-8 snap-x snap-mandatory scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0 scroll-smooth">
                         {[...todasLasSemanas].sort((a, b) => a.numeroSemana - b.numeroSemana).map((semana) => {
                             // Calcular progreso real de la semana
                             const diasConEj = semana.diasSesion.filter(d => d.ejercicios.length > 0);
                             const completados = diasConEj.filter(d => d.sesionesReales && d.sesionesReales.some(sr => sr.completada === true)).length;
                             const estaCompletada = diasConEj.length > 0 && completados === diasConEj.length;
                             
-                            // Determinamos si esta semana contiene el "siguiente estímulo"
+                            // Determinamos cual es la semana focal (en curso)
                             const tieneDiasIncompletos = diasConEj.length > 0 && completados < diasConEj.length;
-                            // Encontramos la primera semana con días incompletos (debería coincidir con la activa)
                             const esSemanaActual = tieneDiasIncompletos && semana.numeroSemana === [...todasLasSemanas].sort((a,b)=>a.numeroSemana-b.numeroSemana).find(s => {
                                 const sDias = s.diasSesion.filter(d => d.ejercicios.length > 0);
                                 const sCompletados = sDias.filter(d => d.sesionesReales && d.sesionesReales.some(sr => sr.completada === true)).length;
                                 return sDias.length > 0 && sCompletados < sDias.length;
                             })?.numeroSemana;
                             
-                            const esSeleccionada = semana.id === semanaSeleccionadaId;
+                            const esSeleccionadaId = semana.id === semanaSeleccionadaId;
 
                             return (
                                 <button
                                     key={semana.id}
                                     onClick={() => setSemanaSeleccionadaId(semana.id)}
-                                    className={`snap-center shrink-0 w-32 p-4 rounded-3xl border transition-all relative group flex flex-col items-center gap-1 ${
-                                        esSeleccionada && esSemanaActual
-                                        ? 'bg-gradient-to-br from-marino-3 to-marino-4 border-naranja text-blanco shadow-[0_4px_20px_-10px_rgba(255,107,0,0.5)] scale-105 z-10'
-                                        : esSemanaActual // Si es la semana que toca, pero no la tengo clickeada, al menos que brille un poco
-                                            ? 'bg-marino-2/80 border-naranja/50 text-blanco shadow-lg shadow-naranja/5'
-                                            : estaCompletada
-                                                ? 'bg-marino-2/40 border-verde/20 text-verde/60'
-                                                : esSeleccionada 
-                                                    ? 'bg-marino-3 border-marino-4 text-blanco'
-                                                    : 'bg-marino-2 border-marino-4/50 text-gris hover:border-marino-4'
-                                    }`}
+                                    className={`snap-center shrink-0 w-16 group relative flex flex-col items-center transition-all duration-300 ${esSeleccionadaId ? 'scale-110' : 'hover:scale-105'}`}
                                 >
-                                    <div className="flex items-center gap-1.5">
-                                        <span className={`text-xl font-barlow-condensed font-black block leading-none ${esSeleccionada || esSemanaActual ? 'text-blanco' : estaCompletada ? 'text-verde/70' : ''}`}>
-                                            S{semana.numeroSemana}
+                                    {/* Indicador de Selección Superior */}
+                                    <div className={`text-[0.5rem] font-black uppercase tracking-tighter mb-2 transition-all duration-300 ${esSeleccionadaId ? 'text-naranja opacity-100' : 'text-gris opacity-0 group-hover:opacity-100'}`}>
+                                        {esSeleccionadaId ? 'Viendo' : 'Ver'}
+                                    </div>
+
+                                    {/* Círculo de la Semana */}
+                                    <div className={`w-14 h-14 rounded-full border-2 flex flex-col items-center justify-center relative transition-all duration-500 overflow-hidden ${
+                                        esSemanaActual 
+                                        ? 'bg-marino-3 border-naranja shadow-[0_0_20px_rgba(255,107,0,0.2)]' 
+                                        : estaCompletada 
+                                            ? 'bg-marino-2/40 border-verde/30 shadow-none' 
+                                            : esSeleccionadaId
+                                                ? 'bg-marino-3 border-blanco/40'
+                                                : 'bg-marino-2 border-marino-4/40 group-hover:border-marino-4'
+                                    }`}>
+                                        <span className={`text-lg font-barlow-condensed font-black leading-none tracking-tighter transition-colors ${
+                                            esSemanaActual ? 'text-naranja' : estaCompletada ? 'text-verde/60' : 'text-blanco/60'
+                                        }`}>
+                                            {semana.numeroSemana}
                                         </span>
-                                        {estaCompletada && <CheckCircle2 size={12} className="text-verde/70" />}
-                                        {esSemanaActual && !estaCompletada && <Play size={10} className="text-naranja fill-naranja" />}
-                                    </div>
-                                    
-                                    <span className={`text-[0.45rem] font-black uppercase tracking-[0.2em] block truncate ${esSemanaActual ? 'text-naranja' : estaCompletada ? 'text-verde/40' : 'text-gris/40'}`}>
-                                        {semana.esFaseDeload ? 'Deload' : estaCompletada ? 'Hecho' : esSemanaActual ? 'Siguiente' : 'Regular'}
-                                    </span>
+                                        
+                                        {/* Progreso Radial Sutil (Borde inferior) */}
+                                        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
+                                            {diasConEj.map((_, i) => (
+                                                <div key={i} className={`w-1 h-1 rounded-full ${i < completados ? (estaCompletada ? 'bg-verde/40' : 'bg-naranja') : 'bg-marino-4/50'}`}></div>
+                                            ))}
+                                        </div>
 
-                                    {/* Barra de Progreso Minimalista */}
-                                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-marino-4/20 rounded-b-3xl overflow-hidden">
-                                        <div 
-                                            className={`h-full transition-all duration-500 ${estaCompletada ? 'bg-verde' : 'bg-naranja'}`}
-                                            style={{ width: `${(completados / (diasConEj.length || 1)) * 100}%` }}
-                                        ></div>
+                                        {/* Overlay para Fase Deload */}
+                                        {semana.esFaseDeload && (
+                                            <div className="absolute inset-0 bg-blue-500/10 pointer-events-none"></div>
+                                        )}
                                     </div>
 
-                                    {/* Indicador de "Seleccionada" visible si hay varias semanas */}
-                                    {esSeleccionada && !esSemanaActual && (
-                                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-gris/50 rounded-full shadow-sm"></div>
-                                    )}
-                                    {/* Indicador de "Semana que toca" visible siempre */}
+                                    {/* Mini Badge de Estado */}
+                                    <div className="mt-3 flex flex-col items-center gap-1">
+                                         {estaCompletada ? (
+                                             <CheckCircle2 size={10} className="text-verde/50" />
+                                         ) : esSemanaActual ? (
+                                             <div className="w-1 h-1 rounded-full bg-naranja animate-ping"></div>
+                                         ) : (
+                                             <div className="w-1 h-1 rounded-full bg-marino-4"></div>
+                                         )}
+                                         
+                                         <span className={`text-[0.45rem] font-bold uppercase tracking-widest ${esSemanaActual ? 'text-naranja' : estaCompletada ? 'text-verde/40' : 'text-gris/30'}`}>
+                                             {semana.esFaseDeload ? 'Dld' : `W${semana.numeroSemana}`}
+                                         </span>
+                                    </div>
+
+                                    {/* Marcador de "Siguiente" */}
                                     {esSemanaActual && (
-                                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-naranja rounded-full animate-pulse shadow-[0_0_8px_#FF6B00]"></div>
+                                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-naranja border-2 border-marino-1 rounded-full shadow-[0_0_8px_#FF6B00]"></div>
                                     )}
                                 </button>
                             );
                         })}
                     </div>
+                </section>
+             )}
                 </section>
             )}
         </div>
