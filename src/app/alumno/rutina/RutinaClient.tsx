@@ -525,9 +525,9 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                 {/* Lista de Ejercicios por Bloques */}
                 <div className="space-y-6">
                     {(() => {
-                        const chunks: any[] = [];
+                        const chunks: { isBlock: boolean; id: string; nombre: string; modalidad: string; ejercicios: Ejercicio[] }[] = [];
                         let currentBlockId: string | null = null;
-                        let currentChunk: any[] = [];
+                        let currentChunk: Ejercicio[] = [];
                         let currentBlockName = 'Entrenamiento Principal';
                         let currentModalidad = 'SECUENCIAL';
                         
@@ -565,7 +565,7 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                                     </summary>
                                     
                                     <div className="space-y-4 pl-0 md:pl-4 border-l-2 border-transparent md:border-marino-4/20 md:ml-5 py-4 mb-8">
-                                        {chunk.ejercicios.map((ep: any, idx: number) => {
+                                        {chunk.ejercicios.map((ep: Ejercicio, idx: number) => {
                                             const nombreEjercicio = ep.ejercicio?.nombre || ep.nombreLibre || "Ejercicio sin nombre";
                                             const tieneVideo = !!ep.ejercicio?.urlVideo;
                                             const esLongitudLarga = ep.ejercicio?.posicionCarga === "LONGITUD_LARGA";

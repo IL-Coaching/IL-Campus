@@ -4,9 +4,8 @@ import { revalidatePath } from "next/cache";
 import { getEntrenadorSesion } from "../seguridad/sesion";
 import { PlanificacionServicio } from "../servicios/planificacion.servicio";
 import { prisma } from "@/baseDatos/conexion";
-import { TipoCarga, ModeloPeriodizacion } from "@prisma/client";
+import { TipoCarga, ModeloPeriodizacion, ModalidadBloque } from "@prisma/client";
 import { EsquemaNuevoMacrociclo, EsquemaActualizarEjercicio, EsquemaActualizarSemana, EsquemaActualizarMesociclo, EsquemaActualizarMacrociclo, EsquemaNuevoMesociclo } from "../validadores/planificacion.validador";
-import { randomUUID } from "crypto";
 
 /**
  * Acciones de Planificación — ArchSecure AI
@@ -558,7 +557,7 @@ export async function reordenarEjercicios(diaId: string, ejercicioIds: string[])
     }
 }
 
-export async function agruparEjercicios(diaId: string, ejercicioIds: string[], nombreGrupo: string, modalidad: any = 'SECUENCIAL') {
+export async function agruparEjercicios(diaId: string, ejercicioIds: string[], nombreGrupo: string, modalidad: ModalidadBloque = 'SECUENCIAL') {
     try {
         const entrenador = await getEntrenadorSesion();
         const diaPropio = await prisma.diaSesion.findFirst({
