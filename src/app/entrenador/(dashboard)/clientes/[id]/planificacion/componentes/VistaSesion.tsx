@@ -588,8 +588,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                     type="number"
                                                                     inputMode="numeric"
                                                                     pattern="[0-9]*"
-                                                                    value={gej.repsMin}
-                                                                    onChange={(e) => handleUpdateChange(gej.id, { repsMin: parseInt(e.target.value) })}
+                                                                    value={gej.repsMin ?? ''}
+                                                                    onChange={(e) => handleUpdateChange(gej.id, { repsMin: parseInt(e.target.value) || null })}
                                                                     className="w-14 bg-marino-4/30 border border-marino-4 rounded-lg py-2 text-base font-black text-blanco focus:outline-none text-center"
                                                                 />
                                                                 <span className="text-gris/40">—</span>
@@ -597,8 +597,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                     type="number"
                                                                     inputMode="numeric"
                                                                     pattern="[0-9]*"
-                                                                    value={gej.repsMax}
-                                                                    onChange={(e) => handleUpdateChange(gej.id, { repsMax: parseInt(e.target.value) })}
+                                                                    value={gej.repsMax ?? ''}
+                                                                    onChange={(e) => handleUpdateChange(gej.id, { repsMax: parseInt(e.target.value) || null })}
                                                                     className="w-14 bg-marino-4/30 border border-marino-4 rounded-lg py-2 text-base font-black text-blanco focus:outline-none text-center"
                                                                 />
                                                             </div>
@@ -736,8 +736,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                     type="number"
                                                     inputMode="numeric"
                                                     pattern="[0-9]*"
-                                                    value={ej.repsMin}
-                                                    onChange={(e) => handleUpdateChange(ej.id, { repsMin: parseInt(e.target.value) })}
+                                                    value={ej.repsMin ?? ''}
+                                                    onChange={(e) => handleUpdateChange(ej.id, { repsMin: parseInt(e.target.value) || null })}
                                                     className="w-14 bg-marino-4/30 border border-marino-4 rounded-lg py-2 text-base font-black text-blanco focus:outline-none text-center"
                                                 />
                                                 <span className="text-gris/40">—</span>
@@ -745,8 +745,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                     type="number"
                                                     inputMode="numeric"
                                                     pattern="[0-9]*"
-                                                    value={ej.repsMax}
-                                                    onChange={(e) => handleUpdateChange(ej.id, { repsMax: parseInt(e.target.value) })}
+                                                    value={ej.repsMax ?? ''}
+                                                    onChange={(e) => handleUpdateChange(ej.id, { repsMax: parseInt(e.target.value) || null })}
                                                     className="w-14 bg-marino-4/30 border border-marino-4 rounded-lg py-2 text-base font-black text-blanco focus:outline-none text-center"
                                                 />
                                             </div>

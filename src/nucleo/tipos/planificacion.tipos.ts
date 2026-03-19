@@ -9,6 +9,9 @@ export type EjercicioConDetalle = EjercicioPlanificado & {
     ejercicio: Ejercicio | null;
     grupoId?: string | null;
     nombreGrupo?: string | null;
+    modoMedicion?: string | null;
+    tiempoObjetivoSeg?: number | null;
+    bloque?: { modalidad: string } | null;
 };
 
 export type DiaConEjercicios = DiaSesion & {
