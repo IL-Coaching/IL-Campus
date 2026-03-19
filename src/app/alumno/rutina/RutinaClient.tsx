@@ -711,62 +711,75 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                                     <button
                                         key={dia.id}
                                         onClick={() => handleDiaClick(dia)}
-                                        className={`relative overflow-hidden group transition-all duration-300 rounded-[2.5rem] p-6 text-left border ${
+                                        className={`relative overflow-hidden group transition-all duration-500 rounded-[2rem] text-left border ${
                                             tieneSesionReal 
-                                            ? 'bg-marino-2/40 border-marino-4/30 opacity-60' 
+                                            ? 'bg-marino-2/20 border-marino-4/20 opacity-40 py-4 px-6 scale-[0.98]' 
                                             : esSiguiente
-                                                ? 'bg-gradient-to-br from-marino-2 to-marino-3 border-naranja/40 shadow-[0_10px_40px_-15px_rgba(255,107,0,0.25)] scale-[1.02] z-10'
-                                                : 'bg-marino-2 border-marino-4/50 opacity-90'
+                                                ? 'bg-gradient-to-br from-marino-2 to-marino-3 border-naranja shadow-[0_20px_50px_-20px_rgba(255,107,0,0.3)] py-8 px-8 scale-100 mb-2 z-10'
+                                                : 'bg-marino-2/60 border-marino-4/40 py-6 px-6 opacity-80'
                                         }`}
                                     >
-                                        {/* Badge de Estado Superior */}
+                                        {/* Estado y Paso */}
                                         <div className="flex items-center justify-between mb-4">
-                                            <span className={`text-[0.6rem] font-black uppercase tracking-[0.25em] flex items-center gap-2 ${
-                                                tieneSesionReal ? 'text-verde/60' : esSiguiente ? 'text-naranja' : 'text-gris'
-                                            }`}>
+                                            <div className="flex items-center gap-2">
                                                 {tieneSesionReal ? (
-                                                    <><CheckCircle2 size={12} /> Completado</>
+                                                    <div className="px-2 py-0.5 bg-verde/10 border border-verde/20 rounded-full flex items-center gap-1.5">
+                                                        <CheckCircle2 size={10} className="text-verde" />
+                                                        <span className="text-[0.55rem] font-black text-verde uppercase tracking-widest">Completado</span>
+                                                    </div>
                                                 ) : esSiguiente ? (
-                                                    <><Play size={10} fill="currentColor" /> Siguiente Estímulo</>
+                                                    <div className="px-3 py-1 bg-naranja border border-naranja/20 rounded-full flex items-center gap-1.5 shadow-[0_0_15px_rgba(255,107,0,0.4)]">
+                                                        <Play size={10} fill="currentColor" className="text-marino" />
+                                                        <span className="text-[0.55rem] font-black text-marino uppercase tracking-widest">Siguiente Estímulo</span>
+                                                    </div>
                                                 ) : (
-                                                    <><Clock size={10} /> Programado</>
+                                                    <div className="px-2 py-0.5 bg-marino-4/30 border border-marino-4/20 rounded-full flex items-center gap-1.5 text-gris">
+                                                        <Clock size={10} />
+                                                        <span className="text-[0.55rem] font-black uppercase tracking-widest">Programado</span>
+                                                    </div>
                                                 )}
-                                            </span>
+                                            </div>
                                             
-                                            <span className="text-[0.65rem] font-barlow-condensed font-black text-gris/40 uppercase tracking-widest bg-marino-3/50 px-3 py-1 rounded-full">
+                                            <span className={`text-[0.6rem] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${esSiguiente ? 'bg-naranja/10 text-naranja border border-naranja/20' : 'text-gris/40 bg-marino-3/50'}`}>
                                                 Paso {idx + 1}
                                             </span>
                                         </div>
-
+ 
                                         <div className="flex items-end justify-between gap-4">
-                                            <div>
-                                                <h3 className={`text-3xl font-barlow-condensed font-black uppercase leading-none tracking-tight mb-2 ${
-                                                    tieneSesionReal ? 'text-gris' : 'text-blanco'
+                                            <div className="flex-1">
+                                                <h3 className={`font-barlow-condensed font-black uppercase leading-none tracking-tighter transition-all ${
+                                                    tieneSesionReal ? 'text-lg text-gris' : esSiguiente ? 'text-5xl text-blanco mb-2' : 'text-3xl text-blanco/80 mb-1'
                                                 }`}>
                                                     {dia.diaSemana}
                                                 </h3>
                                                 {dia.focoMuscular && (
-                                                    <p className={`text-sm font-medium ${tieneSesionReal ? 'text-gris/50' : 'text-gris-claro'}`}>
+                                                    <p className={`font-bold transition-all ${
+                                                        tieneSesionReal ? 'text-[0.65rem] text-gris/40' : esSiguiente ? 'text-sm text-naranja/80' : 'text-[0.7rem] text-gris-claro'
+                                                    }`}>
                                                         {dia.focoMuscular}
                                                     </p>
                                                 )}
                                             </div>
-
-                                            <div className="flex flex-col items-end gap-1">
-                                                <span className={`text-[0.7rem] font-bold ${tieneSesionReal ? 'text-gris/40' : 'text-blanco/60'}`}>
-                                                    {dia.ejercicios.length} ejercicios
-                                                </span>
+ 
+                                            <div className="flex flex-col items-end gap-2 shrink-0">
+                                                {!tieneSesionReal && (
+                                                   <span className={`text-[0.65rem] font-black uppercase tracking-widest ${esSiguiente ? 'text-blanco/40' : 'text-gris/30'}`}>
+                                                       {dia.ejercicios.length} ejercicios
+                                                   </span>
+                                                )}
+                                                
                                                 {esSiguiente && (
-                                                    <div className="w-10 h-10 rounded-full bg-naranja flex items-center justify-center text-marino shadow-lg shadow-naranja/20 transition-transform group-hover:scale-110">
-                                                        <Play size={18} fill="currentColor" className="translate-x-[1px]" />
+                                                    <div className="w-14 h-14 rounded-2xl bg-naranja flex items-center justify-center text-marino shadow-[0_10px_25px_-5px_#FF6B00] transition-transform hover:scale-110 active:scale-95">
+                                                        <Play size={28} fill="currentColor" className="translate-x-[2px]" />
                                                     </div>
                                                 )}
+                                                {tieneSesionReal && <div className="p-1 px-2 border border-verde/20 bg-verde/5 rounded text-[0.6rem] font-bold text-verde/40 uppercase">Vencido</div>}
                                             </div>
                                         </div>
-
-                                        {/* Overlay Glow para el siguiente dia */}
+ 
+                                        {/* Glow effect for Next Session */}
                                         {esSiguiente && (
-                                            <div className="absolute top-0 right-0 w-32 h-32 bg-naranja/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                                            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-naranja/10 rounded-full blur-[60px] pointer-events-none"></div>
                                         )}
                                     </button>
                                 );
