@@ -126,10 +126,15 @@ function CronometroDescanso({ segundos }: { segundos: number }) {
 }
 
 
-function CronometroSesion({ diaId }: { diaId: string }) {
+function CronometroSesion({ diaId, sesionIniciada, onIniciar }: { diaId: string, sesionIniciada: boolean, onIniciar: () => void }) {
     const [seconds, setSeconds] = useState(0);
 
     useEffect(() => {
+        if (!sesionIniciada) {
+            setSeconds(0);
+            return;
+        }
+
         const storedStart = localStorage.getItem(`sesion_inicio_${diaId}`);
         let startTime: number;
 
@@ -146,7 +151,7 @@ function CronometroSesion({ diaId }: { diaId: string }) {
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [diaId]);
+    }, [diaId, sesionIniciada]);
 
     const format = (s: number) => {
         const hrs = Math.floor(s / 3600);
@@ -156,14 +161,22 @@ function CronometroSesion({ diaId }: { diaId: string }) {
     };
 
     return (
-        <div className="flex items-center gap-2 bg-marino-3/50 backdrop-blur-sm px-4 py-2 rounded-2xl border border-naranja/20 shadow-lg shadow-naranja/5">
-            <Clock size={16} className="text-naranja animate-pulse" />
+        <div className={`flex items-center gap-2 backdrop-blur-sm px-4 py-2 rounded-2xl border ${sesionIniciada ? 'bg-marino-3/50 border-naranja/20 shadow-lg shadow-naranja/5' : 'bg-marino-2 border-marino-4/30'}`}>
+            <Clock size={16} className={sesionIniciada ? "text-naranja animate-pulse" : "text-gris"} />
             <div className="flex flex-col">
-                <span className="text-[0.55rem] font-black text-gris uppercase tracking-[0.2em] leading-none mb-1">Duración</span>
-                <span className="font-mono text-lg font-black text-blanco tracking-widest leading-none">
+                <span className="text-[0.45rem] font-black text-gris uppercase tracking-[0.2em] leading-none mb-1">Duración</span>
+                <span className="font-mono text-lg font-black tracking-widest leading-none text-blanco">
                     {format(seconds)}
                 </span>
             </div>
+            {!sesionIniciada && (
+                <button 
+                    onClick={onIniciar}
+                    className="ml-3 bg-naranja/10 text-naranja border border-naranja/20 hover:bg-naranja hover:text-marino transition-colors px-3 py-1.5 rounded-lg text-[0.55rem] font-black uppercase tracking-widest flex items-center gap-1.5"
+                >
+                    <Play size={10} fill="currentColor" /> Iniciar
+                </button>
+            )}
         </div>
     );
 }
@@ -208,9 +221,20 @@ function RegistroSeries({
             repsReales: s.repsReales !== "" ? parseInt(s.repsReales) : null,
             notas: s.notas || null
         }));
+        // If not started yet, start it upon saving implicitly
+        const started = localStorage.getItem(`sesion_inicio_${diaId}`);
+        if (!started) {
+            localStorage.setItem(`sesion_inicio_${diaId}`, Date.now().toString());
+            // It will trigger react state upstream to sync, but let's fire a storage event simply to trigger the timer (or the timer will catch it next render)
+        }
+        
         startTransition(async () => {
             const res = await guardarSeries({ diaId, ejercicioPlanificadoId, series: payload });
-            if (res.exito) setSaved(true);
+            if (res.exito) {
+                setSaved(true);
+                // Force a pseudo state refresh to trigger Timer if not actively rendered as true
+                window.dispatchEvent(new Event('storage'));
+            }
         });
     };
 
@@ -285,6 +309,7 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
     const [pesoGuardado, setPesoGuardado] = useState(false);
     const [showFinishModal, setShowFinishModal] = useState(false);
     const [isFinishing, startFinishing] = useTransition();
+    const [sesionIniciada, setSesionIniciada] = useState(false);
 
     const semanaActual = todasLasSemanas.find(s => s.id === semanaSeleccionadaId) || semanaActiva;
 
@@ -292,9 +317,16 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
         setDiaVisualizado(dia);
         window.scrollTo({ top: 0, behavior: "smooth" });
 
+        // Check if there's already a saved start time
+        const storedStart = localStorage.getItem(`sesion_inicio_${dia.id}`);
+
         // Cargar series ya registradas hoy
         const res = await obtenerSeriesRegistradas(dia.id);
         if (res.exito && res.series) {
+            const hasSeries = res.series.length > 0;
+            if (storedStart || hasSeries) setSesionIniciada(true);
+            else setSesionIniciada(false);
+
             const mapped: Record<string, SetLogEntry[]> = {};
             res.series.forEach((s: { ejercicioPlanificadoId: string; pesoKg: number | null; repsReales: number | null; notas?: string | null }) => {
                 if (!mapped[s.ejercicioPlanificadoId]) mapped[s.ejercicioPlanificadoId] = [];
@@ -305,6 +337,8 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                 });
             });
             setSeriesDelDia(mapped);
+        } else {
+            setSesionIniciada(!!storedStart);
         }
     };
 
@@ -381,14 +415,18 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                     <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
                         <div>
                             <div className="flex items-center gap-3 mb-3">
-                                <div className="px-3 py-1 bg-naranja/10 border border-naranja/20 rounded-lg">
-                                    <span className="text-[0.65rem] font-black text-naranja uppercase tracking-[0.2em] flex items-center gap-2">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-naranja shadow-[0_0_6px_#FF6B00] animate-pulse"></div>
-                                        Modo Foco Activo
+                                <div className={`px-3 py-1 border rounded-lg ${sesionIniciada ? 'bg-naranja/10 border-naranja/20' : 'bg-marino-4/20 border-marino-4/30'}`}>
+                                    <span className={`text-[0.65rem] font-black uppercase tracking-[0.2em] flex items-center gap-2 ${sesionIniciada ? 'text-naranja' : 'text-gris'}`}>
+                                        <div className={`w-1.5 h-1.5 rounded-full ${sesionIniciada ? 'bg-naranja shadow-[0_0_6px_#FF6B00] animate-pulse' : 'bg-gris'}`}></div>
+                                        {sesionIniciada ? 'Entrenando' : 'Viendo Plan'}
                                     </span>
                                 </div>
-                                <CronometroSesion diaId={diaVisualizado.id} />
-                                <span className="text-[0.65rem] font-bold text-gris uppercase tracking-widest">
+                                <CronometroSesion 
+                                    diaId={diaVisualizado.id} 
+                                    sesionIniciada={sesionIniciada} 
+                                    onIniciar={() => setSesionIniciada(true)} 
+                                />
+                                <span className="text-[0.65rem] font-bold text-gris uppercase tracking-widest hidden md:inline-block">
                                     Semana {semanaActual?.numeroSemana}
                                 </span>
                             </div>
