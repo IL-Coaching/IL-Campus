@@ -206,7 +206,7 @@ function RegistroSeries({
         };
     });    const [sets, setSets] = useState<SetLogEntry[]>(initialState);
     const [estadoGuardado, setEstadoGuardado] = useState<"ignorado" | "guardando" | "guardado" | "error">("ignorado");
-    const [isPending, startTransition] = useTransition();
+    const [, startTransition] = useTransition();
 
     // Use a ref to keep track of the timeout ID
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
