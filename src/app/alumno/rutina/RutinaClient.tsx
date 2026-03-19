@@ -168,7 +168,7 @@ function CronometroSesion({ diaId }: { diaId: string }) {
     );
 }
 
-type SetLogEntry = { pesoKg: string; repsReales: string };
+type SetLogEntry = { pesoKg: string; repsReales: string; notas: string };
 
 function RegistroSeries({
     ejercicioPlanificadoId,
@@ -183,11 +183,17 @@ function RegistroSeries({
     pesoSugerido: number | null;
     seriesRegistradas?: SetLogEntry[];
 }) {
-    const [sets, setSets] = useState<SetLogEntry[]>(
-        seriesRegistradas && seriesRegistradas.length > 0
-            ? seriesRegistradas
-            : Array.from({ length: numSeries }, () => ({ pesoKg: pesoSugerido ? String(pesoSugerido) : "", repsReales: "" }))
-    );
+    // Si viene la data de DB, rellenamos SIEMPRE hasta completar numSeries (Evitamos el bug de borrado)
+    const initialState = Array.from({ length: numSeries }, (_, idx) => {
+        const sr = seriesRegistradas?.[idx];
+        return {
+            pesoKg: sr?.pesoKg ?? (pesoSugerido ? String(pesoSugerido) : ""),
+            repsReales: sr?.repsReales ?? "",
+            notas: sr?.notas ?? ""
+        };
+    });
+
+    const [sets, setSets] = useState<SetLogEntry[]>(initialState);
     const [saved, setSaved] = useState(false);
     const [isPending, startTransition] = useTransition();
 
@@ -200,6 +206,7 @@ function RegistroSeries({
         const payload = sets.map(s => ({
             pesoKg: s.pesoKg !== "" ? parseFloat(s.pesoKg) : null,
             repsReales: s.repsReales !== "" ? parseInt(s.repsReales) : null,
+            notas: s.notas || null
         }));
         startTransition(async () => {
             const res = await guardarSeries({ diaId, ejercicioPlanificadoId, series: payload });
@@ -241,6 +248,16 @@ function RegistroSeries({
                     </div>
                 ))}
             </div>
+            
+            <div className="mb-4">
+                <textarea 
+                    placeholder="Escribe aquí si tuviste que realizar otro ejercicio (Ej: Máquina rota, hice press en banco), acotar algún dolor o molestia..."
+                    value={sets[0]?.notas || ""}
+                    onChange={e => handleChange(0, 'notas', e.target.value)}
+                    className="w-full bg-marino-3 border border-marino-4/60 rounded-lg px-3 py-2 text-[0.7rem] text-blanco placeholder-gris/40 focus:outline-none focus:border-naranja/50 transition-colors resize-none h-16"
+                />
+            </div>
+
             <button
                 onClick={handleGuardar}
                 disabled={isPending}
@@ -251,7 +268,7 @@ function RegistroSeries({
                 ) : saved ? (
                     <><CheckCircle2 size={12} /> Guardado — Actualizar</>
                 ) : (
-                    <><CheckCircle2 size={12} /> Guardar Series</>
+                    <><CheckCircle2 size={12} /> Guardar Series y Notas</>
                 )}
             </button>
         </div>
@@ -279,11 +296,12 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
         const res = await obtenerSeriesRegistradas(dia.id);
         if (res.exito && res.series) {
             const mapped: Record<string, SetLogEntry[]> = {};
-            res.series.forEach((s: { ejercicioPlanificadoId: string; pesoKg: number | null; repsReales: number | null }) => {
+            res.series.forEach((s: { ejercicioPlanificadoId: string; pesoKg: number | null; repsReales: number | null; notas?: string | null }) => {
                 if (!mapped[s.ejercicioPlanificadoId]) mapped[s.ejercicioPlanificadoId] = [];
                 mapped[s.ejercicioPlanificadoId].push({
                     pesoKg: s.pesoKg?.toString() || "",
-                    repsReales: s.repsReales?.toString() || ""
+                    repsReales: s.repsReales?.toString() || "",
+                    notas: s.notas || ""
                 });
             });
             setSeriesDelDia(mapped);
@@ -649,8 +667,8 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
             <section>
                 {(() => {
                     const totalSemanas = diasConEjercicios.length;
-                    const completadas = diasConEjercicios.filter(d => d.sesionesReales && d.sesionesReales.length > 0).length;
-                    const porcentaje = (completadas / totalSemanas) * 100;
+                    const completadas = diasConEjercicios.filter(d => d.sesionesReales && d.sesionesReales.some(sr => sr.completada === true)).length;
+                    const porcentaje = totalSemanas > 0 ? (completadas / totalSemanas) * 100 : 0;
 
                     return (
                         <div className="mb-8 px-2">
@@ -685,7 +703,7 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                             let haEncontradoSiguiente = false;
                             
                             return diasConEjercicios.map((dia: DiaSesion, idx: number) => {
-                                const tieneSesionReal = dia.sesionesReales && dia.sesionesReales.length > 0;
+                                const tieneSesionReal = dia.sesionesReales && dia.sesionesReales.some(sr => sr.completada === true);
                                 const esSiguiente = !tieneSesionReal && !haEncontradoSiguiente;
                                 if (esSiguiente) haEncontradoSiguiente = true;
 
@@ -764,34 +782,48 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                     <h3 className="text-[0.6rem] font-black text-gris uppercase tracking-[0.2em] mb-4 text-center">Navegar Semanas</h3>
                     <div className="flex gap-3 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0">
                         {[...todasLasSemanas].sort((a, b) => a.numeroSemana - b.numeroSemana).map((semana) => {
-                            const esSeleccionada = semana.id === semanaSeleccionadaId;
-                            
-                            // Calcular progreso de la semana
+                            // Calcular progreso real de la semana
                             const diasConEj = semana.diasSesion.filter(d => d.ejercicios.length > 0);
-                            const completados = diasConEj.filter(d => d.sesionesReales && d.sesionesReales.length > 0).length;
+                            const completados = diasConEj.filter(d => d.sesionesReales && d.sesionesReales.some(sr => sr.completada === true)).length;
                             const estaCompletada = diasConEj.length > 0 && completados === diasConEj.length;
+                            
+                            // Determinamos si esta semana contiene el "siguiente estímulo"
+                            const tieneDiasIncompletos = diasConEj.length > 0 && completados < diasConEj.length;
+                            // Encontramos la primera semana con días incompletos (debería coincidir con la activa)
+                            const esSemanaActual = tieneDiasIncompletos && semana.numeroSemana === [...todasLasSemanas].sort((a,b)=>a.numeroSemana-b.numeroSemana).find(s => {
+                                const sDias = s.diasSesion.filter(d => d.ejercicios.length > 0);
+                                const sCompletados = sDias.filter(d => d.sesionesReales && d.sesionesReales.some(sr => sr.completada === true)).length;
+                                return sDias.length > 0 && sCompletados < sDias.length;
+                            })?.numeroSemana;
+                            
+                            const esSeleccionada = semana.id === semanaSeleccionadaId;
 
                             return (
                                 <button
                                     key={semana.id}
                                     onClick={() => setSemanaSeleccionadaId(semana.id)}
                                     className={`snap-center shrink-0 w-32 p-4 rounded-3xl border transition-all relative group flex flex-col items-center gap-1 ${
-                                        esSeleccionada
-                                        ? 'bg-gradient-to-br from-marino-3 to-marino-4 border-naranja text-blanco shadow-lg shadow-naranja/5'
-                                        : estaCompletada
-                                            ? 'bg-marino-2/40 border-verde/20 text-verde/60'
-                                            : 'bg-marino-2 border-marino-4/50 text-gris hover:border-marino-4'
+                                        esSeleccionada && esSemanaActual
+                                        ? 'bg-gradient-to-br from-marino-3 to-marino-4 border-naranja text-blanco shadow-[0_4px_20px_-10px_rgba(255,107,0,0.5)] scale-105 z-10'
+                                        : esSemanaActual // Si es la semana que toca, pero no la tengo clickeada, al menos que brille un poco
+                                            ? 'bg-marino-2/80 border-naranja/50 text-blanco shadow-lg shadow-naranja/5'
+                                            : estaCompletada
+                                                ? 'bg-marino-2/40 border-verde/20 text-verde/60'
+                                                : esSeleccionada 
+                                                    ? 'bg-marino-3 border-marino-4 text-blanco'
+                                                    : 'bg-marino-2 border-marino-4/50 text-gris hover:border-marino-4'
                                     }`}
                                 >
                                     <div className="flex items-center gap-1.5">
-                                        <span className={`text-xl font-barlow-condensed font-black block leading-none ${esSeleccionada ? 'text-blanco' : estaCompletada ? 'text-verde/70' : ''}`}>
+                                        <span className={`text-xl font-barlow-condensed font-black block leading-none ${esSeleccionada || esSemanaActual ? 'text-blanco' : estaCompletada ? 'text-verde/70' : ''}`}>
                                             S{semana.numeroSemana}
                                         </span>
                                         {estaCompletada && <CheckCircle2 size={12} className="text-verde/70" />}
+                                        {esSemanaActual && !estaCompletada && <Play size={10} className="text-naranja fill-naranja" />}
                                     </div>
                                     
-                                    <span className={`text-[0.45rem] font-black uppercase tracking-[0.2em] block truncate ${esSeleccionada ? 'text-naranja' : estaCompletada ? 'text-verde/40' : 'text-gris/40'}`}>
-                                        {semana.esFaseDeload ? 'Deload' : 'Regular'}
+                                    <span className={`text-[0.45rem] font-black uppercase tracking-[0.2em] block truncate ${esSemanaActual ? 'text-naranja' : estaCompletada ? 'text-verde/40' : 'text-gris/40'}`}>
+                                        {semana.esFaseDeload ? 'Deload' : estaCompletada ? 'Hecho' : esSemanaActual ? 'Siguiente' : 'Regular'}
                                     </span>
 
                                     {/* Barra de Progreso Minimalista */}
@@ -802,8 +834,12 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                                         ></div>
                                     </div>
 
-                                    {/* Indicador de "Hoy/Activa" */}
-                                    {esSeleccionada && (
+                                    {/* Indicador de "Seleccionada" visible si hay varias semanas */}
+                                    {esSeleccionada && !esSemanaActual && (
+                                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-gris/50 rounded-full shadow-sm"></div>
+                                    )}
+                                    {/* Indicador de "Semana que toca" visible siempre */}
+                                    {esSemanaActual && (
                                         <div className="absolute -top-1 -right-1 w-2 h-2 bg-naranja rounded-full animate-pulse shadow-[0_0_8px_#FF6B00]"></div>
                                     )}
                                 </button>

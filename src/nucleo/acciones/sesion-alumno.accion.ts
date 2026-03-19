@@ -12,7 +12,7 @@ import { revalidatePath } from "next/cache";
 export async function guardarSeries(data: {
     diaId: string;
     ejercicioPlanificadoId: string;
-    series: { pesoKg: number | null; repsReales: number | null }[];
+    series: { pesoKg: number | null; repsReales: number | null; notas?: string | null }[];
 }) {
     try {
         const alumno = await getAlumnoSesion();
@@ -35,17 +35,16 @@ export async function guardarSeries(data: {
             return { error: "Acceso denegado al recurso." };
         }
 
-        // Buscar o crear SesionRegistrada de hoy para este día
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
-        const manana = new Date(hoy);
-        manana.setDate(manana.getDate() + 1);
-
+        // PRICIPIO: "El cuerpo no entiende de calendarios, solo de estímulos".
+        // Buscamos la sesión registrada para este ESTÍMULO (diaId). 
+        // Ya no validamos si fue iniciada "hoy" o "ayer", simplemente buscamos la sesión en curso.
         let sesion = await prisma.sesionRegistrada.findFirst({
             where: {
                 clienteId: alumno.id,
-                diaId: data.diaId,
-                fecha: { gte: hoy, lt: manana }
+                diaId: data.diaId
+            },
+            orderBy: {
+                fecha: 'desc' // Tomar el intento más reciente de este estímulo
             }
         });
 
@@ -54,7 +53,7 @@ export async function guardarSeries(data: {
                 data: {
                     clienteId: alumno.id,
                     diaId: data.diaId,
-                    completada: false // Antes era true, ahora requiere finalizar manualmente
+                    completada: false // Requiere finalizar manualmente
                 }
             });
         }
@@ -68,14 +67,15 @@ export async function guardarSeries(data: {
             }
         });
 
-        // Crear las nuevas series
+        // Crear las nuevas series (ahora puede solo guardar notas sin reps/peso)
         const seriesData = data.series
-            .filter(s => s.pesoKg !== null || s.repsReales !== null)
+            .filter(s => s.pesoKg !== null || s.repsReales !== null || (s.notas && s.notas.trim() !== ""))
             .map(s => ({
                 sesionId: sesion!.id,
                 ejercicioPlanificadoId: data.ejercicioPlanificadoId,
                 pesoKg: s.pesoKg,
                 repsReales: s.repsReales,
+                notas: s.notas || null,
                 completada: true
             }));
 
@@ -93,22 +93,21 @@ export async function guardarSeries(data: {
 }
 
 /**
- * obtenerSeriesRegistradas — Devuelve las series del alumno para un día dado (hoy).
+ * obtenerSeriesRegistradas — Devuelve las series del alumno para un día dado.
+ * Ya no dependemos de fechas, si una sesión existe para el estímulo `diaId` (sea de ayer o de hace un mes),
+ * seguimos con esa hasta que esté marcada como `completada: true`.
  */
 export async function obtenerSeriesRegistradas(diaId: string) {
     try {
         const alumno = await getAlumnoSesion();
 
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
-        const manana = new Date(hoy);
-        manana.setDate(manana.getDate() + 1);
-
         const sesion = await prisma.sesionRegistrada.findFirst({
             where: {
                 clienteId: alumno.id,
-                diaId,
-                fecha: { gte: hoy, lt: manana }
+                diaId
+            },
+            orderBy: {
+                fecha: 'desc'
             },
             include: {
                 series: true
@@ -122,27 +121,24 @@ export async function obtenerSeriesRegistradas(diaId: string) {
 }
 
 /**
- * finalizarSesion — Marca la sesión del día como completada.
+ * finalizarSesion — Marca la sesión del estímulo como completada.
  */
 export async function finalizarSesion(diaId: string) {
     try {
         const alumno = await getAlumnoSesion();
 
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
-        const manana = new Date(hoy);
-        manana.setDate(manana.getDate() + 1);
-
         const sesion = await prisma.sesionRegistrada.findFirst({
             where: {
                 clienteId: alumno.id,
-                diaId,
-                fecha: { gte: hoy, lt: manana }
+                diaId
+            },
+            orderBy: {
+                fecha: 'desc'
             }
         });
 
         if (!sesion) {
-            // Si no hay sesión, creamos una completada (ej: el alumno entró y finalizó sin cargar nada, aunque el UI lo debería evitar)
+            // Si no hay sesión, creamos una completada (ej: el alumno entró y finalizó sin cargar nada)
             await prisma.sesionRegistrada.create({
                 data: {
                     clienteId: alumno.id,

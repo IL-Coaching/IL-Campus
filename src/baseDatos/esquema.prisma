@@ -280,6 +280,7 @@ model SerieRegistrada {
   repsReales             Int?
   velocidadPercibida     VelocidadPercibida?
   completada             Boolean              @default(false)
+  notas                  String?
   ejercicioPlanificado   EjercicioPlanificado @relation(fields: [ejercicioPlanificadoId], references: [id])
   sesionRegistrada       SesionRegistrada     @relation(fields: [sesionId], references: [id])
 }
