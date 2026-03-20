@@ -1,9 +1,6 @@
 import { z } from "zod";
 
 export const EsquemaDatosPersonales = z.object({
-    nombre: z.string().min(1, "El nombre es requerido"),
-    email: z.string().email("Email inválido"),
-    telefono: z.string().min(1, "El teléfono es requerido"),
     nacimiento: z.string().min(1, "La fecha de nacimiento es requerida"),
     edad: z.string().min(1, "La edad es requerida").refine(val => parseInt(val) > 0, "La edad debe ser un número positivo"),
     genero: z.string().min(1, "El género es requerido"),

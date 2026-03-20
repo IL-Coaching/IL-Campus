@@ -1,5 +1,6 @@
 "use client"
 import { useState } from 'react';
+import { z } from 'zod';
 import {
     User,
     Heart,
@@ -101,18 +102,25 @@ export default function InscripcionPage() {
         const nuevosErrores: Record<string, string> = {};
         
         if (stepIndex === 1) {
-            const datos = {
+            // Validamos campos de la raíz
+            const rootParse = z.object({
+                nombre: z.string().min(1, "El nombre es requerido"),
+                email: z.string().email("Email inválido"),
+                telefono: z.string().min(1, "El teléfono es requerido"),
+            }).safeParse({
                 nombre: formData.nombre,
                 email: formData.email,
-                telefono: formData.telefono,
-                nacimiento: formData.respuestas.datosPersonales.nacimiento,
-                edad: formData.respuestas.datosPersonales.edad,
-                genero: formData.respuestas.datosPersonales.genero,
-                peso: formData.respuestas.datosPersonales.peso,
-                altura: formData.respuestas.datosPersonales.altura,
-                ubicacion: formData.respuestas.datosPersonales.ubicacion,
-            };
-            const resultado = EsquemaDatosPersonales.safeParse(datos);
+                telefono: formData.telefono
+            });
+
+            if (!rootParse.success) {
+                rootParse.error.issues.forEach(issue => {
+                    nuevosErrores[issue.path[0] as string] = issue.message;
+                });
+            }
+
+            // Validamos resto de datos personales
+            const resultado = EsquemaDatosPersonales.safeParse(formData.respuestas.datosPersonales);
             if (!resultado.success) {
                 resultado.error.issues.forEach(issue => {
                     nuevosErrores[issue.path[0] as string] = issue.message;
