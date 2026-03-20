@@ -1,0 +1,182 @@
+
+> il-campus@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 1615ms
+ ✓ Compiled /src/middleware in 348ms (138 modules)
+ ○ Compiling / ...
+ ✓ Compiled / in 2.2s (657 modules)
+ ✓ Compiled in 229ms (296 modules)
+ GET / 200 in 6142ms
+ ✓ Compiled /ingresar in 243ms (639 modules)
+ ○ Compiling /entrenador/login ...
+ ✓ Compiled /entrenador/login in 736ms (864 modules)
+ POST /entrenador/login 200 in 5179ms
+ ○ Compiling /entrenador/dashboard ...
+ ✓ Compiled /entrenador/dashboard in 1699ms (2235 modules)
+ POST /entrenador/dashboard 200 in 2692ms
+ POST /entrenador/dashboard 200 in 2466ms
+ ○ Compiling /entrenador/biblioteca ...
+ ✓ Compiled /entrenador/biblioteca in 806ms (2390 modules)
+ ✓ Compiled /icon.png in 283ms (1492 modules)
+ GET /icon.png?e8781042dee0be08 200 in 335ms
+Error al crear ejercicio: ZodError: [
+  {
+    "origin": "array",
+    "code": "too_small",
+    "minimum": 1,
+    "inclusive": true,
+    "path": [
+      "equipamiento"
+    ],
+    "message": "Al menos un equipamiento requerido"
+  }
+]
+    at crearEjercicio (webpack-internal:///(rsc)/./src/nucleo/acciones/ejercicio.accion.ts:51:106)
+    at async C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:40:286
+    at async rk (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:38:8297)
+    at async ne (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:42:1256)
+    at async doRender (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1427:30)
+    at async cacheEntry.responseCache.get.routeKind (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1588:28)
+    at async DevServer.renderToResponseWithComponentsImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1496:28)
+    at async DevServer.renderPageComponent (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1962:32)
+    at async DevServer.pipeImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\next-server.js:272:17)
+    at async DevServer.handleRequestImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:818:17)
+    at async C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+    at async Span.traceAsyncFn (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\trace\trace.js:154:20)
+    at async DevServer.handleRequest (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+    at async invokeRender (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\lib\router-server.js:179:21)
+    at async handleRequest (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\lib\router-server.js:359:24)
+    at async requestHandlerImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\lib\router-server.js:383:13)
+    at async Server.requestListener (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\lib\start-server.js:141:13)
+ POST /entrenador/biblioteca 200 in 1485ms
+Error al crear ejercicio: ZodError: [
+  {
+    "origin": "array",
+    "code": "too_small",
+    "minimum": 1,
+    "inclusive": true,
+    "path": [
+      "equipamiento"
+    ],
+    "message": "Al menos un equipamiento requerido"
+  }
+]
+    at crearEjercicio (webpack-internal:///(rsc)/./src/nucleo/acciones/ejercicio.accion.ts:51:106)
+    at async C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:40:286
+    at async rk (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:38:8297)
+    at async ne (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:42:1256)
+    at async doRender (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1427:30)
+    at async cacheEntry.responseCache.get.routeKind (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1588:28)
+    at async DevServer.renderToResponseWithComponentsImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1496:28)
+    at async DevServer.renderPageComponent (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1962:32)
+    at async DevServer.pipeImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\next-server.js:272:17)
+    at async DevServer.handleRequestImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:818:17)
+    at async C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+    at async Span.traceAsyncFn (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\trace\trace.js:154:20)
+    at async DevServer.handleRequest (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+    at async invokeRender (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\lib\router-server.js:179:21)
+    at async handleRequest (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\lib\router-server.js:359:24)
+    at async requestHandlerImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\lib\router-server.js:383:13)
+    at async Server.requestListener (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\lib\start-server.js:141:13)
+ POST /entrenador/biblioteca 200 in 1467ms
+Error al crear ejercicio: ZodError: [
+  {
+    "origin": "array",
+    "code": "too_small",
+    "minimum": 1,
+    "inclusive": true,
+    "path": [
+      "equipamiento"
+    ],
+    "message": "Al menos un equipamiento requerido"
+  }
+]
+    at crearEjercicio (webpack-internal:///(rsc)/./src/nucleo/acciones/ejercicio.accion.ts:51:106)
+    at async C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:40:286
+    at async rk (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:38:8297)
+    at async ne (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:42:1256)
+    at async doRender (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1427:30)
+    at async cacheEntry.responseCache.get.routeKind (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1588:28)
+    at async DevServer.renderToResponseWithComponentsImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1496:28)
+    at async DevServer.renderPageComponent (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1962:32)
+    at async DevServer.pipeImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\next-server.js:272:17)
+    at async DevServer.handleRequestImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:818:17)
+    at async C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+    at async Span.traceAsyncFn (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\trace\trace.js:154:20)
+    at async DevServer.handleRequest (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+    at async invokeRender (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\lib\router-server.js:179:21)
+    at async handleRequest (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\lib\router-server.js:359:24)
+    at async requestHandlerImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\lib\router-server.js:383:13)
+    at async Server.requestListener (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\lib\start-server.js:141:13)
+ POST /entrenador/biblioteca 200 in 1440ms
+ ✓ Compiled /_not-found in 482ms (2393 modules)
+ GET /comenzar/performance 404 in 577ms
+ GET / 200 in 2439ms
+ GET /entrenador/dashboard 200 in 14576ms
+ POST /entrenador/dashboard 200 in 2640ms
+ POST /entrenador/dashboard 200 in 2407ms
+ POST /entrenador/dashboard 200 in 2400ms
+ POST /entrenador/dashboard 200 in 2409ms
+ ○ Compiling /entrenador/clientes ...
+ ✓ Compiled /entrenador/clientes in 979ms (2487 modules)
+ ✓ Compiled /icon.png in 140ms (1568 modules)
+ GET /icon.png?e8781042dee0be08 200 in 192ms
+ GET / 200 in 2191ms
+ GET /comenzar 404 in 44ms
+ GET /entrenador/clientes 200 in 4796ms
+ POST /entrenador/clientes?tab=inscripciones 200 in 8599ms
+ ○ Compiling /entrenador/planes ...
+ ✓ Compiled /entrenador/planes in 790ms (2500 modules)
+Error al crear plan: ZodError: [
+  {
+    "origin": "number",
+    "code": "too_big",
+    "maximum": 365,
+    "inclusive": true,
+    "path": [
+      "duracionDias"
+    ],
+    "message": "Too big: expected number to be <=365"
+  }
+]
+    at crearPlan (webpack-internal:///(rsc)/./src/nucleo/acciones/plan.accion.ts:61:101)
+    at async C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:40:286
+    at async rk (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:38:8297)
+    at async ne (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\compiled\next-server\app-page.runtime.dev.js:42:1256)
+    at async doRender (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1427:30)
+    at async cacheEntry.responseCache.get.routeKind (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1588:28)
+    at async DevServer.renderToResponseWithComponentsImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1496:28)
+    at async DevServer.renderPageComponent (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1924:24)
+    at async DevServer.renderToResponseImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:1962:32)
+    at async DevServer.pipeImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\next-server.js:272:17)
+    at async DevServer.handleRequestImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\base-server.js:818:17)
+    at async C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+    at async Span.traceAsyncFn (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\trace\trace.js:154:20)
+    at async DevServer.handleRequest (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+    at async invokeRender (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\lib\router-server.js:179:21)
+    at async handleRequest (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\lib\router-server.js:359:24)
+    at async requestHandlerImpl (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\lib\router-server.js:383:13)
+    at async Server.requestListener (C:\Users\inaki\Desktop\IL-Coaching\App IL-Coaching\IL-Campus\il-campus\node_modules\next\dist\server\lib\start-server.js:141:13)
+ POST /entrenador/planes 200 in 1440ms
+ ✓ Compiled in 514ms (2501 modules)
+ ✓ Compiled in 244ms (2501 modules)
+ ✓ Compiled in 383ms (2501 modules)
+ ✓ Compiled in 422ms (2501 modules)
+ ✓ Compiled in 417ms (2501 modules)
+ ✓ Compiled in 246ms (2501 modules)
+ ✓ Compiled in 237ms (2501 modules)
+ ✓ Compiled in 536ms (2501 modules)
+^C^C

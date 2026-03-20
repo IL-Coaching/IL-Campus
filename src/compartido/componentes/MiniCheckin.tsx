@@ -148,6 +148,7 @@ export default function MiniCheckin({ onSuccess }: MiniCheckinProps) {
                         type="number"
                         placeholder="0.0"
                         step="0.1"
+                        min="1"
                         value={formData.peso}
                         onChange={(e) => setFormData({...formData, peso: e.target.value})}
                         className="w-full bg-marino-3 border border-marino-4 rounded-lg px-3 py-2 text-sm text-blanco focus:border-naranja/50 focus:outline-none"

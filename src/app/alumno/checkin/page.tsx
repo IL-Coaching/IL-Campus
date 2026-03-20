@@ -195,6 +195,7 @@ export default function CheckinPage() {
                                 type="number"
                                 placeholder="0.0"
                                 step="0.1"
+                                min="1"
                                 value={formData.peso}
                                 onChange={(e) => setFormData({ ...formData, peso: e.target.value })}
                                 className="w-full bg-marino-3 border border-marino-4 rounded-xl p-4 text-center text-2xl font-barlow-condensed font-black text-blanco focus:border-naranja/50 focus:outline-none placeholder:text-gris/20"

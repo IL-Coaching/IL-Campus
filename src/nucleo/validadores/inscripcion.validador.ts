@@ -5,10 +5,10 @@ export const EsquemaDatosPersonales = z.object({
     email: z.string().email("Email inválido"),
     telefono: z.string().min(1, "El teléfono es requerido"),
     nacimiento: z.string().min(1, "La fecha de nacimiento es requerida"),
-    edad: z.string().min(1, "La edad es requerida"),
+    edad: z.string().min(1, "La edad es requerida").refine(val => parseInt(val) > 0, "La edad debe ser un número positivo"),
     genero: z.string().min(1, "El género es requerido"),
-    peso: z.string().min(1, "El peso es requerido"),
-    altura: z.string().min(1, "La altura es requerida"),
+    peso: z.string().min(1, "El peso es requerido").refine(val => parseFloat(val) > 0, "El peso debe ser un número positivo"),
+    altura: z.string().min(1, "La altura es requerida").refine(val => parseFloat(val) > 0, "La altura debe ser un número positivo"),
     ubicacion: z.string().min(1, "La ubicación es requerida"),
 });
 
@@ -23,7 +23,7 @@ export const EsquemaEstiloDeVida = z.object({
 export const EsquemaSaludMedica = z.object({
     condiciones: z.array(z.string()).optional(),
     otrasCondiciones: z.string().optional(),
-    aptomedico: z.string().min(1, "Debes indicar si tienes apto médico"),
+    aptoMedico: z.string().min(1, "Debes indicar si tienes apto médico"),
 });
 
 export const EsquemaExperiencia = z.object({

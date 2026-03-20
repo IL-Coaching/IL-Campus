@@ -68,13 +68,19 @@ export async function guardarSeries(data: {
         });
 
         // Crear las nuevas series (ahora puede solo guardar notas sin reps/peso)
+        // Filtramos para asegurar que peso y reps sean positivos si se proveen
         const seriesData = data.series
-            .filter(s => s.pesoKg !== null || s.repsReales !== null || (s.notas && s.notas.trim() !== ""))
+            .filter(s => {
+                const tienePeso = s.pesoKg !== null && s.pesoKg > 0;
+                const tieneReps = s.repsReales !== null && s.repsReales > 0;
+                const tieneNotas = s.notas !== null && s.notas && s.notas.trim() !== "";
+                return tienePeso || tieneReps || tieneNotas;
+            })
             .map(s => ({
                 sesionId: sesion!.id,
                 ejercicioPlanificadoId: data.ejercicioPlanificadoId,
-                pesoKg: s.pesoKg,
-                repsReales: s.repsReales,
+                pesoKg: s.pesoKg !== null && s.pesoKg > 0 ? s.pesoKg : null,
+                repsReales: s.repsReales !== null && s.repsReales > 0 ? s.repsReales : null,
                 notas: s.notas || null,
                 completada: true
             }));

@@ -289,6 +289,7 @@ function RegistroSeries({
                         <div className="relative">
                             <input
                                 type="number"
+                                min="1"
                                 placeholder="kg"
                                 value={s.pesoKg}
                                 onChange={e => handleChange(i, 'pesoKg', e.target.value)}
@@ -299,6 +300,7 @@ function RegistroSeries({
                         <div className="relative">
                             <input
                                 type="number"
+                                min="1"
                                 placeholder="reps"
                                 value={s.repsReales}
                                 onChange={e => handleChange(i, 'repsReales', e.target.value)}
@@ -489,6 +491,7 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                     <div className="flex items-center gap-2 w-full md:w-auto">
                         <input
                             type="number"
+                            min="1"
                             placeholder="kg"
                             value={pesoCorporal}
                             disabled={pesoGuardado}

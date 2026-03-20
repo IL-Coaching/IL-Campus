@@ -138,7 +138,7 @@ export default function InscripcionPage() {
             const datos = {
                 condiciones: formData.respuestas.saludMedica.condiciones,
                 otrasCondiciones: formData.respuestas.saludMedica.otrasCondiciones,
-                aptomedico: formData.respuestas.saludMedica.aptoMedico,
+                aptoMedico: formData.respuestas.saludMedica.aptoMedico,
             };
             const resultado = EsquemaSaludMedica.safeParse(datos);
             if (!resultado.success) {
@@ -293,7 +293,10 @@ export default function InscripcionPage() {
     const renderStep2 = () => (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="space-y-4">
-                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block tracking-[0.2em]">Nivel de Actividad Diaria</label>
+                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block tracking-[0.2em] flex flex-col">
+                    <span>Nivel de Actividad Diaria *</span>
+                    <span className="text-[0.55rem] text-gris lowercase font-medium italic">Referencia para gasto calórico base</span>
+                </label>
                 <div className="grid grid-cols-1 gap-3">
                     {[
                         { val: 'Sedentario', desc: 'Sentado gran parte del día (Ej: Oficina)' },
@@ -322,7 +325,10 @@ export default function InscripcionPage() {
             </div>
 
             <div className="space-y-4">
-                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block tracking-[0.2em]">Horas de Sueño Promedio</label>
+                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block tracking-[0.2em] flex flex-col">
+                    <span>Horas de Sueño Promedio *</span>
+                    <span className="text-[0.55rem] text-gris lowercase font-medium italic">Clave para la recuperación muscular</span>
+                </label>
                 <div className="flex flex-wrap gap-2">
                     {['Menos de 6hs', '6 a 7 hs', '7 a 8 hs', 'Más de 8 hs'].map((opt) => (
                         <button
@@ -345,7 +351,10 @@ export default function InscripcionPage() {
             </div>
 
             <div className="space-y-4">
-                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block tracking-[0.2em]">¿Realizas otra actividad física aparte?</label>
+                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block tracking-[0.2em] flex flex-col">
+                    <span>¿Realizas otra actividad física aparte? (Opcional)</span>
+                    <span className="text-[0.55rem] text-gris lowercase font-medium italic">Ayuda a evitar fatiga excesiva</span>
+                </label>
                 <input
                     type="text"
                     value={formData.respuestas.estiloDeVida.otraActividadFisica || ''}
@@ -360,7 +369,10 @@ export default function InscripcionPage() {
     const renderStep3 = () => (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="space-y-4">
-                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block">¿Tomas algún medicamento o tienes alguna condición?</label>
+                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block flex flex-col">
+                    <span>Condiciones Médicas y Medicación (Opcional)</span>
+                    <span className="text-[0.55rem] text-gris lowercase font-medium italic">Vital para tu seguridad y ajuste biomecánico</span>
+                </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {['Asma', 'Diabetes', 'Hipertensión', 'Lesiones previas', 'Cirugías recientes', 'Escoliosis', 'Cifosis', 'Ninguna'].map((opt) => (
                         <button
@@ -391,7 +403,10 @@ export default function InscripcionPage() {
             </div>
 
             <div className="space-y-4">
-                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block">¿Tienes apto médico vigente?</label>
+                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block flex flex-col">
+                    <span>¿Tienes apto médico vigente? *</span>
+                    <span className="text-[0.55rem] text-gris lowercase font-medium italic">Protocolo preventivo obligatorio</span>
+                </label>
                 <div className="flex gap-4">
                     {['Sí', 'No', 'En trámite'].map((opt) => (
                         <button
@@ -422,7 +437,10 @@ export default function InscripcionPage() {
             </h2>
 
             <div className="space-y-4">
-                <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">¿Entrenás actualmente? *</label>
+                <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1 flex flex-col">
+                    <span>¿Entrenás actualmente? *</span>
+                    <span className="text-[0.55rem] text-gris lowercase font-medium italic">Define tu punto de partida metabólico</span>
+                </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {["Sí, frecuentemente", "Sí, a veces", "No, hace tiempo", "Nunca"].map((opc) => (
                         <button
@@ -442,7 +460,10 @@ export default function InscripcionPage() {
             </div>
 
             <div className="space-y-4">
-                <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Objetivos Principales *</label>
+                <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1 flex flex-col">
+                    <span>Objetivos Principales *</span>
+                    <span className="text-[0.55rem] text-gris lowercase font-medium italic">Alinea la selección de ejercicios y volumen total</span>
+                </label>
                 <div className="grid grid-cols-2 gap-3">
                     {['Hipertrofia', 'Fuerza', 'Pérdida de Grasa', 'Salud/Bienestar', 'Rendimiento'].map((opt) => (
                         <button
@@ -462,7 +483,10 @@ export default function InscripcionPage() {
             </div>
 
             <div className="space-y-2">
-                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-1 block">¿Qué te motiva a empezar hoy?</label>
+                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-1 block flex flex-col">
+                    <span>¿Qué te motiva a empezar hoy? (Opcional)</span>
+                    <span className="text-[0.55rem] text-gris lowercase font-medium italic">Tu &quot;por qué&quot; nos ayuda a conectar con tu proceso</span>
+                </label>
                 <textarea
                     value={formData.respuestas.objetivos.motivacion}
                     onChange={(e) => updateNested('respuestas.objetivos.motivacion', e.target.value)}
@@ -481,10 +505,13 @@ export default function InscripcionPage() {
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-1 block">Sesiones Semanales</label>
+                    <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-1 block flex flex-col">
+                        <span>Sesiones Semanales *</span>
+                        <span className="text-[0.55rem] text-gris lowercase font-medium italic">Diseño realista según tu tiempo</span>
+                    </label>
                     <select
                         value={formData.respuestas.disponibilidad.sesionesSemanales}
-                        onChange={(e) => updateNested('respuestas.disponibilidad.sesionesSemanales', e.target.value)}
+                        onChange={(e) => { updateNested('respuestas.disponibilidad.sesionesSemanales', e.target.value); clearError('sesionesSemanales'); }}
                         className={`w-full bg-marino-3 border rounded-xl px-4 py-3 text-blanco text-xs focus:border-naranja/50 outline-none transition-all cursor-pointer ${mostrarErrores && errores.sesionesSemanales ? 'border-red-500' : 'border-marino-4'}`}
                     >
                         <option value="">Seleccionar</option>
@@ -500,10 +527,13 @@ export default function InscripcionPage() {
                     )}
                 </div>
                 <div className="space-y-2">
-                    <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-1 block">Tiempo por Sesión</label>
+                    <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-1 block flex flex-col">
+                        <span>Tiempo por Sesión *</span>
+                        <span className="text-[0.55rem] text-gris lowercase font-medium italic">Optimización por ventana de tiempo</span>
+                    </label>
                     <select
                         value={formData.respuestas.disponibilidad.tiempoSesion}
-                        onChange={(e) => updateNested('respuestas.disponibilidad.tiempoSesion', e.target.value)}
+                        onChange={(e) => { updateNested('respuestas.disponibilidad.tiempoSesion', e.target.value); clearError('tiempoSesion'); }}
                         className={`w-full bg-marino-3 border rounded-xl px-4 py-3 text-blanco text-xs focus:border-naranja/50 outline-none transition-all cursor-pointer ${mostrarErrores && errores.tiempoSesion ? 'border-red-500' : 'border-marino-4'}`}
                     >
                         <option value="">Seleccionar</option>
@@ -520,7 +550,10 @@ export default function InscripcionPage() {
             </div>
 
             <div className="space-y-4">
-                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block">¿Dónde entrenarás? (Puedes elegir más de uno)</label>
+                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-2 block flex flex-col">
+                    <span>¿Dónde entrenarás? * (Elegir uno o más)</span>
+                    <span className="text-[0.55rem] text-gris lowercase font-medium italic">Adaptación según equipamiento accesible</span>
+                </label>
                 <div className="grid grid-cols-2 gap-3">
                     {['Gimnasio', 'Casa', 'Parque', 'Sin Equipo'].map((opt) => (
                         <button
@@ -540,7 +573,10 @@ export default function InscripcionPage() {
             </div>
 
             <div className="space-y-4">
-                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-1 block">Personalizacion y Notas</label>
+                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-widest mb-1 block flex flex-col">
+                    <span>Personalización y Notas (Opcional)</span>
+                    <span className="text-[0.55rem] text-gris lowercase font-medium italic">Cualquier detalle extra que debamos saber</span>
+                </label>
                 <textarea
                     value={formData.respuestas.personalizacion.notas}
                     onChange={(e) => updateNested('respuestas.personalizacion.notas', e.target.value)}
@@ -627,11 +663,17 @@ export default function InscripcionPage() {
                                 <p className="text-gris-claro leading-relaxed font-medium">
                                     Este formulario es el primer paso para construir un proceso estructurado y adaptado a vos. Cada respuesta nos permite diseñar una estrategia precisa, alineada con tus objetivos y capacidades.
                                 </p>
-                                <div className="bg-marino-3 border-l-4 border-l-naranja p-5 rounded-r-xl">
+                                <div className="bg-marino-3 border-l-4 border-l-naranja p-5 rounded-r-xl space-y-3">
                                     <p className="text-xs font-bold text-naranja uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
-                                        <AlertTriangle size={14} /> Importante
+                                        <ShieldCheck size={14} /> Privacidad y Uso de Datos
                                     </p>
-                                    <p className="text-sm text-blanco/80 italic">Tomate unos minutos para completarlo con atención. La calidad de este proceso define la calidad de tus resultados.</p>
+                                    <p className="text-[0.7rem] text-blanco/80 italic leading-relaxed">
+                                        Tus datos son tratados de forma estrictamente confidencial. Los utilizamos exclusivamente para diseñar tu plan de entrenamiento y salud, basándonos en criterios científicos para garantizar tu seguridad y progreso.
+                                    </p>
+                                    <div className="flex items-center gap-2 pt-2 border-t border-marino-4">
+                                        <AlertTriangle size={14} className="text-naranja" />
+                                        <p className="text-[0.65rem] text-gris font-medium">Campos con <span className="text-naranja">*</span> son obligatorios para poder avanzar.</p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -666,7 +708,10 @@ export default function InscripcionPage() {
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Nombre y Apellido *</label>
+                                    <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1 flex items-center justify-between">
+                                        <span>Nombre y Apellido *</span>
+                                        <span className="text-[0.55rem] text-gris lowercase font-medium italic">Uso: Identificación y contacto</span>
+                                    </label>
                                     <div className="relative">
                                         <input
                                             type="text"
@@ -688,12 +733,15 @@ export default function InscripcionPage() {
                                     )}
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Fecha de Nacimiento *</label>
+                                    <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1 flex items-center justify-between">
+                                        <span>Fecha de Nacimiento *</span>
+                                        <span className="text-[0.55rem] text-gris lowercase font-medium italic">Meta: Perfil biológico</span>
+                                    </label>
                                     <div className="relative">
                                         <input
                                             type="date"
                                             value={formData.respuestas.datosPersonales.nacimiento}
-                                            onChange={(e) => updateNested('respuestas.datosPersonales.nacimiento', e.target.value)}
+                                            onChange={(e) => { updateNested('respuestas.datosPersonales.nacimiento', e.target.value); clearError('nacimiento'); }}
                                             className={`w-full bg-marino border rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all ${mostrarErrores && errores.nacimiento ? 'border-red-500' : 'border-marino-4'}`}
                                         />
                                         {mostrarErrores && errores.nacimiento && (
@@ -705,12 +753,16 @@ export default function InscripcionPage() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Edad *</label>
+                                        <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1 flex flex-col">
+                                            <span>Edad *</span>
+                                            <span className="text-[0.5rem] text-gris font-medium italic lowercase">Ajuste de carga</span>
+                                        </label>
                                         <div className="relative">
                                             <input
                                                 type="number"
+                                                min="1"
                                                 value={formData.respuestas.datosPersonales.edad}
-                                                onChange={(e) => updateNested('respuestas.datosPersonales.edad', e.target.value)}
+                                                onChange={(e) => { updateNested('respuestas.datosPersonales.edad', e.target.value); clearError('edad'); }}
                                                 className={`w-full bg-marino border rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all ${mostrarErrores && errores.edad ? 'border-red-500' : 'border-marino-4'}`}
                                             />
                                         </div>
@@ -721,7 +773,10 @@ export default function InscripcionPage() {
                                         )}
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Género *</label>
+                                        <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1 flex flex-col">
+                                            <span>Género *</span>
+                                            <span className="text-[0.5rem] text-gris font-medium italic lowercase">Factores hormonales</span>
+                                        </label>
                                         <select
                                             value={formData.respuestas.datosPersonales.genero}
                                             onChange={(e) => updateNested('respuestas.datosPersonales.genero', e.target.value)}
@@ -739,44 +794,53 @@ export default function InscripcionPage() {
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-6">
-<div className="space-y-2">
-                                         <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Peso (kg) *</label>
-                                         <input
-                                             type="number"
-                                             value={formData.respuestas.datosPersonales.peso}
-                                             onChange={(e) => updateNested('respuestas.datosPersonales.peso', e.target.value)}
-                                             className={`w-full bg-marino border rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all ${mostrarErrores && errores.peso ? 'border-red-500' : 'border-marino-4'}`}
-                                         />
-                                         {mostrarErrores && errores.peso && (
-                                             <p className="text-red-500 text-xs font-bold flex items-center gap-1">
-                                                 <XCircle size={12} /> {errores.peso}
-                                             </p>
-                                         )}
-                                     </div>
-                                     <div className="space-y-2">
-                                         <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1">Altura (cm) *</label>
-                                         <input
-                                             type="number"
-                                             value={formData.respuestas.datosPersonales.altura}
-                                             onChange={(e) => updateNested('respuestas.datosPersonales.altura', e.target.value)}
-                                             className={`w-full bg-marino border rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all ${mostrarErrores && errores.altura ? 'border-red-500' : 'border-marino-4'}`}
-                                         />
-                                         {mostrarErrores && errores.altura && (
-                                             <p className="text-red-500 text-xs font-bold flex items-center gap-1">
-                                                 <XCircle size={12} /> {errores.altura}
-                                             </p>
-                                         )}
-                                     </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1 flex flex-col">
+                                            <span>Peso (kg) *</span>
+                                            <span className="text-[0.5rem] text-gris font-medium italic lowercase">Calc. nutricional</span>
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={formData.respuestas.datosPersonales.peso}
+                                            onChange={(e) => { updateNested('respuestas.datosPersonales.peso', e.target.value); clearError('peso'); }}
+                                            className={`w-full bg-marino border rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all ${mostrarErrores && errores.peso ? 'border-red-500' : 'border-marino-4'}`}
+                                        />
+                                        {mostrarErrores && errores.peso && (
+                                            <p className="text-red-500 text-xs font-bold flex items-center gap-1">
+                                                <XCircle size={12} /> {errores.peso}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1 flex flex-col">
+                                            <span>Altura (cm) *</span>
+                                            <span className="text-[0.5rem] text-gris font-medium italic lowercase">Composición corp.</span>
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={formData.respuestas.datosPersonales.altura}
+                                            onChange={(e) => { updateNested('respuestas.datosPersonales.altura', e.target.value); clearError('altura'); }}
+                                            className={`w-full bg-marino border rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all ${mostrarErrores && errores.altura ? 'border-red-500' : 'border-marino-4'}`}
+                                        />
+                                        {mostrarErrores && errores.altura && (
+                                            <p className="text-red-500 text-xs font-bold flex items-center gap-1">
+                                                <XCircle size={12} /> {errores.altura}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="space-y-2 md:col-span-2">
-                                    <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1 flex items-center gap-2">
-                                        <MapPin size={12} /> Ubicación *
+                                    <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1 flex items-center justify-between">
+                                        <span className="flex items-center gap-2"><MapPin size={12} /> Ubicación *</span>
+                                        <span className="text-[0.55rem] text-gris lowercase font-medium italic">Coord. de zona horaria</span>
                                     </label>
                                     <div className="relative">
                                         <input
                                             type="text"
                                             value={formData.respuestas.datosPersonales.ubicacion}
-                                            onChange={(e) => updateNested('respuestas.datosPersonales.ubicacion', e.target.value)}
+                                            onChange={(e) => { updateNested('respuestas.datosPersonales.ubicacion', e.target.value); clearError('ubicacion'); }}
                                             placeholder="Ciudad, País"
                                             className={`w-full bg-marino border rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all placeholder:text-gris/20 ${mostrarErrores && errores.ubicacion ? 'border-red-500' : 'border-marino-4'}`}
                                         />
@@ -788,14 +852,15 @@ export default function InscripcionPage() {
                                     )}
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1 flex items-center gap-2">
-                                        <Phone size={12} /> WhatsApp *
+                                    <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1 flex items-center justify-between">
+                                        <span className="flex items-center gap-2"><Phone size={12} /> WhatsApp *</span>
+                                        <span className="text-[0.55rem] text-gris lowercase font-medium italic">Seguimiento semanal</span>
                                     </label>
                                     <div className="relative">
                                         <input
                                             type="tel"
                                             value={formData.telefono}
-                                            onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                                            onChange={(e) => { setFormData({ ...formData, telefono: e.target.value }); clearError('telefono'); }}
                                             className={`w-full bg-marino border rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all placeholder:text-gris/20 ${mostrarErrores && errores.telefono ? 'border-red-500' : 'border-marino-4'}`}
                                             placeholder="+54 9..."
                                         />
@@ -807,14 +872,15 @@ export default function InscripcionPage() {
                                     )}
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1 flex items-center gap-2">
-                                        <Mail size={12} /> Email *
+                                    <label className="text-[0.65rem] text-naranja font-black uppercase tracking-widest ml-1 flex items-center justify-between">
+                                        <span className="flex items-center gap-2"><Mail size={12} /> Email *</span>
+                                        <span className="text-[0.55rem] text-gris lowercase font-medium italic">Envío de rutina</span>
                                     </label>
                                     <div className="relative">
                                         <input
                                             type="email"
                                             value={formData.email}
-                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            onChange={(e) => { setFormData({ ...formData, email: e.target.value }); clearError('email'); }}
                                             className={`w-full bg-marino border rounded-xl px-4 py-4 text-blanco focus:border-naranja outline-none transition-all placeholder:text-gris/20 ${mostrarErrores && errores.email ? 'border-red-500' : 'border-marino-4'}`}
                                             placeholder="tu@email.com"
                                         />

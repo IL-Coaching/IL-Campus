@@ -108,6 +108,10 @@ export async function enviarCheckin(data: CheckinInput) {
     try {
         const cliente = await getAlumnoSesion();
 
+        if (data.pesoKg !== undefined && data.pesoKg <= 0) {
+            return { error: "El peso debe ser un número positivo." };
+        }
+
         const checkin = await prisma.checkin.create({
             data: {
                 clienteId: cliente.id,
@@ -138,6 +142,10 @@ export async function enviarCheckin(data: CheckinInput) {
 export async function registrarPesoSesion(pesoKg: number) {
     try {
         const cliente = await getAlumnoSesion();
+        
+        if (pesoKg <= 0) {
+            return { error: "El peso debe ser un número positivo." };
+        }
         await prisma.checkin.create({
             data: {
                 clienteId: cliente.id,
