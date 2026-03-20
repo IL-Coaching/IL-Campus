@@ -974,7 +974,8 @@ export default function InscripcionPage() {
                         <button
                             onClick={nextStep}
                             disabled={enviando || estadoEnviado === 'exito'}
-                            className="flex-1 md:flex-none md:min-w-[200px] bg-naranja hover:bg-naranja-h disabled:opacity-50 text-marino font-black py-3 md:py-4 px-6 md:px-8 rounded-xl flex items-center justify-center gap-3 uppercase tracking-widest font-barlow-condensed text-base md:text-lg transition-all shadow-xl shadow-naranja/20 active:scale-95"
+                            className={`flex-1 md:flex-none md:min-w-[200px] bg-naranja hover:bg-naranja-h disabled:opacity-50 text-marino font-black py-3 md:py-4 px-6 md:px-8 rounded-xl flex items-center justify-center gap-3 uppercase tracking-widest font-barlow-condensed text-base md:text-lg transition-all shadow-xl shadow-naranja/20 active:scale-95 ${estadoEnviado === 'exito' ? 'opacity-0 pointer-events-none' : ''
+                                }`}
                         >
                             {enviando ? (
                                 <span className="flex items-center gap-2 animate-pulse">Procesando...</span>
