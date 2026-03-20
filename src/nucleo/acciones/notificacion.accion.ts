@@ -14,6 +14,7 @@ export async function crearNotificacionAction(data: {
     gravedad: GravedadNotificacion;
     titulo: string;
     cuerpo: string;
+    enlace?: string;
 }) {
     try {
         await prisma.notificacion.create({
@@ -22,7 +23,8 @@ export async function crearNotificacionAction(data: {
                 tipo: data.tipo,
                 gravedad: data.gravedad,
                 titulo: data.titulo,
-                cuerpo: data.cuerpo
+                cuerpo: data.cuerpo,
+                enlace: data.enlace
             }
         });
         revalidatePath("/entrenador");
@@ -163,7 +165,8 @@ export async function dispararAlertasFinancieras() {
                         tipo: TipoNotificacion.FINANZA,
                         gravedad: GravedadNotificacion.ALERTA,
                         titulo: `Vencimiento de Membresía: ${plan.cliente.nombre}`,
-                        cuerpo: `El plan asignado a ${plan.cliente.nombre} vence el ${plan.fechaVencimiento.toLocaleDateString()}. Recordá gestionar el próximo cobro.`
+                        cuerpo: `El plan asignado a ${plan.cliente.nombre} vence el ${plan.fechaVencimiento.toLocaleDateString()}. Recordá gestionar el próximo cobro.`,
+                        enlace: `/entrenador/finanzas?clienteId=${plan.cliente.id}`
                     }
                 });
             }
@@ -203,7 +206,8 @@ export async function dispararAlertasFormularios() {
                         tipo: TipoNotificacion.NUEVO_FORMULARIO,
                         gravedad: GravedadNotificacion.INFO,
                         titulo: `Formulario Pendiente: ${p.nombre}`,
-                        cuerpo: `El prospecto ${p.nombre} envió su formulario y aún no tiene un plan asignado.`
+                        cuerpo: `El prospecto ${p.nombre} envió su formulario y aún no tiene un plan asignado.`,
+                        enlace: `/entrenador/clientes?vista=formulario&clienteId=${p.id}`
                     }
                 });
             }

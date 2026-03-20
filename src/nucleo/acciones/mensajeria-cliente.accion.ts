@@ -3,6 +3,8 @@
 import { prisma } from "@/baseDatos/conexion";
 import { getAlumnoSesion } from "@/nucleo/seguridad/sesion";
 import { revalidatePath } from "next/cache";
+import { crearNotificacionAction } from "./notificacion.accion";
+import { TipoNotificacion, GravedadNotificacion } from "@prisma/client";
 
 export async function obtenerConversacionConEntrenador() {
     try {
@@ -77,7 +79,18 @@ export async function enviarMensajeAEntrenador(contenido: string) {
                 contenido: contenido.trim(),
                 tipo: 'texto',
                 leido: false
-            }
+            },
+            include: { cliente: { select: { nombre: true, entrenadorId: true } } }
+        });
+
+        // Notificar al entrenador
+        await crearNotificacionAction({
+            entrenadorId: mensaje.cliente.entrenadorId,
+            tipo: TipoNotificacion.MENSAJE_DIRECTO,
+            gravedad: GravedadNotificacion.INFO,
+            titulo: `Mensaje de ${mensaje.cliente.nombre}`,
+            cuerpo: contenido.length > 50 ? `${contenido.substring(0, 50)}...` : contenido,
+            enlace: `/entrenador/mensajeria?clienteId=${mensaje.clienteId}`
         });
 
         revalidatePath('/alumno/mensajeria');

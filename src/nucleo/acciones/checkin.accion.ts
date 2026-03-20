@@ -4,6 +4,8 @@ import { prisma } from "@/baseDatos/conexion";
 import { getEntrenadorSesion } from "@/nucleo/seguridad/sesion";
 import { getAlumnoSesion } from "@/nucleo/seguridad/sesion";
 import { revalidatePath } from "next/cache";
+import { crearNotificacionAction } from "./notificacion.accion";
+import { TipoNotificacion, GravedadNotificacion } from "@prisma/client";
 
 /**
  * Obtiene los check-ins pendientes de revisión (no vistos).
@@ -123,7 +125,18 @@ export async function enviarCheckin(data: CheckinInput) {
                 ajustesEsperados: data.problemaFisico ? data.notaProblema : null,
                 pesoKg: data.pesoKg,
                 visto: false
-            }
+            },
+            include: { cliente: { select: { nombre: true, entrenadorId: true } } }
+        });
+
+        // Notificar al entrenador
+        await crearNotificacionAction({
+            entrenadorId: checkin.cliente.entrenadorId,
+            tipo: TipoNotificacion.CHECKIN,
+            gravedad: GravedadNotificacion.ALERTA,
+            titulo: `Nuevo Check-in: ${checkin.cliente.nombre}`,
+            cuerpo: `Se ha registrado el seguimiento semanal de ${checkin.cliente.nombre}.`,
+            enlace: `/entrenador/clientes?vista=checkins&clienteId=${checkin.clienteId}`
         });
 
         revalidatePath('/alumno/dashboard');

@@ -3,6 +3,7 @@
 import { useState, useEffect, useTransition } from 'react';
 import { Bell, Check, Eye, EyeOff, Trash2, MessageCircle, DollarSign, Clock, FileText, Activity } from 'lucide-react';
 import { obtenerNotificaciones, toggleLeidaNotificacion, purgarNotificaciones } from '@/nucleo/acciones/notificacion.accion';
+import { useRouter } from 'next/navigation';
 
 interface Notificacion {
     id: string;
@@ -12,6 +13,7 @@ interface Notificacion {
     cuerpo: string;
     leida: boolean;
     creadaEn: Date;
+    enlace?: string;
 }
 
 const ICONO_TIPO: Record<string, { icono: typeof Bell; color: string; bgColor: string }> = {
@@ -29,6 +31,7 @@ const BORDER_GRAVEDAD: Record<string, string> = {
 };
 
 export default function PanelNotificaciones() {
+    const router = useRouter();
     const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
     const [tab, setTab] = useState<'no_leidas' | 'todas'>('no_leidas');
     const [seleccionadas, setSeleccionadas] = useState<Set<string>>(new Set());
@@ -135,7 +138,13 @@ export default function PanelNotificaciones() {
                         return (
                             <div
                                 key={notif.id}
-                                className={`p-3 rounded-xl border transition-all ${notif.leida
+                                onClick={() => {
+                                    if (notif.enlace) {
+                                        if (!notif.leida) handleToggleLeida(notif.id);
+                                        router.push(notif.enlace);
+                                    }
+                                }}
+                                className={`p-3 rounded-xl border transition-all ${notif.enlace ? 'cursor-pointer hover:scale-[1.01] active:scale-95' : ''} ${notif.leida
                                     ? 'bg-marino-3/30 border-marino-4 opacity-60'
                                     : `bg-marino-3/50 ${BORDER_GRAVEDAD[notif.gravedad] || 'border-naranja/20'}`
                                     } ${isSelected ? 'ring-1 ring-naranja' : ''}`}
@@ -143,7 +152,7 @@ export default function PanelNotificaciones() {
                                 <div className="flex items-start gap-3">
                                     {/* Checkbox */}
                                     <button
-                                        onClick={() => toggleSeleccion(notif.id)}
+                                        onClick={(e) => { e.stopPropagation(); toggleSeleccion(notif.id) }}
                                         className={`mt-1 w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-colors ${isSelected
                                             ? 'bg-naranja border-naranja text-marino'
                                             : 'border-marino-4 hover:border-gris'
@@ -165,7 +174,7 @@ export default function PanelNotificaciones() {
 
                                     {/* Acciones */}
                                     <button
-                                        onClick={() => handleToggleLeida(notif.id)}
+                                        onClick={(e) => { e.stopPropagation(); handleToggleLeida(notif.id) }}
                                         disabled={isPending}
                                         className="flex-shrink-0 px-2 py-1.5 rounded-lg bg-naranja/10 hover:bg-naranja hover:text-marino text-naranja text-[0.55rem] uppercase tracking-widest font-black transition-all disabled:opacity-50"
                                         title={notif.leida ? 'Marcar como NO leído' : 'Marcar como leído'}

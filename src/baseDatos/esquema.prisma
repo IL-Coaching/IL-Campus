@@ -461,6 +461,7 @@ model Notificacion {
   gravedad     GravedadNotificacion @default(INFO)
   titulo       String
   cuerpo       String
+  enlace       String?          
   leida        Boolean              @default(false)
   purgada      Boolean          @default(false)
   creadaEn     DateTime         @default(now())
