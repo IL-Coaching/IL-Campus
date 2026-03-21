@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -11,7 +10,63 @@ const obtenerOrdenDia = (dia: string) => {
 };
 
 interface Props {
-    macrociclos: any[]; // Todo el árbol anidado
+    macrociclos: MacrocicloBitacora[];
+}
+
+interface MacrocicloBitacora {
+    id: string;
+    fechaInicio: Date | string;
+    duracionSemanas: number;
+    bloquesMensuales: BloqueBitacora[];
+}
+
+interface BloqueBitacora {
+    id: string;
+    objetivo: string;
+    semanas: SemanaBitacora[];
+}
+
+interface SemanaBitacora {
+    id: string;
+    numeroSemana: number;
+    objetivoSemana?: string;
+    esFaseDeload?: boolean;
+    diasSesion: DiaSesionBitacora[];
+}
+
+interface DiaSesionBitacora {
+    id: string;
+    nombre: string;
+    diaSemana?: string;
+    focoMuscular?: string;
+    sesionesReales: SesionRealBitacora[];
+    ejercicios: EjercicioSesionBitacora[];
+}
+
+interface EjercicioSesionBitacora {
+    id: string;
+    nombreLibre?: string;
+    ejercicio?: { nombre: string; musculoPrincipal: string };
+    series?: number;
+    repsMin?: number;
+    repsMax?: number;
+    RIR?: number | null;
+    ejercicioPlanificadoId?: string;
+}
+
+interface SesionRealBitacora {
+    id: string;
+    fecha?: Date | string;
+    completada: boolean;
+    series: SerieBitacora[];
+}
+
+interface SerieBitacora {
+    id: string;
+    completada: boolean;
+    ejercicioPlanificadoId?: string;
+    pesoKg?: number | null;
+    repsReales?: number | null;
 }
 
 export default function TabBitacoraClient({ macrociclos }: Props) {
@@ -46,7 +101,7 @@ export default function TabBitacoraClient({ macrociclos }: Props) {
                             </p>
 
                             <div className="mt-8 space-y-8">
-                                {macro.bloquesMensuales.map((bloque: any) => (
+                                {macro.bloquesMensuales.map((bloque: BloqueBitacora) => (
                                     <div key={bloque.id} className="space-y-4">
                                         <h3 className="text-xs font-black text-naranja/80 uppercase tracking-[0.2em] px-2 flex items-center gap-2">
                                             <div className="w-1.5 h-1.5 bg-naranja/80 rounded-full"></div>
@@ -54,7 +109,7 @@ export default function TabBitacoraClient({ macrociclos }: Props) {
                                         </h3>
 
                                         <div className="space-y-3">
-                                            {bloque.semanas.map((semana: any) => (
+                                            {bloque.semanas.map((semana: SemanaBitacora) => (
                                                 <div key={semana.id} className="bg-marino-3/30 border border-marino-4/50 rounded-2xl overflow-hidden transition-all">
                                                     {/* Acordeón Semana */}
                                                     <button
@@ -83,7 +138,7 @@ export default function TabBitacoraClient({ macrociclos }: Props) {
                                                             {semana.diasSesion.length === 0 ? (
                                                                 <p className="text-xs text-gris italic px-2">Sin sesiones planificadas en esta semana.</p>
                                                             ) : (
-                                                                [...semana.diasSesion].sort((a: any, b: any) => obtenerOrdenDia(a.diaSemana) - obtenerOrdenDia(b.diaSemana)).map((dia: any) => {
+                                                                [...semana.diasSesion].sort((a, b) => obtenerOrdenDia(a.diaSemana || '') - obtenerOrdenDia(b.diaSemana || '')).map((dia) => {
                                                                     const sesionReal = dia.sesionesReales?.[0]; // Tomamos la última/única
                                                                     let estado = 'PENDIENTE';
                                                                     let uiStyles = 'bg-marino-2 border-marino-4 opacity-100'; // Default
@@ -153,9 +208,8 @@ export default function TabBitacoraClient({ macrociclos }: Props) {
                                                                                                 </tr>
                                                                                             </thead>
                                                                                             <tbody className="text-xs text-gris-claro divide-y divide-marino-4/30">
-                                                                                                {dia.ejercicios.map((ejPlan: any) => {
-                                                                                                    // Filtrar series reales para este ejercicio particular
-                                                                                                    const seriesEsteEjercicio = sesionReal?.series?.filter((s:any) => s.ejercicioPlanificadoId === ejPlan.id) || [];
+                                                                                        {dia.ejercicios.map((ejPlan: EjercicioSesionBitacora) => {
+                                                                                            const seriesEsteEjercicio = sesionReal?.series?.filter((s) => s.ejercicioPlanificadoId === ejPlan.id) || [];
                                                                                                     
                                                                                                     return (
                                                                                                         <tr key={ejPlan.id} className="hover:bg-marino-3/20 transition-colors">
@@ -167,7 +221,7 @@ export default function TabBitacoraClient({ macrociclos }: Props) {
                                                                                                             <td className="py-3 px-3 align-top">
                                                                                                                 {seriesEsteEjercicio.length > 0 ? (
                                                                                                                     <div className="flex flex-wrap gap-2">
-                                                                                                                        {seriesEsteEjercicio.map((serie:any, idx:number) => (
+                                                                                                                        {seriesEsteEjercicio.map((serie: SerieBitacora, idx:number) => (
                                                                                                                             <div key={serie.id} className="bg-marino-3 border border-marino-4 px-2 py-1 rounded text-[0.65rem] font-mono shadow-inner shadow-black/20 text-blanco flex items-center gap-1.5">
                                                                                                                                 <span className="text-gris">S{idx+1}-</span> 
                                                                                                                                 {serie.pesoKg !== null ? <span className="text-naranja font-bold">{serie.pesoKg}kg</span> : <span className="text-gris italic">--kg</span>} 

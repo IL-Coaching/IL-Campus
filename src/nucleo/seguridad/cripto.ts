@@ -31,14 +31,21 @@ export const CriptoServicio = {
 
     /**
      * Genera un código de activación seguro con formato IL-XXXX-XXX.
-     * Usa CSPRNG para garantizar imprevisibilidad del código temporal de acceso.
+     * Usa CSPRNG + rejection sampling para garantizar distribución uniforme.
      */
     generarCodigoActivacion(): string {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        const bytes = new Uint32Array(CODIGO_ACTIVACION_LONGITUD);
-        crypto.getRandomValues(bytes);
-        const parte1 = Array.from(bytes.slice(0, 4)).map(v => chars[v % chars.length]).join('');
-        const parte2 = Array.from(bytes.slice(4, 7)).map(v => chars[v % chars.length]).join('');
-        return `IL-${parte1}-${parte2}`;
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; // 36 caracteres
+        const charsLen = chars.length; // 36
+        const byteMax = 256;
+        const rejectLimit = Math.floor(byteMax / charsLen) * charsLen; // 252
+        
+        let result = '';
+        while (result.length < CODIGO_ACTIVACION_LONGITUD) {
+            const byte = crypto.getRandomValues(new Uint8Array(1))[0];
+            if (byte < rejectLimit) {
+                result += chars[byte % charsLen];
+            }
+        }
+        return `IL-${result.slice(0, 4)}-${result.slice(4, 7)}`;
     }
 };

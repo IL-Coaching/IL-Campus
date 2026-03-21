@@ -53,7 +53,7 @@ export default function TransicionEpica({ duracion = 2500, destino = '/alumno/da
                 <div className="relative w-32 h-32 md:w-40 md:h-40">
                     <Image
                         src="/icon.png"
-                        alt="IL-Coaching"
+                        alt="Logo de IL-Coaching - Plataforma de entrenamiento personalizado"
                         fill
                         className="object-contain drop-shadow-2xl"
                         priority
