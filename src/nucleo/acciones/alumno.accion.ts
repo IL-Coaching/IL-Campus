@@ -94,7 +94,7 @@ export async function guardarConfiguracionCiclo(formData: FormData) {
         const fechaInicio = formData.get("fechaInicio") as string;
         const duracion = parseInt(formData.get("duracion") as string);
 
-        if (!fechaInicio || isNaN(duracion)) {
+        if (!fechaInicio || Number.isNaN(duracion) || duracion <= 0) {
             return { error: "Datos del ciclo incompletos." };
         }
 

@@ -24,7 +24,7 @@ export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSem
     const router = useRouter();
 
     const handleGuardar = async () => {
-        if (isNaN(duracion) || duracion < 1) {
+        if (Number.isNaN(duracion) || duracion < 1) {
             alert("La duración debe ser un número válido (mínimo 1 semana).");
             return;
         }
@@ -199,7 +199,7 @@ export default function VistaMesociclo({ bloque, mes, limiteSemanas, onSelectSem
                                         type="number"
                                         min={1}
                                         max={104}
-                                        value={isNaN(duracion) ? '' : duracion}
+                                        value={Number.isNaN(duracion) ? '' : duracion}
                                         onChange={(e) => {
                                             const val = parseInt(e.target.value);
                                             setDuracion(val);

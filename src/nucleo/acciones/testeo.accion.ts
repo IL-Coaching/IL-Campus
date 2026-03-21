@@ -3,7 +3,7 @@
 import { prisma } from "@/baseDatos/conexion";
 import { getEntrenadorSesion } from "../seguridad/sesion";
 import { revalidatePath } from "next/cache";
-import { calcularUnRM, calcularFuerzaRelativa, calcularTablaCompleta } from "../testeo/calculos";
+import { calcularUnRM, calcularFuerzaRelativa, calcularTablaCompleta, mapearPorcentajesATabla } from "../testeo/calculos";
 import { ModalidadTesteo } from "@prisma/client";
 
 /**
@@ -74,28 +74,7 @@ export async function registrarResultadoTesteo(data: {
         });
 
         const tabla = calcularTablaCompleta(unRM);
-
-        // Mapeo manual para asegurar compatibilidad con el esquema Prisma
-        const porcentajesData = {
-            p100: tabla.find(f => f.reps === 1)?.pesoKg || 0,
-            p94_3: tabla.find(f => f.reps === 2)?.pesoKg || 0,
-            p90_6: tabla.find(f => f.reps === 3)?.pesoKg || 0,
-            p88_1: tabla.find(f => f.reps === 4)?.pesoKg || 0,
-            p85_6: tabla.find(f => f.reps === 5)?.pesoKg || 0,
-            p83_1: tabla.find(f => f.reps === 6)?.pesoKg || 0,
-            p80_7: tabla.find(f => f.reps === 7)?.pesoKg || 0,
-            p78_6: tabla.find(f => f.reps === 8)?.pesoKg || 0,
-            p76_5: tabla.find(f => f.reps === 9)?.pesoKg || 0,
-            p74_4: tabla.find(f => f.reps === 10)?.pesoKg || 0,
-            p72_3: tabla.find(f => f.reps === 11)?.pesoKg || 0,
-            p70_3: tabla.find(f => f.reps === 12)?.pesoKg || 0,
-            p68_8: tabla.find(f => f.reps === 13)?.pesoKg || 0,
-            p67_5: tabla.find(f => f.reps === 14)?.pesoKg || 0,
-            p66_2: tabla.find(f => f.reps === 15)?.pesoKg || 0,
-            p65_0: tabla.find(f => f.reps === 16)?.pesoKg || 0,
-            p63_8: tabla.find(f => f.reps === 17)?.pesoKg || 0,
-            p62_7: tabla.find(f => f.reps === 18)?.pesoKg || 0,
-        };
+        const porcentajesData = mapearPorcentajesATabla(tabla);
 
         await prisma.porcentajesCliente.upsert({
             where: {
