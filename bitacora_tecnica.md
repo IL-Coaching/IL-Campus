@@ -65,6 +65,32 @@ Este archivo registra las decisiones arquitectónicas, cambios realizados y tare
 
 ---
 
+#### [2026-03-21] — Intervención de OPTIMIZACIÓN (Arquitecto v2.0)
+
+**Agente:** Arquitecto  
+**Tipo:** Hooks reutilizables y constantes centralizadas
+
+- **Nuevo hook creado:**
+  - [x] `useSesionLocal()` — Unifica lógica de LocalStorage para sesiones de entrenamiento
+
+- **Constantes centralizadas:**
+  - [x] Creado `src/nucleo/constantes/valores.ts` con 25+ constantes
+  - [x] `DIAS_CHECKIN`, `DELAY_ANTITIMING_MS`, `RATE_LIMIT_VENTANA_MS`
+  - [x] `MAX_INTENTOS_LOGIN`, `BCRYPT_SALT_ROUNDS`, `TOKEN_LONGITUD`
+  - [x] `LIMITE_CHECKINS_POR_PAGINA`, `XP_POR_NIVEL`, etc.
+
+- **Magic numbers reemplazados:**
+  - [x] `cripto.ts` — BCRYPT_SALT_ROUNDS, TOKEN_LONGITUD
+  - [x] `auth.accion.ts` — DELAY_ANTITIMING, RATE_LIMIT_VENTANA, MAX_INTENTOS
+  - [x] `progreso-alumno.accion.ts` — DIAS_CHECKIN
+
+- **Paginación agregada:**
+  - [x] `checkin.accion.ts` — Límite de 50 registros por consulta
+
+**Gate de calidad:** ✅ Optimización completa
+
+---
+
 #### [2026-03-21] — Intervención de LIMPIEZA (Arquitecto v2.0)
 
 ---
