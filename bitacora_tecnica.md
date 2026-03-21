@@ -106,6 +106,26 @@ Este archivo registra las decisiones arquitectónicas, cambios realizados y tare
 
 ---
 
+#### [2026-03-21] — Intervención de SEGURIDAD Y TIPADO (Arquitecto v2.0)
+
+**Agente:** Arquitecto  
+**Tipo:** Seguridad criptográfica y type safety
+
+- **Seguridad:**
+  - [x] `cripto.ts` - Rejection sampling en `generarCodigoActivacion()`
+  - [x] Eliminado sesgo del operador % en generación de códigos
+
+- **Type Safety:**
+  - [x] `TabBitacoraClient.tsx` - Eliminados 7x `eslint-disable @typescript-eslint/no-explicit-any`
+  - [x] Creadas interfaces: `MacrocicloBitacora`, `BloqueBitacora`, `SemanaBitacora`, `DiaSesionBitacora`, `EjercicioSesionBitacora`, `SesionRealBitacora`, `SerieBitacora`
+
+- **Accesibilidad:**
+  - [x] `TransicionEpica.tsx` - Alt descriptivo en logo
+
+**Gate de calidad:** ✅ Seguridad y tipado mejorados
+
+---
+
 #### [2026-03-21] — Intervención de LIMPIEZA (Arquitecto v2.0)
 
 ---
