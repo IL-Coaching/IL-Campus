@@ -60,30 +60,29 @@ export const MetricasServicio = {
 
         const conteoSaltos: Record<string, { nombre: string, saltos: number, total: number }> = {};
 
-        macrociclo.bloquesMensuales.forEach(bloque => {
-            bloque.semanas.forEach(semana => {
-                semana.diasSesion.forEach(dia => {
-                    sesionesPlanificadas++;
-                    if (dia.sesionesReales.some(s => s.completada)) {
-                        sesionesCompletadas++;
+        const dias = macrociclo.bloquesMensuales
+            .flatMap(b => b.semanas)
+            .flatMap(s => s.diasSesion);
+
+        dias.forEach(dia => {
+            sesionesPlanificadas++;
+            if (dia.sesionesReales.some(s => s.completada)) {
+                sesionesCompletadas++;
+            }
+
+            dia.ejercicios.forEach(ej => {
+                seriesTotalesPlanificadas += ej.series;
+                const seriesOK = ej.seriesRegistradas.filter(s => s.completada).length;
+                seriesCompletadasReales += seriesOK;
+
+                if (ej.ejercicioId) {
+                    const key = ej.ejercicioId;
+                    if (!conteoSaltos[key]) {
+                        conteoSaltos[key] = { nombre: ej.ejercicio?.nombre || ej.nombreLibre || "Desconocido", saltos: 0, total: 0 };
                     }
-
-                    dia.ejercicios.forEach(ej => {
-                        seriesTotalesPlanificadas += ej.series;
-                        const seriesOK = ej.seriesRegistradas.filter(s => s.completada).length;
-                        seriesCompletadasReales += seriesOK;
-
-                        // Detección de patrones
-                        if (ej.ejercicioId) {
-                            const key = ej.ejercicioId;
-                            if (!conteoSaltos[key]) {
-                                conteoSaltos[key] = { nombre: ej.ejercicio?.nombre || ej.nombreLibre || "Desconocido", saltos: 0, total: 0 };
-                            }
-                            conteoSaltos[key].total += ej.series;
-                            conteoSaltos[key].saltos += (ej.series - seriesOK);
-                        }
-                    });
-                });
+                    conteoSaltos[key].total += ej.series;
+                    conteoSaltos[key].saltos += (ej.series - seriesOK);
+                }
             });
         });
 

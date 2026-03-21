@@ -76,6 +76,7 @@ export default function TesteoFuerzaAlumno() {
                     <select
                         name="ejercicioId"
                         required
+                        aria-label="Selector de ejercicio para testeo de fuerza"
                         className="w-full bg-marino border border-marino-4 rounded-xl px-4 py-3 text-blanco focus:outline-none focus:border-naranja transition-all font-medium text-sm appearance-none"
                     >
                         <option value="">Selecciona un ejercicio...</option>

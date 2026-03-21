@@ -242,12 +242,12 @@ export default function ChatPanel() {
                                                 {/* Media */}
                                                 {msg.mediaUrl && msg.tipo === 'imagen' && (
                                                     <div className="relative mb-2 rounded-xl overflow-hidden w-64 h-64">
-                                                        <Image src={msg.mediaUrl} alt="Imagen" fill className="object-cover" />
+                                                        <Image src={msg.mediaUrl} alt="Imagen compartida en el chat" fill className="object-cover" />
                                                     </div>
                                                 )}
                                                 {msg.mediaUrl && msg.tipo === 'video' && (
                                                     <div className="mb-2 rounded-xl overflow-hidden">
-                                                        <video src={msg.mediaUrl} controls className="max-w-full max-h-64 rounded-xl" />
+                                                        <video src={msg.mediaUrl} controls className="max-w-full max-h-64 rounded-xl" aria-label="Video de referencia enviado en el chat" />
                                                     </div>
                                                 )}
 
