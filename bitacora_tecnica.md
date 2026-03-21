@@ -141,6 +141,27 @@ Este archivo registra las decisiones arquitectónicas, cambios realizados y tare
 
 ---
 
+#### [2026-03-21] — Intervención FINAL (Arquitecto v2.0)
+
+**Agente:** Arquitecto  
+**Tipo:** Métricas, accesibilidad y refactorización
+
+- **Métricas:**
+  - [x] `metricas.servicio.ts` - `flatMap()` para eliminar 2 niveles de anidamiento
+  - [x] Código reducido de 25 → 15 líneas
+
+- **Accesibilidad:**
+  - [x] `ChatPanel.tsx` - aria-label en video, alt mejorado en Image
+  - [x] `TesteoFuerzaAlumno.tsx` - aria-label en select de ejercicio
+
+- **Integración Hook:**
+  - [x] `useSesionTracking` integrado parcialmente en `RutinaClient.tsx`
+  - [x] Función `confirmarFinalizacion` usa hook
+
+**Gate de calidad:** ✅ Todas las tareas completadas
+
+---
+
 #### [2026-03-21] — Intervención de LIMPIEZA (Arquitecto v2.0)
 
 ---
