@@ -4,6 +4,7 @@ import { useState, useEffect, useTransition, useRef } from "react";
 import { Dumbbell, Play, Clock, Zap, ShieldAlert, ArrowLeft, Square, RotateCcw, CheckCircle2, Activity, AlertCircle } from "lucide-react";
 import { guardarSeries, obtenerSeriesRegistradas, finalizarSesion } from "@/nucleo/acciones/sesion-alumno.accion";
 import { registrarPesoSesion } from "@/nucleo/acciones/checkin.accion";
+import { useSesionTracking } from "@/compartido/hooks/useSesionLocal";
 
 // Types
 type Ejercicio = {
@@ -228,8 +229,7 @@ function RegistroSeries({
         }));
 
         // Si es la primera vez que hace algo, iniciar la sesión en LocalStorage
-        const started = localStorage.getItem(`sesion_inicio_${diaId}`);
-        if (!started) {
+        if (!localStorage.getItem(`sesion_inicio_${diaId}`)) {
             localStorage.setItem(`sesion_inicio_${diaId}`, Date.now().toString());
             window.dispatchEvent(new Event('storage'));
         }
@@ -335,6 +335,8 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
     const [showFinishModal, setShowFinishModal] = useState(false);
     const [isFinishing, startFinishing] = useTransition();
     const [sesionIniciada, setSesionIniciada] = useState(false);
+    
+    const sesionTracking = useSesionTracking(diaVisualizado?.id || null);
 
     const semanaActual = todasLasSemanas.find(s => s.id === semanaSeleccionadaId) || semanaActiva;
 
@@ -405,7 +407,7 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
         startFinishing(async () => {
             const res = await finalizarSesion(diaVisualizado.id);
             if (res.exito) {
-                localStorage.removeItem(`sesion_inicio_${diaVisualizado.id}`);
+                sesionTracking.limpiarSesion();
                 setShowFinishModal(false);
                 setDiaVisualizado(null); // Vuelve al hub al finalizar
                 window.scrollTo({ top: 0, behavior: "smooth" });

@@ -1,68 +1,43 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
-interface SesionLocalState {
-    inicio: number | null;
-    final: number | null;
-    duracionMinutos: number | null;
-}
+const getSesionKey = (diaId: string) => `sesion_inicio_${diaId}`;
 
-const DEFAULT_STATE: SesionLocalState = {
-    inicio: null,
-    final: null,
-    duracionMinutos: null,
-};
-
-export function useSesionLocal(diaId: string) {
-    const [state, setState] = useState<SesionLocalState>(DEFAULT_STATE);
+export function useSesionTracking(diaId: string | null) {
+    const [inicio, setInicio] = useState<number | null>(null);
 
     useEffect(() => {
-        const stored = localStorage.getItem(`sesion_${diaId}`);
-        if (stored) {
-            try {
-                setState(JSON.parse(stored));
-            } catch {
-                setState(DEFAULT_STATE);
-            }
+        if (!diaId) {
+            setInicio(null);
+            return;
         }
+        const stored = localStorage.getItem(getSesionKey(diaId));
+        setInicio(stored ? parseInt(stored) : null);
     }, [diaId]);
 
-    const iniciarSesion = () => {
-        const newState: SesionLocalState = {
-            inicio: Date.now(),
-            final: null,
-            duracionMinutos: null,
-        };
-        setState(newState);
-        localStorage.setItem(`sesion_${diaId}`, JSON.stringify(newState));
-        localStorage.setItem(`sesion_inicio_${diaId}`, String(newState.inicio));
-    };
+    const iniciarSesion = useCallback(() => {
+        if (!diaId) return;
+        const startTime = Date.now();
+        localStorage.setItem(getSesionKey(diaId), startTime.toString());
+        setInicio(startTime);
+        window.dispatchEvent(new Event('storage'));
+    }, [diaId]);
 
-    const finalizarSesion = () => {
-        const final = Date.now();
-        const duracionMinutos = state.inicio 
-            ? Math.round((final - state.inicio) / 60000) 
-            : null;
-        
-        const newState: SesionLocalState = {
-            inicio: state.inicio,
-            final,
-            duracionMinutos,
-        };
-        setState(newState);
-        localStorage.setItem(`sesion_${diaId}`, JSON.stringify(newState));
-        localStorage.removeItem(`sesion_inicio_${diaId}`);
-    };
+    const tieneSesionActiva = useCallback(() => {
+        if (!diaId) return false;
+        return localStorage.getItem(getSesionKey(diaId)) !== null;
+    }, [diaId]);
 
-    const limpiarSesion = () => {
-        setState(DEFAULT_STATE);
-        localStorage.removeItem(`sesion_${diaId}`);
-        localStorage.removeItem(`sesion_inicio_${diaId}`);
-    };
+    const limpiarSesion = useCallback(() => {
+        if (!diaId) return;
+        localStorage.removeItem(getSesionKey(diaId));
+        setInicio(null);
+        window.dispatchEvent(new Event('storage'));
+    }, [diaId]);
 
     return {
-        ...state,
+        inicio,
         iniciarSesion,
-        finalizarSesion,
+        tieneSesionActiva,
         limpiarSesion,
     };
 }
