@@ -11,9 +11,10 @@ import { prisma } from "@/baseDatos/conexion";
 import { CriptoServicio } from "@/nucleo/seguridad/cripto";
 import { establecerSesion, cerrarSesion } from "@/nucleo/seguridad/sesion";
 import { EsquemaLoginEntrenador, EsquemaLoginAlumno } from "../validadores/auth.validador";
+import { DELAY_ANTITIMING_MS, RATE_LIMIT_VENTANA_MS, MAX_INTENTOS_LOGIN, TOKEN_LONGITUD, SESION_EXPIRACION_CORTA_MIN } from "@/nucleo/constantes/valores";
 
 // Función auxiliar para mitigar ataques de tiempo
-const delayFallo = () => new Promise(resolve => setTimeout(resolve, 1000));
+const delayFallo = () => new Promise(resolve => setTimeout(resolve, DELAY_ANTITIMING_MS));
 
 /**
  * Verifica el límite de peticiones interactuando con la tabla persistente RegistroAutenticacion.
@@ -33,8 +34,7 @@ async function verificarRateLimitPersistente(ip: string): Promise<boolean> {
             return false;
         }
 
-        const windowMs = 15 * 60 * 1000; // 15 minutos
-        if (now.getTime() - registro.ultimoIntento.getTime() > windowMs) {
+        if (now.getTime() - registro.ultimoIntento.getTime() > RATE_LIMIT_VENTANA_MS) {
             // Pasó la ventana de bloqueo, reset
             await prisma.registroAutenticacion.update({
                 where: { ip },
@@ -45,8 +45,8 @@ async function verificarRateLimitPersistente(ip: string): Promise<boolean> {
 
         const nuevosIntentos = registro.intentos + 1;
         let bloqueadoHasta = null;
-        if (nuevosIntentos >= 10) { // Bloquear por 15min luego de 10 fallos
-            bloqueadoHasta = new Date(now.getTime() + windowMs);
+        if (nuevosIntentos >= MAX_INTENTOS_LOGIN) {
+            bloqueadoHasta = new Date(now.getTime() + RATE_LIMIT_VENTANA_MS);
         }
 
         await prisma.registroAutenticacion.update({
@@ -54,7 +54,7 @@ async function verificarRateLimitPersistente(ip: string): Promise<boolean> {
             data: { intentos: nuevosIntentos, ultimoIntento: now, bloqueadoHasta }
         });
 
-        return nuevosIntentos <= 10;
+        return nuevosIntentos <= MAX_INTENTOS_LOGIN;
     } catch (e) {
         console.error("Fallo rate limiter DB, usando bypass de emergencia", e);
         return true;
@@ -232,13 +232,13 @@ export async function loginAlumno(formData: FormData) {
 
         // Si es la primera vez que inicia sesión con el código de activación
         if (cliente.forcePasswordChange) {
-            const tempToken = CriptoServicio.generateRandomToken(40);
+            const tempToken = CriptoServicio.generateRandomToken(TOKEN_LONGITUD);
             const accessor = (prisma.cliente as unknown) as PrismaUpdateRaw;
             await accessor.update({
                 where: { id: cliente.id },
                 data: {
                     passwordResetToken: tempToken,
-                    passwordResetExpires: new Date(Date.now() + 15 * 60000) // Expira en 15 mins
+                    passwordResetExpires: new Date(Date.now() + SESION_EXPIRACION_CORTA_MIN * 60 * 1000)
                 }
             });
 

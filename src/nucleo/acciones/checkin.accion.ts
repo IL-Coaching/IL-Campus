@@ -6,6 +6,7 @@ import { getAlumnoSesion } from "@/nucleo/seguridad/sesion";
 import { revalidatePath } from "next/cache";
 import { crearNotificacionAction } from "./notificacion.accion";
 import { TipoNotificacion, GravedadNotificacion } from "@prisma/client";
+import { LIMITE_CHECKINS_POR_PAGINA } from "@/nucleo/constantes/valores";
 
 /**
  * Obtiene los check-ins pendientes de revisión (no vistos).
@@ -23,7 +24,8 @@ export async function obtenerCheckinsNoVistos() {
             include: {
                 cliente: { select: { id: true, nombre: true, email: true } }
             },
-            orderBy: { fecha: 'desc' }
+            orderBy: { fecha: 'desc' },
+            take: LIMITE_CHECKINS_POR_PAGINA
         });
 
         return { exito: true, checkins };
@@ -50,7 +52,8 @@ export async function obtenerHistorialCheckins(clienteId: string) {
 
         const checkins = await prisma.checkin.findMany({
             where: { clienteId },
-            orderBy: { fecha: 'desc' }
+            orderBy: { fecha: 'desc' },
+            take: LIMITE_CHECKINS_POR_PAGINA
         });
 
         return { exito: true, checkins, cliente };

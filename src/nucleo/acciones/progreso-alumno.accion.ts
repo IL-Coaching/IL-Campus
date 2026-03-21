@@ -4,19 +4,19 @@ import { getAlumnoSesion } from "@/nucleo/seguridad/sesion";
 import { prisma } from "@/baseDatos/conexion";
 import { revalidatePath } from "next/cache";
 import { calcularUnRM, calcularFuerzaRelativa, calcularTablaCompleta, mapearPorcentajesATabla } from "../testeo/calculos";
+import { DIAS_CHECKIN } from "@/nucleo/constantes/valores";
 
 export async function obtenerDatosProgreso() {
     try {
         const cliente = await getAlumnoSesion();
 
-        // Obtener últimos check-ins (últimos 30 días)
-        const hace30Dias = new Date();
-        hace30Dias.setDate(hace30Dias.getDate() - 30);
+        const haceXDias = new Date();
+        haceXDias.setDate(haceXDias.getDate() - DIAS_CHECKIN);
 
         const checkins = await prisma.checkin.findMany({
             where: {
                 clienteId: cliente.id,
-                fecha: { gte: hace30Dias }
+                fecha: { gte: haceXDias }
             },
             orderBy: { fecha: 'desc' }
         });
