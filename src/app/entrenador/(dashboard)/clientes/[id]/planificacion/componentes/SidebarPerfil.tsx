@@ -1,5 +1,6 @@
 "use client"
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
     User,
     Target,
@@ -29,6 +30,7 @@ interface SidebarPerfilProps {
 }
 
 export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
+    const router = useRouter();
     const [colapsado, setColapsado] = useState(false);
     const [tabActiva, setTabActiva] = useState(0);
 
@@ -402,7 +404,7 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                             <button
                                 onClick={async () => {
                                     const res = await alternarEstasisCliente(cliente.id, !cliente.enEstasis);
-                                    if (res.exito) window.location.reload();
+                                    if (res.exito) router.refresh();
                                 }}
                                 className={`w-full flex items-center justify-center gap-2 py-3 border rounded-xl text-xs font-black uppercase tracking-widest transition-all ${cliente.enEstasis ? 'bg-blue-500 text-marino border-blue-400' : 'bg-marino-4 border-marino-4 text-blanco hover:border-blue-500/50'}`}
                             >
@@ -422,7 +424,7 @@ export default function SidebarPerfil({ cliente }: SidebarPerfilProps) {
                                 onClick={async () => {
                                     if (confirm(`¿Estás seguro de ${cliente.esVIP ? 'quitar' : 'otorgar'} el estado VIP a este cliente?`)) {
                                         const res = await toggleVIPCliente(cliente.id, !cliente.esVIP);
-                                        if (res.exito) window.location.reload();
+                                        if (res.exito) router.refresh();
                                     }
                                 }}
                                 className={`w-full flex items-center justify-center gap-2 py-3 border rounded-xl text-xs font-black uppercase tracking-widest transition-all relative z-10 ${cliente.esVIP ? 'bg-[#EAB308]/20 text-[#EAB308] border-[#EAB308]/40 hover:bg-[#EAB308]/30' : 'bg-marino-4 border-marino-4 text-blanco hover:border-[#EAB308]/50 hover:text-[#EAB308]'}`}

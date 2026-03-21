@@ -1,9 +1,11 @@
 "use client"
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Database } from "lucide-react";
 import { cargarBibliotecaOficial } from "@/nucleo/acciones/biblioteca.accion";
 
 export default function BotonImportador() {
+    const router = useRouter();
     const [loading, setLoading] = useState(false);
 
     const handleImportar = async () => {
@@ -13,7 +15,7 @@ export default function BotonImportador() {
             const res = await cargarBibliotecaOficial();
             if (res.exito) {
                 alert(`¡Éxito! Se cargaron ${res.creados} ejercicios.`);
-                window.location.reload();
+                router.refresh();
             } else {
                 alert(res.error);
             }

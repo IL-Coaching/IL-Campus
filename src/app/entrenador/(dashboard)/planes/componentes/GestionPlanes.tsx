@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Edit2, Trash2, Eye, EyeOff, X, Save, AlertTriangle } from "lucide-react";
 import { crearPlan, actualizarPlan, eliminarPlan } from "@/nucleo/acciones/plan.accion";
 
@@ -18,6 +19,7 @@ interface PlanItem {
 }
 
 export default function GestionPlanes({ planesIniciales }: { planesIniciales: PlanItem[] }) {
+    const router = useRouter();
     const [planes, setPlanes] = useState<PlanItem[]>(planesIniciales);
     const [isPending, startTransition] = useTransition();
 
@@ -112,7 +114,7 @@ export default function GestionPlanes({ planesIniciales }: { planesIniciales: Pl
             }
 
             // Temporary, ideally we'd re-fetch naturally via server actions but since it's client state we fake a reload.
-            window.location.reload();
+            router.refresh();
         });
     }
 

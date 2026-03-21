@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { TrendingUp, Settings, Plus, ChevronRight, Target, Zap, Trash2 } from "lucide-react";
 import { MacrocicloCompleto, BloqueConSemanas } from "@/nucleo/tipos/planificacion.tipos";
 import { eliminarMesociclo } from "@/nucleo/acciones/planificacion.accion";
@@ -27,7 +28,7 @@ interface BloqueMapped {
 }
 
 export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMeso, onSelectWeek, onConfigurar, onNuevoMesociclo }: VistaMacrocicloProps) {
-
+    const router = useRouter();
     let semanaGlobalActual = 1;
 
     // Ordenar bloques por la semana más baja que contienen
@@ -86,7 +87,7 @@ export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMes
         if (confirm("¿Seguro que deseas eliminar esta fase? Se borrarán todas las semanas y sesiones asociadas.")) {
             try {
                 const res = await eliminarMesociclo(id);
-                if (res.exito) window.location.reload();
+                if (res.exito) router.refresh();
                 else alert(res.error || "No se pudo eliminar.");
             } catch (err) {
                 console.error(err);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Info, Receipt, CreditCard, Plus, Clock, CheckCircle2, AlertCircle, Calendar } from "lucide-react";
 import ModalRegistrarPago from "./ModalRegistrarPago";
 
@@ -28,6 +29,7 @@ interface Props {
 }
 
 export default function TabFinanzasClient({ clienteId, clienteNombre, resumen }: Props) {
+    const router = useRouter();
     const [modalOpen, setModalOpen] = useState(false);
 
     const totalFacturado = resumen?.cobros.reduce((acc: number, c: CobroConPlan) => acc + c.montoArs, 0) || 0;
@@ -221,7 +223,7 @@ export default function TabFinanzasClient({ clienteId, clienteNombre, resumen }:
                     planesAsignados={resumen?.planActivo ? [resumen.planActivo] : []}
                     onClose={() => {
                         setModalOpen(false);
-                        window.location.reload(); // Recarga simple para refrescar datos
+                        router.refresh();
                     }}
                 />
             )}

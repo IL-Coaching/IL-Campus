@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { X, Loader2, Video, Save } from "lucide-react";
 import { actualizarEjercicio } from "@/nucleo/acciones/ejercicio.accion";
 import {
@@ -24,6 +25,7 @@ interface ModalEditarEjercicioProps {
 }
 
 export default function ModalEditarEjercicio({ ejercicio, onClose }: ModalEditarEjercicioProps) {
+    const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +44,7 @@ export default function ModalEditarEjercicio({ ejercicio, onClose }: ModalEditar
             setError(res.error);
         } else {
             onClose();
-            window.location.reload();
+            router.refresh();
         }
     };
 

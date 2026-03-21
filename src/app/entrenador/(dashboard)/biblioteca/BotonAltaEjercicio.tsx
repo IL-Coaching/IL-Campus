@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, X, Loader2, Video } from "lucide-react";
 import { crearEjercicio } from "@/nucleo/acciones/ejercicio.accion";
 import {
@@ -9,6 +10,7 @@ import {
 } from "@prisma/client";
 
 export default function BotonAltaEjercicio() {
+    const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -36,7 +38,7 @@ export default function BotonAltaEjercicio() {
             setError(res.error);
         } else {
             setIsOpen(false);
-            window.location.reload();
+            router.refresh();
         }
     };
 
