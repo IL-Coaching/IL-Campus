@@ -40,6 +40,35 @@ Este archivo registra las decisiones arquitectónicas, cambios realizados y tare
 
 ---
 
+#### [2026-03-21] — Intervención de REFACTOR (Arquitecto v2.0)
+
+**Agente:** Arquitecto  
+**Tipo:** Refactorización y mejora de código
+
+- **Código duplicado eliminado:**
+  - [x] Nueva función `mapearPorcentajesATabla()` en `calculos.ts`
+  - [x] Eliminado mapeo duplicado en `testeo.accion.ts` (-20 líneas)
+  - [x] Eliminado mapeo duplicado en `progreso-alumno.accion.ts` (-20 líneas)
+
+- **Validaciones mejoradas:**
+  - [x] Reemplazado `isNaN()` por `Number.isNaN()` en 3 archivos
+  - [x] Agregada validación de valores positivos (`pesoKg > 0`, `reps > 0`)
+
+- **UX mejorada:**
+  - [x] Reemplazados 8 `window.location.reload()` por `router.refresh()`
+  - [x] Archivos: VistaMacrociclo, TabFinanzasClient, SidebarPerfil, GestionPlanes, BotonAltaEjercicio, ModalEditarEjercicio, BotonImportador
+
+- **Accesibilidad:**
+  - [x] Añadidos `aria-label` a 3 inputs de rango en `MiniCheckin.tsx`
+
+**Gate de calidad:** ✅ Refactorización completa
+
+---
+
+#### [2026-03-21] — Intervención de LIMPIEZA (Arquitecto v2.0)
+
+---
+
 #### [2026-02-26] — Intervención del ARQUITECTO (ArchSecure AI v4.0)
 
 **Agente:** Arquitecto  
