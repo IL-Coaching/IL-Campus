@@ -177,21 +177,19 @@ export const PlanificacionServicio = {
             });
 
             let contadorSemana = 1;
+            const semanasUpdates = [];
             for (const b of bloquesOrdenados) {
-                // Importante: Volvemos a obtener las semanas del bloque para asegurar que tenemos las recién creadas/actualizadas
-                const semanasBloque = await tx.semana.findMany({
-                    where: { bloqueMensualId: b.id },
-                    orderBy: { numeroSemana: 'asc' }
-                });
-
-                for (const s of semanasBloque) {
-                    await tx.semana.update({
-                        where: { id: s.id },
-                        data: { numeroSemana: contadorSemana }
-                    });
+                for (const s of b.semanas) {
+                    semanasUpdates.push(
+                        tx.semana.update({
+                            where: { id: s.id },
+                            data: { numeroSemana: contadorSemana }
+                        })
+                    );
                     contadorSemana++;
                 }
             }
+            await tx.$transaction(semanasUpdates);
 
             return bloqueActualizado;
         });
