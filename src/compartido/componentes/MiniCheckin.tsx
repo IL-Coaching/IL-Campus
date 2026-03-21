@@ -105,6 +105,7 @@ export default function MiniCheckin({ onSuccess }: MiniCheckinProps) {
                         value={formData.energia}
                         onChange={(e) => setFormData({...formData, energia: parseInt(e.target.value)})}
                         className="w-full h-2 bg-marino-3 rounded-full appearance-none cursor-pointer accent-naranja"
+                        aria-label="Nivel de energía de 1 a 10"
                     />
                 </div>
 
@@ -121,6 +122,7 @@ export default function MiniCheckin({ onSuccess }: MiniCheckinProps) {
                         value={formData.sueno}
                         onChange={(e) => setFormData({...formData, sueno: parseInt(e.target.value)})}
                         className="w-full h-2 bg-marino-3 rounded-full appearance-none cursor-pointer accent-blue-500"
+                        aria-label="Nivel de sueño de 1 a 10"
                     />
                 </div>
 
@@ -138,6 +140,7 @@ export default function MiniCheckin({ onSuccess }: MiniCheckinProps) {
                         value={formData.adherencia}
                         onChange={(e) => setFormData({...formData, adherencia: parseInt(e.target.value)})}
                         className="w-full h-2 bg-marino-3 rounded-full appearance-none cursor-pointer accent-green-500"
+                        aria-label="Porcentaje de adherencia al entrenamiento"
                     />
                 </div>
 
