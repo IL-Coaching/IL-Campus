@@ -91,6 +91,21 @@ Este archivo registra las decisiones arquitectónicas, cambios realizados y tare
 
 ---
 
+#### [2026-03-21] — Intervención de PERFORMANCE (Arquitecto v2.0)
+
+**Agente:** Arquitecto  
+**Tipo:** Optimización N+1 queries
+
+- **N+1 query corregido:**
+  - [x] `planificacion.servicio.ts` - Función `actualizarBloque()`
+  - Eliminados `findMany` redundantes dentro del loop
+  - Usados datos ya cargados con `include`
+  - Updates ejecutados en `$transaction()` paralelo
+
+**Gate de calidad:** ✅ Performance optimizada
+
+---
+
 #### [2026-03-21] — Intervención de LIMPIEZA (Arquitecto v2.0)
 
 ---
