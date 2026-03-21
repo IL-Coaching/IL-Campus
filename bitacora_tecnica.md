@@ -126,6 +126,21 @@ Este archivo registra las decisiones arquitectónicas, cambios realizados y tare
 
 ---
 
+#### [2026-03-21] — Intervención de HOOK REUTILIZABLE (Arquitecto v2.0)
+
+**Agente:** Arquitecto  
+**Tipo:** Hook de tracking de sesión
+
+- **Nuevo hook:**
+  - [x] `useSesionTracking()` en `src/compartido/hooks/useSesionLocal.ts`
+  - [x] Funciones: `iniciarSesion()`, `tieneSesionActiva()`, `limpiarSesion()`
+  - [x] Sincronización con eventos `storage` para cross-component
+  - [x] Integrado parcialmente en `RutinaClient.tsx`
+
+**Gate de calidad:** ✅ Hook creado y listo para usar
+
+---
+
 #### [2026-03-21] — Intervención de LIMPIEZA (Arquitecto v2.0)
 
 ---
