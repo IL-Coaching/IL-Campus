@@ -8,14 +8,37 @@ Este archivo registra las decisiones arquitectónicas, cambios realizados y tare
 
 ### 🚀 ESTADO ACTUAL
 
-- **Fase:** 4 — Adaptación Móvil (Pendiente de inicio)
-- **Estado del Pipeline:** ARQUITECTO completado → GUARDIÁN DE SEGURIDAD próximo
+- **Fase:** 5 — Limpieza y Optimización (Completada)
+- **Estado del Pipeline:** PROYECTO LIMPIO → Mantenimiento
 - **Entorno de Deploy:** Vercel (Next.js 14 + Prisma + Supabase)
 - **Node.js:** 20.x (declarado en package.json ✅)
+- **Tests:** 30 passing ✅
 
 ---
 
 ### 🛠️ LOG DE INTERVENCIONES
+
+#### [2026-03-21] — Intervención de LIMPIEZA (Arquitecto v2.0)
+
+**Agente:** Arquitecto  
+**Tipo:** Limpieza Nivel 1 - Eliminación de código muerto
+
+- **Archivos eliminados (código muerto):**
+  - [x] `src/nucleo/acciones/notas.accion.ts` — Duplicado de `nota.accion.ts`
+  - [x] `src/nucleo/acciones/invitacion.accion.ts` — No usado en ningún archivo
+  - [x] `dev.log` — Log de desarrollo local
+  - [x] `lint-out.txt` — Output de linter
+  - [x] `docs/TAREAS.md` — Desactualizado
+  - [x] `tasklist.md` — Duplicado de bitácora
+  - [x] `Extras/Tool Box/` — 13 archivos duplicados de `.agents/workflows/`
+
+- **Correcciones:**
+  - [x] Test actualizado: `notificacion.test.ts` — Añadido campo `enlace` faltante
+  - [x] Verificación: Lint ✅, TypeScript ✅, Tests ✅ (30/30 passing)
+
+**Gate de calidad:** ✅ Proyecto limpio y verificado
+
+---
 
 #### [2026-02-26] — Intervención del ARQUITECTO (ArchSecure AI v4.0)
 
@@ -113,6 +136,7 @@ Estas reglas deben respetarse en todo código nuevo de la Fase 4:
 | Fase 4: Adaptación Móvil | Por definir | ✅ 2026-03-19 |
 | Auditoría de seguridad | Guardián de Seguridad | ✅ 2026-03-19 |
 | **Suite de tests críticos** | Centinela de Calidad | ✅ 2026-03-19 |
+| Limpieza de código muerto | Arquitecto | ✅ 2026-03-21 |
 - [x] **Calidad:** Creada suite de tests unitarios para `EsquemaActualizarEjercicio` (`tests/unitarios/planificacion.test.ts`). Cobertura del 100% en lógica de `ModoMedicion`.
 
 ---
