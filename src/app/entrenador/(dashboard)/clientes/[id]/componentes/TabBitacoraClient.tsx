@@ -189,7 +189,7 @@ export default function TabBitacoraClient({ macrociclos }: Props) {
                                                                                         </div>
                                                                                         <span className="text-xs text-gris-claro mt-1 block">
                                                                                             Foco: {dia.focoMuscular} • {dia.ejercicios.length} Ejs.
-                                                                                            {sesionReal && <span className="ml-2">• Realizada: {new Date(sesionReal.fecha).toLocaleDateString()}</span>}
+                                                                                            {sesionReal?.fecha && <span className="ml-2">• Realizada: {new Date(sesionReal.fecha).toLocaleDateString()}</span>}
                                                                                         </span>
                                                                                     </div>
                                                                                 </div>

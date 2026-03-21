@@ -177,19 +177,15 @@ export const PlanificacionServicio = {
             });
 
             let contadorSemana = 1;
-            const semanasUpdates = [];
             for (const b of bloquesOrdenados) {
                 for (const s of b.semanas) {
-                    semanasUpdates.push(
-                        tx.semana.update({
-                            where: { id: s.id },
-                            data: { numeroSemana: contadorSemana }
-                        })
-                    );
+                    await tx.semana.update({
+                        where: { id: s.id },
+                        data: { numeroSemana: contadorSemana }
+                    });
                     contadorSemana++;
                 }
             }
-            await tx.$transaction(semanasUpdates);
 
             return bloqueActualizado;
         });

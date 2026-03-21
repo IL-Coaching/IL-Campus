@@ -16,6 +16,13 @@ export const CriptoServicio = {
     },
 
     /**
+     * Compara una contraseña en texto plano con un hash.
+     */
+    async comparePassword(password: string, hash: string): Promise<boolean> {
+        return bcrypt.compare(password, hash);
+    },
+
+    /**
      * Genera un token aleatorio para invitaciones o resets.
      */
     generateRandomToken(length = TOKEN_LONGITUD): string {
