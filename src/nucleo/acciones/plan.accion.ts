@@ -35,6 +35,14 @@ export async function crearPlan(data: unknown) {
         // Validación con Zod
         const datosValidados = EsquemaPlan.parse(data);
 
+        // Si el nuevo plan es popular, desmarcar los demás primero
+        if (datosValidados.esPopular) {
+            await prisma.plan.updateMany({
+                where: { entrenadorId: entrenador.id },
+                data: { esPopular: false }
+            });
+        }
+
         const nuevoPlan = await prisma.plan.create({
             data: {
                 entrenadorId: entrenador.id,
@@ -62,6 +70,14 @@ export async function actualizarPlan(id: string, data: unknown) {
         // Validación con Zod incorporando el id
         const datosValidados = EsquemaActualizarPlan.parse({ id, ...(data as object) });
 
+        // Si se está marcando como popular, desmarcar los demás primero
+        if (datosValidados.esPopular === true) {
+            await prisma.plan.updateMany({
+                where: { entrenadorId: entrenador.id, id: { not: id } },
+                data: { esPopular: false }
+            });
+        }
+
         await prisma.plan.update({
             where: { id: datosValidados.id, entrenadorId: entrenador.id }, // BOLA
             data: {
@@ -72,7 +88,8 @@ export async function actualizarPlan(id: string, data: unknown) {
                 duracionDias: datosValidados.duracionDias,
                 descripcion: datosValidados.descripcion,
                 beneficios: datosValidados.beneficios,
-                visible: datosValidados.visible
+                visible: datosValidados.visible,
+                esPopular: datosValidados.esPopular
             }
         });
 

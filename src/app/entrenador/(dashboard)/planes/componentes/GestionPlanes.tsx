@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Edit2, Trash2, Eye, EyeOff, X, Save, AlertTriangle } from "lucide-react";
+import { Plus, Edit2, Trash2, Eye, EyeOff, X, Save, AlertTriangle, Star } from "lucide-react";
 import { crearPlan, actualizarPlan, eliminarPlan } from "@/nucleo/acciones/plan.accion";
 
 interface PlanItem {
@@ -15,6 +15,7 @@ interface PlanItem {
     descripcion: string | null;
     beneficios: string[];
     visible: boolean;
+    esPopular: boolean;
     _count: { asignaciones: number };
 }
 
@@ -35,6 +36,7 @@ export default function GestionPlanes({ planesIniciales }: { planesIniciales: Pl
     const [descripcion, setDescripcion] = useState('');
     const [beneficios, setBeneficios] = useState<string[]>(['']);
     const [visible, setVisible] = useState(true);
+    const [esPopular, setEsPopular] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
 
     function abrirModalCrecion() {
@@ -47,6 +49,7 @@ export default function GestionPlanes({ planesIniciales }: { planesIniciales: Pl
         setDescripcion('');
         setBeneficios(['']);
         setVisible(true);
+        setEsPopular(false);
         setErrorMsg('');
         setModalAbierto(true);
     }
@@ -61,6 +64,7 @@ export default function GestionPlanes({ planesIniciales }: { planesIniciales: Pl
         setDescripcion(plan.descripcion || '');
         setBeneficios(plan.beneficios.length ? [...plan.beneficios] : ['']);
         setVisible(plan.visible);
+        setEsPopular(plan.esPopular);
         setErrorMsg('');
         setModalAbierto(true);
     }
@@ -96,7 +100,8 @@ export default function GestionPlanes({ planesIniciales }: { planesIniciales: Pl
                 duracionDias: Number(duracionDias),
                 descripcion: descripcion.trim(),
                 beneficios: beneficiosLimpio,
-                visible
+                visible,
+                esPopular
             };
 
             if (planEditando) {
@@ -149,7 +154,12 @@ export default function GestionPlanes({ planesIniciales }: { planesIniciales: Pl
                         Todavía no creaste ningún plan.
                     </div>
                 ) : planes.map(plan => (
-                    <div key={plan.id} className="bg-marino-2 border border-marino-4 hover:border-naranja/20 transition-colors rounded-2xl p-6 shadow-xl flex flex-col h-full">
+                    <div key={plan.id} className={`bg-marino-2 border ${plan.esPopular ? 'border-naranja/50' : 'border-marino-4'} hover:border-naranja/20 transition-colors rounded-2xl p-6 shadow-xl flex flex-col h-full relative`}>
+                        {plan.esPopular && (
+                            <div className="absolute -top-2 -right-2 bg-naranja text-marino text-[0.55rem] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-lg">
+                                ★ Popular
+                            </div>
+                        )}
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <h3 className="text-xl font-bold text-blanco mb-1">{plan.nombre}</h3>
@@ -271,6 +281,14 @@ export default function GestionPlanes({ planesIniciales }: { planesIniciales: Pl
                                 <button onClick={() => setVisible(!visible)} className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-colors ${visible ? 'bg-verde/10 text-verde border border-verde/20' : 'bg-marino-3 border border-marino-4 text-gris'}`}>
                                     {visible ? <Eye size={14} /> : <EyeOff size={14} />}
                                     {visible ? 'SÍ' : 'NO'}
+                                </button>
+                            </div>
+
+                            <div className="pt-4 flex items-center gap-3 border-t border-marino-4">
+                                <span className="text-[0.6rem] text-gris uppercase tracking-widest font-bold">Más Popular (destacado)</span>
+                                <button onClick={() => setEsPopular(!esPopular)} className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-colors ${esPopular ? 'bg-naranja/20 text-naranja border border-naranja/30' : 'bg-marino-3 border border-marino-4 text-gris'}`}>
+                                    <Star size={14} className={esPopular ? 'fill-naranja' : ''} />
+                                    {esPopular ? 'SÍ' : 'NO'}
                                 </button>
                             </div>
 

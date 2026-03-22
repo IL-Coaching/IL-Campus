@@ -11,6 +11,7 @@ interface Plan {
     duracionDias: number;
     descripcion: string | null;
     beneficios: string[];
+    esPopular: boolean;
 }
 
 interface Props {
@@ -38,12 +39,10 @@ export default function Planes({ planes }: Props) {
                         </p>
                     </div>
                 </div>
-
                 {/* Planes Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-10 items-stretch">
                     {planes.map((plan, index) => {
-                        const isDestacado = plan.nombre.toLowerCase().includes('popular') || plan.nombre.toLowerCase().includes('rat') || index === 1;
-
+                        const isDestacado = plan.esPopular === true;
                         return (
                             <div
                                 key={plan.id}

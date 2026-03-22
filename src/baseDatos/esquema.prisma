@@ -41,6 +41,7 @@ model Plan {
   descripcion       String?
   beneficios        String[]
   visible           Boolean        @default(true)
+  esPopular         Boolean        @default(false)
   creadoEn          DateTime       @default(now())
   entrenador        Entrenador     @relation(fields: [entrenadorId], references: [id])
   asignaciones      PlanAsignado[]

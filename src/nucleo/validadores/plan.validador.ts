@@ -13,6 +13,7 @@ export const EsquemaPlan = z.object({
     descripcion: z.string().optional().or(z.literal("")),
     beneficios: z.array(z.string()).optional().default([]),
     visible: z.boolean().default(true),
+    esPopular: z.boolean().default(false),
 });
 
 export const EsquemaActualizarPlan = z.object({
@@ -25,6 +26,7 @@ export const EsquemaActualizarPlan = z.object({
     descripcion: z.string().optional(),
     beneficios: z.array(z.string()).optional(),
     visible: z.boolean().optional(),
+    esPopular: z.boolean().optional(),
 });
 
 export type TPlan = z.infer<typeof EsquemaPlan>;
