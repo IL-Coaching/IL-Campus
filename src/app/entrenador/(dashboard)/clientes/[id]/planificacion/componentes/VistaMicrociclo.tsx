@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SemanaConDias } from "@/nucleo/tipos/planificacion.tipos";
-import { Calendar, Trash2, Zap, Plus, Activity, BarChart3, AlertTriangle, Copy, ClipboardPaste, Loader2 } from "lucide-react";
-import { crearSesion, eliminarSesion, obtenerVolumenSemanal, actualizarSemana, clonarSemana } from "@/nucleo/acciones/planificacion.accion";
+import { Calendar, Trash2, Zap, Plus, Activity, AlertTriangle, Copy, ClipboardPaste, Loader2 } from "lucide-react";
+import { crearSesion, eliminarSesion, actualizarSemana, clonarSemana } from "@/nucleo/acciones/planificacion.accion";
 
 interface VistaMicrocicloProps {
     semana: SemanaConDias;
@@ -12,22 +12,11 @@ interface VistaMicrocicloProps {
 
 export default function VistaMicrociclo({ semana, onSelectSesion }: VistaMicrocicloProps) {
     const [isCreating, setIsCreating] = useState(false);
-    const [volumen, setVolumen] = useState<{ grupoMuscular: string; seriesTotal: number; estado: string }[]>([]);
-    const [loadingVol, setLoadingVol] = useState(false);
     const [copiedSemanaId, setCopiedSemanaId] = useState<string | null>(null);
     const [pasting, setPasting] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
-        const fetchVolumen = async () => {
-            setLoadingVol(true);
-            const res = await obtenerVolumenSemanal(semana.id);
-            if (res.exito && res.volumen) {
-                setVolumen(res.volumen);
-            }
-            setLoadingVol(false);
-        };
-        fetchVolumen();
         setCopiedSemanaId(localStorage.getItem('copied_semana_id'));
     }, [semana.id]);
 
@@ -155,9 +144,8 @@ export default function VistaMicrociclo({ semana, onSelectSesion }: VistaMicroci
             </div>
 
             {/* Dashboard Científico - Volumen Semanal IUSCA */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
-                <div className="xl:col-span-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {diasSemana.map((nombre) => {
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {diasSemana.map((nombre) => {
                         const sesionesEnEsteDia = semana.diasSesion.filter(d => d.diaSemana === nombre);
                         return (
                             <div key={nombre} className="space-y-3">
@@ -218,47 +206,6 @@ export default function VistaMicrociclo({ semana, onSelectSesion }: VistaMicroci
                         );
                     })}
                 </div>
-
-                <div className="bg-marino-2 border border-marino-4 rounded-3xl p-8 shadow-2xl relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-naranja/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-naranja/10 transition-colors"></div>
-                    <div className="flex items-center justify-between mb-8 relative z-10">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-naranja/10 rounded-xl border border-naranja/20">
-                                <BarChart3 size={20} className="text-naranja" />
-                            </div>
-                            <div>
-                                <h4 className="text-xl font-barlow-condensed font-black uppercase text-blanco leading-none">Volumen Semanal</h4>
-                                <span className="text-[0.55rem] font-bold text-naranja uppercase tracking-widest">Consenso IUSCA 2021</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="space-y-5 relative z-10">
-                        {loadingVol ? (
-                            <div className="py-20 flex justify-center"><div className="w-8 h-8 border-2 border-naranja border-t-transparent rounded-full animate-spin"></div></div>
-                        ) : volumen.length === 0 ? (
-                            <div className="py-10 text-center">
-                                <p className="text-gris text-xs font-medium italic">Sin datos de volumen.</p>
-                            </div>
-                        ) : volumen.map((v) => (
-                            <div key={v.grupoMuscular} className="space-y-2">
-                                <div className="flex justify-between items-end">
-                                    <span className="text-[0.7rem] font-black text-blanco uppercase tracking-wider">{v.grupoMuscular}</span>
-                                    <span className="text-sm font-black text-blanco">{v.seriesTotal}</span>
-                                </div>
-                                <div className="h-2 w-full bg-marino-4 rounded-full overflow-hidden flex">
-                                    {Array.from({ length: Math.min(v.seriesTotal, 20) }).map((_, i) => (
-                                        <div
-                                            key={i}
-                                            className={`h-full flex-1 border-r border-marino-2 last:border-0 ${v.estado === 'BAJO' ? 'bg-rojo' : v.estado === 'ELEVADO' ? 'bg-naranja' : 'bg-[#22C55E]'}`}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
 
             {/* Alerta de Interferencia */}
             {interferencia && (
