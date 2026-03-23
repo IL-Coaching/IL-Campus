@@ -176,3 +176,38 @@ export async function registrarPesoSesion(pesoKg: number) {
         return { error: "No se pudo registrar el peso." };
     }
 }
+
+/**
+ * Obtiene el último check-in de un cliente con peso registrado.
+ * @security Valida que el cliente pertenece al entrenador (BOLA).
+ */
+export async function obtenerUltimoCheckin(clienteId: string) {
+    try {
+        const entrenador = await getEntrenadorSesion();
+
+        const cliente = await prisma.cliente.findFirst({
+            where: { id: clienteId, entrenadorId: entrenador.id },
+            select: { id: true, nombre: true }
+        });
+        if (!cliente) return { error: "Cliente no encontrado." };
+
+        const checkin = await prisma.checkin.findFirst({
+            where: { clienteId, pesoKg: { not: null } },
+            orderBy: { fecha: 'desc' },
+            select: {
+                pesoKg: true,
+                fecha: true,
+                energia: true,
+                sueno: true,
+                adherencia: true,
+                nota: true,
+                ajustesEsperados: true
+            }
+        });
+
+        return { exito: true, checkin };
+    } catch (error) {
+        console.error("Error al obtener último check-in:", error);
+        return { error: "No se pudo obtener el check-in." };
+    }
+}
