@@ -12,6 +12,10 @@
   --blanco: #F5F5F5;
   --gris: #8A9BBF;
   --gris-claro: #C8CCDA;
+  --rojo: #EF4444;
+  --verde: #22C55E;
+  --azul: #3B82F6;
+  --yellow: #EAB308;
 }
 
 html {
@@ -70,7 +74,6 @@ select:-webkit-autofill:focus {
     transform: translateY(0);
   }
 
-  /* Delays para animaciones secuenciales */
   .delay-100 {
     transition-delay: 100ms;
   }
@@ -94,7 +97,6 @@ select:-webkit-autofill:focus {
     border: 1px solid rgba(255, 255, 255, 0.05);
   }
 
-  /* Skeleton Vivos (Premium Shimmer) */
   .skeleton-shimmer {
     background: linear-gradient(
       90deg, 
@@ -104,6 +106,101 @@ select:-webkit-autofill:focus {
     );
     background-size: 200% 100%;
     animation: shimmer 2s infinite ease-in-out;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     SISTEMA DE DISEÑO IL-CAMPUS - Tokens Unificados
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  /* ── Bordes Unificados ── */
+  .border-base {
+    @apply border border-marino-4;
+  }
+  
+  .border-subtle {
+    @apply border border-white/10;
+  }
+  
+  .border-naranja-subtle {
+    @apply border border-naranja/20;
+  }
+
+  /* ── Cards y Containers ── */
+  .card {
+    @apply bg-marino-2 border border-marino-4 rounded-xl;
+  }
+  
+  .card-elevated {
+    @apply bg-marino-2 border border-marino-4 rounded-2xl shadow-xl;
+  }
+  
+  .card-interactive {
+    @apply bg-marino-2 border border-marino-4 rounded-xl transition-all hover:border-naranja/50 hover:bg-marino-3;
+  }
+
+  /* ── Botones Base ── */
+  .btn {
+    @apply px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all;
+  }
+  
+  .btn-primary {
+    @apply bg-naranja text-marino hover:bg-naranja-h active:scale-95;
+  }
+  
+  .btn-secondary {
+    @apply bg-marino-3 text-gris-claro hover:text-blanco border border-marino-4 hover:border-naranja/50;
+  }
+  
+  .btn-ghost {
+    @apply bg-transparent text-gris hover:text-blanco;
+  }
+
+  /* ── Inputs ── */
+  .input {
+    @apply w-full bg-marino border border-marino-4 rounded-lg px-4 py-2.5 text-sm text-blanco placeholder:text-gris/40 focus:outline-none focus:border-naranja/50 transition-all;
+  }
+  
+  .input-lg {
+    @apply w-full bg-marino border border-marino-4 rounded-xl px-4 py-3 text-base text-blanco placeholder:text-gris/40 focus:outline-none focus:border-naranja/50 transition-all;
+  }
+
+  /* ── Badges ── */
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[0.6rem] font-black uppercase tracking-widest;
+  }
+  
+  .badge-success {
+    @apply bg-verde/10 text-verde border border-verde/20;
+  }
+  
+  .badge-warning {
+    @apply bg-yellow/10 text-yellow border border-yellow/20;
+  }
+  
+  .badge-error {
+    @apply bg-rojo/10 text-rojo border border-rojo/20;
+  }
+  
+  .badge-info {
+    @apply bg-naranja/10 text-naranja border border-naranja/20;
+  }
+
+  /* ── Separadores ── */
+  .divider {
+    @apply border-t border-marino-4;
+  }
+  
+  .divider-subtle {
+    @apply border-t border-white/5;
+  }
+
+  /* ── Estados de Hover ── */
+  .hover-lift {
+    @apply transition-transform hover:-translate-y-0.5;
+  }
+  
+  .hover-glow {
+    @apply transition-shadow hover:shadow-lg hover:shadow-naranja/10;
   }
 }
 
