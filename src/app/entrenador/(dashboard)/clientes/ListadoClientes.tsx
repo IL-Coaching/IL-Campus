@@ -197,9 +197,9 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                                                             nombre: cliente.nombre,
                                                             estado: ultimoPlan.estado
                                                         })}
-                                                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-[0.65rem] font-black uppercase tracking-widest transition-all hover:brightness-110 ${estadoCfg.cls}`}
+                                                        className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border text-[0.65rem] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-md ${estadoCfg.cls}`}
                                                     >
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                                                        <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
                                                         {estadoCfg.label}
                                                     </button>
                                                 )}
@@ -272,7 +272,7 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                                                                     className="fixed inset-0 z-40"
                                                                     onClick={() => setMenuAbierto(null)}
                                                                 />
-                                                                <div className="absolute right-0 top-full mt-1.5 z-50 bg-marino-2 border border-marino-4 rounded-xl shadow-2xl overflow-hidden min-w-[180px] animate-in fade-in zoom-in-95 duration-150">
+                                                                <div className="absolute right-0 bottom-full mb-1.5 z-[60] bg-marino-2 border border-marino-4 rounded-xl shadow-2xl overflow-hidden min-w-[180px] animate-in fade-in zoom-in-95 duration-150">
                                                                     {tabActual === "activos" ? (
                                                                         <button
                                                                             onClick={() => handleToggleStatus(cliente.id, false)}
@@ -389,7 +389,7 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                                                     nombre: cliente.nombre,
                                                     estado: ultimoPlan.estado
                                                 })}
-                                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[0.6rem] font-black uppercase tracking-widest ${estadoCfg.cls}`}
+                                                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[0.6rem] font-black uppercase tracking-widest transition-all hover:scale-105 ${estadoCfg.cls}`}
                                             >
                                                 <span className="w-1.5 h-1.5 rounded-full bg-current" />
                                                 {estadoCfg.label}
