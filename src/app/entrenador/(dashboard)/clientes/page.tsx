@@ -10,7 +10,7 @@ import ListadoClientes from "./ListadoClientes";
 export default async function ClientesPage({
     searchParams
 }: {
-    searchParams: { tab?: string }
+    searchParams: { tab?: string; clienteId?: string }
 }) {
     const entrenador = await getEntrenadorSesion();
 
@@ -23,6 +23,7 @@ export default async function ClientesPage({
 
     const validTabs = ["activos", "inactivos", "inscripciones"];
     const tabActual = (searchParams?.tab && validTabs.includes(searchParams.tab)) ? searchParams.tab as "activos" | "inactivos" | "inscripciones" : "activos";
+    const clienteIdDestacado = searchParams?.clienteId || null;
 
     let clientesAMostrar = activos;
     if (tabActual === "inactivos") clientesAMostrar = inactivos;
@@ -75,6 +76,7 @@ export default async function ClientesPage({
                     clientes={clientesAMostrar as any[]}
                     planes={planes}
                     tabActual={tabActual as "activos" | "inactivos" | "inscripciones"}
+                    clienteIdDestacado={clienteIdDestacado}
                 />
             </div>
         </div>

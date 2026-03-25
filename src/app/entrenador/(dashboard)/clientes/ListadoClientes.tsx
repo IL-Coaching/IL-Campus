@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Users, MoreVertical, Ban, CheckCircle2, MessageCircle, CreditCard, ChevronRight } from "lucide-react";
 import ModalAsignarPlan from "./ModalAsignarPlan";
@@ -38,6 +38,7 @@ interface Props {
     clientes: Cliente[];
     planes: Plan[];
     tabActual: "activos" | "inactivos" | "inscripciones";
+    clienteIdDestacado?: string | null;
 }
 
 const ESTADO_CONFIG: Record<string, { label: string; cls: string }> = {
@@ -59,11 +60,23 @@ function Iniciales({ nombre }: { nombre: string }) {
     );
 }
 
-export default function ListadoClientes({ clientes, planes, tabActual }: Props) {
+export default function ListadoClientes({ clientes, planes, tabActual, clienteIdDestacado }: Props) {
     const [clienteAsignando, setClienteAsignando] = useState<{ id: string, nombre: string, ultimoPlanVencimiento?: string | Date } | null>(null);
     const [clientePago, setClientePago] = useState<{ clienteId: string, planAsignadoId: string, nombre: string, estado: string } | null>(null);
     const [menuAbierto, setMenuAbierto] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
+    const refScroll = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (clienteIdDestacado && refScroll.current) {
+            const elemento = refScroll.current.querySelector(`[data-cliente-id="${clienteIdDestacado}"]`);
+            if (elemento) {
+                elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                elemento.classList.add('ring-2', 'ring-naranja');
+                setTimeout(() => elemento.classList.remove('ring-2', 'ring-naranja'), 3000);
+            }
+        }
+    }, [clienteIdDestacado]);
 
     function formatPhone(phone: string | null) {
         if (!phone) return null;
@@ -132,7 +145,7 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                                 const vencido = ultimoPlan && new Date(ultimoPlan.fechaVencimiento) < new Date();
 
                                 return (
-                                    <tr key={cliente.id} className="hover:bg-marino-3/20 transition-colors group">
+                                    <tr key={cliente.id} data-cliente-id={cliente.id} className="hover:bg-marino-3/20 transition-colors group">
 
                                         {/* Cliente */}
                                         <td className="py-4 px-4">
@@ -336,7 +349,7 @@ export default function ListadoClientes({ clientes, planes, tabActual }: Props) 
                         const vencido = ultimoPlan && new Date(ultimoPlan.fechaVencimiento) < new Date();
 
                         return (
-                            <div key={cliente.id} className="p-4 space-y-3">
+                            <div key={cliente.id} data-cliente-id={cliente.id} className="p-4 space-y-3">
                                 {/* Cabecera card */}
                                 <div className="flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-3 min-w-0">
