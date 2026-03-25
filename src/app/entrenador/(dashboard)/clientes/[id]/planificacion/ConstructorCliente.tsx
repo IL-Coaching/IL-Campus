@@ -10,10 +10,11 @@ import VistaSesion from './componentes/VistaSesion';
 import BuscadorEjercicios from './componentes/BuscadorEjercicios';
 import { MacrocicloCompleto, ClientePlanificacion, BloqueConSemanas, SemanaConDias } from '@/nucleo/tipos/planificacion.tipos';
 import { crearNuevoMacrociclo, agregarEjercicio } from '@/nucleo/acciones/planificacion.accion';
-import { Loader2, Settings } from 'lucide-react';
+import { Loader2, Settings, Download } from 'lucide-react';
 
 import ModalConfigurarMacro from './componentes/ModalConfigurarMacro';
 import ModalNuevoMesociclo from './componentes/ModalNuevoMesociclo';
+import ModalImportadorPlantilla from '@/app/entrenador/(dashboard)/componentes/planificacion/ModalImportadorPlantilla';
 
 type NivelVista = 'macro' | 'meso' | 'micro' | 'sesion';
 
@@ -33,6 +34,7 @@ export default function ConstructorCliente({ cliente, macrocicloInicial, limiteC
     const [configurarMacroOpen, setConfigurarMacroOpen] = useState(false);
     const [nuevoMesoOpen, setNuevoMesoOpen] = useState(false);
     const [creandoPlan, setCreandoPlan] = useState(false);
+    const [importarPlantillaOpen, setImportarPlantillaOpen] = useState(false);
 
     const router = useRouter();
 
@@ -129,6 +131,7 @@ export default function ConstructorCliente({ cliente, macrocicloInicial, limiteC
                                     }}
                                     onConfigurar={() => setConfigurarMacroOpen(true)}
                                     onNuevoMesociclo={() => setNuevoMesoOpen(true)}
+                                    onImportarPlantilla={() => setImportarPlantillaOpen(true)}
                                 />
                             )}
 
@@ -162,7 +165,14 @@ export default function ConstructorCliente({ cliente, macrocicloInicial, limiteC
                     )}
                 </main>
 
-                <div className="xl:hidden fixed bottom-6 right-6">
+                <div className="xl:hidden fixed bottom-6 right-6 flex gap-3">
+                    <button
+                        onClick={() => setImportarPlantillaOpen(true)}
+                        className="w-14 h-14 bg-verde text-marino rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform"
+                        title="Importar de Biblioteca"
+                    >
+                        <Download size={24} />
+                    </button>
                     <button
                         onClick={() => setBuscadorOpen(true)}
                         className="w-14 h-14 bg-naranja text-marino rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform"
@@ -204,6 +214,14 @@ export default function ConstructorCliente({ cliente, macrocicloInicial, limiteC
                 <ModalNuevoMesociclo
                     macrociclo={macrocicloInicial}
                     onClose={() => setNuevoMesoOpen(false)}
+                />
+            )}
+
+            {importarPlantillaOpen && (
+                <ModalImportadorPlantilla
+                    clienteId={cliente.id}
+                    onClose={() => setImportarPlantillaOpen(false)}
+                    onImportacionCompleta={() => router.refresh()}
                 />
             )}
         </div>

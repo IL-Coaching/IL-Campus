@@ -191,7 +191,7 @@ model BloqueMensual {
 
 model Semana {
   id                  String                  @id @default(uuid())
-  bloqueMensualId     String
+  bloqueMensualId     String?
   numeroSemana        Int
   objetivoSemana      String
   RIRobjetivo         Int
@@ -202,9 +202,12 @@ model Semana {
   modeloPeriodizacion ModeloPeriodizacion     @default(LINEAL)
   fasesCiclo          String?
   checkinRequerido    Boolean                 @default(false)
+  // Campos para plantillas de biblioteca
+  esPlantilla         Boolean                 @default(false)
+  plantillaNombre     String?
   configsTesteo       ConfigTesteoEjercicio[]
   diasSesion          DiaSesion[]
-  bloqueMensual       BloqueMensual           @relation(fields: [bloqueMensualId], references: [id])
+  bloqueMensual       BloqueMensual?          @relation(fields: [bloqueMensualId], references: [id])
   volumenesSemanales  VolumenSemanal[]
 }
 

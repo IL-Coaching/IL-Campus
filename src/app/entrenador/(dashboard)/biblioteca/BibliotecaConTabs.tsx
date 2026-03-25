@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Dumbbell, LayoutTemplate } from 'lucide-react';
 import BibliotecaEjercicios from './BibliotecaEjercicios';
 import BotonAltaEjercicio from './BotonAltaEjercicio';
-import BibliotecaRutinas from './BibliotecaRutinas';
+import ConstructorBiblioteca from './ConstructorBiblioteca';
 
 interface Props {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -53,7 +53,7 @@ export default function BibliotecaConTabs({ ejerciciosIniciales }: Props) {
             {tab === 'ejercicios' ? (
                 <BibliotecaEjercicios iniciales={ejerciciosIniciales} />
             ) : (
-                <BibliotecaRutinas />
+                <ConstructorBiblioteca />
             )}
         </div>
     );

@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { TrendingUp, Settings, Plus, ChevronRight, Target, Zap, Trash2 } from "lucide-react";
+import { TrendingUp, Settings, Plus, ChevronRight, Target, Zap, Trash2, Download } from "lucide-react";
 import { MacrocicloCompleto, BloqueConSemanas } from "@/nucleo/tipos/planificacion.tipos";
 import { eliminarMesociclo } from "@/nucleo/acciones/planificacion.accion";
 
@@ -12,6 +12,7 @@ interface VistaMacrocicloProps {
     onSelectWeek: (mes: number, semana: number) => void;
     onConfigurar: () => void;
     onNuevoMesociclo: () => void;
+    onImportarPlantilla: () => void;
 }
 
 interface BloqueMapped {
@@ -27,7 +28,7 @@ interface BloqueMapped {
     color: string;
 }
 
-export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMeso, onSelectWeek, onConfigurar, onNuevoMesociclo }: VistaMacrocicloProps) {
+export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMeso, onSelectWeek, onConfigurar, onNuevoMesociclo, onImportarPlantilla }: VistaMacrocicloProps) {
     const router = useRouter();
     let semanaGlobalActual = 1;
 
@@ -125,6 +126,14 @@ export default function VistaMacrociclo({ macrociclo, limiteSemanas, onSelectMes
                     </div>
 
                     <div className="flex flex-wrap gap-4 w-full lg:w-auto">
+                        {onImportarPlantilla && (
+                            <button
+                                onClick={onImportarPlantilla}
+                                className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-verde/10 border border-verde/30 rounded-xl text-[0.7rem] font-black uppercase tracking-widest text-verde hover:bg-verde hover:text-marino transition-all"
+                            >
+                                <Download size={16} /> Importar
+                            </button>
+                        )}
                         <button
                             onClick={onConfigurar}
                             className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-marino-3 border border-marino-4 rounded-xl text-[0.7rem] font-black uppercase tracking-widest text-gris hover:text-blanco hover:border-naranja/30 transition-all group"
