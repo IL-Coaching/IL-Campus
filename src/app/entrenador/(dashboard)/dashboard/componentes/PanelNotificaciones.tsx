@@ -3,7 +3,6 @@
 import { useState, useEffect, useTransition } from 'react';
 import { Bell, Check, Eye, EyeOff, Trash2, MessageCircle, DollarSign, Clock, FileText, Activity } from 'lucide-react';
 import { obtenerNotificaciones, toggleLeidaNotificacion, purgarNotificaciones } from '@/nucleo/acciones/notificacion.accion';
-import { useRouter } from 'next/navigation';
 
 interface Notificacion {
     id: string;
@@ -31,7 +30,6 @@ const BORDER_GRAVEDAD: Record<string, string> = {
 };
 
 export default function PanelNotificaciones() {
-    const router = useRouter();
     const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
     const [tab, setTab] = useState<'no_leidas' | 'todas'>('no_leidas');
     const [seleccionadas, setSeleccionadas] = useState<Set<string>>(new Set());
@@ -141,10 +139,10 @@ export default function PanelNotificaciones() {
                                 onClick={() => {
                                     if (notif.enlace) {
                                         if (!notif.leida) handleToggleLeida(notif.id);
-                                        router.push(notif.enlace);
+                                        window.location.href = notif.enlace;
                                     }
                                 }}
-                                className={`p-3 rounded-xl border transition-all ${notif.enlace ? 'cursor-pointer hover:scale-[1.01] active:scale-95' : ''} ${notif.leida
+                                className={`p-3 rounded-xl border transition-all ${notif.enlace ? 'cursor-pointer hover:scale-[1.01] active:scale-95 hover:bg-naranja/5' : ''} ${notif.leida
                                     ? 'bg-marino-3/30 border-marino-4 opacity-60'
                                     : `bg-marino-3/50 ${BORDER_GRAVEDAD[notif.gravedad] || 'border-naranja/20'}`
                                     } ${isSelected ? 'ring-1 ring-naranja' : ''}`}

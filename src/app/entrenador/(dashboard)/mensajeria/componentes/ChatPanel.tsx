@@ -26,7 +26,11 @@ interface MensajeChat {
     leido: boolean;
 }
 
-export default function ChatPanel() {
+interface ChatPanelProps {
+    clienteIdInicial?: string | null;
+}
+
+export default function ChatPanel({ clienteIdInicial }: ChatPanelProps) {
     const [conversaciones, setConversaciones] = useState<Conversacion[]>([]);
     const [clienteActivo, setClienteActivo] = useState<string | null>(null);
     const [nombreActivo, setNombreActivo] = useState('');
@@ -73,6 +77,15 @@ export default function ChatPanel() {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
     }, [mensajes]);
+
+    useEffect(() => {
+        if (clienteIdInicial) {
+            const conv = conversaciones.find(c => c.clienteId === clienteIdInicial);
+            if (conv) {
+                seleccionarCliente(conv.clienteId, conv.nombre);
+            }
+        }
+    }, [clienteIdInicial, conversaciones]);
 
     async function cargarConversaciones() {
         const res = await obtenerConversaciones();

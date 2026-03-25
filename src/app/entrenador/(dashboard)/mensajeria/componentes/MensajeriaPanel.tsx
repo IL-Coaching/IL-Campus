@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { MessageCircle, ClipboardCheck } from 'lucide-react';
 import ChatPanel from './ChatPanel';
 import CheckinsPanel from './CheckinsPanel';
@@ -8,7 +9,20 @@ import CheckinsPanel from './CheckinsPanel';
 type TabActivo = 'chat' | 'checkins';
 
 export default function MensajeriaPanel() {
+    const searchParams = useSearchParams();
+    const clienteIdParam = searchParams.get('clienteId');
+    const vistaParam = searchParams.get('vista');
     const [tab, setTab] = useState<TabActivo>('chat');
+    const [clienteIdInicial, setClienteIdInicial] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (vistaParam === 'checkins') {
+            setTab('checkins');
+        } else if (clienteIdParam) {
+            setClienteIdInicial(clienteIdParam);
+            setTab('chat');
+        }
+    }, [clienteIdParam, vistaParam]);
 
     return (
         <div className="space-y-4">
@@ -35,7 +49,7 @@ export default function MensajeriaPanel() {
             </div>
 
             {/* Contenido */}
-            {tab === 'chat' ? <ChatPanel /> : <CheckinsPanel />}
+            {tab === 'chat' ? <ChatPanel clienteIdInicial={clienteIdInicial} /> : <CheckinsPanel />}
         </div>
     );
 }
