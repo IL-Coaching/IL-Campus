@@ -207,7 +207,7 @@ export async function dispararAlertasFormularios() {
                         gravedad: GravedadNotificacion.INFO,
                         titulo: `Formulario Pendiente: ${p.nombre}`,
                         cuerpo: `El prospecto ${p.nombre} envió su formulario y aún no tiene un plan asignado.`,
-                        enlace: `/entrenador/clientes?vista=formulario&clienteId=${p.id}`
+                        enlace: `/entrenador/clientes/${p.id}`
                     }
                 });
             }
