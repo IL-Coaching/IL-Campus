@@ -114,19 +114,48 @@ export default async function RutinaPage() {
         );
     }
 
-    // Determinar semana actual: buscar la primera semana que tenga ejercicios
+    // Determinar semana actual: buscar la primera semana que tenga sesiones pendientes
     const todasLasSemanas = macrociclo.bloquesMensuales.flatMap(b => b.semanas);
-    const semanaActiva = todasLasSemanas.find(s =>
-        s.diasSesion.some(d => d.ejercicios.length > 0)
-    ) || todasLasSemanas[0];
+    
+    const semanaConSesionesPendientes = todasLasSemanas.find(semana => {
+        const diasConEjercicios = semana.diasSesion.filter(d => d.ejercicios.length > 0);
+        return diasConEjercicios.some(dia => {
+            const sesionReal = dia.sesionesReales?.[0];
+            // Hay sesión pendiente si: no hay sesión real O la sesión real no está completada
+            return !sesionReal || sesionReal.completada !== true;
+        });
+    });
+
+    const semanaActiva = semanaConSesionesPendientes || todasLasSemanas[0];
 
     const bloqueSemanaActiva = macrociclo.bloquesMensuales.find(b =>
         b.semanas.some(s => s.id === semanaActiva?.id)
     );
 
+    const semanasConEstado = todasLasSemanas.map(semana => {
+        const diasConEjercicios = semana.diasSesion.filter(d => d.ejercicios.length > 0);
+        const sesionesCompletadas = diasConEjercicios.filter(dia => {
+            const sesionReal = dia.sesionesReales?.[0];
+            return sesionReal?.completada === true;
+        }).length;
+        
+        const sesionesTotales = diasConEjercicios.length;
+        const completada = sesionesTotales > 0 && sesionesCompletadas === sesionesTotales;
+        const tienePendientes = sesionesTotales > 0 && sesionesCompletadas < sesionesTotales;
+
+        return {
+            ...semana,
+            sesionesCompletadas,
+            sesionesTotales,
+            completada,
+            tienePendientes,
+            esActiva: semana.id === semanaActiva?.id
+        };
+    });
+
     const macrocicloData = {
         semanaActiva,
-        todasLasSemanas,
+        todasLasSemanas: semanasConEstado,
         bloqueObjetivo: bloqueSemanaActiva?.objetivo,
         notasMacrociclo: macrociclo.notas
     };

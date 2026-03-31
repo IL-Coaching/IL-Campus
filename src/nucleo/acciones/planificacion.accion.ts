@@ -564,17 +564,16 @@ export async function reordenarEjercicios(diaId: string, ejercicioIds: string[])
     }
 }
 
-export async function agruparEjercicios(diaId: string, ejercicioIds: string[], nombreGrupo: string, modalidad: ModalidadBloque = 'SECUENCIAL') {
+export async function agruparEjercicios(diaId: string, ejercicioIds: string[], nombreGrupo: string, modalidad: ModalidadBloque = 'SECUENCIAL', tipo: 'AGRUPACION' | 'CIRCUITO' = 'AGRUPACION', rounds?: number, bloquePadreId?: string) {
     try {
-        const entrenador = await getEntrenadorSesion();
         const diaPropio = await prisma.diaSesion.findFirst({
-            where: { id: diaId, semana: { bloqueMensual: { macrociclo: { cliente: { entrenadorId: entrenador.id } } } } },
+            where: { id: diaId, semana: { bloqueMensual: { macrociclo: { cliente: { entrenadorId: await getEntrenadorSesion().then(e => e.id) } } } } },
             include: { semana: { include: { bloqueMensual: { include: { macrociclo: true } } } } }
         });
         if (!diaPropio) throw new Error("Acceso denegado.");
 
         const clienteId = diaPropio.semana.bloqueMensual?.macrociclo.clienteId;
-        await PlanificacionServicio.agruparEjercicios(diaId, ejercicioIds, nombreGrupo, modalidad);
+        await PlanificacionServicio.agruparEjercicios(diaId, ejercicioIds, nombreGrupo, modalidad, tipo, rounds, bloquePadreId);
         revalidatePath(`/entrenador/clientes/${clienteId}/planificacion`);
         return { exito: true };
     } catch (error) {
@@ -618,7 +617,7 @@ export async function actualizarNombreGrupo(diaId: string, grupoId: string, nomb
     }
 }
 
-export async function actualizarBloqueSesion(diaId: string, bloqueId: string, data: { modalidad?: ModalidadBloque, nombre?: string }) {
+export async function actualizarBloqueSesion(diaId: string, bloqueId: string, data: { modalidad?: ModalidadBloque, nombre?: string, tipo?: 'AGRUPACION' | 'CIRCUITO', rounds?: number }) {
     try {
         const entrenador = await getEntrenadorSesion();
         const diaPropio = await prisma.diaSesion.findFirst({

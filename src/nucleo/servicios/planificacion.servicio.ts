@@ -22,7 +22,8 @@ export const PlanificacionServicio = {
                                     include: {
                                         ejercicios: {
                                             include: {
-                                                ejercicio: true
+                                                ejercicio: true,
+                                                bloque: true
                                             }
                                         },
                                         sesionesReales: {
@@ -438,12 +439,15 @@ export const PlanificacionServicio = {
     /**
      * Agrupa varios ejercicios creando un BloqueSesion (Cluster).
      */
-    async agruparEjercicios(diaId: string, ejercicioIds: string[], nombreGrupo: string, modalidad: ModalidadBloque = 'SECUENCIAL') {
+    async agruparEjercicios(diaId: string, ejercicioIds: string[], nombreGrupo: string, modalidad: ModalidadBloque = 'SECUENCIAL', tipo: 'AGRUPACION' | 'CIRCUITO' = 'AGRUPACION', rounds?: number, bloquePadreId?: string) {
         const nuevoBloque = await prisma.bloqueSesion.create({
             data: {
                 diaId,
                 nombre: nombreGrupo,
-                modalidad
+                modalidad,
+                tipo,
+                rounds: tipo === 'CIRCUITO' ? rounds ?? 1 : null,
+                bloquePadreId
             }
         });
 
@@ -477,7 +481,7 @@ export const PlanificacionServicio = {
         });
     },
 
-    async actualizarBloqueSesion(bloqueId: string, data: { modalidad?: ModalidadBloque, nombre?: string }) {
+    async actualizarBloqueSesion(bloqueId: string, data: { modalidad?: ModalidadBloque, nombre?: string, tipo?: 'AGRUPACION' | 'CIRCUITO', rounds?: number }) {
         if (data.nombre) {
             await prisma.ejercicioPlanificado.updateMany({
                 where: { grupoId: bloqueId },

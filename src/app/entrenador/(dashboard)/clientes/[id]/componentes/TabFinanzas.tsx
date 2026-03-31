@@ -1,4 +1,5 @@
 import { obtenerResumenFinanciero } from "@/nucleo/acciones/finanzas.accion";
+import { ClienteServicio } from "@/nucleo/servicios/cliente.servicio";
 import TabFinanzasClient, { ResumenFinanciero } from "./TabFinanzasClient";
 
 interface Props {
@@ -7,9 +8,10 @@ interface Props {
 }
 
 export default async function TabFinanzas({ clienteId, clienteNombre }: Props) {
-    // SSR
-    const data = await obtenerResumenFinanciero(clienteId);
+    const [data, cliente] = await Promise.all([
+        obtenerResumenFinanciero(clienteId),
+        ClienteServicio.obtenerPorId(clienteId)
+    ]);
 
-    // Inject the result from server into client component
-    return <TabFinanzasClient clienteId={clienteId} clienteNombre={clienteNombre} resumen={data as ResumenFinanciero | null} />;
+    return <TabFinanzasClient clienteId={clienteId} clienteNombre={clienteNombre} resumen={data as ResumenFinanciero | null} esVIP={cliente?.esVIP || false} />;
 }

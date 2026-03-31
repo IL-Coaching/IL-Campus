@@ -25,6 +25,8 @@ type Ejercicio = {
         nombre: string | null;
         modalidad: string;
         orden: number;
+        tipo?: string;
+        rounds?: number | null;
     } | null;
     ejercicio: {
         nombre: string;
@@ -58,6 +60,11 @@ type Semana = {
     RIRobjetivo: number | null;
     esFaseDeload: boolean;
     diasSesion: DiaSesion[];
+    sesionesCompletadas?: number;
+    sesionesTotales?: number;
+    completada?: boolean;
+    tienePendientes?: boolean;
+    esActiva?: boolean;
 };
 
 type MacrocicloData = {
@@ -335,14 +342,34 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
     const [showFinishModal, setShowFinishModal] = useState(false);
     const [isFinishing, startFinishing] = useTransition();
     const [sesionIniciada, setSesionIniciada] = useState(false);
+    const [haIniciado, setHaIniciado] = useState(false);
     
     const sesionTracking = useSesionTracking(diaVisualizado?.id || null);
 
     const semanaActual = todasLasSemanas.find(s => s.id === semanaSeleccionadaId) || semanaActiva;
 
-    const handleDiaClick = async (dia: DiaSesion) => {
+    // Auto-seleccionar el primer día con sesiones pendientes de la semana activa en la primera carga
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => {
+        if (!haIniciado && semanaActual && semanaActual.esActiva) {
+            const diasConEjercicios = [...semanaActual.diasSesion].filter(d => d.ejercicios.length > 0);
+            const primerDiaPendiente = diasConEjercicios.find((dia: DiaSesion) => {
+                const sesionReal = dia.sesionesReales?.[0];
+                return !sesionReal || sesionReal.completada !== true;
+            });
+            
+            if (primerDiaPendiente) {
+                handleDiaClick(primerDiaPendiente, true);
+            }
+            setHaIniciado(true);
+        }
+    }, [semanaActual]);
+
+    const handleDiaClick = async (dia: DiaSesion, esAutoSeleccion = false) => {
         setDiaVisualizado(dia);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        if (!esAutoSeleccion) {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
 
         // Check if there's already a saved start time
         const storedStart = localStorage.getItem(`sesion_inicio_${dia.id}`);
@@ -387,6 +414,15 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
         : [];
 
     const handleVolverAlHub = () => {
+        setDiaVisualizado(null);
+        // Resetear para permitir auto-selección la próxima vez
+        setHaIniciado(false);
+    };
+
+    const handleSemanaClick = (semanaId: string) => {
+        setSemanaSeleccionadaId(semanaId);
+        // Resetear cuando se cambia de semana manualmente
+        setHaIniciado(false);
         setDiaVisualizado(null);
     };
 
@@ -530,28 +566,31 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                 {/* Lista de Ejercicios por Bloques */}
                 <div className="space-y-6">
                     {(() => {
-                        const chunks: { isBlock: boolean; id: string; nombre: string; modalidad: string; ejercicios: Ejercicio[] }[] = [];
+                        const chunks: { isBlock: boolean; id: string; nombre: string; modalidad: string; tipo: string; rounds?: number; ejercicios: Ejercicio[] }[] = [];
                         let currentBlockId: string | null = null;
                         let currentChunk: Ejercicio[] = [];
                         let currentBlockName = 'Entrenamiento Principal';
                         let currentModalidad = 'SECUENCIAL';
+                        let currentTipo = 'AGRUPACION';
+                        let currentRounds: number | undefined;
                         
-                        diaVisualizado.ejercicios.forEach(ep => {
+                        diaVisualizado.ejercicios.forEach((ep: Ejercicio) => {
                             if (ep.bloqueId !== currentBlockId) {
                                 if (currentChunk.length > 0) {
-                                    chunks.push({ isBlock: !!currentBlockId, id: currentBlockId || `free-${chunks.length}`, nombre: currentBlockName, modalidad: currentModalidad, ejercicios: currentChunk });
+                                    chunks.push({ isBlock: !!currentBlockId, id: currentBlockId || `free-${chunks.length}`, nombre: currentBlockName, modalidad: currentModalidad, tipo: currentTipo, rounds: currentRounds, ejercicios: currentChunk });
                                 }
                                 currentBlockId = ep.bloqueId || null;
                                 currentBlockName = ep.bloque?.nombre || 'Entrenamiento Principal';
                                 currentModalidad = ep.bloque?.modalidad || 'SECUENCIAL';
+                                currentTipo = ep.bloque?.tipo || 'AGRUPACION';
+                                currentRounds = ep.bloque?.rounds ?? undefined;
                                 currentChunk = [];
                             }
                             currentChunk.push(ep);
                         });
-                        if (currentChunk.length > 0) chunks.push({ isBlock: !!currentBlockId, id: currentBlockId || `free-${chunks.length}`, nombre: currentBlockName, modalidad: currentModalidad, ejercicios: currentChunk });
+                        if (currentChunk.length > 0) chunks.push({ isBlock: !!currentBlockId, id: currentBlockId || `free-${chunks.length}`, nombre: currentBlockName, modalidad: currentModalidad, tipo: currentTipo, rounds: currentRounds, ejercicios: currentChunk });
                         
                         return chunks.map((chunk, chunkIdx) => {
-                            // Si son flat (viejos o sueltos), se agrupan en un bloque "Entrenamiento Principal"
                             return (
                                 <details key={chunk.id || chunkIdx} className="group" open={chunkIdx === 0}>
                                     <summary className="list-none cursor-pointer p-4 md:p-5 bg-marino-2/40 border border-marino-4/30 rounded-2xl md:rounded-3xl hover:bg-marino-3/50 transition-all flex items-center justify-between mb-2">
@@ -561,7 +600,10 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                                             </div>
                                             <div>
                                                 <h3 className="text-xl md:text-2xl font-barlow-condensed font-black uppercase text-blanco tracking-widest">{chunk.nombre}</h3>
-                                                <span className="text-[0.6rem] font-bold text-naranja tracking-widest uppercase">{chunk.ejercicios.length} ejercicios • Modalidad {chunk.modalidad}</span>
+                                                <span className="text-[0.6rem] font-bold text-naranja tracking-widest uppercase">
+                                                    {chunk.tipo === 'CIRCUITO' && chunk.rounds ? `${chunk.rounds} rondas • ` : ''}
+                                                    {chunk.ejercicios.length} ejercicios • {chunk.tipo === 'CIRCUITO' ? 'Circuito' : 'Serie'}
+                                                </span>
                                             </div>
                                         </div>
                                         <div className="text-gris/50 group-open:rotate-180 transition-transform duration-300 w-8 h-8 flex items-center justify-center bg-marino-4/20 rounded-full shrink-0">
@@ -954,25 +996,15 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
 
                     <div className="flex gap-4 overflow-x-auto pt-6 pb-12 snap-x snap-mandatory scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0 scroll-smooth">
                         {[...todasLasSemanas].sort((a, b) => a.numeroSemana - b.numeroSemana).map((semana) => {
-                            // Calcular progreso real de la semana
-                            const diasConEj = semana.diasSesion.filter(d => d.ejercicios.length > 0);
-                            const completados = diasConEj.filter(d => d.sesionesReales && d.sesionesReales.some(sr => sr.completada === true)).length;
-                            const estaCompletada = diasConEj.length > 0 && completados === diasConEj.length;
-                            
-                            // Determinamos cual es la semana focal (en curso)
-                            const tieneDiasIncompletos = diasConEj.length > 0 && completados < diasConEj.length;
-                            const esSemanaActual = tieneDiasIncompletos && semana.numeroSemana === [...todasLasSemanas].sort((a,b)=>a.numeroSemana-b.numeroSemana).find(s => {
-                                const sDias = s.diasSesion.filter(d => d.ejercicios.length > 0);
-                                const sCompletados = sDias.filter(d => d.sesionesReales && d.sesionesReales.some(sr => sr.completada === true)).length;
-                                return sDias.length > 0 && sCompletados < sDias.length;
-                            })?.numeroSemana;
+                            const esSemanaActiva = semana.esActiva === true;
+                            const esCompletada = semana.completada === true;
                             
                             const esSeleccionadaId = semana.id === semanaSeleccionadaId;
 
                             return (
                                 <button
                                     key={semana.id}
-                                    onClick={() => setSemanaSeleccionadaId(semana.id)}
+                                    onClick={() => handleSemanaClick(semana.id)}
                                     className={`snap-center shrink-0 w-16 group relative flex flex-col items-center transition-all duration-300 ${esSeleccionadaId ? 'scale-110' : 'hover:scale-105'}`}
                                 >
                                     {/* Indicador de Selección Superior */}
@@ -980,28 +1012,37 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                                         {esSeleccionadaId ? 'Viendo' : 'Ver'}
                                     </div>
 
-                                    {/* Círculo de la Semana */}
+                                    {/* Círculo de la Semana - ESTADOS VISUALES DISTINTOS */}
                                     <div className={`w-14 h-14 rounded-full border-2 flex flex-col items-center justify-center relative transition-all duration-500 overflow-hidden ${
-                                        esSemanaActual 
-                                        ? 'bg-marino-3 border-naranja shadow-[0_0_20px_rgba(255,107,0,0.2)]' 
-                                        : estaCompletada 
-                                            ? 'bg-marino-2/40 border-verde/30 shadow-none' 
-                                            : esSeleccionadaId
-                                                ? 'bg-marino-3 border-blanco/40'
-                                                : 'bg-marino-2 border-marino-4/40 group-hover:border-marino-4'
+                                        esSemanaActiva 
+                                        ? 'bg-naranja/20 border-naranja shadow-[0_0_25px_rgba(255,107,0,0.4)]' 
+                                        : esCompletada 
+                                            ? 'bg-verde/10 border-verde/40 shadow-[0_0_10px_rgba(34,197,94,0.1)]' 
+                                            : 'bg-marino-2 border-marino-4/40 group-hover:border-marino-4'
                                     }`}>
                                         <span className={`text-lg font-barlow-condensed font-black leading-none tracking-tighter transition-colors ${
-                                            esSemanaActual ? 'text-naranja' : estaCompletada ? 'text-verde/60' : 'text-blanco/60'
+                                            esSemanaActiva ? 'text-naranja' : esCompletada ? 'text-verde/80' : 'text-blanco/60'
                                         }`}>
                                             {semana.numeroSemana}
                                         </span>
                                         
-                                        {/* Progreso Radial Sutil (Borde inferior) */}
-                                        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
-                                            {diasConEj.map((_, i) => (
-                                                <div key={i} className={`w-1 h-1 rounded-full ${i < completados ? (estaCompletada ? 'bg-verde/40' : 'bg-naranja') : 'bg-marino-4/50'}`}></div>
-                                            ))}
-                                        </div>
+                                        {/* Progreso de sesiones */}
+                                        {(semana.sesionesTotales ?? 0) > 0 && (
+                                            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
+                                                {Array.from({ length: semana.sesionesTotales ?? 0 }).map((_, i) => (
+                                                    <div 
+                                                        key={i} 
+                                                        className={`w-1 h-1 rounded-full ${
+                                                            esSemanaActiva 
+                                                                ? (i < (semana.sesionesCompletadas ?? 0) ? 'bg-naranja' : 'bg-naranja/30')
+                                                                : esCompletada 
+                                                                    ? 'bg-verde/60'
+                                                                    : 'bg-marino-4/50'
+                                                        }`}
+                                                    ></div>
+                                                ))}
+                                            </div>
+                                        )}
 
                                         {/* Overlay para Fase Deload */}
                                         {semana.esFaseDeload && (
@@ -1009,23 +1050,29 @@ export default function RutinaClient({ macrocicloData }: { macrocicloData: Macro
                                         )}
                                     </div>
 
-                                    {/* Mini Badge de Estado */}
+                                    {/* Badge de Estado */}
                                     <div className="mt-3 flex flex-col items-center gap-1">
-                                         {estaCompletada ? (
-                                             <CheckCircle2 size={10} className="text-verde/50" />
-                                         ) : esSemanaActual ? (
-                                             <div className="w-1 h-1 rounded-full bg-naranja animate-ping"></div>
-                                         ) : (
-                                             <div className="w-1 h-1 rounded-full bg-marino-4"></div>
-                                         )}
-                                         
-                                         <span className={`text-[0.45rem] font-bold uppercase tracking-widest ${esSemanaActual ? 'text-naranja' : estaCompletada ? 'text-verde/40' : 'text-gris/30'}`}>
-                                             {semana.esFaseDeload ? 'Dld' : `W${semana.numeroSemana}`}
-                                         </span>
+                                        {esSemanaActiva ? (
+                                            <div className="flex items-center gap-1">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-naranja animate-pulse shadow-[0_0_6px_#FF6B00]"></div>
+                                                <span className="text-[0.45rem] font-bold text-naranja uppercase tracking-widest">Activa</span>
+                                            </div>
+                                        ) : esCompletada ? (
+                                            <div className="flex items-center gap-1">
+                                                <CheckCircle2 size={10} className="text-verde" />
+                                                <span className="text-[0.45rem] font-bold text-verde/60 uppercase tracking-widest">Completada</span>
+                                            </div>
+                                        ) : (
+                                            <span className="text-[0.45rem] font-bold text-gris/40 uppercase tracking-widest">Pendiente</span>
+                                        )}
+                                        
+                                        <span className={`text-[0.45rem] font-bold uppercase tracking-widest ${esSemanaActiva ? 'text-naranja' : esCompletada ? 'text-verde/40' : 'text-gris/30'}`}>
+                                            {semana.esFaseDeload ? 'Dld' : `Sem ${semana.numeroSemana}`}
+                                        </span>
                                     </div>
 
-                                    {/* Marcador de "Siguiente" */}
-                                    {esSemanaActual && (
+                                    {/* Marcador de semana activa */}
+                                    {esSemanaActiva && (
                                         <div className="absolute -top-1 -right-1 w-3 h-3 bg-naranja border-2 border-marino-1 rounded-full shadow-[0_0_8px_#FF6B00]"></div>
                                     )}
                                 </button>

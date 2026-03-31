@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Info, Receipt, CreditCard, Plus, Clock, CheckCircle2, AlertCircle, Calendar } from "lucide-react";
+import { Info, Receipt, CreditCard, Plus, Clock, CheckCircle2, AlertCircle, Calendar, Star } from "lucide-react";
 import ModalRegistrarPago from "./ModalRegistrarPago";
+import { toggleVIPCliente } from "@/nucleo/acciones/cliente.accion";
 
 interface CobroConPlan {
     id: string;
@@ -26,11 +27,26 @@ interface Props {
     clienteId: string;
     clienteNombre: string;
     resumen: ResumenFinanciero | null;
+    esVIP: boolean;
 }
 
-export default function TabFinanzasClient({ clienteId, clienteNombre, resumen }: Props) {
+export default function TabFinanzasClient({ clienteId, clienteNombre, resumen, esVIP }: Props) {
     const router = useRouter();
     const [modalOpen, setModalOpen] = useState(false);
+    const [isPending, startTransition] = useTransition();
+    const [clienteEsVIP, setClienteEsVIP] = useState(esVIP);
+
+    function handleToggleVIP() {
+        startTransition(async () => {
+            const res = await toggleVIPCliente(clienteId, !clienteEsVIP);
+            if (res.exito) {
+                setClienteEsVIP(!clienteEsVIP);
+                router.refresh();
+            } else {
+                alert(res.error || "Error al cambiar estado VIP");
+            }
+        });
+    }
 
     const totalFacturado = resumen?.cobros.reduce((acc: number, c: CobroConPlan) => acc + c.montoArs, 0) || 0;
     const ultimoCobro = resumen?.cobros[0];
@@ -71,6 +87,19 @@ export default function TabFinanzasClient({ clienteId, clienteNombre, resumen }:
                             {resumen?.estado === 'AL_DIA' ? "Al Día / Solvente" :
                                 resumen?.estado === 'VENCIDO' ? "Membresía Vencida" : "Sin Plan Activo"}
                         </h4>
+                        <div className="flex items-center gap-3 mt-2">
+                            <button
+                                onClick={handleToggleVIP}
+                                disabled={isPending}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[0.6rem] font-black uppercase tracking-widest transition-all ${clienteEsVIP
+                                    ? 'bg-[#EAB308]/20 border-[#EAB308]/40 text-[#EAB308] hover:bg-[#EAB308]/30'
+                                    : 'bg-marino-3 border-marino-4 text-gris hover:text-naranja hover:border-naranja/40'
+                                    }`}
+                            >
+                                <Star size={14} className={clienteEsVIP ? "fill-current" : ""} />
+                                {clienteEsVIP ? "VIP ACTIVO" : "Activar VIP"}
+                            </button>
+                        </div>
                         <p className="text-[0.7rem] md:text-xs text-gris font-medium mt-2 max-w-md">
                             {resumen?.estado === 'AL_DIA' ? `Próximo vencimiento automático en ${resumen.diasParaVencer} días.` :
                                 resumen?.estado === 'VENCIDO' ? "El cliente ha superado la fecha límite de pago." : "Asigne un plan para comenzar el seguimiento."}

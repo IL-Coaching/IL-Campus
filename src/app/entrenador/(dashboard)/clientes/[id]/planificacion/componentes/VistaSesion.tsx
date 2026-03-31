@@ -205,10 +205,19 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
         const nombre = prompt("Nombre del Bloque (ej: Superserie A, Circuito Core):", "Superserie");
         if (!nombre) return;
         
-        const esCircuito = window.confirm("¿Este bloque tiene modalidad CIRCUITO? (Conectará los ejercicios visualmente en el celular del alumno)");
-        const modalidad = esCircuito ? 'CIRCUITO' : 'SECUENCIAL';
+        const tipo = window.confirm("¿Crear un CIRCUITO? (Los ejercicios se hacen consecutivos sin descanso, con rondas)\n\nCancelar = AGRUPACIÓN (Ejercicios con descanso individual)")
+            ? 'CIRCUITO' 
+            : 'AGRUPACION';
+        
+        let rounds: number | undefined;
+        if (tipo === 'CIRCUITO') {
+            const roundsInput = prompt("Número de rondas:", "3");
+            rounds = roundsInput ? parseInt(roundsInput, 10) : 1;
+        }
+        
+        const modalidad = tipo === 'CIRCUITO' ? 'CIRCUITO' : 'SECUENCIAL';
 
-        const res = await agruparEjercicios(diaObjeto.id, selectedIds, nombre, modalidad);
+        const res = await agruparEjercicios(diaObjeto.id, selectedIds, nombre, modalidad, tipo, rounds);
         if (res.exito) {
             router.refresh();
             setSelectedIds([]);
@@ -236,9 +245,17 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
         }
     };
 
-    const handleAlternarModalidad = async (bloqueId: string, modalidadActual: string) => {
-        const nuevaModalidad = modalidadActual === 'CIRCUITO' ? 'SECUENCIAL' : 'CIRCUITO';
-        const res = await actualizarBloqueSesion(diaObjeto.id, bloqueId, { modalidad: nuevaModalidad });
+    const handleAlternarModalidad = async (bloqueId: string, tipoActual: string) => {
+        const nuevoTipo = tipoActual === 'CIRCUITO' ? 'AGRUPACION' : 'CIRCUITO';
+        
+        let rounds: number | undefined;
+        if (nuevoTipo === 'CIRCUITO') {
+            const roundsInput = prompt("Número de rondas:", "3");
+            rounds = roundsInput ? parseInt(roundsInput, 10) : 1;
+        }
+        
+        const modalidad = nuevoTipo === 'CIRCUITO' ? 'CIRCUITO' : 'SECUENCIAL';
+        const res = await actualizarBloqueSesion(diaObjeto.id, bloqueId, { modalidad, tipo: nuevoTipo, rounds });
         if (res.exito) router.refresh();
     };
 
@@ -835,32 +852,35 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                                                                     onClick={() => handleCambiarNombreGrupo(ej.grupoId!, ej.nombreGrupo || "Bloque")}
                                                                     className="text-sm font-black text-blanco uppercase tracking-widest hover:text-naranja transition-colors flex items-center gap-2"
                                                                 >
-                                                                    {ej.nombreGrupo || "Bloque Vinculado"}
+                                                                {ej.nombreGrupo || "Bloque Vinculado"}
+                                                                {ej.bloque?.tipo === 'CIRCUITO' && ej.bloque?.rounds && (
+                                                                    <span className="ml-2 text-[0.55rem] font-bold text-naranja">({ej.bloque.rounds} rondas)</span>
+                                                                )}
+                                                            </button>
+                                                            
+                                                            <div className="flex items-center gap-1 bg-marino-4/30 p-1 rounded-xl border border-white/5">
+                                                                <button
+                                                                    onClick={() => handleAlternarModalidad(ej.grupoId!, ej.bloque?.tipo || 'AGRUPACION')}
+                                                                    className={`text-[0.6rem] font-bold px-3 py-1 rounded-lg uppercase tracking-wider transition-all ${
+                                                                        (ej.bloque?.tipo || 'AGRUPACION') === 'CIRCUITO'
+                                                                        ? 'bg-naranja text-marino'
+                                                                        : 'text-gris/60 hover:text-blanco'
+                                                                    }`}
+                                                                >
+                                                                    Circuito
                                                                 </button>
-                                                                
-                                                                <div className="flex items-center gap-1 bg-marino-4/30 p-1 rounded-xl border border-white/5">
-                                                                    <button
-                                                                        onClick={() => handleAlternarModalidad(ej.grupoId!, ej.bloque?.modalidad || 'SECUENCIAL')}
-                                                                        className={`text-[0.6rem] font-bold px-3 py-1 rounded-lg uppercase tracking-wider transition-all ${
-                                                                            (ej.bloque?.modalidad || 'SECUENCIAL') === 'CIRCUITO'
-                                                                            ? 'bg-naranja text-marino'
-                                                                            : 'text-gris/60 hover:text-blanco'
-                                                                        }`}
-                                                                    >
-                                                                        Circuito
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => handleAlternarModalidad(ej.grupoId!, ej.bloque?.modalidad || 'SECUENCIAL')}
-                                                                        className={`text-[0.6rem] font-bold px-3 py-1 rounded-lg uppercase tracking-wider transition-all ${
-                                                                            (ej.bloque?.modalidad || 'SECUENCIAL') === 'SECUENCIAL'
-                                                                            ? 'bg-blanco text-marino'
-                                                                            : 'text-gris/60 hover:text-blanco'
-                                                                        }`}
-                                                                    >
-                                                                        Serie
-                                                                    </button>
-                                                                </div>
+                                                                <button
+                                                                    onClick={() => handleAlternarModalidad(ej.grupoId!, ej.bloque?.tipo || 'AGRUPACION')}
+                                                                    className={`text-[0.6rem] font-bold px-3 py-1 rounded-lg uppercase tracking-wider transition-all ${
+                                                                        (ej.bloque?.tipo || 'AGRUPACION') === 'AGRUPACION'
+                                                                        ? 'bg-blanco text-marino'
+                                                                        : 'text-gris/60 hover:text-blanco'
+                                                                    }`}
+                                                                >
+                                                                    Serie
+                                                                </button>
                                                             </div>
+                                                        </div>
                                                             <div className="flex items-center gap-2">
                                                                 {isSelectionMode && selectedIds.length > 0 && (
                                                                     <button

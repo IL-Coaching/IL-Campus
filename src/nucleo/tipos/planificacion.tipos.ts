@@ -1,4 +1,4 @@
-import { Cliente, Macrociclo, Semana, DiaSesion, EjercicioPlanificado, Ejercicio, Prisma, TipoCarga } from "@prisma/client";
+import { Cliente, Macrociclo, Semana, DiaSesion, EjercicioPlanificado, Ejercicio, Prisma, TipoCarga, TipoBloque, BloqueSesion } from "@prisma/client";
 
 /**
  * Tipos de Planificación — ArchSecure AI
@@ -11,7 +11,12 @@ export type EjercicioConDetalle = EjercicioPlanificado & {
     nombreGrupo?: string | null;
     modoMedicion?: string | null;
     tiempoObjetivoSeg?: number | null;
-    bloque?: { modalidad: string } | null;
+    bloque?: { modalidad: string; tipo?: TipoBloque; rounds?: number | null } | null;
+};
+
+export type BloqueConEjercicios = BloqueSesion & {
+    ejercicios: EjercicioConDetalle[];
+    bloquesHijos?: BloqueConEjercicios[];
 };
 
 export type DiaConEjercicios = DiaSesion & {

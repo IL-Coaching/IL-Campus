@@ -239,7 +239,17 @@ model BloqueSesion {
   nombre         String?                // Ej: "Activación Nerviosa", "Fuerza Estructural"
   orden          Int                    @default(1)
   modalidad      ModalidadBloque        @default(SECUENCIAL)
+  tipo           TipoBloque             @default(AGRUPACION)  // AGRUPACION o CIRCUITO
+  rounds         Int?                   // Solo para CIRCUITO: número de rondas
+  bloquePadreId  String?                // Para bloques anidados (circuito dentro de agrupacion)
+  bloquePadre    BloqueSesion?          @relation("BloquesAnidados", fields: [bloquePadreId], references: [id])
+  bloquesHijos   BloqueSesion[]         @relation("BloquesAnidados")
   ejercicios     EjercicioPlanificado[]
+}
+
+enum TipoBloque {
+  AGRUPACION
+  CIRCUITO
 }
 
 enum ModalidadBloque {
