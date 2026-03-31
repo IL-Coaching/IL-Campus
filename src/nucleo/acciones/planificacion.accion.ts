@@ -338,6 +338,8 @@ export async function clonarContenidoSesion(idOrigen: string, idDestino: string)
                         nombre: bloque.nombre,
                         orden: bloque.orden,
                         modalidad: bloque.modalidad,
+                        tipo: bloque.tipo,
+                        rounds: bloque.rounds,
                     }
                 });
                 groupMap.set(bloque.id, nuevoBloque.id);
@@ -721,6 +723,8 @@ export async function clonarSemana(semanaOrigenId: string, semanaDestinoId: stri
                             nombre: bloque.nombre,
                             orden: bloque.orden,
                             modalidad: bloque.modalidad,
+                            tipo: bloque.tipo,
+                            rounds: bloque.rounds,
                         }
                     });
                     groupMap.set(bloque.id, nuevoBloque.id);
