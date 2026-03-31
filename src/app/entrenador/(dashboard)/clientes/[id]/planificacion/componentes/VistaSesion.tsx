@@ -167,11 +167,13 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
 
     const handleGuardarTodo = async () => {
         setSaving(true);
+        console.log('[DEBUG] Guardando sesión - ejercicios:', ejercicios.length);
         try {
             await actualizarDiaSesion(diaObjeto.id, { notas: notasGrales });
 
             for (const ej of ejercicios) {
-                await guardarCambiosEjercicio(ej.id, {
+                console.log('[DEBUG] Guardando ejercicio:', ej.id, ej.nombreLibre || ej.ejercicio?.nombre);
+                const res = await guardarCambiosEjercicio(ej.id, {
                     series: ej.series,
                     modoMedicion: (ej.modoMedicion as 'REPS' | 'TIEMPO' | 'DISTANCIA' | 'AMRAP') || 'REPS',
                     repsMin: ej.repsMin ?? null,
@@ -188,13 +190,16 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                     esTesteo: ej.esTesteo,
                     modalidadTesteo: ej.modalidadTesteo
                 });
+                if (!res.exito) {
+                    console.error('[ERROR] Guardar ejercicio:', res.error);
+                }
             }
             router.refresh();
             setHasUnsavedChanges(false);
             alert("Sesión guardada correctamente.");
         } catch (error) {
-            console.error(error);
-            alert("Error al guardar algunos cambios.");
+            console.error('[EXCEPTION] Guardar sesión completa:', error);
+            alert("Error al guardar: " + (error instanceof Error ? error.message : 'Error desconocido'));
         } finally {
             setSaving(false);
         }
