@@ -166,13 +166,23 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
     };
 
     const handleGuardarTodo = async () => {
+        console.log('[DEBUG] handleGuardarTodo INICIADO');
+        alert('Iniciando guardado de ' + ejercicios.length + ' ejercicios');
         setSaving(true);
-        console.log('[DEBUG] Guardando sesión - ejercicios:', ejercicios.length);
         try {
-            await actualizarDiaSesion(diaObjeto.id, { notas: notasGrales });
+            console.log('[DEBUG] Actualizando notas del día...');
+            const resNotas = await actualizarDiaSesion(diaObjeto.id, { notas: notasGrales });
+            console.log('[DEBUG] Res notas:', resNotas);
+            if (!resNotas.exito) {
+                alert('Error al guardar notas: ' + resNotas.error);
+                setSaving(false);
+                return;
+            }
 
-            for (const ej of ejercicios) {
-                console.log('[DEBUG] Guardando ejercicio:', ej.id, ej.nombreLibre || ej.ejercicio?.nombre);
+            console.log('[DEBUG] Guardando ejercicios...');
+            for (let i = 0; i < ejercicios.length; i++) {
+                const ej = ejercicios[i];
+                console.log('[DEBUG] Guardando ejercicio ' + (i+1) + ':', ej.id, ej.nombreLibre || ej.ejercicio?.nombre);
                 const res = await guardarCambiosEjercicio(ej.id, {
                     series: ej.series,
                     modoMedicion: (ej.modoMedicion as 'REPS' | 'TIEMPO' | 'DISTANCIA' | 'AMRAP') || 'REPS',
@@ -190,8 +200,11 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                     esTesteo: ej.esTesteo,
                     modalidadTesteo: ej.modalidadTesteo
                 });
+                console.log('[DEBUG] Res ejercicio ' + (i+1) + ':', res);
                 if (!res.exito) {
-                    console.error('[ERROR] Guardar ejercicio:', res.error);
+                    alert('Error al guardar ejercicio ' + (i+1) + ': ' + res.error);
+                    setSaving(false);
+                    return;
                 }
             }
             router.refresh();
