@@ -45,6 +45,7 @@ model Plan {
   creadoEn          DateTime       @default(now())
   entrenador        Entrenador     @relation(fields: [entrenadorId], references: [id])
   asignaciones      PlanAsignado[]
+  @@index([entrenadorId])
 }
 
 model Ejercicio {
@@ -76,6 +77,7 @@ model Ejercicio {
   ejerciciosRutina       EjercicioRutina[]
   porcentajesCliente     PorcentajesCliente[]
   resultadosTesteo       ResultadoTesteo[]
+  @@index([entrenadorId])
 }
 
 model Cliente {
@@ -113,6 +115,7 @@ model Cliente {
   resultadosTesteo      ResultadoTesteo[]
   sesiones              SesionRegistrada[]
   gamificacion          GamificacionCliente?
+  @@index([entrenadorId, activo])
 }
 
 model PlanAsignado {
@@ -126,6 +129,7 @@ model PlanAsignado {
   cobros           Cobro[]
   cliente          Cliente  @relation(fields: [clienteId], references: [id])
   plan             Plan     @relation(fields: [planId], references: [id])
+  @@index([clienteId])
 }
 
 model FormularioInscripcion {
@@ -175,6 +179,7 @@ model Macrociclo {
   creadoEn         DateTime        @default(now())
   bloquesMensuales BloqueMensual[]
   cliente          Cliente         @relation(fields: [clienteId], references: [id])
+  @@index([clienteId])
 }
 
 model BloqueMensual {
@@ -187,6 +192,7 @@ model BloqueMensual {
   rangoReferencia String?
   macrociclo      Macrociclo @relation(fields: [macrocicloId], references: [id])
   semanas         Semana[]
+  @@index([macrocicloId])
 }
 
 model Semana {
@@ -209,6 +215,7 @@ model Semana {
   diasSesion          DiaSesion[]
   bloqueMensual       BloqueMensual?          @relation(fields: [bloqueMensualId], references: [id])
   volumenesSemanales  VolumenSemanal[]
+  @@index([bloqueMensualId])
 }
 
 model VolumenSemanal {
@@ -230,6 +237,7 @@ model DiaSesion {
   bloques        BloqueSesion[]
   ejercicios     EjercicioPlanificado[]
   sesionesReales SesionRegistrada[]
+  @@index([semanaId])
 }
 
 model BloqueSesion {
@@ -294,6 +302,7 @@ model EjercicioPlanificado {
   diaSesion            DiaSesion         @relation(fields: [diaId], references: [id])
   ejercicio            Ejercicio?        @relation(fields: [ejercicioId], references: [id])
   seriesRegistradas    SerieRegistrada[]
+  @@index([diaId])
 }
 
 model SesionRegistrada {
@@ -307,6 +316,7 @@ model SesionRegistrada {
   series          SerieRegistrada[]
   cliente         Cliente           @relation(fields: [clienteId], references: [id])
   diaSesion       DiaSesion         @relation(fields: [diaId], references: [id])
+  @@index([clienteId])
 }
 
 model SerieRegistrada {
@@ -320,6 +330,7 @@ model SerieRegistrada {
   notas                  String?
   ejercicioPlanificado   EjercicioPlanificado @relation(fields: [ejercicioPlanificadoId], references: [id])
   sesionRegistrada       SesionRegistrada     @relation(fields: [sesionId], references: [id])
+  @@index([sesionId])
 }
 
 model MetricasSesion {
@@ -351,6 +362,7 @@ model AlertaEstancamiento {
   creadaEn         DateTime  @default(now())
   cliente          Cliente   @relation(fields: [clienteId], references: [id])
   ejercicio        Ejercicio @relation(fields: [ejercicioId], references: [id])
+  @@index([clienteId])
 }
 
 model RegistroAdherencia {
@@ -361,6 +373,7 @@ model RegistroAdherencia {
   sesionesCompletadas  Int
   porcentaje           Float
   cliente              Cliente @relation(fields: [clienteId], references: [id])
+  @@index([clienteId])
 }
 
 model Checkin {
@@ -380,6 +393,7 @@ model Checkin {
   videoUrl         String?
   visto            Boolean  @default(false)
   cliente          Cliente  @relation(fields: [clienteId], references: [id])
+  @@index([clienteId, fecha])
 }
 
 model Cobro {
@@ -395,6 +409,7 @@ model Cobro {
   comprobanteUrl String?
   cliente        Cliente       @relation(fields: [clienteId], references: [id])
   planAsignado   PlanAsignado? @relation(fields: [planAsignadoId], references: [id])
+  @@index([clienteId, fecha])
 }
 
 model Mensaje {
@@ -407,6 +422,7 @@ model Mensaje {
   leido     Boolean  @default(false)
   mediaUrl  String?
   cliente   Cliente  @relation(fields: [clienteId], references: [id])
+  @@index([clienteId, leido])
 }
 
 model ResultadoTesteo {
@@ -423,6 +439,7 @@ model ResultadoTesteo {
   notas          String?
   cliente        Cliente         @relation(fields: [clienteId], references: [id])
   ejercicio      Ejercicio       @relation(fields: [ejercicioId], references: [id])
+  @@index([clienteId])
 }
 
 model ConfigTesteoEjercicio {
@@ -480,6 +497,7 @@ model Notificacion {
   purgada      Boolean          @default(false)
   creadaEn     DateTime         @default(now())
   entrenador   Entrenador       @relation(fields: [entrenadorId], references: [id])
+  @@index([entrenadorId, leida])
 }
 
 model NotaEntrenador {
@@ -490,6 +508,7 @@ model NotaEntrenador {
   creadaEn      DateTime   @default(now())
   actualizadaEn DateTime   @updatedAt
   entrenador    Entrenador @relation(fields: [entrenadorId], references: [id])
+  @@index([entrenadorId])
 }
 
 model RutinaPlantilla {
@@ -502,6 +521,7 @@ model RutinaPlantilla {
   actualizadaEn DateTime          @updatedAt
   ejercicios    EjercicioRutina[]
   entrenador    Entrenador        @relation(fields: [entrenadorId], references: [id])
+  @@index([entrenadorId])
 }
 
 model EjercicioRutina {

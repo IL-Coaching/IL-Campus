@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getEntrenadorSesion } from "../seguridad/sesion";
+import { PlanificacionServicio } from "../servicios/planificacion.servicio";
 import { prisma } from "@/baseDatos/conexion";
 
 export async function crearSesion(semanaId: string, diaSemana: string) {
@@ -22,9 +23,7 @@ export async function crearSesion(semanaId: string, diaSemana: string) {
 
         if (!semanaPropia) throw new Error("Acceso denegado.");
 
-        await import("../servicios/planificacion.servicio").then(m =>
-            m.PlanificacionServicio.crearNuevaSesion(semanaId, diaSemana)
-        );
+        await PlanificacionServicio.crearNuevaSesion(semanaId, diaSemana);
         revalidatePath(`/entrenador/clientes/${semanaPropia.bloqueMensual?.macrociclo.clienteId}/planificacion`);
         return { exito: true };
     } catch (error) {
@@ -52,9 +51,7 @@ export async function eliminarSesion(id: string) {
 
         if (!sesionPropia) throw new Error("Acceso denegado.");
 
-        await import("../servicios/planificacion.servicio").then(m =>
-            m.PlanificacionServicio.eliminarSesion(id)
-        );
+        await PlanificacionServicio.eliminarSesion(id);
         revalidatePath(`/entrenador/clientes/${sesionPropia.semana.bloqueMensual?.macrociclo.clienteId}/planificacion`);
         return { exito: true };
     } catch (error) {
