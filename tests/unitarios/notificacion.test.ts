@@ -82,7 +82,7 @@ describe('Notificacion Acciones - dispararAlertasFormularios', () => {
                 gravedad: GravedadNotificacion.INFO,
                 titulo: 'Formulario Pendiente: Maria Gomez',
                 cuerpo: 'El prospecto Maria Gomez envió su formulario y aún no tiene un plan asignado.',
-                enlace: '/entrenador/clientes?vista=formulario&clienteId=cliente-1'
+                enlace: '/entrenador/clientes/cliente-1'
             }
         }));
     });
