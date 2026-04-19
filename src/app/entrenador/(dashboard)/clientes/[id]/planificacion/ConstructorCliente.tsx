@@ -9,7 +9,8 @@ import VistaMicrociclo from './componentes/VistaMicrociclo';
 import VistaSesion from './componentes/VistaSesion';
 import BuscadorEjercicios from '@/compartido/componentes/planificacion/BuscadorEjercicios';
 import { MacrocicloCompleto, ClientePlanificacion, BloqueConSemanas, SemanaConDias } from '@/nucleo/tipos/planificacion.tipos';
-import { crearNuevoMacrociclo, agregarEjercicio } from '@/nucleo/acciones/planificacion.accion';
+import { agregarEjercicio } from '@/nucleo/acciones/ejercicio-planificado.accion';
+import { crearNuevoMacrociclo } from '@/nucleo/acciones/macrociclo.accion';
 import { Loader2, Settings, Download } from 'lucide-react';
 
 import ModalConfigurarMacro from './componentes/ModalConfigurarMacro';

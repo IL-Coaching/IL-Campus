@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { X, Target, Zap, PlusCircle, Loader2 } from "lucide-react";
 import { MacrocicloCompleto } from "@/nucleo/tipos/planificacion.tipos";
-import { agregarMesociclo } from "@/nucleo/acciones/planificacion.accion";
+import { agregarMesociclo } from '@/nucleo/acciones/macrociclo.accion';
 import { useRouter } from "next/navigation";
 
 interface Props {

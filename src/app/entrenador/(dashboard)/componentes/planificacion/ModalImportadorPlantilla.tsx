@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from 'react';
 import { X, Calendar, Loader2, ChevronDown, ChevronUp, Download } from 'lucide-react';
-import { obtenerPlantillasSemana, importarSemanaAPlantilla } from '@/nucleo/acciones/planificacion.accion';
+import { importarSemanaAPlantilla, obtenerPlantillasSemana } from '@/nucleo/acciones/plantilla.accion';
 import { useTransition } from 'react';
 
 interface PlantillaSemana {

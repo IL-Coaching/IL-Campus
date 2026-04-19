@@ -1,15 +1,7 @@
 "use client"
 import { useState, useEffect, useTransition } from 'react';
 import { Plus, Trash2, ChevronDown, ChevronUp, Dumbbell, X, Calendar, Loader2, Settings, ArrowLeft } from 'lucide-react';
-import { 
-    obtenerPlantillasSemana, 
-    crearPlantillaSemana,
-    actualizarDiaPlantilla,
-    agregarEjercicioAPlantilla,
-    guardarCambiosEjercicioPlantilla,
-    eliminarEjercicioPlantilla,
-    eliminarPlantillaSemana
-} from '@/nucleo/acciones/planificacion.accion';
+import { actualizarDiaPlantilla, agregarEjercicioAPlantilla, crearPlantillaSemana, eliminarEjercicioPlantilla, eliminarPlantillaSemana, guardarCambiosEjercicioPlantilla, obtenerPlantillasSemana } from '@/nucleo/acciones/plantilla.accion';
 import BuscadorEjercicios from '@/compartido/componentes/planificacion/BuscadorEjercicios';
 import SelectorEjercicioCelda from '@/compartido/componentes/planificacion/SelectorEjercicioCelda';
 

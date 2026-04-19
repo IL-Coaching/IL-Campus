@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SemanaConDias } from "@/nucleo/tipos/planificacion.tipos";
 import { Calendar, Trash2, Zap, Plus, Activity, AlertTriangle, Copy, ClipboardPaste, Loader2 } from "lucide-react";
-import { crearSesion, eliminarSesion, actualizarSemana, clonarSemana } from "@/nucleo/acciones/planificacion.accion";
+import { actualizarSemana, clonarSemana } from '@/nucleo/acciones/macrociclo.accion';
+import { crearSesion, eliminarSesion } from '@/nucleo/acciones/sesion.accion';
 
 interface VistaMicrocicloProps {
     semana: SemanaConDias;

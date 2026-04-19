@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { TrendingUp, Settings, Plus, ChevronRight, Target, Zap, Trash2, Download } from "lucide-react";
 import { MacrocicloCompleto, BloqueConSemanas } from "@/nucleo/tipos/planificacion.tipos";
-import { eliminarMesociclo } from "@/nucleo/acciones/planificacion.accion";
+import { eliminarMesociclo } from '@/nucleo/acciones/macrociclo.accion';
 
 interface VistaMacrocicloProps {
     macrociclo: MacrocicloCompleto;

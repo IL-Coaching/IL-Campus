@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { X, Calendar, Clock, Save, Loader2, Info } from "lucide-react";
 import { MacrocicloCompleto } from "@/nucleo/tipos/planificacion.tipos";
-import { actualizarMacrociclo } from "@/nucleo/acciones/planificacion.accion";
+import { actualizarMacrociclo } from '@/nucleo/acciones/macrociclo.accion';
 import { useRouter } from "next/navigation";
 
 interface Props {

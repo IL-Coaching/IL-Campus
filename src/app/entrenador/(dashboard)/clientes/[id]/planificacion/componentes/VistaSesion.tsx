@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Copy, Save, Info, Loader2, Dumbbell, ClipboardList, Gauge, Scale, Activity, ShieldAlert, ChevronDown, ChevronUp, GripVertical, ChevronLeft } from 'lucide-react';
 import { DiaConEjercicios, EjercicioConDetalle, SemanaConDias } from '@/nucleo/tipos/planificacion.tipos';
-import { guardarCambiosEjercicio, eliminarEjercicio, reordenarEjercicios, agruparEjercicios, desagruparEjercicios, actualizarNombreGrupo, clonarContenidoSesion, actualizarDiaSesion, actualizarBloqueSesion, vincularEjerciciosABloque } from '@/nucleo/acciones/planificacion.accion';
+import { actualizarBloqueSesion, actualizarNombreGrupo, agruparEjercicios, desagruparEjercicios, eliminarEjercicio, guardarCambiosEjercicio, reordenarEjercicios, vincularEjerciciosABloque } from '@/nucleo/acciones/ejercicio-planificado.accion';
+import { actualizarDiaSesion, clonarContenidoSesion } from '@/nucleo/acciones/sesion.accion';
 import { obtenerCondicionesClinicas } from '@/nucleo/acciones/cliente.accion';
 import { useRouter, useParams } from 'next/navigation';
 import SelectorEjercicioCelda from '@/compartido/componentes/planificacion/SelectorEjercicioCelda';
