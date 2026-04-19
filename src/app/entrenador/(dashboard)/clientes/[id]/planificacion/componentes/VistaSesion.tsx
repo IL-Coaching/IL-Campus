@@ -166,23 +166,17 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
     };
 
     const handleGuardarTodo = async () => {
-        console.log('[DEBUG] handleGuardarTodo INICIADO');
-        alert('Iniciando guardado de ' + ejercicios.length + ' ejercicios');
         setSaving(true);
         try {
-            console.log('[DEBUG] Actualizando notas del día...');
             const resNotas = await actualizarDiaSesion(diaObjeto.id, { notas: notasGrales });
-            console.log('[DEBUG] Res notas:', resNotas);
             if (!resNotas.exito) {
-                alert('Error al guardar notas: ' + resNotas.error);
+                console.error('Error al guardar notas:', resNotas.error);
                 setSaving(false);
                 return;
             }
 
-            console.log('[DEBUG] Guardando ejercicios...');
             for (let i = 0; i < ejercicios.length; i++) {
                 const ej = ejercicios[i];
-                console.log('[DEBUG] Guardando ejercicio ' + (i+1) + ':', ej.id, ej.nombreLibre || ej.ejercicio?.nombre);
                 const res = await guardarCambiosEjercicio(ej.id, {
                     series: ej.series,
                     modoMedicion: (ej.modoMedicion as 'REPS' | 'TIEMPO' | 'DISTANCIA' | 'AMRAP') || 'REPS',
@@ -200,19 +194,16 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
                     esTesteo: ej.esTesteo,
                     modalidadTesteo: ej.modalidadTesteo
                 });
-                console.log('[DEBUG] Res ejercicio ' + (i+1) + ':', res);
                 if (!res.exito) {
-                    alert('Error al guardar ejercicio ' + (i+1) + ': ' + res.error);
+                    console.error('Error al guardar ejercicio ' + (i+1) + ':', res.error);
                     setSaving(false);
                     return;
                 }
             }
             router.refresh();
             setHasUnsavedChanges(false);
-            alert("Sesión guardada correctamente.");
         } catch (error) {
-            console.error('[EXCEPTION] Guardar sesión completa:', error);
-            alert("Error al guardar: " + (error instanceof Error ? error.message : 'Error desconocido'));
+            console.error('Error al guardar sesión:', error);
         } finally {
             setSaving(false);
         }
@@ -279,7 +270,6 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
 
     const handleVincularABloque = async (bloqueId: string) => {
         if (selectedIds.length === 0) {
-            alert("Primero selecciona los ejercicios sueltos que quieres unir a este bloque.");
             return;
         }
         const res = await vincularEjerciciosABloque(diaObjeto.id, bloqueId, selectedIds);
@@ -293,7 +283,6 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
     const handleCopiarEstructura = () => {
         localStorage.setItem('copied_sesion_id', diaObjeto.id);
         setCopiedSesionId(diaObjeto.id);
-        alert("Estructura de la sesión copiada.");
     };
 
     const handlePegarEstructura = async () => {
@@ -305,9 +294,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onO
         const res = await clonarContenidoSesion(idOrigen, diaObjeto.id);
         if (res.exito) {
             router.refresh();
-            alert("Estructura clonada con éxito.");
         } else {
-            alert("Error al pegar: " + res.error);
+            console.error("Error al pegar:", res.error);
         }
         setSaving(false);
     };
