@@ -11,7 +11,7 @@ import {
     eliminarPlantillaSemana
 } from '@/nucleo/acciones/planificacion.accion';
 import BuscadorEjercicios from '@/compartido/componentes/planificacion/BuscadorEjercicios';
-import SelectorEjercicioCelda from '../componentes/planificacion/SelectorEjercicioCelda';
+import SelectorEjercicioCelda from '@/compartido/componentes/planificacion/SelectorEjercicioCelda';
 
 interface EjercicioPlantilla {
     id: string;

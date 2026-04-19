@@ -5,7 +5,7 @@ import { DiaConEjercicios, EjercicioConDetalle, SemanaConDias } from '@/nucleo/t
 import { guardarCambiosEjercicio, eliminarEjercicio, reordenarEjercicios, agruparEjercicios, desagruparEjercicios, actualizarNombreGrupo, clonarContenidoSesion, actualizarDiaSesion, actualizarBloqueSesion, vincularEjerciciosABloque } from '@/nucleo/acciones/planificacion.accion';
 import { obtenerCondicionesClinicas } from '@/nucleo/acciones/cliente.accion';
 import { useRouter, useParams } from 'next/navigation';
-import SelectorEjercicioCelda from './SelectorEjercicioCelda';
+import SelectorEjercicioCelda from '@/compartido/componentes/planificacion/SelectorEjercicioCelda';
 
 
 interface VistaSesionProps {
