@@ -36,6 +36,7 @@ import {
 } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import ModalEditarEjercicio from "./ModalEditarEjercicio";
+import { FILTRO_TODOS } from "@/nucleo/constantes/enums";
 
 // Definición extendida para la UI
 interface Ejercicio {
@@ -67,9 +68,9 @@ export default function BibliotecaEjercicios({ iniciales }: { iniciales: Ejercic
     const [showFilters, setShowFilters] = useState(false);
 
     // Filtros activos
-    const [filtroMusculo, setFiltroMusculo] = useState<string>('TODOS');
-    const [filtroEquipamiento, setFiltroEquipamiento] = useState<string>('TODOS');
-    const [filtroPatron, setFiltroPatron] = useState<string>('TODOS');
+    const [filtroMusculo, setFiltroMusculo] = useState<string>(FILTRO_TODOS);
+    const [filtroEquipamiento, setFiltroEquipamiento] = useState<string>(FILTRO_TODOS);
+    const [filtroPatron, setFiltroPatron] = useState<string>(FILTRO_TODOS);
 
     // Ejercicio seleccionado para modal de detalle
     const [selectedEjercicio, setSelectedEjercicio] = useState<Ejercicio | null>(null);
@@ -79,9 +80,9 @@ export default function BibliotecaEjercicios({ iniciales }: { iniciales: Ejercic
     const ejerciciosFiltrados = useMemo(() => {
         return ejercicios.filter(ej => {
             const matchQuery = ej.nombre.toLowerCase().includes(query.toLowerCase());
-            const matchMusculo = filtroMusculo === 'TODOS' || ej.musculoPrincipal === filtroMusculo;
-            const matchEquipo = filtroEquipamiento === 'TODOS' || ej.equipamiento.includes(filtroEquipamiento as TipoEquipamiento);
-            const matchPatron = filtroPatron === 'TODOS' || ej.patron === filtroPatron;
+            const matchMusculo = filtroMusculo === FILTRO_TODOS || ej.musculoPrincipal === filtroMusculo;
+            const matchEquipo = filtroEquipamiento === FILTRO_TODOS || ej.equipamiento.includes(filtroEquipamiento as TipoEquipamiento);
+            const matchPatron = filtroPatron === FILTRO_TODOS || ej.patron === filtroPatron;
 
             return matchQuery && matchMusculo && matchEquipo && matchPatron;
         });
@@ -264,9 +265,9 @@ export default function BibliotecaEjercicios({ iniciales }: { iniciales: Ejercic
                         <div className="flex items-end pb-0.5">
                             <button
                                 onClick={() => {
-                                    setFiltroMusculo('TODOS');
-                                    setFiltroEquipamiento('TODOS');
-                                    setFiltroPatron('TODOS');
+                                    setFiltroMusculo(FILTRO_TODOS);
+                                    setFiltroEquipamiento(FILTRO_TODOS);
+                                    setFiltroPatron(FILTRO_TODOS);
                                     setQuery("");
                                 }}
                                 className="text-[0.6rem] font-black text-gris hover:text-rojo uppercase tracking-widest transition-colors"

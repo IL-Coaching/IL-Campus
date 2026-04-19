@@ -4,6 +4,7 @@ import { Search, X, Dumbbell, Loader2, Play, Video } from 'lucide-react';
 import Image from 'next/image';
 import { buscarEjercicios } from '@/nucleo/acciones/ejercicio.accion';
 import type { Ejercicio } from '@prisma/client';
+import { GRUPOS_MUSCULARES_BUSCADOR, FILTRO_TODOS } from '@/nucleo/constantes/enums';
 
 interface BuscadorEjerciciosProps {
     onClose: () => void;
@@ -11,7 +12,7 @@ interface BuscadorEjerciciosProps {
 }
 
 export default function BuscadorEjercicios({ onClose, onSelect }: BuscadorEjerciciosProps) {
-    const [musculoFiltro, setMusculoFiltro] = useState('Todos');
+    const [musculoFiltro, setMusculoFiltro] = useState<string>(FILTRO_TODOS);
     const [query, setQuery] = useState('');
     const [resultados, setResultados] = useState<Ejercicio[]>([]);
     const [loading, setLoading] = useState(false);
@@ -63,11 +64,11 @@ export default function BuscadorEjercicios({ onClose, onSelect }: BuscadorEjerci
                     </div>
 
                     <div className="flex flex-wrap gap-2 text-white">
-                        {['TODOS', 'PECHO', 'ESPALDA', 'HOMBROS', 'BICEPS', 'TRICEPS', 'CUADRICEPS', 'ISQUIOTIBIALES', 'GLUTEO', 'CORE'].map(m => (
+                        {GRUPOS_MUSCULARES_BUSCADOR.map(m => (
                             <button
                                 key={m}
-                                onClick={() => setMusculoFiltro(m === 'TODOS' ? 'Todos' : m)}
-                                className={`px-4 py-2 rounded-full text-[0.65rem] font-bold uppercase tracking-widest transition-all ${(musculoFiltro === m || (m === 'TODOS' && musculoFiltro === 'Todos'))
+                                onClick={() => setMusculoFiltro(m)}
+                                className={`px-4 py-2 rounded-full text-[0.65rem] font-bold uppercase tracking-widest transition-all ${musculoFiltro === m
                                     ? 'bg-naranja text-marino shadow-lg shadow-naranja/20'
                                     : 'bg-marino-3 border border-marino-4 text-gris hover:text-blanco hover:border-gris'
                                     }`}
