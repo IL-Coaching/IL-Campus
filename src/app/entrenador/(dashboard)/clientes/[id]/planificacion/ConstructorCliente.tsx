@@ -7,7 +7,7 @@ import VistaMacrociclo from './componentes/VistaMacrociclo';
 import VistaMesociclo from './componentes/VistaMesociclo';
 import VistaMicrociclo from './componentes/VistaMicrociclo';
 import VistaSesion from './componentes/VistaSesion';
-import BuscadorEjercicios from './componentes/BuscadorEjercicios';
+import BuscadorEjercicios from '@/compartido/componentes/planificacion/BuscadorEjercicios';
 import { MacrocicloCompleto, ClientePlanificacion, BloqueConSemanas, SemanaConDias } from '@/nucleo/tipos/planificacion.tipos';
 import { crearNuevoMacrociclo, agregarEjercicio } from '@/nucleo/acciones/planificacion.accion';
 import { Loader2, Settings, Download } from 'lucide-react';

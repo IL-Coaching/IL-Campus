@@ -10,7 +10,7 @@ import {
     eliminarEjercicioPlantilla,
     eliminarPlantillaSemana
 } from '@/nucleo/acciones/planificacion.accion';
-import BuscadorEjercicios from '../componentes/planificacion/BuscadorEjercicios';
+import BuscadorEjercicios from '@/compartido/componentes/planificacion/BuscadorEjercicios';
 import SelectorEjercicioCelda from '../componentes/planificacion/SelectorEjercicioCelda';
 
 interface EjercicioPlantilla {
