@@ -1,8 +1,6 @@
-export interface FaqItem {
-    q?: string;
-    a?: string;
-    pregunta?: string;
-    respuesta?: string;
+interface FaqItem {
+    q: string;
+    a: string;
 }
 
 interface Props {

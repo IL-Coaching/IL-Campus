@@ -20,7 +20,7 @@ export default async function RutinaPage() {
                     Cámara de Éstasis Activa
                 </h1>
                 <p className="text-blue-200/60 text-sm font-medium max-w-xs leading-relaxed mb-8">
-                    Tu acceso a la planificación ha sido congelado temporalmente por tu entrenador. Tu progreso financiero está en pausa y tus rutinas están salvaguardadas.
+                    Tu acceso a la planificación ha sido congelado temporalmente por tu entrenador. Tu progreso financiero está en pausa y tus rutinas están resguardadas.
                 </p>
                 <div className="p-4 bg-marino-2 border border-blue-500/20 rounded-2xl text-[0.65rem] text-blue-300 font-bold uppercase tracking-widest">
                     Contacta a tu coach para reactivar

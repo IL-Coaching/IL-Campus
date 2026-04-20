@@ -1,8 +1,7 @@
-export interface Testimonio {
+interface Testimonio {
     nombre: string;
     texto: string;
     plan?: string;
-    rating?: number;
 }
 
 interface Props {

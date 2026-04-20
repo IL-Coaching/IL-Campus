@@ -4,8 +4,8 @@ import Nav from "./componentes-landing/Nav";
 import Hero from "./componentes-landing/Hero";
 import Bio from "./componentes-landing/Bio";
 import Planes from "./componentes-landing/Planes";
-import Testimonios from "./componentes-landing/Testimonios";
-import Faq from "./componentes-landing/Faq";
+import Testimonios, { Testimonio } from "./componentes-landing/Testimonios";
+import Faq, { FaqItem } from "./componentes-landing/Faq";
 import CtaFinal from "./componentes-landing/CtaFinal";
 import Footer from "./componentes-landing/Footer";
 import ModalWhatsapp from "./componentes-landing/ModalWhatsapp";
@@ -134,10 +134,10 @@ export default async function LandingPage() {
         <Planes planes={planesVisibles} />
 
         {/* 5. TESTIMONIOS */}
-        <Testimonios testimoniosData={configD?.testimonios} />
+        <Testimonios testimoniosData={configD?.testimonios as Testimonio[] | null | undefined} />
 
         {/* 6. FAQ */}
-        <Faq faqsData={configD?.faqs} />
+        <Faq faqsData={configD?.faqs as FaqItem[] | null | undefined} />
 
         {/* 7. CTA FINAL */}
         <CtaFinal />
