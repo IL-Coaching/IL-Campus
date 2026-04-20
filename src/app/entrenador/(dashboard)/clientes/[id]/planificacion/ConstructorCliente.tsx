@@ -158,7 +158,6 @@ export default function ConstructorCliente({ cliente, macrocicloInicial, limiteC
                                     diaObjeto={diaObjetoActual}
                                     semanaObjeto={semanaActual}
                                     semanaNombre={`Semana ${semanaActiva}`}
-                                    onOpenBuscador={() => setBuscadorOpen(true)}
                                     onBack={volver}
                                 />
                             )}
