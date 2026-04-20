@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Trash2, Dumbbell, Activity, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, Info, Loader2, Dumbbell, Gauge, Scale, Activity, GripVertical } from 'lucide-react';
 import BannerClinico from './BannerClinico';
 import HeaderSesion from './HeaderSesion';
 import MetodologiaSesion from './MetodologiaSesion';
@@ -16,9 +16,10 @@ interface VistaSesionProps {
     diaObjeto: DiaConEjercicios;
     semanaObjeto: SemanaConDias;
     semanaNombre: string;
+    onOpenBuscador: () => void;
     onBack: () => void;
 }
-export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onBack }: VistaSesionProps) {
+export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onOpenBuscador, onBack }: VistaSesionProps) {
     const [ejercicios, setEjercicios] = useState<EjercicioConDetalle[]>(diaObjeto.ejercicios);
     const [notasGrales, setNotasGrales] = useState<string>(diaObjeto.notas || '');
     const [saving, setSaving] = useState(false);
@@ -27,6 +28,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [isSelectionMode, setIsSelectionMode] = useState(false);
     const [copiedSesionId, setCopiedSesionId] = useState<string | null>(null);
+    const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const router = useRouter();
     const params = useParams();
@@ -55,6 +57,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
             const blockItems = ejercicios.filter(e => e.grupoId === blockId);
             const targetItem = ejercicios[idx];
             
+            // Si el target es parte del mismo bloque, no hacemos nada
             if (targetItem.grupoId === blockId) {
                 setDraggingIdx(null);
                 setIsDraggingBlock(false);
@@ -71,6 +74,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
                 result.splice(targetIdxInOthers, 0, ...blockItems);
             }
             
+            // Actualizar órdenes
             const updated = result.map((ej, i) => ({ ...ej, orden: i + 1 }));
             setEjercicios(updated);
             setDraggingIdx(null);
@@ -80,6 +84,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
             const [draggedItem] = newEjercicios.splice(draggingIdx, 1);
             newEjercicios.splice(idx, 0, draggedItem);
 
+            // Actualizar órdenes
             const updated = newEjercicios.map((ej, i) => ({ ...ej, orden: i + 1 }));
             setEjercicios(updated);
             setDraggingIdx(null);
@@ -97,6 +102,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
         newEjercicios[idx] = newEjercicios[newIdx];
         newEjercicios[newIdx] = temp;
 
+        // Actualizar órdenes
         const updated = newEjercicios.map((ej, i) => ({ ...ej, orden: i + 1 }));
         setEjercicios(updated);
 
@@ -116,6 +122,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
     }, [diaObjeto.id, clienteId]);
 
 
+    // Sincronizar state si cambia el objeto de prop (ej. cambio de día)
     useEffect(() => {
         const sorted = [...diaObjeto.ejercicios].sort((a, b) => a.orden - b.orden);
         setEjercicios(sorted);
@@ -123,12 +130,14 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
         setHasUnsavedChanges(false);
     }, [diaObjeto]);
 
+    // Detectar cambios
     useEffect(() => {
         const isDirty = JSON.stringify(ejercicios) !== JSON.stringify([...diaObjeto.ejercicios].sort((a, b) => a.orden - b.orden)) || 
                         notasGrales !== (diaObjeto.notas || '');
         setHasUnsavedChanges(isDirty);
     }, [ejercicios, notasGrales, diaObjeto]);
 
+    // Registrar advertencia de salida
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
             if (hasUnsavedChanges) {
@@ -322,6 +331,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
             />
 
 
+            {/* Listado de Ejercicios — Vista Móvil (Cards) & Desktop (Tabla) */}
             <div className={`bg-marino-2 border rounded-3xl overflow-hidden shadow-2xl relative transition-all duration-500 ${semanaObjeto.esFaseDeload ? 'border-blue-500/30 ring-1 ring-blue-500/10 shadow-blue-900/10' : 'border-marino-4'}`}>
                 {semanaObjeto.esFaseDeload && (
                     <div className="bg-blue-500/10 border-b border-blue-500/10 px-8 py-4 flex items-center gap-4">
@@ -330,6 +340,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
                     </div>
                 )}
 
+                {/* Vista MOBILE: Cards de Ejercicio */}
                 <div className="block md:hidden divide-y divide-marino-4">
                     {ejercicios.length === 0 ? (
                         <div className="p-20 text-center">
@@ -504,6 +515,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
                                     className={`p-5 transition-colors relative cursor-pointer ${isSelectionMode ? (selectedIds.includes(ej.id) ? 'bg-naranja/10 border-b border-naranja/20' : 'hover:bg-naranja/5 border-b border-marino-4/40') : 'active:bg-marino-3/50'}`}
                                     onClick={() => { if (isSelectionMode) handleToggleSelection(ej.id); }}
                                 >
+                                    {/* Overlay en modo selección para bloquear inputs */}
                                     {isSelectionMode && (
                                         <div className="absolute inset-0 z-10 flex items-center justify-end pr-5">
                                             <div className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition-all ${selectedIds.includes(ej.id) ? 'bg-naranja border-naranja' : 'bg-marino-3 border-marino-4'}`}>
@@ -644,6 +656,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
                     })()}
                 </div>
 
+                {/* Vista DESKTOP: Tabla Profesional Agile Grid */}
                 <div className="hidden md:block w-full overflow-x-auto scrollbar-hide">
                     <table className="w-full text-left text-sm border-collapse table-fixed min-w-[1000px]">
                         <thead>
@@ -706,7 +719,6 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
                                                                     <span className="ml-2 text-[0.55rem] font-bold text-naranja">({ej.bloque.rounds} rondas)</span>
                                                                 )}
                                                             </button>
-                                                            </div>
                                                             
                                                             <div className="flex items-center gap-1 bg-marino-4/30 p-1 rounded-xl border border-white/5">
                                                                 <button
@@ -731,88 +743,147 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
                                                                 </button>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-2">
-                                                            {isSelectionMode && selectedIds.length > 0 && (
+                                                            <div className="flex items-center gap-2">
+                                                                {isSelectionMode && selectedIds.length > 0 && (
+                                                                    <button
+                                                                        onClick={() => handleVincularABloque(ej.grupoId!)}
+                                                                        className="text-[0.6rem] font-black text-naranja border border-naranja/40 rounded-xl px-4 py-1.5 hover:bg-naranja hover:text-marino transition-all uppercase tracking-widest flex items-center gap-2"
+                                                                    >
+                                                                        <Plus size={12} />
+                                                                        Unir Seleccionados
+                                                                    </button>
+                                                                )}
                                                                 <button
-                                                                    onClick={() => handleVincularABloque(ej.grupoId!)}
-                                                                    className="text-[0.6rem] font-bold px-3 py-1 bg-verde text-marino rounded-lg uppercase"
+                                                                    onClick={() => handleDesagrupar(ej.grupoId!)}
+                                                                    className="text-[0.6rem] font-black text-gris/30 hover:text-rojo uppercase tracking-widest px-4 py-1.5 border border-marino-4 rounded-xl hover:bg-rojo/5 transition-all"
                                                                 >
-                                                                    +Vincular ({selectedIds.length})
+                                                                    Disolver Bloque
                                                                 </button>
-                                                            )}
-                                                            <button
-                                                                onClick={() => handleDesagrupar(ej.grupoId!)}
-                                                                className="text-[0.55rem] font-bold text-gris/60 hover:text-rojo uppercase"
-                                                            >
-                                                                Desvincular
-                                                            </button>
+                                                            </div>
                                                         </div>
                                                     </td>
                                                 </tr>
                                                 {groupMembers.map((gej, gidx) => (
-                                                    <tr 
-                                                        key={gej.id} 
-                                                        className="hover:bg-marino-3/30 transition-colors"
+                                                    <tr
+                                                        key={gej.id}
+                                                        onDragOver={handleDragOver}
+                                                        onDrop={() => handleDrop(ejercicios.findIndex(e => e.id === gej.id))}
+                                                        onClick={() => { if (isSelectionMode) handleToggleSelection(gej.id); }}
+                                                        className={`group transition-all border-l-4 border-l-naranja/20 ${isSelectionMode
+                                                            ? (selectedIds.includes(gej.id) ? 'bg-naranja/10 cursor-pointer' : 'hover:bg-naranja/5 cursor-pointer')
+                                                            : `hover:bg-white/[0.02] ${draggingIdx === ejercicios.findIndex(e => e.id === gej.id) ? 'opacity-20' : ''}`
+                                                            } ${activeDropdownId === gej.id ? 'z-[60] relative' : ''}`}
                                                     >
-                                                        <td className="p-3 sticky left-0 z-20 bg-marino-2 border-r border-marino-4 w-[40px]">
-                                                            {isSelectionMode && (
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={selectedIds.includes(gej.id)}
-                                                                    onChange={() => handleToggleSelection(gej.id)}
-                                                                    className="w-4 h-4 rounded border-marino-4"
+                                                        <td
+                                                            className={`p-3 text-center sticky left-0 z-10 bg-marino-2/95 backdrop-blur-sm border-r border-white/5 ${activeDropdownId === gej.id ? 'z-[70]' : ''}`}
+                                                            draggable={!isSelectionMode}
+                                                            onDragStart={() => handleDragStart(ejercicios.findIndex(e => e.id === gej.id))}
+                                                        >
+                                                            {isSelectionMode ? (
+                                                                <div
+                                                                    onClick={(e) => { e.stopPropagation(); handleToggleSelection(gej.id); }}
+                                                                    className={`w-5 h-5 rounded border-2 flex items-center justify-center mx-auto cursor-pointer transition-all ${selectedIds.includes(gej.id) ? 'bg-naranja border-naranja' : 'bg-marino-3 border-marino-4 hover:border-naranja/60'
+                                                                        }`}
+                                                                >
+                                                                    {selectedIds.includes(gej.id) && <span className="text-marino font-black text-[10px]">✓</span>}
+                                                                </div>
+                                                            ) : (
+                                                                <GripVertical size={14} className="opacity-0 group-hover:opacity-100 transition-opacity mx-auto text-gris cursor-grab" />
+                                                            )}
+                                                        </td>
+                                                        <td className="p-3 text-gris font-black text-base text-center opacity-30 group-hover:opacity-100 transition-opacity sticky left-[40px] z-10 bg-marino-2/95 backdrop-blur-sm border-r border-white/5">
+                                                            {String.fromCharCode(65 + gidx)}
+                                                        </td>
+                                                        <td className={`p-3 sticky left-[85px] z-10 bg-marino-2/95 backdrop-blur-sm border-r border-white/10 shadow-[5px_0_15px_rgba(0,0,0,0.2)] w-[220px] ${activeDropdownId === gej.id ? 'z-[70]' : ''}`}>
+                                                            {isSelectionMode ? (
+                                                                <span className="text-blanco font-black text-[0.75rem] uppercase tracking-tight">
+                                                                    {gej.ejercicio?.nombre || gej.nombreLibre || '—'}
+                                                                </span>
+                                                            ) : (
+                                                                <SelectorEjercicioCelda
+                                                                    initialValue={gej.ejercicio?.nombre || gej.nombreLibre || ""}
+                                                                    ejercicioId={gej.ejercicioId}
+                                                                    esBiblioteca={gej.esBiblioteca}
+                                                                    onSelect={(data) => handleUpdateChange(gej.id, {
+                                                                        ejercicioId: data.ejercicioId,
+                                                                        nombreLibre: data.nombre,
+                                                                        esBiblioteca: data.esBiblioteca
+                                                                    })}
+                                                                    onOpenChange={(isOpen) => setActiveDropdownId(isOpen ? gej.id : null)}
                                                                 />
                                                             )}
                                                         </td>
-                                                        <td className="p-3 sticky left-[40px] z-20 bg-marino-2 border-r border-marino-4 w-[45px] text-center font-black text-gris">
-                                                            {String.fromCharCode(65 + gidx)}
+                                                        <td className="p-2">
+                                                            {/* Toggle modo + campo adaptativo */}
+                                                            <div className="flex flex-col gap-1">
+                                                                <div className="flex items-center gap-0.5 bg-marino-4/30 rounded-md p-0.5">
+                                                                    {(['REPS','TIEMPO','AMRAP'] as const).map(modo => (
+                                                                        <button key={modo}
+                                                                            onClick={() => handleUpdateChange(gej.id, { modoMedicion: modo, repsMin: modo !== 'REPS' ? null : gej.repsMin, repsMax: modo !== 'REPS' ? null : gej.repsMax, tiempoObjetivoSeg: modo !== 'TIEMPO' ? null : gej.tiempoObjetivoSeg })}
+                                                                            className={`flex-1 text-[0.5rem] font-black uppercase py-0.5 rounded transition-all ${ (gej.modoMedicion || 'REPS') === modo ? 'bg-naranja text-marino' : 'text-gris/50 hover:text-blanco' }`}
+                                                                        >{modo === 'AMRAP' ? 'AMRP' : modo}</button>
+                                                                    ))}
+                                                                </div>
+                                                                {(gej.modoMedicion || 'REPS') === 'REPS' && (
+                                                                    <div className="flex items-center gap-0.5 bg-marino border border-white/5 rounded-lg overflow-hidden">
+                                                                        <input type="number" inputMode="numeric" value={gej.repsMin ?? ''}
+                                                                            onChange={(e) => handleUpdateChange(gej.id, { repsMin: parseInt(e.target.value) || null })}
+                                                                            className="w-full bg-marino-3/50 py-1.5 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10"
+                                                                        />
+                                                                        <span className="text-gris/20 text-[10px]">—</span>
+                                                                        <input type="number" inputMode="numeric" value={gej.repsMax ?? ''}
+                                                                            onChange={(e) => handleUpdateChange(gej.id, { repsMax: parseInt(e.target.value) || null })}
+                                                                            className="w-full bg-marino-3/50 py-1.5 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10"
+                                                                        />
+                                                                    </div>
+                                                                )}
+                                                                {(gej.modoMedicion || 'REPS') === 'TIEMPO' && (
+                                                                    <div className="flex items-center gap-0.5 bg-marino border border-blue-400/20 rounded-lg overflow-hidden px-2">
+                                                                        <input type="number" inputMode="numeric" value={gej.tiempoObjetivoSeg ?? ''}
+                                                                            onChange={(e) => handleUpdateChange(gej.id, { tiempoObjetivoSeg: parseInt(e.target.value) || null })}
+                                                                            className="w-full bg-transparent py-1.5 text-center text-blue-300 focus:outline-none text-sm font-black"
+                                                                            placeholder="seg"
+                                                                        />
+                                                                        <span className="text-[0.5rem] font-black text-blue-400/50">s</span>
+                                                                    </div>
+                                                                )}
+                                                                {(gej.modoMedicion || 'REPS') === 'AMRAP' && (
+                                                                    <div className="text-center text-[0.6rem] font-black text-naranja/60 uppercase tracking-wider py-1">Máx posibles</div>
+                                                                )}
+                                                            </div>
                                                         </td>
-                                                        <td className="p-3 sticky left-[85px] z-20 bg-marino-2 border-r border-marino-4 w-[220px]">
-                                                            <SelectorEjercicioCelda
-                                                                initialValue={gej.ejercicio?.nombre || gej.nombreLibre || ""}
-                                                                ejercicioId={gej.ejercicioId}
-                                                                esBiblioteca={gej.esBiblioteca}
-                                                                onSelect={(data) => handleUpdateChange(gej.id, {
-                                                                    ejercicioId: data.ejercicioId,
-                                                                    nombreLibre: data.nombre,
-                                                                    esBiblioteca: data.esBiblioteca
-                                                                })}
-                                                            />
-                                                        </td>
-                                                        <td className="p-3 text-center w-[130px]">
-                                                            <span className="text-[0.65rem] font-black text-gris uppercase">{gej.modoMedicion || 'REPS'}</span>
-                                                        </td>
-                                                        <td className="p-3 text-center w-[80px]">
-                                                            <input
-                                                                type="number"
-                                                                inputMode="numeric"
-                                                                pattern="[0-9]*"
+                                                        <td className="p-2 text-center">
+                                                            <input type="number" inputMode="numeric" pattern="[0-9]*"
                                                                 value={gej.series}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { series: parseInt(e.target.value) })}
-                                                                className="w-14 bg-marino-4/20 border border-marino-4 rounded-lg py-1 text-center font-black text-blanco"
+                                                                className="w-full bg-marino-3/50 border border-white/5 py-2 rounded-lg text-center text-blanco font-black text-sm focus:bg-naranja/10 focus:border-naranja/20 transition-all"
                                                             />
                                                         </td>
-                                                        <td className="p-3 text-center w-[80px]">
-                                                            <input
-                                                                type="number"
-                                                                inputMode="numeric"
-                                                                pattern="[0-9]*"
-                                                                value={gej.RIR !== null ? gej.RIR : ''}
-                                                                onChange={(e) => handleUpdateChange(gej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                                className="w-14 bg-marino-4/20 border border-marino-4 rounded-lg py-1 text-center font-black text-naranja"
-                                                            />
+                                                        <td className="p-2 text-center">
+                                                            {(gej.modoMedicion === 'REPS' || !gej.modoMedicion) ? (
+                                                                <input type="number" inputMode="numeric" pattern="[0-9]*"
+                                                                    value={gej.RIR !== null ? gej.RIR : ''}
+                                                                    onChange={(e) => handleUpdateChange(gej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
+                                                                    className="w-full bg-marino-3/50 border border-white/5 py-2 rounded-lg text-center text-naranja font-black text-sm focus:bg-naranja/10 focus:border-naranja/20 transition-all"
+                                                                />
+                                                            ) : (
+                                                                <span className="text-gris/20 text-[0.6rem] font-bold uppercase">N/A</span>
+                                                            )}
                                                         </td>
-                                                        <td className="p-3 text-center w-[100px]">
-                                                            <input
-                                                                type="number"
-                                                                inputMode="numeric"
-                                                                pattern="[0-9]*"
-                                                                value={gej.descansoSegundos !== null ? gej.descansoSegundos : ''}
-                                                                onChange={(e) => handleUpdateChange(gej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                                className="w-20 bg-marino-4/20 border border-marino-4 rounded-lg py-1 text-center font-black text-blanco"
-                                                            />
+                                                        <td className="p-2 text-center">
+                                                            <div className="flex items-center gap-0.5 bg-marino-3/50 px-1 rounded-lg border border-white/5">
+                                                                <input
+                                                                    type="number"
+                                                                    inputMode="numeric"
+                                                                    pattern="[0-9]*"
+                                                                    value={gej.descansoSegundos !== null ? gej.descansoSegundos : ''}
+                                                                    onChange={(e) => handleUpdateChange(gej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
+                                                                    className="w-full bg-transparent py-2 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/5"
+                                                                />
+                                                                <span className="text-[0.4rem] font-black text-gris/30 pr-0.5">s</span>
+                                                            </div>
                                                         </td>
-                                                        <td className="p-3 text-center w-[100px]">
+                                                        <td className="p-2 text-center">
                                                             <input
                                                                 type="number"
                                                                 step="0.5"
@@ -820,26 +891,22 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
                                                                 pattern="[0-9]*(\.[0-9]+)?"
                                                                 value={gej.pesoSugerido || ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { pesoSugerido: parseFloat(e.target.value) })}
-                                                                className="w-20 bg-marino-4/20 border border-verde/20 rounded-lg py-1 text-center font-black text-verde"
+                                                                className="w-full bg-marino-3/50 border border-verde/10 py-2 rounded-lg text-center text-verde font-black text-sm focus:bg-verde/5 focus:border-verde/30 transition-all"
                                                             />
                                                         </td>
                                                         <td className="p-2">
                                                             <textarea
                                                                 value={gej.notasTecnicas || ''}
                                                                 onChange={(e) => handleUpdateChange(gej.id, { notasTecnicas: e.target.value })}
-                                                                className="w-full bg-marino-3/30 border border-marino-4/30 rounded-lg px-2 py-1 text-xs text-blanco font-medium resize-none"
-                                                                rows={2}
+                                                                rows={1}
+                                                                className="w-full bg-marino-3/30 border border-white/5 p-2 rounded-lg text-blanco text-[10px] focus:outline-none focus:border-naranja/20 transition-all resize-none h-9 focus:h-20 focus:z-30 relative"
+                                                                placeholder="..."
                                                             />
                                                         </td>
-                                                        <td className="p-3 text-right w-[50px]">
-                                                            {!isSelectionMode && (
-                                                                <button
-                                                                    onClick={() => handleEliminar(gej.id)}
-                                                                    className="p-1.5 text-rojo/40 hover:text-rojo transition-colors"
-                                                                >
-                                                                    <Trash2 size={16} />
-                                                                </button>
-                                                            )}
+                                                        <td className="p-2 text-right">
+                                                            <button onClick={() => handleEliminar(gej.id)} className="text-gris/20 hover:text-rojo p-1.5 rounded-lg transition-colors">
+                                                                <Trash2 size={14} />
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -848,110 +915,145 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
                                     }
 
                                     return (
-                                        <tr 
-                                            key={ej.id} 
-                                            className={`hover:bg-marino-3/30 transition-colors cursor-grab ${draggingIdx === idx && !isDraggingBlock ? 'opacity-30' : ''}`}
-                                            draggable={!isSelectionMode}
-                                            onDragStart={() => handleDragStart(idx, false)}
+                                        <tr
+                                            key={ej.id}
                                             onDragOver={handleDragOver}
                                             onDrop={() => handleDrop(idx)}
+                                            onClick={() => { if (isSelectionMode) handleToggleSelection(ej.id); }}
+                                            className={`group transition-all relative ${isSelectionMode
+                                                ? (selectedIds.includes(ej.id) ? 'bg-naranja/10 cursor-pointer' : 'hover:bg-naranja/5 cursor-pointer')
+                                                : `hover:bg-white/[0.02] ${draggingIdx === idx ? 'opacity-20' : ''}`
+                                                } ${activeDropdownId === ej.id ? 'z-[60]' : ''}`}
                                         >
-                                            <td className="p-3 sticky left-0 z-20 bg-marino-2 border-r border-marino-4 w-[40px]">
-                                                {isSelectionMode && (
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedIds.includes(ej.id)}
-                                                        onChange={() => handleToggleSelection(ej.id)}
-                                                        className="w-4 h-4 rounded border-marino-4"
+                                            <td
+                                                className={`p-3 text-center sticky left-0 z-10 bg-marino-2 border-r border-white/5 ${activeDropdownId === ej.id ? 'z-[70]' : ''}`}
+                                                onClick={(e) => e.stopPropagation()}
+                                                draggable={!isSelectionMode}
+                                                onDragStart={() => handleDragStart(idx)}
+                                            >
+                                                {isSelectionMode ? (
+                                                    <div
+                                                        onClick={(e) => { e.stopPropagation(); handleToggleSelection(ej.id); }}
+                                                        className={`w-5 h-5 rounded border-2 flex items-center justify-center mx-auto cursor-pointer transition-all ${selectedIds.includes(ej.id) ? 'bg-naranja border-naranja' : 'bg-marino-3 border-marino-4 hover:border-naranja/60'
+                                                            }`}
+                                                    >
+                                                        {selectedIds.includes(ej.id) && <span className="text-marino font-black text-[10px]">✓</span>}
+                                                    </div>
+                                                ) : (
+                                                    <GripVertical size={14} className="opacity-0 group-hover:opacity-100 transition-opacity mx-auto text-gris cursor-grab" />
+                                                )}
+                                            </td>
+                                            <td className="p-3 text-gris font-black text-base text-center opacity-30 group-hover:opacity-100 transition-opacity sticky left-[40px] z-10 bg-marino-2 border-r border-white/5">{idx + 1}</td>
+                                            <td className={`p-3 sticky left-[85px] z-10 bg-marino-2 border-r border-white/10 shadow-[5px_0_15px_rgba(0,0,0,0.2)] w-[220px] ${activeDropdownId === ej.id ? 'z-[70]' : ''}`} onClick={(e) => { if (isSelectionMode) e.stopPropagation(); }}>
+                                                {isSelectionMode ? (
+                                                    <span className="text-blanco font-black text-[0.75rem] uppercase tracking-tight">
+                                                        {ej.ejercicio?.nombre || ej.nombreLibre || '—'}
+                                                    </span>
+                                                ) : (
+                                                    <SelectorEjercicioCelda
+                                                        initialValue={ej.ejercicio?.nombre || ej.nombreLibre || ""}
+                                                        ejercicioId={ej.ejercicioId}
+                                                        esBiblioteca={ej.esBiblioteca}
+                                                        onSelect={(data) => handleUpdateChange(ej.id, {
+                                                            ejercicioId: data.ejercicioId,
+                                                            nombreLibre: data.nombre,
+                                                            esBiblioteca: data.esBiblioteca
+                                                        })}
+                                                        onOpenChange={(isOpen) => setActiveDropdownId(isOpen ? ej.id : null)}
                                                     />
                                                 )}
                                             </td>
-                                            <td className="p-3 sticky left-[40px] z-20 bg-marino-2 border-r border-marino-4 w-[45px] text-center font-black text-blanco">
-                                                {idx + 1}
+                                            <td className="p-2">
+                                                {/* Toggle modo + campo adaptativo */}
+                                                <div className="flex flex-col gap-1">
+                                                    <div className="flex items-center gap-0.5 bg-marino-4/30 rounded-md p-0.5">
+                                                        {(['REPS','TIEMPO','AMRAP'] as const).map(modo => (
+                                                            <button key={modo}
+                                                                onClick={() => handleUpdateChange(ej.id, { modoMedicion: modo, repsMin: modo !== 'REPS' ? null : ej.repsMin, repsMax: modo !== 'REPS' ? null : ej.repsMax, tiempoObjetivoSeg: modo !== 'TIEMPO' ? null : ej.tiempoObjetivoSeg })}
+                                                                className={`flex-1 text-[0.5rem] font-black uppercase py-0.5 rounded transition-all ${ (ej.modoMedicion || 'REPS') === modo ? 'bg-naranja text-marino' : 'text-gris/50 hover:text-blanco' }`}
+                                                            >{modo === 'AMRAP' ? 'AMRP' : modo}</button>
+                                                        ))}
+                                                    </div>
+                                                    {(ej.modoMedicion || 'REPS') === 'REPS' && (
+                                                        <div className="flex items-center gap-0.5 bg-marino border border-white/5 rounded-lg overflow-hidden">
+                                                            <input type="number" inputMode="numeric" value={ej.repsMin ?? ''}
+                                                                onChange={(e) => handleUpdateChange(ej.id, { repsMin: parseInt(e.target.value) || null })}
+                                                                className="w-full bg-marino-3/50 py-1.5 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10"
+                                                            />
+                                                            <span className="text-gris/20 text-[10px]">—</span>
+                                                            <input type="number" inputMode="numeric" value={ej.repsMax ?? ''}
+                                                                onChange={(e) => handleUpdateChange(ej.id, { repsMax: parseInt(e.target.value) || null })}
+                                                                className="w-full bg-marino-3/50 py-1.5 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/10"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                    {(ej.modoMedicion || 'REPS') === 'TIEMPO' && (
+                                                        <div className="flex items-center gap-0.5 bg-marino border border-blue-400/20 rounded-lg overflow-hidden px-2">
+                                                            <input type="number" inputMode="numeric" value={ej.tiempoObjetivoSeg ?? ''}
+                                                                onChange={(e) => handleUpdateChange(ej.id, { tiempoObjetivoSeg: parseInt(e.target.value) || null })}
+                                                                className="w-full bg-transparent py-1.5 text-center text-blue-300 focus:outline-none text-sm font-black"
+                                                                placeholder="seg"
+                                                            />
+                                                            <span className="text-[0.5rem] font-black text-blue-400/50">s</span>
+                                                        </div>
+                                                    )}
+                                                    {(ej.modoMedicion || 'REPS') === 'AMRAP' && (
+                                                        <div className="text-center text-[0.6rem] font-black text-naranja/60 uppercase tracking-wider py-1">Máx posibles</div>
+                                                    )}
+                                                </div>
                                             </td>
-                                            <td className="p-3 sticky left-[85px] z-20 bg-marino-2 border-r border-marino-4 w-[220px]">
-                                                <SelectorEjercicioCelda
-                                                    initialValue={ej.ejercicio?.nombre || ej.nombreLibre || ""}
-                                                    ejercicioId={ej.ejercicioId}
-                                                    esBiblioteca={ej.esBiblioteca}
-                                                    onSelect={(data) => handleUpdateChange(ej.id, {
-                                                        ejercicioId: data.ejercicioId,
-                                                        nombreLibre: data.nombre,
-                                                        esBiblioteca: data.esBiblioteca
-                                                    })}
-                                                />
-                                            </td>
-                                            <td className="p-3 text-center w-[130px]">
-                                                <span className="text-[0.65rem] font-black text-gris uppercase">{ej.modoMedicion || 'REPS'}</span>
-                                            </td>
-                                            <td className="p-3 text-center w-[80px]">
-                                                <input
-                                                    type="number"
-                                                    inputMode="numeric"
-                                                    pattern="[0-9]*"
+                                            <td className="p-2 text-center">
+                                                <input type="number" inputMode="numeric" pattern="[0-9]*"
                                                     value={ej.series}
                                                     onChange={(e) => handleUpdateChange(ej.id, { series: parseInt(e.target.value) })}
-                                                    className="w-14 bg-marino-4/20 border border-marino-4 rounded-lg py-1 text-center font-black text-blanco focus:border-naranja/40"
+                                                    className="w-full bg-marino-3/50 border border-white/5 py-2 rounded-lg text-center text-blanco font-black text-sm focus:bg-naranja/10 focus:border-naranja/20 transition-all"
                                                 />
                                             </td>
-                                            <td className="p-3 text-center w-[80px]">
-                                                <input
-                                                    type="number"
-                                                    inputMode="numeric"
-                                                    pattern="[0-9]*"
-                                                    value={ej.RIR !== null ? ej.RIR : ''}
-                                                    onChange={(e) => handleUpdateChange(ej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                    className="w-14 bg-marino-4/20 border border-marino-4 rounded-lg py-1 text-center font-black text-naranja"
-                                                />
+                                            <td className="p-2 text-center">
+                                                {(ej.modoMedicion === 'REPS' || !ej.modoMedicion) ? (
+                                                    <input type="number" inputMode="numeric" pattern="[0-9]*"
+                                                        value={ej.RIR !== null ? ej.RIR : ''}
+                                                        onChange={(e) => handleUpdateChange(ej.id, { RIR: e.target.value ? parseInt(e.target.value) : undefined })}
+                                                        className="w-full bg-marino-3/50 border border-white/5 py-2 rounded-lg text-center text-naranja font-black text-sm focus:bg-naranja/10 focus:border-naranja/20 transition-all"
+                                                    />
+                                                ) : (
+                                                    <span className="text-gris/20 text-[0.6rem] font-bold uppercase">N/A</span>
+                                                )}
                                             </td>
-                                            <td className="p-3 text-center w-[100px]">
-                                                <input
-                                                    type="number"
-                                                    inputMode="numeric"
-                                                    pattern="[0-9]*"
-                                                    value={ej.descansoSegundos !== null ? ej.descansoSegundos : ''}
-                                                    onChange={(e) => handleUpdateChange(ej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
-                                                    className="w-20 bg-marino-4/20 border border-marino-4 rounded-lg py-1 text-center font-black text-blanco"
-                                                />
+                                            <td className="p-2 text-center">
+                                                <div className="flex items-center gap-0.5 bg-marino-3/50 px-1 rounded-lg border border-white/5">
+                                                    <input
+                                                        type="number"
+                                                        inputMode="numeric"
+                                                        pattern="[0-9]*"
+                                                        value={ej.descansoSegundos !== null ? ej.descansoSegundos : ''}
+                                                        onChange={(e) => handleUpdateChange(ej.id, { descansoSegundos: e.target.value ? parseInt(e.target.value) : undefined })}
+                                                        className="w-full bg-transparent py-2 text-center text-blanco focus:outline-none text-sm font-black focus:bg-naranja/5"
+                                                    />
+                                                    <span className="text-[0.4rem] font-black text-gris/30 pr-0.5">s</span>
+                                                </div>
                                             </td>
-                                            <td className="p-3 text-center w-[100px]">
+                                            <td className="p-2 text-center">
                                                 <input
                                                     type="number"
                                                     step="0.5"
-                                                    inputMode="decimal"
-                                                    pattern="[0-9]*(\.[0-9]+)?"
                                                     value={ej.pesoSugerido || ''}
                                                     onChange={(e) => handleUpdateChange(ej.id, { pesoSugerido: parseFloat(e.target.value) })}
-                                                    className="w-20 bg-marino-4/20 border border-verde/20 rounded-lg py-1 text-center font-black text-verde"
+                                                    className="w-full bg-marino-3/50 border border-verde/10 py-2 rounded-lg text-center text-verde font-black text-sm focus:bg-verde/5 focus:border-verde/30 transition-all"
                                                 />
                                             </td>
                                             <td className="p-2">
                                                 <textarea
                                                     value={ej.notasTecnicas || ''}
                                                     onChange={(e) => handleUpdateChange(ej.id, { notasTecnicas: e.target.value })}
-                                                    className="w-full bg-marino-3/30 border border-marino-4/30 rounded-lg px-2 py-1 text-xs text-blanco font-medium resize-none focus:border-naranja/30"
-                                                    rows={2}
+                                                    className="w-full bg-marino-3/30 border border-white/5 p-2 rounded-lg text-blanco text-[10px] focus:outline-none focus:border-naranja/20 transition-all resize-none h-9 focus:h-20 focus:z-30 relative"
+                                                    placeholder="..."
                                                 />
                                             </td>
-                                            <td className="p-3 text-right w-[50px]">
-                                                {!isSelectionMode && (
-                                                    <div className="flex flex-col gap-1">
-                                                        <button
-                                                            onClick={(e) => { e.stopPropagation(); handleMove(idx, 'up'); }}
-                                                            disabled={idx === 0}
-                                                            className="p-1 text-gris hover:text-naranja disabled:opacity-20"
-                                                        >
-                                                            <ChevronUp size={14} />
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => { e.stopPropagation(); handleMove(idx, 'down'); }}
-                                                            disabled={idx === ejercicios.length - 1}
-                                                            className="p-1 text-gris hover:text-naranja disabled:opacity-20"
-                                                        >
-                                                            <ChevronDown size={14} />
-                                                        </button>
-                                                    </div>
-                                                )}
+                                            <td className="p-2 text-right">
+                                                <button onClick={() => handleEliminar(ej.id)} className="text-gris/20 hover:text-rojo p-1.5 rounded-lg transition-all">
+                                                    <Trash2 size={14} />
+                                                </button>
                                             </td>
                                         </tr>
                                     );
@@ -959,6 +1061,87 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
                             })()}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Footer Tabla Profesional */}
+                <div className="p-6 bg-marino-3/30 border-t border-marino-4">
+                    <button
+                        onClick={onOpenBuscador}
+                        className="w-full p-10 border-2 border-dashed border-marino-4/40 rounded-[2.5rem] flex flex-col items-center justify-center gap-5 text-gris/60 group hover:border-naranja/40 hover:bg-naranja/[0.02] hover:text-naranja transition-all"
+                    >
+                        <div className="p-5 bg-marino-3 border border-marino-4 rounded-[1.5rem] group-hover:bg-naranja group-hover:text-marino group-hover:border-naranja transition-all shadow-2xl">
+                            <Plus size={36} strokeWidth={2.5} />
+                        </div>
+                        <span className="font-barlow-condensed font-black uppercase tracking-[0.4em] text-sm">Expandir Arsenal de Sesión</span>
+                    </button>
+
+                    {/* Metricas de Pie — Resultados del Atleta */}
+                    <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-2">
+                        {(() => {
+                            const latestSesion = diaObjeto.sesionesReales?.[0];
+                            const metricas = latestSesion?.metricas;
+
+                            return (
+                                <>
+                                    <div className="flex items-center gap-5 p-5 bg-marino-2 border border-marino-4/30 rounded-3xl hover:border-rojo/20 transition-all group">
+                                        <div className="p-3 bg-rojo/5 rounded-2xl text-rojo group-hover:bg-rojo/10 transition-colors"><Activity size={24} /></div>
+                                        <div className="flex-1">
+                                            <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest block mb-1.5">DOMS / Carga</label>
+                                            <div className="flex items-baseline gap-1">
+                                                <span className="text-blanco font-black text-xl">{metricas?.DOMS || '--'}</span>
+                                                <span className="text-[0.6rem] text-gris/40 font-bold uppercase">/ 10</span>
+                                            </div>
+                                            <p className="text-[0.5rem] text-gris/40 font-bold uppercase mt-1 tracking-tighter">Feedback del Atleta</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-5 p-5 bg-marino-2 border border-marino-4/30 rounded-3xl hover:border-blue-400/20 transition-all group">
+                                        <div className="p-3 bg-blue-400/5 rounded-2xl text-blue-400 group-hover:bg-blue-400/10 transition-colors"><Gauge size={24} /></div>
+                                        <div className="flex-1">
+                                            <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest block mb-1.5">Esfuerzo Percibido</label>
+                                            <div className="flex items-baseline gap-1">
+                                                <span className="text-blanco font-black text-xl">{metricas?.esfuerzoGral || '--'}</span>
+                                                <span className="text-[0.6rem] text-gris/40 font-bold uppercase">RPE</span>
+                                            </div>
+                                            <p className="text-[0.5rem] text-gris/40 font-bold uppercase mt-1 tracking-tighter">Reportado post-sesión</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-5 p-5 bg-marino-2 border border-marino-4/30 rounded-3xl hover:border-verde/20 transition-all group">
+                                        <div className="p-3 bg-verde/5 rounded-2xl text-verde group-hover:bg-verde/10 transition-colors"><Scale size={24} /></div>
+                                        <div className="flex-1">
+                                            <label className="text-[0.65rem] font-black text-gris uppercase tracking-widest block mb-1.5">Pesaje del Atleta</label>
+                                            <div className="flex items-baseline gap-1">
+                                                <span className="text-blanco font-black text-xl">{metricas?.pesajeDia || '--'}</span>
+                                                <span className="text-[0.6rem] text-gris/40 font-bold uppercase">KG</span>
+                                            </div>
+                                            <p className="text-[0.5rem] text-gris/40 font-bold uppercase mt-1 tracking-tighter">Dato sincronizado</p>
+                                        </div>
+                                    </div>
+                                </>
+                            );
+                        })()}
+
+                        <div className="flex items-center gap-5 p-5 bg-marino-2 border border-naranja/20 rounded-3xl hover:border-naranja/40 transition-all group">
+                            <div className="p-3 bg-naranja/5 rounded-2xl text-naranja group-hover:bg-naranja/10 transition-colors"><Dumbbell size={24} /></div>
+                            <div className="flex-1">
+                                <label className="text-[0.65rem] font-black text-naranja uppercase tracking-[0.2em] block mb-1.5">Tonelaje Teórico</label>
+                                <span className="text-blanco font-black text-xl uppercase tracking-tighter">
+                                    {ejercicios.reduce((acc, ej) => acc + (ej.series * (ej.repsMax || 0) * (ej.pesoSugerido || 0)), 0).toLocaleString()} <span className="text-[0.6rem] text-gris font-medium">KG</span>
+                                </span>
+                                <p className="text-[0.5rem] text-naranja/40 font-black uppercase mt-1 tracking-tighter">Carga Total Planificada</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-10 pt-6 border-t border-marino-4/50 flex flex-col md:flex-row justify-between items-center gap-6 text-gris text-[0.6rem] font-bold uppercase tracking-[0.2em]">
+                        <div className="flex items-center gap-3 px-5 py-2.5 bg-marino-3 rounded-full border border-marino-4 shadow-inner">
+                            <Info size={14} className="text-naranja" />
+                            <span>Sistema de Seguimiento — IL-CAMPUS Professional</span>
+                        </div>
+                        <div className="flex gap-6 opacity-60">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
