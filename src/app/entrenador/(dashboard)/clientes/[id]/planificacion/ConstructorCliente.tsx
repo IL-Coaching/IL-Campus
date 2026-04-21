@@ -12,7 +12,7 @@ import BuscadorEjercicios from '@/compartido/componentes/planificacion/BuscadorE
 import { MacrocicloCompleto, ClientePlanificacion, BloqueConSemanas, SemanaConDias } from '@/nucleo/tipos/planificacion.tipos';
 import { agregarEjercicio } from '@/nucleo/acciones/ejercicio-planificado.accion';
 import { crearNuevoMacrociclo } from '@/nucleo/acciones/macrociclo.accion';
-import { Loader2, Settings, Download } from 'lucide-react';
+import { Loader2, Settings, Download, Plus } from 'lucide-react';
 
 import ModalConfigurarMacro from './componentes/ModalConfigurarMacro';
 import ModalNuevoMesociclo from './componentes/ModalNuevoMesociclo';
@@ -177,8 +177,9 @@ export default function ConstructorCliente({ cliente, macrocicloInicial, limiteC
                     <button
                         onClick={() => setBuscadorOpen(true)}
                         className="w-14 h-14 bg-naranja text-marino rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform"
+                        title="Agregar ejercicio"
                     >
-                        <Settings size={24} />
+                        <Plus size={24} />
                     </button>
                 </div>
             </div>
