@@ -427,8 +427,12 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
                                                                         <ChevronDown size={14} />
                                                                     </button>
                                                                 </div>
-                                                                <button onClick={() => handleEliminar(gej.id)} className="p-2 text-rojo/30">
-                                                                    <Trash2 size={18} />
+                                                                <button 
+                                                                    onClick={() => handleEliminar(gej.id)} 
+                                                                    className="p-2 bg-rojo/10 hover:bg-rojo/30 text-rojo rounded-lg transition-all"
+                                                                    title="Eliminar ejercicio"
+                                                                >
+                                                                    <Trash2 size={16} />
                                                                 </button>
                                                             </div>
                                                         )}
@@ -574,8 +578,12 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
                                                         <ChevronDown size={14} />
                                                     </button>
                                                 </div>
-                                                <button onClick={(e) => { e.stopPropagation(); handleEliminar(ej.id); }} className="p-2 text-rojo/30">
-                                                    <Trash2 size={18} />
+                                                <button 
+                                                    onClick={(e) => { e.stopPropagation(); handleEliminar(ej.id); }} 
+                                                    className="p-2 bg-rojo/10 hover:bg-rojo/30 text-rojo rounded-lg transition-all"
+                                                    title="Eliminar ejercicio"
+                                                >
+                                                    <Trash2 size={16} />
                                                 </button>
                                             </div>
                                         )}
@@ -860,7 +868,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
                                                             {!isSelectionMode && (
                                                                 <button
                                                                     onClick={() => handleEliminar(gej.id)}
-                                                                    className="p-1.5 text-rojo/40 hover:text-rojo transition-colors"
+                                                                    className="p-2 bg-rojo/10 hover:bg-rojo/30 text-rojo rounded-lg transition-all"
+                                                                    title="Eliminar ejercicio"
                                                                 >
                                                                     <Trash2 size={16} />
                                                                 </button>
