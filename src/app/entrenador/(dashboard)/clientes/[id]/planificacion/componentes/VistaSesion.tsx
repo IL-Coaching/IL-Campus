@@ -690,7 +690,9 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
                                 <th className="p-3 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[100px] text-center">Rest</th>
                                 <th className="p-3 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem] w-[100px] text-center">Kg</th>
                                 <th className="p-3 font-barlow-condensed font-black uppercase tracking-widest text-gris text-[0.6rem]">Técnica / Feedback</th>
-                                <th className="p-3 text-right w-[50px]"></th>
+                                <th className="p-3 text-right w-[60px]">
+                                    <span className="sr-only">Acciones</span>
+                                </th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-marino-4">
@@ -967,22 +969,31 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
                                                     rows={2}
                                                 />
                                             </td>
-                                            <td className="p-3 text-right w-[50px]">
+                                            <td className="p-3 text-right w-[60px]">
                                                 {!isSelectionMode && (
-                                                    <div className="flex flex-col gap-1">
+                                                    <div className="flex flex-col gap-1 items-end">
+                                                        <div className="flex gap-1">
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); handleMove(idx, 'up'); }}
+                                                                disabled={idx === 0}
+                                                                className="p-1 text-gris hover:text-naranja disabled:opacity-20"
+                                                            >
+                                                                <ChevronUp size={14} />
+                                                            </button>
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); handleMove(idx, 'down'); }}
+                                                                disabled={idx === ejercicios.length - 1}
+                                                                className="p-1 text-gris hover:text-naranja disabled:opacity-20"
+                                                            >
+                                                                <ChevronDown size={14} />
+                                                            </button>
+                                                        </div>
                                                         <button
-                                                            onClick={(e) => { e.stopPropagation(); handleMove(idx, 'up'); }}
-                                                            disabled={idx === 0}
-                                                            className="p-1 text-gris hover:text-naranja disabled:opacity-20"
+                                                            onClick={(e) => { e.stopPropagation(); handleEliminar(ej.id); }}
+                                                            className="p-1.5 bg-rojo/10 hover:bg-rojo/30 text-rojo rounded-lg transition-all"
+                                                            title="Eliminar ejercicio"
                                                         >
-                                                            <ChevronUp size={14} />
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => { e.stopPropagation(); handleMove(idx, 'down'); }}
-                                                            disabled={idx === ejercicios.length - 1}
-                                                            className="p-1 text-gris hover:text-naranja disabled:opacity-20"
-                                                        >
-                                                            <ChevronDown size={14} />
+                                                            <Trash2 size={14} />
                                                         </button>
                                                     </div>
                                                 )}
