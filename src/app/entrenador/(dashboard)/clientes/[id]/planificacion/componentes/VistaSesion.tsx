@@ -10,6 +10,9 @@ import { actualizarDiaSesion, clonarContenidoSesion } from '@/nucleo/acciones/se
 import { obtenerCondicionesClinicas } from '@/nucleo/acciones/cliente.accion';
 import { useRouter, useParams } from 'next/navigation';
 import SelectorEjercicioCelda from '@/compartido/componentes/planificacion/SelectorEjercicioCelda';
+import ModalConfirmSimple from '@/compartido/componentes/ModalConfirmSimple';
+import ModalRenombrar from '@/compartido/componentes/ModalRenombrar';
+import { toast } from '@/compartido/hooks/useToast';
 
 
 interface VistaSesionProps {
@@ -33,6 +36,10 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
     const clienteId = params.id as string;
 
     const [isDraggingBlock, setIsDraggingBlock] = useState(false);
+
+    // Estados para modales de confirmación
+    const [ejercicioAEliminar, setEjercicioAEliminar] = useState<{ id: string; nombre: string } | null>(null);
+    const [grupoARenombrar, setGrupoARenombrar] = useState<{ grupoId: string; nombreActual: string } | null>(null);
 
     const handleDragStart = (idx: number, isBlock = false) => {
         setDraggingIdx(idx);
@@ -141,12 +148,21 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
     }, [hasUnsavedChanges]);
 
     const handleEliminar = async (id: string) => {
-        if (!confirm("¿Seguro que quieres eliminar este ejercicio de la sesión?")) return;
-        const res = await eliminarEjercicio(id);
+        setEjercicioAEliminar({ id, nombre: '' });
+    };
+
+    const confirmarEliminacion = async () => {
+        if (!ejercicioAEliminar) return;
+        
+        const res = await eliminarEjercicio(ejercicioAEliminar.id);
         if (res.exito) {
-            setEjercicios(prev => prev.filter(e => e.id !== id));
+            toast.exito("Ejercicio eliminado correctamente");
+            setEjercicios(prev => prev.filter(e => e.id !== ejercicioAEliminar.id));
             router.refresh();
+        } else {
+            toast.error(res.error || "Error al eliminar ejercicio");
         }
+        setEjercicioAEliminar(null);
     };
 
     const handleUpdateChange = (id: string, updates: Partial<EjercicioConDetalle>) => {
@@ -240,11 +256,20 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
     };
 
     const handleCambiarNombreGrupo = async (grupoId: string, nombreActual: string) => {
-        const nuevoNombre = prompt("Cambiar nombre del bloque:", nombreActual);
-        if (nuevoNombre && nuevoNombre !== nombreActual) {
-            const res = await actualizarNombreGrupo(diaObjeto.id, grupoId, nuevoNombre);
-            if (res.exito) router.refresh();
+        setGrupoARenombrar({ grupoId, nombreActual });
+    };
+
+    const confirmarRenombrar = async (nuevoNombre: string) => {
+        if (!grupoARenombrar) return;
+        
+        const res = await actualizarNombreGrupo(diaObjeto.id, grupoARenombrar.grupoId, nuevoNombre);
+        if (res.exito) {
+            toast.exito("Bloque renombrado correctamente");
+            router.refresh();
+        } else {
+            toast.error(res.error || "Error al renombrar");
         }
+        setGrupoARenombrar(null);
     };
 
     const handleAlternarModalidad = async (bloqueId: string, tipoActual: string) => {
@@ -961,6 +986,27 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
                     </table>
                 </div>
             </div>
+
+            {/* Modal de confirmación para eliminar ejercicio */}
+            <ModalConfirmSimple
+                abierto={!!ejercicioAEliminar}
+                titulo="Eliminar Ejercicio"
+                mensaje="¿Estás seguro de que quieres eliminar este ejercicio de la sesión? Esta acción no se puede deshacer."
+                textoConfirmar="Eliminar"
+                variante="peligro"
+                onConfirm={confirmarEliminacion}
+                onClose={() => setEjercicioAEliminar(null)}
+            />
+
+            {/* Modal para renombrar grupo/bloque */}
+            <ModalRenombrar
+                abierto={!!grupoARenombrar}
+                titulo="Renombrar Bloque"
+                valorInicial={grupoARenombrar?.nombreActual || ''}
+                placeholder="Nombre del bloque (ej: Superserie A)"
+                onConfirm={confirmarRenombrar}
+                onClose={() => setGrupoARenombrar(null)}
+            />
         </div>
     );
 }
