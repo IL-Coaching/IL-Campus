@@ -11,7 +11,7 @@ interface Props {
         clienteId: string;
         planAsignadoId: string;
         nombre: string;
-        estado: string;
+        estado: "ACTIVO" | "ARCHIVADO" | "VENCIDO" | "CANCELADO";
     };
     onClose: () => void;
 }
@@ -24,15 +24,15 @@ const METODOS_PAGO = [
     "Otro"
 ];
 
-const ESTADOS_PAGO = [
-    { value: "ABONADO", label: "Abonado", color: "bg-verde", icon: Check },
-    { value: "PARCIAL", label: "Pago Parcial", color: "bg-[#eab308]", icon: DollarSign },
-    { value: "PENDIENTE", label: "Pendiente", color: "bg-gris-claro", icon: Calendar },
-    { value: "VENCIDO", label: "Vencido", color: "bg-rojo", icon: X }
+const ESTADOS_PAGO: { value: "ACTIVO" | "ARCHIVADO" | "VENCIDO" | "CANCELADO"; label: string; color: string; icon: typeof Check }[] = [
+    { value: "ACTIVO", label: "Activo", color: "bg-verde", icon: Check },
+    { value: "ARCHIVADO", label: "Archivado", color: "bg-gris-claro", icon: Calendar },
+    { value: "VENCIDO", label: "Vencido", color: "bg-rojo", icon: X },
+    { value: "CANCELADO", label: "Cancelado", color: "bg-[#eab308]", icon: DollarSign }
 ];
 
 export default function ModalGestionPago({ data, onClose }: Props) {
-    const [estado, setEstado] = useState(data.estado);
+    const [estado, setEstado] = useState<"ACTIVO" | "ARCHIVADO" | "VENCIDO" | "CANCELADO">(data.estado);
     const [monto, setMonto] = useState("");
     const [metodo, setMetodo] = useState("Transferencia");
     const [notas, setNotas] = useState("");
@@ -100,7 +100,7 @@ export default function ModalGestionPago({ data, onClose }: Props) {
                                         key={est.value}
                                         onClick={() => setEstado(est.value)}
                                         className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all group ${active
-                                                ? `bg-marino-3 border-${est.value === 'ABONADO' ? 'verde' : est.value === 'PARCIAL' ? '[#eab308]' : est.value === 'VENCIDO' ? 'rojo' : 'marino-4'} ring-2 ring-opacity-20`
+                                                ? `bg-marino-3 border-${est.value === 'ACTIVO' ? 'verde' : est.value === 'CANCELADO' ? '[#eab308]' : est.value === 'VENCIDO' ? 'rojo' : 'marino-4'} ring-2 ring-opacity-20`
                                                 : 'bg-marino-2 border-marino-4 hover:border-marino-3'
                                             }`}
                                     >

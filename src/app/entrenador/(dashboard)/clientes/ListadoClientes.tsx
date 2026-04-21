@@ -63,7 +63,7 @@ function Iniciales({ nombre }: { nombre: string }) {
 
 export default function ListadoClientes({ clientes, planes, tabActual, clienteIdDestacado }: Props) {
     const [clienteAsignando, setClienteAsignando] = useState<{ id: string, nombre: string, ultimoPlanVencimiento?: string | Date } | null>(null);
-    const [clientePago, setClientePago] = useState<{ clienteId: string, planAsignadoId: string, nombre: string, estado: string } | null>(null);
+    const [clientePago, setClientePago] = useState<{ clienteId: string, planAsignadoId: string, nombre: string, estado: "ACTIVO" | "ARCHIVADO" | "VENCIDO" | "CANCELADO" } | null>(null);
     const [menuAbierto, setMenuAbierto] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
     const refScroll = useRef<HTMLDivElement>(null);
@@ -209,7 +209,7 @@ export default function ListadoClientes({ clientes, planes, tabActual, clienteId
                                                             clienteId: cliente.id,
                                                             planAsignadoId: ultimoPlan.id,
                                                             nombre: cliente.nombre,
-                                                            estado: ultimoPlan.estado
+                                                            estado: ultimoPlan.estado as "ACTIVO" | "ARCHIVADO" | "VENCIDO" | "CANCELADO"
                                                         })}
                                                         className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border text-[0.65rem] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-md ${estadoCfg.cls}`}
                                                     >
@@ -401,7 +401,7 @@ export default function ListadoClientes({ clientes, planes, tabActual, clienteId
                                                     clienteId: cliente.id,
                                                     planAsignadoId: ultimoPlan.id,
                                                     nombre: cliente.nombre,
-                                                    estado: ultimoPlan.estado
+                                                    estado: ultimoPlan.estado as "ACTIVO" | "ARCHIVADO" | "VENCIDO" | "CANCELADO"
                                                 })}
                                                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[0.6rem] font-black uppercase tracking-widest transition-all hover:scale-105 ${estadoCfg.cls}`}
                                             >

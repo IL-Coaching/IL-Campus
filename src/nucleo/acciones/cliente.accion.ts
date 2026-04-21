@@ -136,13 +136,13 @@ export async function obtenerCondicionesClinicas(clienteId: string) {
     }
 }
 
-export async function cambiarEstadoPagoPlan(planAsignadoId: string, nuevoEstado: string) {
+export async function cambiarEstadoPagoPlan(planAsignadoId: string, nuevoEstado: "ACTIVO" | "ARCHIVADO" | "VENCIDO" | "CANCELADO") {
     try {
-        const entrenador = await getEntrenadorSesion();
+        const entrenamiento = await getEntrenadorSesion();
 
         // BOLA: Validar que el plan asignado corresponda a un cliente de este entrenador
         const plan = await prisma.planAsignado.findFirst({
-            where: { id: planAsignadoId, cliente: { entrenadorId: entrenador.id } }
+            where: { id: planAsignadoId, cliente: { entrenadorId: entrenamiento.id } }
         });
 
         if (!plan) return { error: "Plan no encontrado o acceso denegado." };
