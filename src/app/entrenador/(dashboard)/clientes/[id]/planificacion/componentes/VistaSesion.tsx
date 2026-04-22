@@ -12,6 +12,7 @@ import { useRouter, useParams } from 'next/navigation';
 import SelectorEjercicioCelda from '@/compartido/componentes/planificacion/SelectorEjercicioCelda';
 import ModalConfirmSimple from '@/compartido/componentes/ModalConfirmSimple';
 import ModalRenombrar from '@/compartido/componentes/ModalRenombrar';
+import ModalAgrupar from '@/compartido/componentes/ModalAgrupar';
 import { toast } from '@/compartido/hooks/useToast';
 
 
@@ -40,6 +41,8 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
     // Estados para modales de confirmación
     const [ejercicioAEliminar, setEjercicioAEliminar] = useState<{ id: string; nombre: string } | null>(null);
     const [grupoARenombrar, setGrupoARenombrar] = useState<{ grupoId: string; nombreActual: string } | null>(null);
+    const [mostrarAgrupar, setMostrarAgrupar] = useState(false);
+    const [grupoADesagrupar, setGrupoADesagrupar] = useState<{ grupoId: string; nombre: string } | null>(null);
 
     const handleDragStart = (idx: number, isBlock = false) => {
         setDraggingIdx(idx);
@@ -219,34 +222,41 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
     };
 
     const handleAgrupar = async () => {
-        if (selectedIds.length < 2) return;
-        const nombre = prompt("Nombre del Bloque (ej: Superserie A, Circuito Core):", "Superserie");
-        if (!nombre) return;
-        
-        const tipo = window.confirm("¿Crear un CIRCUITO? (Los ejercicios se hacen consecutivos sin descanso, con rondas)\n\nCancelar = AGRUPACIÓN (Ejercicios con descanso individual)")
-            ? 'CIRCUITO' 
-            : 'AGRUPACION';
-        
-        let rounds: number | undefined;
-        if (tipo === 'CIRCUITO') {
-            const roundsInput = prompt("Número de rondas:", "3");
-            rounds = roundsInput ? parseInt(roundsInput, 10) : 1;
+        if (selectedIds.length < 2) {
+            toast.error("Selecciona al menos 2 ejercicios para agrupar");
+            return;
         }
-        
-        const modalidad = tipo === 'CIRCUITO' ? 'CIRCUITO' : 'SECUENCIAL';
+        setMostrarAgrupar(true);
+    };
 
+    const confirmarAgrupar = async (nombre: string, tipo: 'AGRUPACION' | 'CIRCUITO', rounds?: number) => {
+        const modalidad = tipo === 'CIRCUITO' ? 'CIRCUITO' : 'SECUENCIAL';
         const res = await agruparEjercicios(diaObjeto.id, selectedIds, nombre, modalidad, tipo, rounds);
         if (res.exito) {
+            toast.exito("Ejercicios agrupados correctamente");
             router.refresh();
             setSelectedIds([]);
             setIsSelectionMode(false);
+        } else {
+            toast.error(res.error || "Error al agrupar");
         }
+        setMostrarAgrupar(false);
     };
 
-    const handleDesagrupar = async (grupoId: string) => {
-        if (!confirm("¿Desagrupar estos ejercicios?")) return;
-        const res = await desagruparEjercicios(diaObjeto.id, grupoId);
-        if (res.exito) router.refresh();
+    const handleDesagrupar = async (grupoId: string, nombre: string) => {
+        setGrupoADesagrupar({ grupoId, nombre });
+    };
+
+    const confirmarDesagrupar = async () => {
+        if (!grupoADesagrupar) return;
+        const res = await desagruparEjercicios(diaObjeto.id, grupoADesagrupar.grupoId);
+        if (res.exito) {
+            toast.exito("Bloque desagrupado correctamente");
+            router.refresh();
+        } else {
+            toast.error(res.error || "Error al desagrupar");
+        }
+        setGrupoADesagrupar(null);
     };
 
     const handleToggleSelection = (id: string) => {
@@ -376,7 +386,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
                                                 <div className="w-1.5 h-1.5 bg-naranja rounded-full"></div>
                                                 <span className="text-[0.65rem] font-black text-naranja uppercase tracking-widest">{ej.nombreGrupo || "Bloque Vinculado"}</span>
                                             </div>
-                                            <button onClick={() => handleDesagrupar(ej.grupoId!)} className="text-[0.55rem] font-black text-gris/60 uppercase tracking-tighter">Desvincular</button>
+                                            <button onClick={() => handleDesagrupar(ej.grupoId!, ej.nombreGrupo || "Bloque")} className="text-[0.55rem] font-black text-gris/60 uppercase tracking-tighter hover:text-rojo transition-colors">Desvincular</button>
                                         </div>
                                         <div className="divide-y divide-marino-4/40">
                                             {groupMembers.map((gej, gidx) => (
@@ -776,7 +786,7 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
                                                                 </button>
                                                             )}
                                                             <button
-                                                                onClick={() => handleDesagrupar(ej.grupoId!)}
+                                                                onClick={() => handleDesagrupar(ej.grupoId!, ej.nombreGrupo || "Bloque")}
                                                                 className="text-[0.55rem] font-bold text-gris/60 hover:text-rojo uppercase"
                                                             >
                                                                 Desvincular
@@ -1026,6 +1036,25 @@ export default function VistaSesion({ diaObjeto, semanaObjeto, semanaNombre, onB
                 placeholder="Nombre del bloque (ej: Superserie A)"
                 onConfirm={confirmarRenombrar}
                 onClose={() => setGrupoARenombrar(null)}
+            />
+
+            {/* Modal para agrupar ejercicios */}
+            <ModalAgrupar
+                abierto={mostrarAgrupar}
+                cantidadSeleccionados={selectedIds.length}
+                onConfirm={confirmarAgrupar}
+                onClose={() => setMostrarAgrupar(false)}
+            />
+
+            {/* Modal para desagrupar */}
+            <ModalConfirmSimple
+                abierto={!!grupoADesagrupar}
+                titulo="Desagrupar Ejercicios"
+                mensaje={`¿Estás seguro de que quieres desvincular los ejercicios del bloque "${grupoADesagrupar?.nombre}"? Los ejercicios seguirán en la sesión pero sin agrupar.`}
+                textoConfirmar="Desvincular"
+                variante="advertencia"
+                onConfirm={confirmarDesagrupar}
+                onClose={() => setGrupoADesagrupar(null)}
             />
         </div>
     );

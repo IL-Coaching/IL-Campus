@@ -12,7 +12,7 @@ import BuscadorEjercicios from '@/compartido/componentes/planificacion/BuscadorE
 import { MacrocicloCompleto, ClientePlanificacion, BloqueConSemanas, SemanaConDias } from '@/nucleo/tipos/planificacion.tipos';
 import { agregarEjercicio } from '@/nucleo/acciones/ejercicio-planificado.accion';
 import { crearNuevoMacrociclo } from '@/nucleo/acciones/macrociclo.accion';
-import { Loader2, Settings, Download, Plus } from 'lucide-react';
+import { Loader2, Download, Plus } from 'lucide-react';
 
 import ModalConfigurarMacro from './componentes/ModalConfigurarMacro';
 import ModalNuevoMesociclo from './componentes/ModalNuevoMesociclo';
